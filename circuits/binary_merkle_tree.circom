@@ -17,7 +17,7 @@ template HashLeftRight() {
   hash <== hasher.out;
 }
 
-template MerkleTreeInclusionProof(n_levels) {
+template CalculateRootFromMerklePath(n_levels) {
     signal input leaf;
     signal input path_index[n_levels];
     signal input path_elements[n_levels][1];
@@ -52,7 +52,7 @@ template MerkleTreeInclusionProof(n_levels) {
     root <== levelHashes[n_levels];
 }
 
-template LeafExists(levels){
+template CheckLeafExists(levels){
   // Ensures that a leaf exists within a merkletree with given `root`
 
   // levels is depth of tree
@@ -63,7 +63,7 @@ template LeafExists(levels){
 
   signal input root;
 
-  component merkletree = MerkleTreeInclusionProof(levels);
+  component merkletree = CalculateRootFromMerklePath(levels);
   merkletree.leaf <== leaf;
   for (var i = 0; i < levels; i++) {
     merkletree.path_index[i] <== path_index[i];
@@ -73,7 +73,31 @@ template LeafExists(levels){
   root === merkletree.root;
 }
 
-template CheckRoot(levels) {
+template CheckLeafUpdate(levels) {
+  signal input oldLeaf;
+  signal input newLeaf;
+  signal private input path_elements[levels][1];
+  signal private input path_index[levels];
+  signal input oldRoot;
+  signal input newRoot;
+  component oldTree = CheckLeafExists(levels);
+  oldTree.leaf <== oldLeaf;
+  // we should implement batch signal assign & constrain later, to avoid the boilerplate code
+  for (var i = 0; i < levels; i++) {
+    oldTree.path_index[i] <== path_index[i];
+    oldTree.path_elements[i][0] <== path_elements[i][0];
+  }
+  oldTree.root <== oldRoot;
+  component newTree = CheckLeafExists(levels);
+  newTree.leaf <== newLeaf;
+  for (var i = 0; i < levels; i++) {
+    newTree.path_index[i] <== path_index[i];
+    newTree.path_elements[i][0] <== path_elements[i][0];
+  }
+  newTree.root <== newRoot;
+}
+
+template CalculateRootFromLeaves(levels) {
     // Given a Merkle root and a list of leaves, check if the root is the
     // correct result of inserting all the leaves into the tree (in the given
     // order)
