@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "lib": ["ES2020", "DOM"],
+    "resolveJsonModule": true,
+    "downlevelIteration": true
+  }
+}
