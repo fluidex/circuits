@@ -1,0 +1,174 @@
+/**
+ * Process a rollup transfer_to_old transaction
+ * @param nLevels - merkle tree depth
+ * @input fromIdx - {Uint48} - index sender
+ * @input toIdx - {Uint48} - index receiver
+ * @input amount - {Uint192} - amount to transfer from L2 to L2
+ * @input tokenID - {Uint32} - tokenID signed in the transaction
+ * @input nonce - {Uint40} - nonce signed in the transaction
+ * @input sigL2Hash - {Field} - hash L2 data to sign
+ * @input s - {Field} - eddsa signature field
+ * @input r8x - {Field} - eddsa signature field
+ * @input r8y - {Field} - eddsa signature field
+ * @input nonce1 - {Uint40} - nonce of the sender leaf
+ * @input sign1 - {Bool} - sign of the sender leaf
+ * @input balance1 - {Uint192} - balance of the sender leaf
+ * @input ay1 - {Field} - ay of the sender leaf
+ * @input ethAddr1 - {Uint160} - ethAddr of the sender leaf
+ * @input siblings1[nLevels + 1] - {Array(Field)} - siblings merkle proof of the sender leaf
+ * @input nonce2 - {Uint40} - nonce of the receiver leaf
+ * @input sign2 - {Bool} - sign of the receiver leaf
+ * @input balance2 - {Uint192} - balance of the receiver leaf
+ * @input ay2 - {Field} - ay of the receiver leaf
+ * @input ethAddr2 - {Uint160} - ethAddr of the receiver leaf
+ * @input siblings2[nLevels + 1] - {Array(Field)} - siblings merkle proof of the receiver leaf
+ * @input oldStateRoot - {Field} - initial state root
+ * @output newStateRoot - {Field} - final state root
+ */
+template TransferToOld(nLevels) {
+    // Phases rollup_transfer_to_old-tx circuit
+        // ...
+
+    // Tx
+    signal input fromIdx;
+
+    signal input toIdx;
+
+    signal input amount;
+    signal input tokenID;
+    signal input nonce;
+
+    signal input sigL2Hash;
+    signal input s;
+    signal input r8x;
+    signal input r8y;
+
+    // State 1
+    signal input nonce1;
+    signal input sign1;
+    signal input balance1;
+    signal input ay1;
+    signal input ethAddr1;
+    signal input siblings1[nLevels+1];
+
+    // State 2
+    signal input nonce2;
+    signal input sign2;
+    signal input balance2;
+    signal input newExit;
+    signal input ay2;
+    signal input ethAddr2;
+    signal input siblings2[nLevels+1];
+
+    // Roots
+    signal input oldStateRoot;
+    signal output newStateRoot;
+
+    var i;
+
+    // XXX - check state fields
+    ////////
+    // sender nonce check on L2
+    // nonce signed by the user must match nonce of the sender account
+    nonce === nonce1;
+
+    // D - compute old hash states
+    ////////
+    // oldState1 Packer
+    component oldSt1Hash = HashState();
+    oldSt1Hash.tokenID <== tokenID;
+    oldSt1Hash.nonce <== nonce1;
+    oldSt1Hash.sign <== sign1;
+    oldSt1Hash.balance <== balance1;
+    oldSt1Hash.ay <== ay1;
+    oldSt1Hash.ethAddr <== ethAddr1;
+
+    // oldState2 Packer
+    component oldSt2Hash = HashState();
+    oldSt2Hash.tokenID <== tokenID;
+    oldSt2Hash.nonce <== nonce2;
+    oldSt2Hash.sign <== sign2;
+    oldSt2Hash.balance <== balance2;
+    oldSt2Hash.ay <== ay2;
+    oldSt2Hash.ethAddr <== ethAddr2;
+
+    // XXX - verify eddsa signature
+    ////////
+    // computes babyjubjub X coordinate
+    component getAx = AySign2Ax();
+    getAx.ay <== ay1;
+    getAx.sign <== sign1;
+
+    // signature L2 verifier
+    component sigVerifier = EdDSAPoseidonVerifier();
+    sigVerifier.enabled <== 1;
+
+    sigVerifier.Ax <== getAx.ax;
+    sigVerifier.Ay <== ay1;
+
+    sigVerifier.S <== s;
+    sigVerifier.R8x <== r8x;
+    sigVerifier.R8y <== r8y;
+
+    sigVerifier.M <== sigL2Hash;
+
+    // TODO: underflow check
+
+    // TODO: overflow check
+
+    // TODO: fee
+
+    // XXX - compute hash new states
+    ////////
+    // newState1 hash state
+    component newSt1Hash = HashState();
+    newSt1Hash.tokenID <== tokenID;
+    newSt1Hash.nonce <== nonce1 + 1;
+    newSt1Hash.sign <== sign1;
+    newSt1Hash.balance <== balance1 - amount;
+    newSt1Hash.ay <== ay1;
+    newSt1Hash.ethAddr <== ethAddr1;
+
+    // newState2 hash state
+    component newSt2Hash = HashState();
+    newSt2Hash.tokenID <== tokenID;
+    newSt2Hash.nonce <== nonce2;
+    newSt2Hash.sign <== sign2;
+    newSt2Hash.balance <== balance2 + amount;
+    newSt2Hash.ay <== ay2;
+    newSt2Hash.ethAddr <== ethAddr2;
+
+    // XXX - smt processors
+    ////////
+    // processor 1: sender
+    component processor1 = SMTProcessor(nLevels+1) ;
+    processor1.oldRoot <== oldStateRoot;
+    for (i = 0; i < nLevels + 1; i++) {
+        processor1.siblings[i] <== siblings1[i];
+    }
+    processor1.oldKey <== fromIdx;
+    processor1.oldValue <== oldSt1Hash.out;
+    processor1.isOld0 <== 1;
+    processor1.newKey <== fromIdx;
+    processor1.newValue <== newSt1Hash.out;
+    // update
+    processor1.fnc[0] <== 0;
+    processor1.fnc[1] <== 1;
+
+    // processor 2: receiver
+    component processor2 = SMTProcessor(nLevels+1) ;
+    processor2.oldRoot <== processor1.newRoot;
+    for (i = 0; i < nLevels + 1; i++) {
+        processor2.siblings[i] <== siblings2[i]; // TODO: siblings2 updated?
+    }
+    processor2.oldKey <== toIdx;
+    processor2.oldValue <== oldSt2Hash.out;
+    processor2.isOld0 <== 1;
+    processor2.newKey <== toIdx;
+    processor2.newValue <== newSt2Hash.out;
+    // update
+    processor2.fnc[0] <== 0;
+    processor2.fnc[1] <== 1;
+
+    processor2.newRoot ==> newStateRoot;
+}
