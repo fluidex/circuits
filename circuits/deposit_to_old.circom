@@ -1,3 +1,6 @@
+include "../node_modules/circomlib/circuits/bitify.circom";
+include "./decode-float.circom";
+
 /**
  * Process a deposit_to_existed_account transaction
  * @param nLevels - merkle tree depth

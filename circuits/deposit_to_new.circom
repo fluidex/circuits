@@ -1,3 +1,6 @@
+include "../node_modules/circomlib/circuits/bitify.circom";
+include "./decode-float.circom";
+
 /**
  * Process a deposit_and_create_account transaction, also support create 0 balance account
  * @param nLevels - merkle tree depth
