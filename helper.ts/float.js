@@ -72,9 +72,9 @@ const {float16} = require("@hermeznetwork/commonjs");
 async function fix2Float2Fix(input) {
 	console.log("input:", input);
 	var temp1 = float16.fix2Float(input);
-	console.log(temp1);
+	console.log("fix2Float:", temp1);
 	var input2 = float16.float2Fix(temp1);
-	console.log("fix:", input2);
+	console.log("float2Fix:", input2);
 };
 
 
