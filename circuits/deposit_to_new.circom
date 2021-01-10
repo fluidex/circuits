@@ -91,4 +91,5 @@ template DepositToNew(nLevels) {
     update_checker.newRoot <== newStateRoot;
 }
 
+// TODO: for test compilation temporarily
 component main = DepositToNew(2);
