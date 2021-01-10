@@ -2,8 +2,8 @@ const Scalar = require("ffjavascript").Scalar;
 
 const Account = require("@hermeznetwork/commonjs").HermezAccount;
 
-const prv = 1;
-const account = new Account(prv);
+const prvkey = 1;
+const account = new Account(prvkey);
 console.log(account);
 
 // convert bjjCompressed to bits
