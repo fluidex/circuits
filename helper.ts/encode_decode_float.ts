@@ -70,7 +70,7 @@ async function testEncodeDecode(f) {
 	let result = decodeFloat16(temp);
 	console.log("decoded as:", result);
 	console.log("diff: ", Math.abs(result-f)/f );
-	assert(Math.abs(result-f)/f < 0.00012);
+	assert(Math.abs(result-f)/f < 0.00012, "testEncodeDecode deviates too much");
 	console.log("================");
 };
 
