@@ -67,7 +67,10 @@ async function testEncodeDecode(f) {
 	console.log("input:", f);
 	let temp = toHalf(f);
 	console.log("encoded as:", temp);
-	console.log("decoded as:", decodeFloat16(temp));
+	let result = decodeFloat16(temp);
+	console.log("decoded as:", result);
+	console.log("diff: ", Math.abs(result-f)/f );
+	assert(Math.abs(result-f)/f < 0.00012);
 	console.log("================");
 };
 
