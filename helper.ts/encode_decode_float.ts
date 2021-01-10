@@ -61,8 +61,8 @@ function decodeFloat16 (binary) {"use strict";
 };
 
 
-async function testEncodeDecode(f) {
-	console.log("testEncodeDecode");
+async function testEncodeDecodeF(f) {
+	console.log("testEncodeDecodeF");
 	console.log("----------------");
 	console.log("input:", f);
 	let temp = toHalf(f);
@@ -70,7 +70,7 @@ async function testEncodeDecode(f) {
 	let result = decodeFloat16(temp);
 	console.log("decoded as:", result);
 	console.log("diff: ", Math.abs(result-f)/f );
-	assert(Math.abs(result-f)/f < 0.00012, "testEncodeDecode deviates too much");
+	assert(Math.abs(result-f)/f < 0.00012, "testEncodeDecodeF deviates too much");
 	console.log("================");
 };
 
@@ -93,12 +93,79 @@ function Num2Bits16(input) {
    return output;
 };
 
+// input is Num2Bits16 result array
+function DecodeFloatBin(input) {
+	let m: Array<number> = [0];   // Mantisa bits
+	m.fill(0, 0, 10);
+	let e: Array<number> = [0];   // Exponent bits
+	e.fill(0, 0, 5);
+    var d;       // Half digit bit
+
+	let pe: Array<number> = [0];   // Intermediary steps for multiplying the exponents
+	pe.fill(0, 0, 5);
+    var allow5;  // Allows have digit (exp > 0)
+    var scale10; // 10^exp
+    var scale5;  // scale10/2
+    var outAux;  // Intermediary state for the output
+
+    var i;
+    var lcm;
+
+    // Mapping
+    d = input[10]
+    for (i = 0; i < 10; i++) m[i] = input[i];
+    for (i = 0; i < 5; i++) e[i] = input[i+11];
+
+    pe[0] = (9 * e[0]) + 1;
+    for (i = 1; i < 5; i++) {
+        pe[i] = (pe[i-1] * (10**(2**i)) - pe[i-1]) * e[i] + pe[i-1];
+    }
+
+    scale10 = pe[4];
+
+    // TODO:
+    // allow5 = 1 - ((e[0] + e[1] + e[2] + e[3] + e[4])===0);
+
+    // NOTE FOR INTERNAL AUDIT:
+    // Double check on this assigned signal with no constraints
+
+    scale5 = scale10 / 2;
+    // TODO:
+    // scale5 * 2 === scale10 * allow5;
+
+    lcm = 0;
+    var e2 = 1;
+    for (i = 0; i < 10; i++) {
+        lcm += e2 * m[i];
+        e2 = e2 + e2;
+    }
+
+    outAux = lcm * scale10;
+
+    return outAux + (d * scale5);
+}
+
+async function testFloatBin(f) {
+	console.log("testFloatBin");
+	console.log("----------------");
+	console.log("input:", f);
+	let temp = toHalf(f);
+	console.log("encoded as:", temp);
+	let temp2 = Num2Bits16(temp);
+	// console.log("Num2Bits16:", temp2);
+	let result = DecodeFloatBin(temp2);
+	console.log("decoded as:", result);
+	// assert(Math.abs(result-f)/f < 0.00012, "testFloatBin deviates too much");
+	console.log("================");
+};
+
 
 async function main() {
   try {
-  	testEncodeDecode(1.99);
-  	// testAdd(1.99);
-  	Num2Bits16(1);
+  	testEncodeDecodeF(1.99);
+  	testFloatBin(1.1);
+  	testFloatBin(0.1);
+  	testFloatBin(1.0);
   } catch (e) {
     console.error(e);
   }
