@@ -1,9 +1,9 @@
 const assert = require("assert");
 const {float16} = require("@hermeznetwork/commonjs");
 
-// function random(ceil){
-//     return Math.floor((Math.random() * ceil));
-// }
+function random(ceil){
+    return Math.floor((Math.random() * ceil));
+}
 
 // function Num2Bits16(input) {
 // 	const nBits = 16;
@@ -70,6 +70,7 @@ const {float16} = require("@hermeznetwork/commonjs");
 // }
 
 async function fix2Float2Fix(input) {
+	input = input || random(2**50);
 	console.log("input:", input);
 	var temp1 = float16.fix2Float(input);
 	console.log("fix2Float:", temp1);
@@ -80,7 +81,7 @@ async function fix2Float2Fix(input) {
 
 async function main() {
   try {
-  	fix2Float2Fix(500);
+  	fix2Float2Fix(null);
   } catch (e) {
     console.error(e);
   }
