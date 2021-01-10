@@ -41,5 +41,41 @@ function toHalf(val) {
     return bits;
 };
 
+// https://stackoverflow.com/questions/5678432/decompressing-half-precision-floats-in-javascript
+function decodeFloat16 (binary) {"use strict";
+	var pow = Math.pow;
+    
+    var exponent = (binary & 0x7C00) >> 10,
+        fraction = binary & 0x03FF;
+    return (binary >> 15 ? -1 : 1) * (
+        exponent ?
+        (
+            exponent === 0x1F ?
+            fraction ? NaN : Infinity :
+            pow(2, exponent - 15) * (1 + fraction / 0x400)
+        ) :
+        6.103515625e-5 * (fraction / 0x400)
+    );
+};
 
-console.log(toHalf(1.99));
+
+async function testEncodeDecode(f) {
+	console.log("testEncodeDecode");
+	console.log("----------------");
+	console.log("input:", f);
+	let temp = toHalf(f);
+	console.log("encoded as:", temp);
+	console.log("decoded as:", decodeFloat16(temp));
+	console.log("================");
+};
+
+
+async function main() {
+  try {
+  	testEncodeDecode(1.99);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+main();
