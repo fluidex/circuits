@@ -75,10 +75,28 @@ async function testEncodeDecode(f) {
 };
 
 
+function Num2Bits16(input) {
+	let output: Array<number> = [0];
+	output.fill(0, 0, 16);
+    var lc1=0;
+
+    var e2=1;
+    for (var i = 0; i<16; i++) {
+        output[i] = (input >> i) & 1;
+        // output[i] * (output[i] -1 ) === 0;
+        lc1 += output[i] * e2;
+        e2 = e2+e2;
+    }
+   assert(lc1 === input, "Num2Bits16 conversion error");
+   return output;
+};
+
+
 async function main() {
   try {
   	testEncodeDecode(1.99);
   	// testAdd(1.99);
+  	Num2Bits16(1);
   } catch (e) {
     console.error(e);
   }
