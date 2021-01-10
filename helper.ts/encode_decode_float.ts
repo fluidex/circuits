@@ -83,7 +83,7 @@ function Num2Bits16(input) {
     var e2=1;
     for (var i = 0; i<16; i++) {
         output[i] = (input >> i) & 1;
-        // output[i] * (output[i] -1 ) === 0;
+   		assert(output[i] * (output[i] -1 ) === 0, "output[i] should be binary");
         lc1 += output[i] * e2;
         e2 = e2+e2;
     }
