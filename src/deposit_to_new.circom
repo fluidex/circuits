@@ -1,4 +1,4 @@
-include "../node_modules/circomlib/circuits/bitify.circom";
+// include "../node_modules/circomlib/circuits/bitify.circom";
 include "./decode-float.circom";
 include "./utils-bjj.circom";
 include "./hash-state.circom";
@@ -84,9 +84,9 @@ template DepositToNew(nLevels) {
     newStHash.ethAddr <== fromEthAddr;
 
     component update_checker = CheckLeafUpdate(nLevels);
-    update_checker.oldLeaf <== oldStHash;
-    update_checker.newLeaf <== newStHash;
-    for (var i = 0; i < levels; i++) {
+    update_checker.oldLeaf <== oldStHash.out;
+    update_checker.newLeaf <== newStHash.out;
+    for (var i = 0; i < nLevels; i++) {
         update_checker.path_index[i] <== path_index[i];
         update_checker.path_elements[i][0] <== path_elements[i][0];
     }
