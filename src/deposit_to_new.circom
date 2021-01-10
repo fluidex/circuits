@@ -11,7 +11,7 @@ include "./binary_merkle_tree.circom";
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input fromEthAddr - {Uint160} - L1 sender ethereum address
  * @input fromBjjCompressed[256]- {Array(Bool)} - babyjubjub compressed sender
- * @input loadAmountF - {Uint16} - amount to deposit from L1 to L2 encoded as float16
+ * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
  * @input path_index[n_levels] - {Array(Bool)} - index position on the tree from leaf to root 
  * @input path_elements[n_levels][1] - {Array(Field)} - siblings merkle proof of the leaf
  * @input oldStateRoot - {Field} - initial state root
@@ -28,7 +28,7 @@ template DepositToNew(nLevels) {
     // For L1 TX
     signal input fromEthAddr;
     signal input fromBjjCompressed[256];
-    signal input loadAmountF;
+    signal input loadAmount;
 
     // State 1
     signal input path_index[nLevels];
@@ -39,13 +39,6 @@ template DepositToNew(nLevels) {
     signal input newStateRoot;
 
     var i;
-
-    // decode loadAmountF
-    signal loadAmount;
-
-    component decodeLoadAmountF = DecodeFloat();
-    decodeLoadAmountF.in <== loadAmountF;
-    decodeLoadAmountF.out ==> loadAmount;
 
     // decode BjjCompressed
     component decodeFromBjj = BitsCompressed2AySign();

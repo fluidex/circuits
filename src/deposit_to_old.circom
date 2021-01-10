@@ -8,7 +8,7 @@ include "./binary_merkle_tree.circom";
  * Process a deposit_to_existed_account transaction
  * @param nLevels - merkle tree depth
  * @input fromIdx - {Uint48} - index account
- * @input loadAmountF - {Uint16} - amount to deposit from L1 to L2 encoded as float16
+ * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
  * @input tokenID - {Uint32} - tokenID of the account leaf
  * @input nonce - {Uint40} - nonce of the account leaf
  * @input sign - {Bool} - sign of the account leaf
@@ -27,7 +27,7 @@ template DepositToOld(nLevels) {
     signal input fromIdx;
 
     // For L1 TX
-    signal input loadAmountF;
+    signal input loadAmount;
 
     // State
     signal input tokenID;
@@ -43,13 +43,6 @@ template DepositToOld(nLevels) {
     signal output newStateRoot;
 
     var i;
-
-    // decode loadAmountF
-    signal loadAmount;
-
-    component decodeLoadAmountF = DecodeFloat();
-    decodeLoadAmountF.in <== loadAmountF;
-    decodeLoadAmountF.out ==> loadAmount;
 
     // XXX - compute old hash states
     ////////
