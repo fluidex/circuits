@@ -123,15 +123,13 @@ function DecodeFloatBin(input) {
 
     scale10 = pe[4];
 
-    // TODO:
-    // allow5 = 1 - ((e[0] + e[1] + e[2] + e[3] + e[4])===0);
+    allow5 = ((e[0] + e[1] + e[2] + e[3] + e[4])===0)?0:1;
 
     // NOTE FOR INTERNAL AUDIT:
     // Double check on this assigned signal with no constraints
 
     scale5 = scale10 / 2;
-    // TODO:
-    // scale5 * 2 === scale10 * allow5;
+    assert(scale5 * 2 === scale10 * allow5, "scale5 * 2 != scale10 * allow5")
 
     lcm = 0;
     var e2 = 1;
@@ -155,7 +153,6 @@ async function testFloatBin(f) {
 	// console.log("Num2Bits16:", temp2);
 	let result = DecodeFloatBin(temp2);
 	console.log("decoded as:", result);
-	// assert(Math.abs(result-f)/f < 0.00012, "testFloatBin deviates too much");
 	console.log("================");
 };
 
