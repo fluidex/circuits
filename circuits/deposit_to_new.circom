@@ -4,12 +4,13 @@ include "./decode-float.circom";
 /**
  * Process a deposit_and_create_account transaction, also support create 0 balance account
  * @param nLevels - merkle tree depth
- * @input auxFromIdx - {Uint48} - auxiliary index to create accounts
+// * @input auxFromIdx - {Uint48} - auxiliary index to create accounts // TODO: parse auxFromIdx to path_index
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input fromEthAddr - {Uint160} - L1 sender ethereum address
  * @input fromBjjCompressed[256]- {Array(Bool)} - babyjubjub compressed sender
  * @input loadAmountF - {Uint16} - amount to deposit from L1 to L2 encoded as float16
- * @input siblings[nLevels + 1] - {Array(Field)} - siblings merkle proof of the leaf
+ * @input path_index[n_levels] - {Array(Bool)} - index position on the tree from leaf to root 
+ * @input path_elements[n_levels][1] - {Array(Field)} - siblings merkle proof of the leaf
  * @input oldStateRoot - {Field} - initial state root
  * @output newStateRoot - {Field} - final state root
  */
@@ -18,7 +19,7 @@ template DepositToNew(nLevels) {
         // ...
 
     // Tx
-    signal input auxFromIdx;
+    // signal input auxFromIdx; // TODO: parse auxFromIdx to path_index
     signal input tokenID;
 
     // For L1 TX
@@ -27,11 +28,12 @@ template DepositToNew(nLevels) {
     signal input loadAmountF;
 
     // State 1
-    signal input siblings[nLevels+1];
+    signal input path_index[n_levels];
+    signal input path_elements[n_levels][1];
 
     // Roots
     signal input oldStateRoot;
-    signal output newStateRoot;
+    signal input newStateRoot;
 
     var i;
 
@@ -60,6 +62,18 @@ template DepositToNew(nLevels) {
 
     // TODO: fee
 
+    // XXX - compute hash old states
+    ////////
+    // TODO: use balance tree
+    // oldState hash state
+    component oldStHash = HashState();
+    oldStHash.tokenID <== 0;
+    oldStHash.nonce <== 0;
+    oldStHash.sign <== 0;
+    oldStHash.balance <== 0;
+    oldStHash.ay <== 0;
+    oldStHash.ethAddr <== 0;
+
     // XXX - compute hash new states
     ////////
     // TODO: use balance tree
@@ -72,22 +86,13 @@ template DepositToNew(nLevels) {
     newStHash.ay <== decodeFromBjj.ay;
     newStHash.ethAddr <== fromEthAddr;
 
-    // XXX - smt processors
-    ////////
-    // TODO: change to our tree
-    component processor = SMTProcessor(nLevels+1);
-    processor.oldRoot <== oldStateRoot;
-    for (i = 0; i < nLevels + 1; i++) {
-        processor.siblings[i] <== siblings1[i];
+    component update_checker = CheckLeafUpdate(nLevels);
+    update_checker.oldLeaf <== oldStHash;
+    update_checker.newLeaf <== newStHash;
+    for (var i = 0; i < levels; i++) {
+        update_checker.path_index[i] <== path_index[i];
+        update_checker.path_elements[i][0] <== path_elements[i][0];
     }
-    processor.oldKey <== 0;
-    processor.oldValue <== 0;
-    processor.isOld0 <== 0;
-    processor.newKey <== auxFromIdx;
-    processor.newValue <== newStHash.out;
-    // insert
-    processor.fnc[0] <== 1;
-    processor.fnc[1] <== 0;
-    
-    processor.newRoot ==> newStateRoot;
+    update_checker.oldRoot <== oldStateRoot;
+    update_checker.newRoot <== newStateRoot;
 }
