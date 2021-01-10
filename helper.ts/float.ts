@@ -1,4 +1,5 @@
 const assert = require("assert");
+
 const {float16} = require("@hermeznetwork/commonjs");
 
 function random(ceil){
