@@ -78,7 +78,7 @@ async function testEncodeDecodeF(f) {
 function Num2Bits16(input) {
 	const nBits = 16;
 
-	let output = new Int8Array(nBits);
+	let output = new Int8Array(nBits).fill(0);	
     var lc1=0;
 
     var e2=1;
@@ -94,11 +94,11 @@ function Num2Bits16(input) {
 
 // input is Num2Bits16 result array
 function DecodeFloatBin(input) {
-	let m = new Int8Array(10);   // Mantisa bits
-	let e = new Int8Array(5);   // Exponent bits
+	let m = new Int8Array(10).fill(0);   // Mantisa bits
+	let e = new Int8Array(5).fill(0);   // Exponent bits
     var d;       // Half digit bit
 
-	let pe = new Int8Array(5);   // Intermediary steps for multiplying the exponents
+	let pe = new Int32Array(5).fill(0);   // Intermediary steps for multiplying the exponents
     var allow5;  // Allows have digit (exp > 0)
     var scale10; // 10^exp
     var scale5;  // scale10/2
@@ -159,6 +159,8 @@ async function main() {
   	testFloatBin(1.1);
   	testFloatBin(0.1);
   	testFloatBin(1.0);
+  	testFloatBin(2.0);
+  	testFloatBin(3.0);
   } catch (e) {
     console.error(e);
   }
