@@ -76,12 +76,14 @@ async function testEncodeDecode(f) {
 
 
 function Num2Bits16(input) {
+	const nBits = 16;
+
 	let output: Array<number> = [0];
-	output.fill(0, 0, 16);
+	output.fill(0, 0, nBits);
     var lc1=0;
 
     var e2=1;
-    for (var i = 0; i<16; i++) {
+    for (var i = 0; i<nBits; i++) {
         output[i] = (input >> i) & 1;
    		assert(output[i] * (output[i] -1 ) === 0, "output[i] should be binary");
         lc1 += output[i] * e2;
