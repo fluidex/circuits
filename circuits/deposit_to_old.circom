@@ -44,7 +44,7 @@ template DepositToOld(nLevels) {
     // decode loadAmountF
     signal loadAmount;
 
-    component decodeLoadAmountF DecodeFloat();
+    component decodeLoadAmountF = DecodeFloat();
     decodeLoadAmountF.in <== loadAmountF;
     decodeLoadAmountF.out ==> loadAmount;
 

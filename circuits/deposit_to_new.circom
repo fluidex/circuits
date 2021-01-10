@@ -28,8 +28,8 @@ template DepositToNew(nLevels) {
     signal input loadAmountF;
 
     // State 1
-    signal input path_index[n_levels];
-    signal input path_elements[n_levels][1];
+    signal input path_index[nLevels];
+    signal input path_elements[nLevels][1];
 
     // Roots
     signal input oldStateRoot;
@@ -40,7 +40,7 @@ template DepositToNew(nLevels) {
     // decode loadAmountF
     signal loadAmount;
 
-    component decodeLoadAmountF DecodeFloat();
+    component decodeLoadAmountF = DecodeFloat();
     decodeLoadAmountF.in <== loadAmountF;
     decodeLoadAmountF.out ==> loadAmount;
 
@@ -90,3 +90,5 @@ template DepositToNew(nLevels) {
     update_checker.oldRoot <== oldStateRoot;
     update_checker.newRoot <== newStateRoot;
 }
+
+component main = DepositToNew(2);
