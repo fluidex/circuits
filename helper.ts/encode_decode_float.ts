@@ -1,3 +1,5 @@
+import assert = require("assert");
+
 // https://stackoverflow.com/questions/32633585/how-do-you-convert-to-half-floats-in-javascript
 function toHalf(val) {
   var floatView = new Float32Array(1);
@@ -73,6 +75,7 @@ async function testEncodeDecode(f) {
 async function main() {
   try {
   	testEncodeDecode(1.99);
+  	// testAdd(1.99);
   } catch (e) {
     console.error(e);
   }
