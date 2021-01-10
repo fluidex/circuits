@@ -3,5 +3,5 @@
 ## Test
 
 ```
-npx ts-node ./circuits/test/test_all.ts
+npx ts-node ./test/test_all.ts
 ```
