@@ -5,7 +5,7 @@ function random(ceil){
     return Math.floor((Math.random() * ceil));
 }
 
-async function fix2Float2Fix(input) {
+function fix2Float2Fix(input) {
 	input = input || random(2**50);
 	console.log("input:", input);
 	var temp1 = float16.fix2Float(input);
@@ -14,8 +14,4 @@ async function fix2Float2Fix(input) {
 	console.log("float2Fix:", input2);
 };
 
-function main() {
-  	fix2Float2Fix(null);
-};
-
-main();
+fix2Float2Fix(null);
