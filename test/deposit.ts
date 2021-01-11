@@ -5,6 +5,7 @@ import { HermezAccount as Account } from '@hermeznetwork/commonjs';
 import { SimpleTest, TestComponent } from './base_test';
 
 /**
+ * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input fromEthAddr - {Uint160} - L1 sender ethereum address
  * @input fromBjjCompressed[256]- {Array(Bool)} - babyjubjub compressed sender
  * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
@@ -30,14 +31,14 @@ class TestDepositToNew implements SimpleTest {
     const account = new Account(prvkey);
 
     return { 
-      tokenID,
-      Scalar.fromString(account.ethAddr.replace("0x", "")),
-      [],
-      0,
-      [],
-      [],
-      Scalar.e(0),
-      Scalar.e(0),
+      tokenID: tokenID,
+      fromEthAddr: Scalar.fromString(account.ethAddr.replace("0x", "")),
+      fromBjjCompressed: [],
+      loadAmount: 0,
+      path_index: [],
+      path_elements: [],
+      oldStateRoot: Scalar.e(0),
+      newStateRoot: Scalar.e(0),
     };
   }
   getOutput() {
