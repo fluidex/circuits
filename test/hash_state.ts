@@ -1,25 +1,38 @@
 import * as path from 'path';
 import { poseidon } from 'circomlib';
+import { Scalar } from 'ffjavascript';
 import { SimpleTest, TestComponent } from './base_test';
+import { stateUtils } from '@hermeznetwork/commonjs';
+
+const state = {
+    tokenID: 1,
+    nonce: 49,
+    balance: 12343256,
+    sign: 1,
+    ay: "144e7e10fd47e0c67a733643b760e80ed399f70e78ae97620dbb719579cd645d",
+    ethAddr: "0x7e5f4552091a69125d5dfcb7b8c2659029395bdf".replace("0x", ""),
+};
 
 class TestHashState implements SimpleTest {
   getInput() {
-    let leaves = [BigInt(10), BigInt(11), BigInt(12), BigInt(13)];
-    let midLevel = [poseidon([leaves[0], leaves[1]]), poseidon([leaves[2], leaves[3]])];
-    let root = poseidon(midLevel);
-    // check leaves[2] in this tree
-    let leaf = leaves[2];
-    let path_elements = [[leaves[3]], [midLevel[0]]];
-    let path_index = [0, 1];
-    return { leaf, path_elements, path_index, root };
+    return {
+	    tokenID: Scalar.e(state.tokenID),
+	    nonce: Scalar.e(state.nonce),
+	    balance: Scalar.e(state.balance),
+	    sign: Scalar.e(state.sign),
+	    ay: Scalar.fromString(state.ay, 16),
+	    ethAddr: Scalar.fromString(state.ethAddr, 16),
+    };
   }
   getOutput() {
-    return {};
+  	let out = stateUtils.hashState(state);
+    return { out };
+    // return { };
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'binary_merkle_tree.circom'),
-      main: 'CheckLeafExists(2)',
+      src: path.join(__dirname, '..', 'src', 'hash-state.circom'),
+      main: 'HashState()',
     };
   }
 }
