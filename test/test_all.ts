@@ -39,8 +39,8 @@ async function main() {
   try {
     // await testWithInputOutput(new TestCheckLeafExists());
     // await testWithInputOutput(new TestCheckLeafUpdate());
-    // await testWithInputOutput(new TestDepositToNew());
     await testWithInputOutput(new TestHashState());
+    await testWithInputOutput(new TestDepositToNew());
   } catch (e) {
     console.error(e);
   }
