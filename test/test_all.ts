@@ -5,6 +5,7 @@ import * as circom from 'circom';
 import { SimpleTest, TestComponent } from './base_test';
 import { TestCheckLeafExists, TestCheckLeafUpdate } from './binary_merkle_tree';
 import { TestDepositToNew } from './deposit';
+import { TestHashState } from './hash_state';
 
 async function generateMainTestCircom({ src, main }: TestComponent) {
   let srcCode = `include "${src}";
@@ -38,7 +39,8 @@ async function main() {
   try {
     // await testWithInputOutput(new TestCheckLeafExists());
     // await testWithInputOutput(new TestCheckLeafUpdate());
-    await testWithInputOutput(new TestDepositToNew());
+    // await testWithInputOutput(new TestDepositToNew());
+    await testWithInputOutput(new TestHashState());
   } catch (e) {
     console.error(e);
   }
