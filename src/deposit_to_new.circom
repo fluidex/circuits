@@ -10,16 +10,19 @@ include "./binary_merkle_tree.circom";
  * @input fromEthAddr - {Uint160} - L1 sender ethereum address
  * @input fromBjjCompressed[256]- {Array(Bool)} - babyjubjub compressed sender
  * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
- * @input path_index[n_levels] - {Array(Bool)} - index position on the tree from leaf to root 
- * @input path_elements[n_levels][1] - {Array(Field)} - siblings merkle proof of the leaf
- * @input oldStateRoot - {Field} - initial state root
- * @output newStateRoot - {Field} - final state root
+ * @input balance_path_index[balanceLevels] - {Array(Bool)} - index position on the balance tree from leaf to root 
+ * @input balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the leaf
+ * @input account_path_index[accountLevels] - {Array(Bool)} - index position on the account tree from leaf to root 
+ * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the leaf
+ * @input oldBalanceRoot - {Field} - initial balance state root
+ * @output newBalanceRoot - {Field} - final balance state root
+ * @input oldAccountRoot - {Field} - initial account state root
+ * @output newAccountRoot - {Field} - final account state root
  */
+// TODO: parse tokenID to balance_path_index, auxFromIdx to account_path_index?
 template DepositToNew(balanceLevels, accountLevels) {
-    
     // Tx
     signal input tokenID;
-    // TODO: parse tokenID to balance_path_index, auxFromIdx to account_path_index?
 
     // For L1 TX
     signal input fromEthAddr;
@@ -33,8 +36,10 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal input account_path_elements[accountLevels][1];
 
     // Roots
-    signal input oldStateRoot;
-    signal input newStateRoot;
+    signal input oldBalanceRoot;
+    signal input newBalanceRoot;
+    signal input oldAccountRoot;
+    signal input newAccountRoot;
 
     var i;
 
