@@ -8,8 +8,7 @@ const state = {
     balance: Scalar.e(12343256),
     sign: 1,
     ay: "144e7e10fd47e0c67a733643b760e80ed399f70e78ae97620dbb719579cd645d",
-    // ethAddr: "0x7e5f4552091a69125d5dfcb7b8c2659029395bdf",
-    ethAddr: "7e5f4552091a69125d5dfcb7b8c2659029395bdf",
+    ethAddr: "0x7e5f4552091a69125d5dfcb7b8c2659029395bdf".replace("0x", ""),
 };
 
 const input = {
