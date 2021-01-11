@@ -28,9 +28,17 @@ class TestDepositToNew implements SimpleTest {
     const tokenID = 1;
     const prvkey = 1;
     const account = new Account(prvkey);
-    console.log(account.ethAddr.replace("0x", ""));
 
-    return { tokenID };
+    return { 
+      tokenID,
+      Scalar.fromString(account.ethAddr.replace("0x", "")),
+      [],
+      0,
+      [],
+      [],
+      Scalar.e(0),
+      Scalar.e(0),
+    };
   }
   getOutput() {
     return {};
