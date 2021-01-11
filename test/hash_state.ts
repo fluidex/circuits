@@ -2,9 +2,9 @@ import * as path from 'path';
 import { poseidon } from 'circomlib';
 import { Scalar } from 'ffjavascript';
 import { SimpleTest, TestComponent } from './base_test';
+import { hashAccountState } from '../helper.ts/state-utils';
 
 const Account = require("@hermeznetwork/commonjs").HermezAccount;
-// import { stateUtils } from '../helper.ts';
 
 const tokenID = 1;
 const loadAmount = 500;
@@ -40,28 +40,29 @@ const account_state = {
     ay: account.ay,
     ethAddr: ethAddrNoPrefix,
 };
-// class TestHashAccount implements SimpleTest {
-//   getInput() {
-//     return {
-//       nonce: Scalar.e(account_state.nonce),
-//       sign: Scalar.e(account_state.sign),
-//       balanceRoot: Scalar.e(account_state.balanceRoot),
-//       ay: Scalar.fromString(account_state.ay, 16),
-//       ethAddr: Scalar.fromString(account_state.ethAddr, 16),
-//     };
-//   }
-//   getOutput() {
-//     const output = {
-//       out: stateUtils.hashState(account_state),
-//     };
-//     return output;
-//   }
-//   getComponent(): TestComponent {
-//     return {
-//       src: path.join(__dirname, '..', 'src', 'hash_state.circom'),
-//       main: 'HashAccount()',
-//     };
-//   }
-// }
+class TestHashAccount implements SimpleTest {
+  getInput() {
+    return {
+      nonce: Scalar.e(account_state.nonce),
+      sign: Scalar.e(account_state.sign),
+      balanceRoot: Scalar.e(account_state.balanceRoot),
+      ay: Scalar.fromString(account_state.ay, 16),
+      ethAddr: Scalar.fromString(account_state.ethAddr, 16),
+    };
+  }
+  getOutput() {
+    return {};
+    // const output = {
+    //   out: stateUtils.hashState(account_state),
+    // };
+    // return output;
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'hash_state.circom'),
+      main: 'HashAccount()',
+    };
+  }
+}
 
-export { TestHashBalance, /*TestHashAccount*/ }
+export { TestHashBalance, TestHashAccount }

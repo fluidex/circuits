@@ -26,10 +26,9 @@ function state2Array(st) {
  * @param {Object} st - Merkle tree state object
  * @returns {Scalar} Resulting poseidon hash
  */
-function hashState(st) {
+function hashAccountState(st) {
     return poseidonHash(state2Array(st));
 }
 
-module.exports = {
-    hashState,
-};
+
+export { hashAccountState };
