@@ -57,7 +57,7 @@ template DepositToNew(nLevels) {
     // TODO: use balance tree
     // oldState hash state
     component oldStHash = HashState();
-    oldStHash.tokenID <== 0;
+    oldStHash.tokenID <== 0; // TODO: use tokenID directly?
     oldStHash.nonce <== 0;
     oldStHash.sign <== 0;
     oldStHash.balance <== 0;
