@@ -36,8 +36,8 @@ async function testWithInputOutput(t: SimpleTest) {
 
 async function main() {
   try {
-    await testWithInputOutput(new TestCheckLeafExists());
-    await testWithInputOutput(new TestCheckLeafUpdate());
+    // await testWithInputOutput(new TestCheckLeafExists());
+    // await testWithInputOutput(new TestCheckLeafUpdate());
     await testWithInputOutput(new TestDepositToNew());
   } catch (e) {
     console.error(e);

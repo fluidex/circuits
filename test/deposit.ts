@@ -17,6 +17,7 @@ class TestDepositToNew implements SimpleTest {
     const tokenID = 1;
     const prvkey = 1;
     const account = new Account(prvkey);
+    console.log(account.ethAddr.slice(2));
 
     return { tokenID };
   }
