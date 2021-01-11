@@ -18,11 +18,10 @@ class TestDepositToNew implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'binary_merkle_tree.circom'),
-      main: 'CheckLeafExists(2)',
+      src: path.join(__dirname, '..', 'src', 'deposit_to_new.circom'),
+      main: 'DepositToNew(2)',
     };
   }
 }
-
 
 export { TestDepositToNew };
