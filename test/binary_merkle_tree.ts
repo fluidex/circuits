@@ -1,6 +1,6 @@
-import { SimpleTest, TestComponent } from './base_test';
-import { poseidon } from 'circomlib';
 import * as path from 'path';
+import { poseidon } from 'circomlib';
+import { SimpleTest, TestComponent } from './base_test';
 
 class TestCheckLeafExists implements SimpleTest {
   getInput() {

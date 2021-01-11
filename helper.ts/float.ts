@@ -1,6 +1,5 @@
-const assert = require("assert");
-
-const {float16} = require("@hermeznetwork/commonjs");
+import * as assert from 'assert';
+import { float16 } from "@hermeznetwork/commonjs";
 
 function random(ceil){
     return Math.floor((Math.random() * ceil));

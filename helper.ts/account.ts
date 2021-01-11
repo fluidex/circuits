@@ -1,6 +1,5 @@
-const Scalar = require("ffjavascript").Scalar;
-
-const Account = require("@hermeznetwork/commonjs").HermezAccount;
+import { Scalar } from 'ffjavascript';
+import { HermezAccount as Account } from '@hermeznetwork/commonjs';
 
 const prvkey = 1;
 const account = new Account(prvkey);

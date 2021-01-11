@@ -1,6 +1,5 @@
-const Scalar = require("ffjavascript").Scalar;
-
-const stateUtils = require("@hermeznetwork/commonjs").stateUtils;
+import { Scalar } from 'ffjavascript';
+import { stateUtils } from '@hermeznetwork/commonjs';
 
 const state = {
     tokenID: 1,

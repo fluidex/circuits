@@ -1,8 +1,8 @@
-import { SimpleTest, TestComponent } from './base_test';
-import { poseidon } from 'circomlib';
 import * as path from 'path';
-const Scalar = require("ffjavascript").Scalar;
-const Account = require("@hermeznetwork/commonjs").HermezAccount;
+import { poseidon } from 'circomlib';
+import Scalar from 'ffjavascript';
+import { HermezAccount as Account } from '@hermeznetwork/commonjs';
+import { SimpleTest, TestComponent } from './base_test';
 
 class TestDepositToNew implements SimpleTest {
   getInput() {
