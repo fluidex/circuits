@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { poseidon } from 'circomlib';
 import Scalar from 'ffjavascript';
-import { HermezAccount as Account } from '@hermeznetwork/commonjs';
+import { HermezAccount as Account, stateUtils } from '@hermeznetwork/commonjs';
 import { SimpleTest, TestComponent } from './base_test';
 
 /**
@@ -27,8 +27,30 @@ class TestDepositToNew implements SimpleTest {
     // return { leaf, path_elements, path_index, root };
 
     const tokenID = 1;
+    const loadAmount = 500;
     const prvkey = 1;
     const account = new Account(prvkey);
+
+    let oldState = {
+      tokenID: Scalar.e(0),
+      nonce: Scalar.e(0),
+      balance: Scalar.e(0),
+      sign: Scalar.e(0),
+      ay: Scalar.e(0),
+      ethAddr: Scalar.e(0),
+    };
+    let oldStateHash = stateUtils.hashState(oldState);
+
+    let newState = {
+      tokenID: Scalar.e(tokenID),
+      nonce: Scalar.e(1),
+      balance: Scalar.e(loadAmount),
+      sign: account.sign,
+      ay: account.ay,
+      ethAddr: account.ethAddr,
+    };
+    let newStateHash = stateUtils.hashState(newState);
+
 
     return { 
       tokenID: tokenID,
