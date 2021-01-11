@@ -19,15 +19,6 @@ const Account = require("@hermeznetwork/commonjs").HermezAccount;
 
 class TestDepositToNew implements SimpleTest {
   getInput() {
-    // let leaves = [BigInt(10), BigInt(11), BigInt(12), BigInt(13)];
-    // let midLevel = [poseidon([leaves[0], leaves[1]]), poseidon([leaves[2], leaves[3]])];
-    // let root = poseidon(midLevel);
-    // // check leaves[2] in this tree
-    // let leaf = leaves[2];
-    // let path_elements = [[leaves[3]], [midLevel[0]]];
-    // let path_index = [0, 1];
-    // return { leaf, path_elements, path_index, root };
-
     const tokenID = 1;
     const loadAmount = 500;
     const prvkey = 1;
@@ -44,6 +35,10 @@ class TestDepositToNew implements SimpleTest {
     };
     const oldStateHash = stateUtils.hashState(oldState);
 
+    let leaves = [BigInt(10), BigInt(11), oldStateHash, BigInt(13)];
+    let oldMidLevel = [poseidon([leaves[0], leaves[1]]), poseidon([leaves[2], leaves[3]])];
+    let oldStateRoot = poseidon(oldMidLevel);
+
     const newState = {
       tokenID: Scalar.e(tokenID),
       nonce: Scalar.e(1),
@@ -54,16 +49,19 @@ class TestDepositToNew implements SimpleTest {
     };
     const newStateHash = stateUtils.hashState(newState);
 
+    leaves = [BigInt(10), BigInt(11), newStateHash, BigInt(13)];
+    let newMidLevel = [poseidon([leaves[0], leaves[1]]), poseidon([leaves[2], leaves[3]])];
+    let newStateRoot = poseidon(newMidLevel);
 
     return { 
       tokenID: Scalar.e(tokenID),
       fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16),
       fromBjjCompressed: [],
       loadAmount: Scalar.e(loadAmount),
-      path_index: [],
-      path_elements: [],
-      oldStateRoot: Scalar.e(0),
-      newStateRoot: Scalar.e(0),
+      path_index: [0, 1],
+      path_elements: [[leaves[3]], [newMidLevel[0]]],
+      oldStateRoot: oldStateRoot,
+      newStateRoot: newStateRoot,
     };
   }
   getOutput() {
