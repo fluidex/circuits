@@ -24,6 +24,10 @@ class TestDepositToNew implements SimpleTest {
     const prvkey = 1;
     const account = new Account(prvkey);
     const ethAddrNoPrefix = account.ethAddr.replace("0x", "");
+    // convert bjjCompressed to bits
+    const bjjCompressed = Scalar.fromString(account.bjjCompressed, 16);
+    const bjjCompressedBits = Scalar.bits(bjjCompressed);
+    while (bjjCompressedBits.length < 256) bjjCompressedBits.push(0);
 
     const oldState = {
       tokenID: Scalar.e(0),
@@ -56,10 +60,10 @@ class TestDepositToNew implements SimpleTest {
     return { 
       tokenID: Scalar.e(tokenID),
       fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16),
-      fromBjjCompressed: [],
+      fromBjjCompressed: bjjCompressedBits,
       loadAmount: Scalar.e(loadAmount),
       path_index: [0, 1],
-      path_elements: [[leaves[3]], [newMidLevel[0]]],
+      path_elements: [[leaves[3]], [oldMidLevel[0]]],
       oldStateRoot: oldStateRoot,
       newStateRoot: newStateRoot,
     };
