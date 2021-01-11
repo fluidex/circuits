@@ -57,6 +57,9 @@ class TestDepositToNew implements SimpleTest {
     let newMidLevel = [poseidon([leaves[0], leaves[1]]), poseidon([leaves[2], leaves[3]])];
     let newStateRoot = poseidon(newMidLevel);
 
+    console.log(oldStateRoot);
+    console.log(newStateRoot);
+
     return { 
       tokenID: Scalar.e(tokenID),
       fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16),
