@@ -1,12 +1,11 @@
-include "./utils-bjj.circom";
-include "./hash-state.circom";
+include "./utils_bjj.circom";
+include "./hash_state.circom";
 include "./binary_merkle_tree.circom";
 
 /**
  * Process a deposit_and_create_account transaction, also support create 0 balance account
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
-// * @input auxFromIdx - {Uint48} - auxiliary index to create accounts // TODO: parse auxFromIdx to path_index
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input fromEthAddr - {Uint160} - L1 sender ethereum address
  * @input fromBjjCompressed[256]- {Array(Bool)} - babyjubjub compressed sender
@@ -17,12 +16,10 @@ include "./binary_merkle_tree.circom";
  * @output newStateRoot - {Field} - final state root
  */
 template DepositToNew(balanceLevels, accountLevels) {
-    // Phases deposit_to_new-tx circuit
-        // ...
-
+    
     // Tx
-    // signal input auxFromIdx; // TODO: parse auxFromIdx to path_index
     signal input tokenID;
+    // TODO: parse tokenID to balance_path_index, auxFromIdx to account_path_index?
 
     // For L1 TX
     signal input fromEthAddr;
@@ -53,37 +50,51 @@ template DepositToNew(balanceLevels, accountLevels) {
 
     // TODO: fee
 
-    // - compute hash old states
+    // - check balance tree update
     ////////
-    // TODO: use balance tree
-    // oldState hash state
-    component oldStHash = HashState();
-    oldStHash.tokenID <== 0; // TODO: use tokenID directly?
-    oldStHash.nonce <== 0;
-    oldStHash.sign <== 0;
-    oldStHash.balance <== 0;
-    oldStHash.ay <== 0;
-    oldStHash.ethAddr <== 0;
-
-    // - compute hash new states
-    ////////
-    // TODO: use balance tree
-    // newState hash state
-    component newStHash = HashState();
-    newStHash.tokenID <== tokenID;
-    newStHash.nonce <== 0;
-    newStHash.sign <== decodeFromBjj.sign;
-    newStHash.balance <== loadAmount;
-    newStHash.ay <== decodeFromBjj.ay;
-    newStHash.ethAddr <== fromEthAddr;
-
-    component update_checker = CheckLeafUpdate(nLevels);
-    update_checker.oldLeaf <== oldStHash.out;
-    update_checker.newLeaf <== newStHash.out;
-    for (var i = 0; i < nLevels; i++) {
-        update_checker.path_index[i] <== path_index[i];
-        update_checker.path_elements[i][0] <== path_elements[i][0];
+    // old balance state hash
+    component oldBalanceHash = HashBalance();
+    oldBalanceHash.tokenID <== 0;
+    oldBalanceHash.balance <== 0;
+    // new balance state hash
+    component newBalanceHash = HashBalance();
+    newBalanceHash.tokenID <== tokenID;
+    newBalanceHash.balance <== loadAmount;
+    // check update
+    component balance_update_checker = CheckLeafUpdate(balanceLevels);
+    balance_update_checker.oldLeaf <== oldBalanceHash.out;
+    balance_update_checker.newLeaf <== newBalanceHash.out;
+    for (var i = 0; i < balanceLevels; i++) {
+        balance_update_checker.balance_path_index[i] <== balance_path_index[i];
+        balance_update_checker.balance_path_elements[i][0] <== balance_path_elements[i][0];
     }
-    update_checker.oldRoot <== oldStateRoot;
-    update_checker.newRoot <== newStateRoot;
+    balance_update_checker.oldRoot <== oldBalanceRoot;
+    balance_update_checker.newRoot <== newBalanceRoot;
+
+    // - check account tree update
+    ////////
+    // old account state hash
+    component oldAccountHash = HashAccount();
+    oldAccountHash.nonce = 0;
+    oldAccountHash.sign = 0;
+    oldAccountHash.balanceRoot = oldBalanceRoot;
+    oldAccountHash.ay = 0;
+    oldAccountHash.ethAddr = 0;
+    // new account state hash
+    component newAccountHash = HashAccount();
+    newAccountHash.nonce = 0;
+    newAccountHash.sign = decodeFromBjj.sign;
+    newAccountHash.balanceRoot = newBalanceRoot;
+    newAccountHash.ay = decodeFromBjj.ay;
+    newAccountHash.ethAddr = fromEthAddr;
+    // check update
+    component account_update_checker = CheckLeafUpdate(accountLevels);
+    account_update_checker.oldLeaf <== oldAccountHash.out;
+    account_update_checker.newLeaf <== newAccountHash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        account_update_checker.account_path_index[i] <== account_path_index[i];
+        account_update_checker.account_path_elements[i][0] <== account_path_elements[i][0];
+    }
+    account_update_checker.oldRoot <== oldAccountRoot;
+    account_update_checker.newRoot <== newAccountRoot;
 }
