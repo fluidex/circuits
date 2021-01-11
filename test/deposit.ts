@@ -32,7 +32,7 @@ class TestDepositToNew implements SimpleTest {
 
     return { 
       tokenID: tokenID,
-      fromEthAddr: Scalar.fromString(account.ethAddr.replace("0x", "")),
+      fromEthAddr: account.ethAddr.replace("0x", ""),
       fromBjjCompressed: [],
       loadAmount: 0,
       path_index: [],
