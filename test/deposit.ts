@@ -33,9 +33,9 @@ class TestDepositToNew implements SimpleTest {
     return { 
       tokenID: tokenID,
       // fromEthAddr: account.ethAddr,
-      fromEthAddr: account.ethAddr.replace("0x", ""),
+      fromEthAddr: account.ethAddr.replace("0x", ""), // TODO:
       fromBjjCompressed: [],
-      loadAmount: 0,
+      loadAmount: 500,  // TODO: BigInt?
       path_index: [],
       path_elements: [],
       oldStateRoot: Scalar.e(0),
