@@ -1,5 +1,3 @@
-// include "../node_modules/circomlib/circuits/bitify.circom";
-include "./decode-float.circom";
 include "./utils-bjj.circom";
 include "./hash-state.circom";
 include "./binary_merkle_tree.circom";
