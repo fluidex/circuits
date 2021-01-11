@@ -6,17 +6,6 @@ const Scalar = require("ffjavascript").Scalar;
 const stateUtils = require("@hermeznetwork/commonjs").stateUtils;
 const Account = require("@hermeznetwork/commonjs").HermezAccount;
 
-/**
- * @input tokenID - {Uint32} - tokenID signed in the transaction
- * @input fromEthAddr - {Uint160} - L1 sender ethereum address
- * @input fromBjjCompressed[256]- {Array(Bool)} - babyjubjub compressed sender
- * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
- * @input path_index[n_levels] - {Array(Bool)} - index position on the tree from leaf to root 
- * @input path_elements[n_levels][1] - {Array(Field)} - siblings merkle proof of the leaf
- * @input oldStateRoot - {Field} - initial state root
- * @output newStateRoot - {Field} - final state root
- */
-
 class TestDepositToNew implements SimpleTest {
   getInput() {
     const tokenID = 1;
@@ -45,7 +34,7 @@ class TestDepositToNew implements SimpleTest {
 
     const newState = {
       tokenID: Scalar.e(tokenID),
-      nonce: Scalar.e(1),
+      nonce: Scalar.e(0),
       balance: Scalar.e(loadAmount),
       sign: Scalar.e(account.sign),
       ay: account.ay,
@@ -56,9 +45,6 @@ class TestDepositToNew implements SimpleTest {
     leaves = [BigInt(10), BigInt(11), newStateHash, BigInt(13)];
     let newMidLevel = [poseidon([leaves[0], leaves[1]]), poseidon([leaves[2], leaves[3]])];
     let newStateRoot = poseidon(newMidLevel);
-
-    // console.log(oldStateRoot);
-    // console.log(newStateRoot);
 
     return { 
       tokenID: Scalar.e(tokenID),
