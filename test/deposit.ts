@@ -56,11 +56,10 @@ class TestDepositToNew implements SimpleTest {
 
 
     return { 
-      tokenID: tokenID,
-      // fromEthAddr: account.ethAddr,
-      fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16), // TODO:
+      tokenID: Scalar.e(tokenID),
+      fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16),
       fromBjjCompressed: [],
-      loadAmount: 500,  // TODO: BigInt?
+      loadAmount: Scalar.e(loadAmount),
       path_index: [],
       path_elements: [],
       oldStateRoot: Scalar.e(0),
