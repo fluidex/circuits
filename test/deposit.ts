@@ -1,8 +1,10 @@
 import * as path from 'path';
 import { poseidon } from 'circomlib';
-import Scalar from 'ffjavascript';
-import { HermezAccount as Account, stateUtils } from '@hermeznetwork/commonjs';
 import { SimpleTest, TestComponent } from './base_test';
+
+const Scalar = require("ffjavascript").Scalar;
+const stateUtils = require("@hermeznetwork/commonjs").stateUtils;
+const Account = require("@hermeznetwork/commonjs").HermezAccount;
 
 /**
  * @input tokenID - {Uint32} - tokenID signed in the transaction
@@ -30,14 +32,15 @@ class TestDepositToNew implements SimpleTest {
     const loadAmount = 500;
     const prvkey = 1;
     const account = new Account(prvkey);
+    const ethAddrNoPrefix = account.ethAddr.replace("0x", "");
 
     let oldState = {
       tokenID: Scalar.e(0),
       nonce: Scalar.e(0),
       balance: Scalar.e(0),
       sign: Scalar.e(0),
-      ay: Scalar.e(0),
-      ethAddr: Scalar.e(0),
+      ay: "0",
+      ethAddr: "0",
     };
     let oldStateHash = stateUtils.hashState(oldState);
 
@@ -45,9 +48,9 @@ class TestDepositToNew implements SimpleTest {
       tokenID: Scalar.e(tokenID),
       nonce: Scalar.e(1),
       balance: Scalar.e(loadAmount),
-      sign: account.sign,
-      ay: account.ay,
-      ethAddr: account.ethAddr,
+      sign: Scalar.e(account.sign),
+      ay: Scalar.fromString(account.ay, 16),
+      ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
     };
     let newStateHash = stateUtils.hashState(newState);
 
@@ -55,7 +58,7 @@ class TestDepositToNew implements SimpleTest {
     return { 
       tokenID: tokenID,
       // fromEthAddr: account.ethAddr,
-      fromEthAddr: account.ethAddr.replace("0x", ""), // TODO:
+      fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16), // TODO:
       fromBjjCompressed: [],
       loadAmount: 500,  // TODO: BigInt?
       path_index: [],
