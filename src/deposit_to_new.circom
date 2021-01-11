@@ -4,7 +4,8 @@ include "./binary_merkle_tree.circom";
 
 /**
  * Process a deposit_and_create_account transaction, also support create 0 balance account
- * @param nLevels - merkle tree depth
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
 // * @input auxFromIdx - {Uint48} - auxiliary index to create accounts // TODO: parse auxFromIdx to path_index
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input fromEthAddr - {Uint160} - L1 sender ethereum address
@@ -15,7 +16,7 @@ include "./binary_merkle_tree.circom";
  * @input oldStateRoot - {Field} - initial state root
  * @output newStateRoot - {Field} - final state root
  */
-template DepositToNew(nLevels) {
+template DepositToNew(balanceLevels, accountLevels) {
     // Phases deposit_to_new-tx circuit
         // ...
 
@@ -29,8 +30,10 @@ template DepositToNew(nLevels) {
     signal input loadAmount;
 
     // State 1
-    signal input path_index[nLevels];
-    signal input path_elements[nLevels][1];
+    signal input balance_path_index[balanceLevels];
+    signal input balance_path_elements[balanceLevels][1];
+    signal input account_path_index[accountLevels];
+    signal input account_path_elements[accountLevels][1];
 
     // Roots
     signal input oldStateRoot;
