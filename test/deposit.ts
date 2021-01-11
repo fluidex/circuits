@@ -34,7 +34,7 @@ class TestDepositToNew implements SimpleTest {
     const account = new Account(prvkey);
     const ethAddrNoPrefix = account.ethAddr.replace("0x", "");
 
-    let oldState = {
+    const oldState = {
       tokenID: Scalar.e(0),
       nonce: Scalar.e(0),
       balance: Scalar.e(0),
@@ -42,17 +42,17 @@ class TestDepositToNew implements SimpleTest {
       ay: "0",
       ethAddr: "0",
     };
-    let oldStateHash = stateUtils.hashState(oldState);
+    const oldStateHash = stateUtils.hashState(oldState);
 
-    let newState = {
+    const newState = {
       tokenID: Scalar.e(tokenID),
       nonce: Scalar.e(1),
       balance: Scalar.e(loadAmount),
       sign: Scalar.e(account.sign),
-      ay: Scalar.fromString(account.ay, 16),
-      ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
+      ay: account.ay,
+      ethAddr: ethAddrNoPrefix,
     };
-    let newStateHash = stateUtils.hashState(newState);
+    const newStateHash = stateUtils.hashState(newState);
 
 
     return { 
