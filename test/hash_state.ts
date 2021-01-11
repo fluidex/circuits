@@ -25,9 +25,10 @@ class TestHashState implements SimpleTest {
     };
   }
   getOutput() {
-  	let out = stateUtils.hashState(state);
-    return { out };
-    // return { };
+    const output = {
+        out: stateUtils.hashState(state),
+    };
+    return output;
   }
   getComponent(): TestComponent {
     return {
