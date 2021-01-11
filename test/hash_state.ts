@@ -51,11 +51,10 @@ class TestHashAccount implements SimpleTest {
     };
   }
   getOutput() {
-    return {};
-    // const output = {
-    //   out: stateUtils.hashState(account_state),
-    // };
-    // return output;
+    const output = {
+      out: hashAccountState(account_state),
+    };
+    return output;
   }
   getComponent(): TestComponent {
     return {
