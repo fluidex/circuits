@@ -44,7 +44,7 @@ template DepositToOld(nLevels) {
 
     var i;
 
-    // XXX - compute old hash states
+    // - compute old hash states
     ////////
     // oldState Packer
     component oldStHash = HashState();
@@ -61,7 +61,7 @@ template DepositToOld(nLevels) {
 
     // TODO: fee
 
-    // XXX - compute hash new states
+    // - compute hash new states
     ////////
     // newState hash state
     component newStHash = HashState();
@@ -72,7 +72,7 @@ template DepositToOld(nLevels) {
     newStHash.ay <== ay;
     newStHash.ethAddr <== ethAddr;
 
-    // XXX - smt processors
+    // - smt processors
     ////////
     // TODO: change to our tree
     component processor = SMTProcessor(nLevels+1);

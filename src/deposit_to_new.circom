@@ -52,7 +52,7 @@ template DepositToNew(nLevels) {
 
     // TODO: fee
 
-    // XXX - compute hash old states
+    // - compute hash old states
     ////////
     // TODO: use balance tree
     // oldState hash state
@@ -64,7 +64,7 @@ template DepositToNew(nLevels) {
     oldStHash.ay <== 0;
     oldStHash.ethAddr <== 0;
 
-    // XXX - compute hash new states
+    // - compute hash new states
     ////////
     // TODO: use balance tree
     // newState hash state
