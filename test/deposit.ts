@@ -88,20 +88,6 @@ class TestDepositToNew implements SimpleTest {
   }
 }
 
-/**
- * Process a deposit_to_existed_account transaction
- * @param nLevels - merkle tree depth
- * @input tokenID - {Uint32} - tokenID signed in the transaction
- * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
- * @input nonce - {Uint40} - nonce of the account leaf
- * @input sign - {Bool} - sign of the account leaf
- * @input balance - {Uint192} - balance of the account leaf
- * @input ay - {Field} - ay of the account leaf
- * @input ethAddr - {Uint160} - ethAddr of the account leaf
- * @input siblings[nLevels + 1] - {Array(Field)} - siblings merkle proof of the account leaf
- * @input oldStateRoot - {Field} - initial state root
- * @output newStateRoot - {Field} - final state root
- */
 class TestDepositToOld implements SimpleTest {
   getInput() {
     // input-level assignments and pre-processings
@@ -112,10 +98,45 @@ class TestDepositToOld implements SimpleTest {
     const prvkey = 1;
     const account = new Account(prvkey);
     const ethAddrNoPrefix = account.ethAddr.replace("0x", "");
-    // // convert bjjCompressed to bits
-    // const bjjCompressed = Scalar.fromString(account.bjjCompressed, 16);
-    // const bjjCompressedBits = Scalar.bits(bjjCompressed);
-    // while (bjjCompressedBits.length < 256) bjjCompressedBits.push(0);
+
+    // balance tree
+    const oldBalanceHash = poseidon([BigInt(tokenID), BigInt(oldBalance)]);
+    const newBalanceHash = poseidon([BigInt(tokenID), BigInt(oldBalance) + BigInt(loadAmount)]);
+
+    let balanceLeaves = [BigInt(10), BigInt(11), oldBalanceHash, BigInt(13)];
+    let oldBalanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
+    let oldBalanceRoot = poseidon(oldBalanceMidLevel);
+
+    balanceLeaves = [BigInt(10), BigInt(11), newBalanceHash, BigInt(13)];
+    let newBalanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
+    let newBalanceRoot = poseidon(newBalanceMidLevel);
+
+    // account tree
+    const oldAccount = {
+      nonce: Scalar.e(0),
+      sign: Scalar.e(account.sign),
+      balanceRoot: oldBalanceRoot,
+      ay: account.ay,
+      ethAddr: ethAddrNoPrefix,
+    };
+    const oldAccountHash = hashAccountState(oldAccount);
+
+    const newAccount = {
+      nonce: Scalar.e(0),
+      sign: Scalar.e(account.sign),
+      balanceRoot: newBalanceRoot,
+      ay: account.ay,
+      ethAddr: ethAddrNoPrefix,
+    };
+    const newAccountHash = hashAccountState(newAccount);
+
+    let accountLeaves = [BigInt(20), BigInt(21), oldAccountHash, BigInt(23)];
+    let oldAccountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
+    let oldAccountRoot = poseidon(oldAccountMidLevel);
+
+    accountLeaves = [BigInt(20), BigInt(21), newAccountHash, BigInt(23)];
+    let newAccountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
+    let newAccountRoot = poseidon(newAccountMidLevel);
     
     return {
       tokenID: Scalar.e(tokenID),
@@ -124,6 +145,14 @@ class TestDepositToOld implements SimpleTest {
       sign: Scalar.e(account.sign),
       ay: account.ay,
       ethAddr: ethAddrNoPrefix,
+      balance_path_index: [0, 1],
+      balance_path_elements: [[balanceLeaves[3]], [oldBalanceMidLevel[0]]],
+      oldBalanceRoot: oldBalanceRoot,
+      newBalanceRoot: newBalanceRoot,
+      account_path_index: [0, 1],
+      account_path_elements: [[accountLeaves[3]], [oldAccountMidLevel[0]]],
+      oldAccountRoot: oldAccountRoot,
+      newAccountRoot: newAccountRoot,
     };
   }
   getOutput() {
@@ -137,4 +166,4 @@ class TestDepositToOld implements SimpleTest {
   }
 }
 
-export { TestDepositToNew };
+export { TestDepositToNew, TestDepositToOld };
