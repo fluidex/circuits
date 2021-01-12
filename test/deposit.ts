@@ -105,6 +105,7 @@ class TestDepositToNew implements SimpleTest {
 class TestDepositToOld implements SimpleTest {
   getInput() {
     // input-level assignments and pre-processings
+    const nonce = 51;
     const tokenID = 1;
     const oldBalance = 500;
     const loadAmount = 500;
@@ -117,6 +118,12 @@ class TestDepositToOld implements SimpleTest {
     // while (bjjCompressedBits.length < 256) bjjCompressedBits.push(0);
     
     return {
+      tokenID: Scalar.e(tokenID),
+      loadAmount: Scalar.e(loadAmount),
+      nonce: Scalar.e(nonce),
+      sign: Scalar.e(account.sign),
+      ay: account.ay,
+      ethAddr: ethAddrNoPrefix,
     };
   }
   getOutput() {

@@ -15,9 +15,9 @@ include "./binary_merkle_tree.circom";
  * @input account_path_index[accountLevels] - {Array(Bool)} - index position on the account tree from leaf to root 
  * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the leaf
  * @input oldBalanceRoot - {Field} - initial balance state root
- * @output newBalanceRoot - {Field} - final balance state root
+ * @input newBalanceRoot - {Field} - final balance state root
  * @input oldAccountRoot - {Field} - initial account state root
- * @output newAccountRoot - {Field} - final account state root
+ * @input newAccountRoot - {Field} - final account state root
  */
 // TODO: parse tokenID to balance_path_index, auxFromIdx to account_path_index?
 template DepositToNew(balanceLevels, accountLevels) {
