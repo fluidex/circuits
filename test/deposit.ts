@@ -63,7 +63,7 @@ class TestDepositToNew implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'deposit_to_new.circom'),
-      main: 'DepositToNew(2)',
+      main: 'DepositToNew(2, 2)',
     };
   }
 }
