@@ -18,7 +18,6 @@ include "./binary_merkle_tree.circom";
  * @input oldAccountRoot - {Field} - initial account state root
  * @input newAccountRoot - {Field} - final account state root
  */
-// TODO: parse tokenID to balance_path_index, auxFromIdx to account_path_index?
 template DepositToNew(balanceLevels, accountLevels) {
     // Tx
     signal input auxFromIdx;

@@ -6,6 +6,7 @@ include "./binary_merkle_tree.circom";
  * Process a deposit_to_existed_account transaction
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
+ * @input fromIdx - {Uint48} - account index
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
  * @input nonce - {Uint40} - nonce of the account leaf
@@ -22,10 +23,9 @@ include "./binary_merkle_tree.circom";
  * @input oldAccountRoot - {Field} - initial account state root
  * @input newAccountRoot - {Field} - final account state root
  */
-// TODO: parse tokenID to balance_path_index, fromIdx to account_path_index?
 template DepositToOld(balanceLevels, accountLevels) {
     // Tx
-    // signal input fromIdx;
+    signal input fromIdx;
     signal input tokenID;
 
     // For L1 TX
@@ -37,9 +37,7 @@ template DepositToOld(balanceLevels, accountLevels) {
     signal input balance;
     signal input ay;
     signal input ethAddr;
-    signal input balance_path_index[balanceLevels];
     signal input balance_path_elements[balanceLevels][1];
-    signal input account_path_index[accountLevels];
     signal input account_path_elements[accountLevels][1];
 
     // Roots
@@ -47,6 +45,24 @@ template DepositToOld(balanceLevels, accountLevels) {
     signal input newBalanceRoot;
     signal input oldAccountRoot;
     signal input newAccountRoot;
+
+    // Path index
+    signal balance_path_index[balanceLevels];
+    signal account_path_index[accountLevels];
+
+    // decode balance_path_index
+    component bTokenID = Num2Bits(balanceLevels);
+    bTokenID.in <== tokenID;
+    for (var i = 0; i < balanceLevels; i++) {
+        balance_path_index[i] <== bTokenID.out[i];
+    }
+
+    // decode account_path_index
+    component bAuxFromIdx = Num2Bits(accountLevels);
+    bAuxFromIdx.in <== fromIdx;
+    for (var i = 0; i < accountLevels; i++) {
+        account_path_index[i] <== bAuxFromIdx.out[i];
+    }
 
     // TODO: underflow check
 

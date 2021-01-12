@@ -91,8 +91,9 @@ class TestDepositToNew implements SimpleTest {
 class TestDepositToOld implements SimpleTest {
   getInput() {
     // input-level assignments and pre-processings
+    const fromIdx = 2;
     const nonce = 51;
-    const tokenID = 1;
+    const tokenID = 2;
     const oldBalance = 500;
     const loadAmount = 500;
     const prvkey = 1;
@@ -139,6 +140,7 @@ class TestDepositToOld implements SimpleTest {
     let newAccountRoot = poseidon(newAccountMidLevel);
     
     return {
+      fromIdx: Scalar.e(fromIdx),
       tokenID: Scalar.e(tokenID),
       loadAmount: Scalar.e(loadAmount),
       nonce: Scalar.e(nonce),
@@ -146,11 +148,9 @@ class TestDepositToOld implements SimpleTest {
       ay: Scalar.fromString(account.ay, 16),
       balance: Scalar.e(oldBalance),
       ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
-      balance_path_index: [0, 1],
       balance_path_elements: [[balanceLeaves[3]], [oldBalanceMidLevel[0]]],
       oldBalanceRoot: oldBalanceRoot,
       newBalanceRoot: newBalanceRoot,
-      account_path_index: [0, 1],
       account_path_elements: [[accountLeaves[3]], [oldAccountMidLevel[0]]],
       oldAccountRoot: oldAccountRoot,
       newAccountRoot: newAccountRoot,

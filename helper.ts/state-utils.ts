@@ -29,5 +29,4 @@ function hashAccountState(st) {
     return poseidonHash(accountState2Array(st));
 }
 
-
 export { hashAccountState };
