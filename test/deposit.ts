@@ -13,6 +13,7 @@ const accountLevels = 2;
 class TestDepositToNew implements SimpleTest {
   getInput() {
     // input-level assignments and pre-processings
+    const auxFromIdx = 2;
     const tokenID = 2;
     const loadAmount = 500;
     const prvkey = 1;
@@ -63,6 +64,7 @@ class TestDepositToNew implements SimpleTest {
     let newAccountRoot = poseidon(newAccountMidLevel);
 
     return {
+      auxFromIdx: Scalar.e(auxFromIdx),
       tokenID: Scalar.e(tokenID),
       fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16),
       fromBjjCompressed: bjjCompressedBits,
@@ -70,7 +72,6 @@ class TestDepositToNew implements SimpleTest {
       balance_path_elements: [[balanceLeaves[3]], [oldBalanceMidLevel[0]]],
       oldBalanceRoot: oldBalanceRoot,
       newBalanceRoot: newBalanceRoot,
-      account_path_index: [0, 1],
       account_path_elements: [[accountLeaves[3]], [oldAccountMidLevel[0]]],
       oldAccountRoot: oldAccountRoot,
       newAccountRoot: newAccountRoot,
