@@ -44,7 +44,7 @@ template DepositToNew(balanceLevels, accountLevels) {
 
     // decode BjjCompressed
     component decodeFromBjj = BitsCompressed2AySign();
-    for (var i; i = 0; i < 256; i++){
+    for (var i = 0; i < 256; i++){
         decodeFromBjj.bjjCompressed[i] <== fromBjjCompressed[i];
     }
 
