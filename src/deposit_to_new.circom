@@ -70,8 +70,8 @@ template DepositToNew(balanceLevels, accountLevels) {
     balance_update_checker.oldLeaf <== oldBalanceHash.out;
     balance_update_checker.newLeaf <== newBalanceHash.out;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_update_checker.balance_path_index[i] <== balance_path_index[i];
-        balance_update_checker.balance_path_elements[i][0] <== balance_path_elements[i][0];
+        balance_update_checker.path_index[i] <== balance_path_index[i];
+        balance_update_checker.path_elements[i][0] <== balance_path_elements[i][0];
     }
     balance_update_checker.oldRoot <== oldBalanceRoot;
     balance_update_checker.newRoot <== newBalanceRoot;
@@ -80,25 +80,25 @@ template DepositToNew(balanceLevels, accountLevels) {
     ////////
     // old account state hash
     component oldAccountHash = HashAccount();
-    oldAccountHash.nonce = 0;
-    oldAccountHash.sign = 0;
-    oldAccountHash.balanceRoot = oldBalanceRoot;
-    oldAccountHash.ay = 0;
-    oldAccountHash.ethAddr = 0;
+    oldAccountHash.nonce <== 0;
+    oldAccountHash.sign <== 0;
+    oldAccountHash.balanceRoot <== oldBalanceRoot;
+    oldAccountHash.ay <== 0;
+    oldAccountHash.ethAddr <== 0;
     // new account state hash
     component newAccountHash = HashAccount();
-    newAccountHash.nonce = 0;
-    newAccountHash.sign = decodeFromBjj.sign;
-    newAccountHash.balanceRoot = newBalanceRoot;
-    newAccountHash.ay = decodeFromBjj.ay;
-    newAccountHash.ethAddr = fromEthAddr;
+    newAccountHash.nonce<== 0;
+    newAccountHash.sign<== decodeFromBjj.sign;
+    newAccountHash.balanceRoot<== newBalanceRoot;
+    newAccountHash.ay<== decodeFromBjj.ay;
+    newAccountHash.ethAddr<== fromEthAddr;
     // check update
     component account_update_checker = CheckLeafUpdate(accountLevels);
     account_update_checker.oldLeaf <== oldAccountHash.out;
     account_update_checker.newLeaf <== newAccountHash.out;
     for (var i = 0; i < accountLevels; i++) {
-        account_update_checker.account_path_index[i] <== account_path_index[i];
-        account_update_checker.account_path_elements[i][0] <== account_path_elements[i][0];
+        account_update_checker.path_index[i] <== account_path_index[i];
+        account_update_checker.path_elements[i][0] <== account_path_elements[i][0];
     }
     account_update_checker.oldRoot <== oldAccountRoot;
     account_update_checker.newRoot <== newAccountRoot;
