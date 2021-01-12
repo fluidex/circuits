@@ -13,7 +13,7 @@ const accountLevels = 2;
 class TestDepositToNew implements SimpleTest {
   getInput() {
     // input-level assignments and pre-processings
-    const tokenID = 1;
+    const tokenID = 2;
     const loadAmount = 500;
     const prvkey = 1;
     const account = new Account(prvkey);
@@ -67,7 +67,6 @@ class TestDepositToNew implements SimpleTest {
       fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16),
       fromBjjCompressed: bjjCompressedBits,
       loadAmount: Scalar.e(loadAmount),
-      balance_path_index: [0, 1],
       balance_path_elements: [[balanceLeaves[3]], [oldBalanceMidLevel[0]]],
       oldBalanceRoot: oldBalanceRoot,
       newBalanceRoot: newBalanceRoot,

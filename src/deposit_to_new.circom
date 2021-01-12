@@ -10,7 +10,6 @@ include "./binary_merkle_tree.circom";
  * @input fromEthAddr - {Uint160} - L1 sender ethereum address
  * @input fromBjjCompressed[256]- {Array(Bool)} - babyjubjub compressed sender
  * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
- * @input balance_path_index[balanceLevels] - {Array(Bool)} - index position on the balance tree from leaf to root 
  * @input balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the leaf
  * @input account_path_index[accountLevels] - {Array(Bool)} - index position on the account tree from leaf to root 
  * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the leaf
@@ -31,7 +30,6 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal input loadAmount;
 
     // State
-    signal input balance_path_index[balanceLevels];
     signal input balance_path_elements[balanceLevels][1];
     signal input account_path_index[accountLevels];
     signal input account_path_elements[accountLevels][1];
@@ -42,10 +40,20 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal input oldAccountRoot;
     signal input newAccountRoot;
 
+    // Path index
+    signal balance_path_index[balanceLevels];
+
     // decode BjjCompressed
     component decodeFromBjj = BitsCompressed2AySign();
-    for (var i = 0; i < 256; i++){
+    for (var i = 0; i < 256; i++) {
         decodeFromBjj.bjjCompressed[i] <== fromBjjCompressed[i];
+    }
+
+    // decode balance_path_index
+    component bTokenID = Num2Bits(balanceLevels);
+    bTokenID.in <== tokenID;
+    for (var i = 0; i < balanceLevels; i++) {
+        balance_path_index[i] <== bTokenID.out[i];
     }
 
     // TODO: underflow check
