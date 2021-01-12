@@ -83,14 +83,14 @@ template DepositToOld(balanceLevels, accountLevels) {
     oldAccountHash.sign <== sign;
     oldAccountHash.balanceRoot <== oldBalanceRoot;
     oldAccountHash.ay <== ay;
-    oldAccountHash.ethAddr <== fromEthAddr;
+    oldAccountHash.ethAddr <== ethAddr;
     // new account state hash
     component newAccountHash = HashAccount();
     newAccountHash.nonce <== nonce;
     newAccountHash.sign <== sign;
     newAccountHash.balanceRoot <== newBalanceRoot;
     newAccountHash.ay <== ay;
-    newAccountHash.ethAddr <== fromEthAddr;
+    newAccountHash.ethAddr <== ethAddr;
     // check update
     component account_update_checker = CheckLeafUpdate(accountLevels);
     account_update_checker.oldLeaf <== oldAccountHash.out;

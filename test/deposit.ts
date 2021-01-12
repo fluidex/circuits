@@ -161,7 +161,7 @@ class TestDepositToOld implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'deposit_to_old.circom'),
-      main: 'DepositToNew('+balanceLevels+', '+accountLevels+ ')',
+      main: 'DepositToOld('+balanceLevels+', '+accountLevels+ ')',
     };
   }
 }
