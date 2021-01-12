@@ -16,10 +16,9 @@ class TestHashBalance implements SimpleTest {
     };
   }
   getOutput() {
-    const output = {
-        out: poseidon([BigInt(tokenID), BigInt(loadAmount)]),
+    return {
+      out: poseidon([BigInt(tokenID), BigInt(loadAmount)]),
     };
-    return output;
   }
   getComponent(): TestComponent {
     return {
@@ -51,10 +50,9 @@ class TestHashAccount implements SimpleTest {
     };
   }
   getOutput() {
-    const output = {
+    return {
       out: hashAccountState(account_state),
     };
-    return output;
   }
   getComponent(): TestComponent {
     return {
