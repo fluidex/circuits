@@ -31,24 +31,16 @@ template DepositToOld(nLevels) {
     signal input balance;
     signal input ay;
     signal input ethAddr;
-    signal input siblings[nLevels+1];
+    signal input balance_path_index[balanceLevels];
+    signal input balance_path_elements[balanceLevels][1];
+    signal input account_path_index[accountLevels];
+    signal input account_path_elements[accountLevels][1];
 
     // Roots
-    signal input oldStateRoot;
-    signal output newStateRoot;
-
-    var i;
-
-    // - compute old hash states
-    ////////
-    // oldState Packer
-    component oldStHash = HashState();
-    oldStHash.tokenID <== tokenID;
-    oldStHash.nonce <== nonce;
-    oldStHash.sign <== sign;
-    oldStHash.balance <== balance;
-    oldStHash.ay <== ay;
-    oldStHash.ethAddr <== ethAddr;
+    signal input oldBalanceRoot;
+    signal input newBalanceRoot;
+    signal input oldAccountRoot;
+    signal input newAccountRoot;
 
     // TODO: underflow check
 
@@ -56,33 +48,51 @@ template DepositToOld(nLevels) {
 
     // TODO: fee
 
-    // - compute hash new states
+    // - check balance tree update
     ////////
-    // newState hash state
-    component newStHash = HashState();
-    newStHash.tokenID <== tokenID;
-    newStHash.nonce <== nonce;
-    newStHash.sign <== sign;
-    newStHash.balance <== balance + loadAmount;
-    newStHash.ay <== ay;
-    newStHash.ethAddr <== ethAddr;
-
-    // - smt processors
-    ////////
-    // TODO: change to our tree
-    component processor = SMTProcessor(nLevels+1);
-    processor.oldRoot <== oldStateRoot;
-    for (i = 0; i < nLevels + 1; i++) {
-        processor.siblings[i] <== siblings1[i];
+    // old balance state hash
+    component oldBalanceHash = HashBalance();
+    oldBalanceHash.tokenID <== tokenID;
+    oldBalanceHash.balance <== balance;
+    // new balance state hash
+    component newBalanceHash = HashBalance();
+    newBalanceHash.tokenID <== tokenID;
+    newBalanceHash.balance <== balance + loadAmount;
+    // check update
+    component balance_update_checker = CheckLeafUpdate(balanceLevels);
+    balance_update_checker.oldLeaf <== oldBalanceHash.out;
+    balance_update_checker.newLeaf <== newBalanceHash.out;
+    for (var i = 0; i < balanceLevels; i++) {
+        balance_update_checker.path_index[i] <== balance_path_index[i];
+        balance_update_checker.path_elements[i][0] <== balance_path_elements[i][0];
     }
-    processor.oldKey <== fromIdx;
-    processor.oldValue <== oldStHash.out;
-    processor.isOld0 <== 1;
-    processor.newKey <== fromIdx;
-    processor.newValue <== newStHash.out;
-    // update
-    processor.fnc[0] <== 0;
-    processor.fnc[1] <== 1;
-    
-    processor.newRoot ==> newStateRoot;
+    balance_update_checker.oldRoot <== oldBalanceRoot;
+    balance_update_checker.newRoot <== newBalanceRoot;
+
+    // - check account tree update
+    ////////
+    // old account state hash
+    component oldAccountHash = HashAccount();
+    oldAccountHash.nonce <== nonce;
+    oldAccountHash.sign <== sign;
+    oldAccountHash.balanceRoot <== oldBalanceRoot;
+    oldAccountHash.ay <== ay;
+    oldAccountHash.ethAddr <== fromEthAddr;
+    // new account state hash
+    component newAccountHash = HashAccount();
+    newAccountHash.nonce <== nonce;
+    newAccountHash.sign <== sign;
+    newAccountHash.balanceRoot <== newBalanceRoot;
+    newAccountHash.ay <== ay;
+    newAccountHash.ethAddr <== fromEthAddr;
+    // check update
+    component account_update_checker = CheckLeafUpdate(accountLevels);
+    account_update_checker.oldLeaf <== oldAccountHash.out;
+    account_update_checker.newLeaf <== newAccountHash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        account_update_checker.path_index[i] <== account_path_index[i];
+        account_update_checker.path_elements[i][0] <== account_path_elements[i][0];
+    }
+    account_update_checker.oldRoot <== oldAccountRoot;
+    account_update_checker.newRoot <== newAccountRoot;
 }

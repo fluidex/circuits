@@ -30,7 +30,7 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal input fromBjjCompressed[256];
     signal input loadAmount;
 
-    // State 1
+    // State
     signal input balance_path_index[balanceLevels];
     signal input balance_path_elements[balanceLevels][1];
     signal input account_path_index[accountLevels];
@@ -42,11 +42,9 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal input oldAccountRoot;
     signal input newAccountRoot;
 
-    var i;
-
     // decode BjjCompressed
     component decodeFromBjj = BitsCompressed2AySign();
-    for (i = 0; i < 256; i++){
+    for (var i; i = 0; i < 256; i++){
         decodeFromBjj.bjjCompressed[i] <== fromBjjCompressed[i];
     }
 
@@ -88,11 +86,11 @@ template DepositToNew(balanceLevels, accountLevels) {
     oldAccountHash.ethAddr <== 0;
     // new account state hash
     component newAccountHash = HashAccount();
-    newAccountHash.nonce<== 0;
-    newAccountHash.sign<== decodeFromBjj.sign;
-    newAccountHash.balanceRoot<== newBalanceRoot;
-    newAccountHash.ay<== decodeFromBjj.ay;
-    newAccountHash.ethAddr<== fromEthAddr;
+    newAccountHash.nonce <== 0;
+    newAccountHash.sign <== decodeFromBjj.sign;
+    newAccountHash.balanceRoot <== newBalanceRoot;
+    newAccountHash.ay <== decodeFromBjj.ay;
+    newAccountHash.ethAddr <== fromEthAddr;
     // check update
     component account_update_checker = CheckLeafUpdate(accountLevels);
     account_update_checker.oldLeaf <== oldAccountHash.out;
