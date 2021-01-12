@@ -5,7 +5,6 @@ include "./binary_merkle_tree.circom";
 /**
  * Process a deposit_to_existed_account transaction
  * @param nLevels - merkle tree depth
- * @input fromIdx - {Uint48} - index account
  * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
  * @input tokenID - {Uint32} - tokenID of the account leaf
  * @input nonce - {Uint40} - nonce of the account leaf
@@ -17,7 +16,7 @@ include "./binary_merkle_tree.circom";
  * @input oldStateRoot - {Field} - initial state root
  * @output newStateRoot - {Field} - final state root
  */
-// TODO: parse tokenID to balance_path_index, auxFromIdx to account_path_index?
+// TODO: parse tokenID to balance_path_index, FromIdx to account_path_index?
 template DepositToOld(nLevels) {
     // Tx
     signal input fromIdx;
