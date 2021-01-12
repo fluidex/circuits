@@ -1,9 +1,9 @@
 import * as path from 'path';
 import { poseidon } from 'circomlib';
 import { SimpleTest, TestComponent } from './base_test';
+import { hashAccountState } from '../helper.ts/state-utils';
 
 const Scalar = require("ffjavascript").Scalar;
-const stateUtils = require("@hermeznetwork/commonjs").stateUtils;
 const Account = require("@hermeznetwork/commonjs").HermezAccount;
 
 // circuit-level definitions
@@ -43,7 +43,7 @@ class TestDepositToNew implements SimpleTest {
       ay: "0",
       ethAddr: "0",
     };
-    const oldAccountHash = stateUtils.hashAccountState(oldAccount);
+    const oldAccountHash = hashAccountState(oldAccount);
 
     const newAccount = {
       nonce: Scalar.e(0),
@@ -52,7 +52,7 @@ class TestDepositToNew implements SimpleTest {
       ay: account.ay,
       ethAddr: ethAddrNoPrefix,
     };
-    const newAccountHash = stateUtils.hashAccountState(newAccount);
+    const newAccountHash = hashAccountState(newAccount);
 
     let accountLeaves = [BigInt(20), BigInt(21), oldAccountHash, BigInt(23)];
     let oldAccountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
