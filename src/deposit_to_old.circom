@@ -4,7 +4,8 @@ include "./binary_merkle_tree.circom";
 
 /**
  * Process a deposit_to_existed_account transaction
- * @param nLevels - merkle tree depth
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
  * @input nonce - {Uint40} - nonce of the account leaf
@@ -17,7 +18,7 @@ include "./binary_merkle_tree.circom";
  * @output newStateRoot - {Field} - final state root
  */
 // TODO: parse tokenID to balance_path_index, fromIdx to account_path_index?
-template DepositToOld(nLevels) {
+template DepositToOld(balanceLevels, accountLevels) {
     // Tx
     // signal input fromIdx;
     signal input tokenID;

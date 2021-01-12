@@ -62,7 +62,7 @@ class TestDepositToNew implements SimpleTest {
     let newAccountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
     let newAccountRoot = poseidon(newAccountMidLevel);
 
-    return { 
+    return {
       tokenID: Scalar.e(tokenID),
       fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16),
       fromBjjCompressed: bjjCompressedBits,
@@ -83,6 +83,48 @@ class TestDepositToNew implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'deposit_to_new.circom'),
+      main: 'DepositToNew('+balanceLevels+', '+accountLevels+ ')',
+    };
+  }
+}
+
+/**
+ * Process a deposit_to_existed_account transaction
+ * @param nLevels - merkle tree depth
+ * @input tokenID - {Uint32} - tokenID signed in the transaction
+ * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
+ * @input nonce - {Uint40} - nonce of the account leaf
+ * @input sign - {Bool} - sign of the account leaf
+ * @input balance - {Uint192} - balance of the account leaf
+ * @input ay - {Field} - ay of the account leaf
+ * @input ethAddr - {Uint160} - ethAddr of the account leaf
+ * @input siblings[nLevels + 1] - {Array(Field)} - siblings merkle proof of the account leaf
+ * @input oldStateRoot - {Field} - initial state root
+ * @output newStateRoot - {Field} - final state root
+ */
+class TestDepositToOld implements SimpleTest {
+  getInput() {
+    // input-level assignments and pre-processings
+    const tokenID = 1;
+    const oldBalance = 500;
+    const loadAmount = 500;
+    const prvkey = 1;
+    const account = new Account(prvkey);
+    const ethAddrNoPrefix = account.ethAddr.replace("0x", "");
+    // // convert bjjCompressed to bits
+    // const bjjCompressed = Scalar.fromString(account.bjjCompressed, 16);
+    // const bjjCompressedBits = Scalar.bits(bjjCompressed);
+    // while (bjjCompressedBits.length < 256) bjjCompressedBits.push(0);
+    
+    return {
+    };
+  }
+  getOutput() {
+    return {};
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'deposit_to_old.circom'),
       main: 'DepositToNew('+balanceLevels+', '+accountLevels+ ')',
     };
   }
