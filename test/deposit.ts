@@ -144,6 +144,7 @@ class TestDepositToOld implements SimpleTest {
       nonce: Scalar.e(nonce),
       sign: Scalar.e(account.sign),
       ay: Scalar.fromString(account.ay, 16),
+      balance: Scalar.e(oldBalance),
       ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
       balance_path_index: [0, 1],
       balance_path_elements: [[balanceLeaves[3]], [oldBalanceMidLevel[0]]],
