@@ -113,7 +113,7 @@ class TestDepositToOld implements SimpleTest {
 
     // account tree
     const oldAccount = {
-      nonce: Scalar.e(0),
+      nonce: Scalar.e(nonce),
       sign: Scalar.e(account.sign),
       balanceRoot: oldBalanceRoot,
       ay: account.ay,
@@ -122,7 +122,7 @@ class TestDepositToOld implements SimpleTest {
     const oldAccountHash = hashAccountState(oldAccount);
 
     const newAccount = {
-      nonce: Scalar.e(0),
+      nonce: Scalar.e(nonce),
       sign: Scalar.e(account.sign),
       balanceRoot: newBalanceRoot,
       ay: account.ay,
