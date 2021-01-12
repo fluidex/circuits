@@ -19,10 +19,8 @@ include "./binary_merkle_tree.circom";
  * @input oldStateRoot - {Field} - initial state root
  * @output newStateRoot - {Field} - final state root
  */
+// TODO: parse tokenID to balance_path_index, auxFromIdx to account_path_index?
 template DepositToOld(nLevels) {
-    // Phases deposit_to_old-tx circuit
-        // ...
-
     // Tx
     signal input fromIdx;
 
