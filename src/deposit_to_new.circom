@@ -22,6 +22,7 @@ include "./binary_merkle_tree.circom";
 // TODO: parse tokenID to balance_path_index, auxFromIdx to account_path_index?
 template DepositToNew(balanceLevels, accountLevels) {
     // Tx
+    // signal input auxFromIdx;
     signal input tokenID;
 
     // For L1 TX
