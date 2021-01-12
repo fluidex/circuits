@@ -6,8 +6,13 @@ const Scalar = require("ffjavascript").Scalar;
 const stateUtils = require("@hermeznetwork/commonjs").stateUtils;
 const Account = require("@hermeznetwork/commonjs").HermezAccount;
 
+// circuit-level definitions
+const balanceLevels = 2;
+const accountLevels = 2;
+
 class TestDepositToNew implements SimpleTest {
   getInput() {
+    // input-level assignments and pre-processings
     const tokenID = 1;
     const loadAmount = 500;
     const prvkey = 1;
@@ -18,43 +23,58 @@ class TestDepositToNew implements SimpleTest {
     const bjjCompressedBits = Scalar.bits(bjjCompressed);
     while (bjjCompressedBits.length < 256) bjjCompressedBits.push(0);
 
-    const oldState = {
-      tokenID: Scalar.e(0),
+    // balance tree
+    const oldBalanceHash = poseidon([BigInt(0), BigInt(0)]);
+    const newBalanceHash = poseidon([BigInt(tokenID), BigInt(loadAmount)]);
+
+    let balanceLeaves = [BigInt(10), BigInt(11), oldBalanceHash, BigInt(13)];
+    let oldBalanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
+    let oldBalanceRoot = poseidon(oldBalanceMidLevel);
+
+    balanceLeaves = [BigInt(10), BigInt(11), newBalanceHash, BigInt(13)];
+    let newBalanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
+    let newBalanceRoot = poseidon(newBalanceMidLevel);
+
+    // account tree
+    const oldAccount = {
       nonce: Scalar.e(0),
-      balance: Scalar.e(0),
       sign: Scalar.e(0),
+      balanceRoot: oldBalanceRoot,
       ay: "0",
       ethAddr: "0",
     };
-    const oldStateHash = stateUtils.hashState(oldState);
+    const oldAccountHash = stateUtils.hashAccountState(oldAccount);
 
-    let leaves = [BigInt(10), BigInt(11), oldStateHash, BigInt(13)];
-    let oldMidLevel = [poseidon([leaves[0], leaves[1]]), poseidon([leaves[2], leaves[3]])];
-    let oldStateRoot = poseidon(oldMidLevel);
-
-    const newState = {
-      tokenID: Scalar.e(tokenID),
+    const newAccount = {
       nonce: Scalar.e(0),
-      balance: Scalar.e(loadAmount),
       sign: Scalar.e(account.sign),
+      balanceRoot: newBalanceRoot,
       ay: account.ay,
       ethAddr: ethAddrNoPrefix,
     };
-    const newStateHash = stateUtils.hashState(newState);
+    const newAccountHash = stateUtils.hashAccountState(newAccount);
 
-    leaves = [BigInt(10), BigInt(11), newStateHash, BigInt(13)];
-    let newMidLevel = [poseidon([leaves[0], leaves[1]]), poseidon([leaves[2], leaves[3]])];
-    let newStateRoot = poseidon(newMidLevel);
+    let accountLeaves = [BigInt(20), BigInt(21), oldAccountHash, BigInt(23)];
+    let oldAccountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
+    let oldAccountRoot = poseidon(oldAccountMidLevel);
+
+    accountLeaves = [BigInt(20), BigInt(21), newAccountHash, BigInt(23)];
+    let newAccountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
+    let newAccountRoot = poseidon(newAccountMidLevel);
 
     return { 
       tokenID: Scalar.e(tokenID),
       fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16),
       fromBjjCompressed: bjjCompressedBits,
       loadAmount: Scalar.e(loadAmount),
-      path_index: [0, 1],
-      path_elements: [[leaves[3]], [oldMidLevel[0]]],
-      oldStateRoot: oldStateRoot,
-      newStateRoot: newStateRoot,
+      balance_path_index: [0, 1],
+      balance_path_elements: [[balanceLeaves[3]], [oldBalanceMidLevel[0]]],
+      oldBalanceRoot: oldBalanceRoot,
+      newBalanceRoot: newBalanceRoot,
+      account_path_index: [0, 1],
+      account_path_elements: [[accountLeaves[3]], [oldAccountMidLevel[0]]],
+      oldAccountRoot: oldAccountRoot,
+      newAccountRoot: newAccountRoot,
     };
   }
   getOutput() {
@@ -63,7 +83,7 @@ class TestDepositToNew implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'deposit_to_new.circom'),
-      main: 'DepositToNew(2, 2)',
+      main: 'DepositToNew('+balanceLevels+', '+accountLevels+ ')',
     };
   }
 }
