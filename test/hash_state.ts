@@ -6,28 +6,6 @@ import { hashAccountState } from '../helper.ts/state-utils';
 
 const Account = require("@hermeznetwork/commonjs").HermezAccount;
 
-const tokenID = 1;
-const loadAmount = 500;
-class TestHashBalance implements SimpleTest {
-  getInput() {
-    return {
-      tokenID: Scalar.e(tokenID),
-      balance: Scalar.e(loadAmount),
-    };
-  }
-  getOutput() {
-    return {
-      out: poseidon([BigInt(tokenID), BigInt(loadAmount)]),
-    };
-  }
-  getComponent(): TestComponent {
-    return {
-      src: path.join(__dirname, '..', 'src', 'hash_state.circom'),
-      main: 'HashBalance()',
-    };
-  }
-}
-
 const balanceRoot = poseidon([BigInt(1)]);
 const prvkey = 1;
 const account = new Account(prvkey);
@@ -62,4 +40,4 @@ class TestHashAccount implements SimpleTest {
   }
 }
 
-export { TestHashBalance, TestHashAccount }
+export { TestHashAccount }

@@ -70,18 +70,9 @@ template DepositToNew(balanceLevels, accountLevels) {
 
     // - check balance tree update
     ////////
-    // old balance state hash
-    component oldBalanceHash = HashBalance();
-    oldBalanceHash.tokenID <== 0;
-    oldBalanceHash.balance <== 0;
-    // new balance state hash
-    component newBalanceHash = HashBalance();
-    newBalanceHash.tokenID <== tokenID;
-    newBalanceHash.balance <== loadAmount;
-    // check update
     component balance_update_checker = CheckLeafUpdate(balanceLevels);
-    balance_update_checker.oldLeaf <== oldBalanceHash.out;
-    balance_update_checker.newLeaf <== newBalanceHash.out;
+    balance_update_checker.oldLeaf <== 0;
+    balance_update_checker.newLeaf <== loadAmount;
     for (var i = 0; i < balanceLevels; i++) {
         balance_update_checker.path_index[i] <== balance_path_index[i];
         balance_update_checker.path_elements[i][0] <== balance_path_elements[i][0];

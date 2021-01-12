@@ -25,14 +25,11 @@ class TestDepositToNew implements SimpleTest {
     while (bjjCompressedBits.length < 256) bjjCompressedBits.push(0);
 
     // balance tree
-    const oldBalanceHash = poseidon([BigInt(0), BigInt(0)]);
-    const newBalanceHash = poseidon([BigInt(tokenID), BigInt(loadAmount)]);
-
-    let balanceLeaves = [BigInt(10), BigInt(11), oldBalanceHash, BigInt(13)];
+    let balanceLeaves = [BigInt(10), BigInt(11), BigInt(0), BigInt(13)];
     let oldBalanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
     let oldBalanceRoot = poseidon(oldBalanceMidLevel);
 
-    balanceLeaves = [BigInt(10), BigInt(11), newBalanceHash, BigInt(13)];
+    balanceLeaves = [BigInt(10), BigInt(11), BigInt(loadAmount), BigInt(13)];
     let newBalanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
     let newBalanceRoot = poseidon(newBalanceMidLevel);
 
@@ -101,14 +98,11 @@ class TestDepositToOld implements SimpleTest {
     const ethAddrNoPrefix = account.ethAddr.replace("0x", "");
 
     // balance tree
-    const oldBalanceHash = poseidon([BigInt(tokenID), BigInt(oldBalance)]);
-    const newBalanceHash = poseidon([BigInt(tokenID), BigInt(oldBalance) + BigInt(loadAmount)]);
-
-    let balanceLeaves = [BigInt(10), BigInt(11), oldBalanceHash, BigInt(13)];
+    let balanceLeaves = [BigInt(10), BigInt(11), BigInt(oldBalance), BigInt(13)];
     let oldBalanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
     let oldBalanceRoot = poseidon(oldBalanceMidLevel);
 
-    balanceLeaves = [BigInt(10), BigInt(11), newBalanceHash, BigInt(13)];
+    balanceLeaves = [BigInt(10), BigInt(11), BigInt(oldBalance) + BigInt(loadAmount), BigInt(13)];
     let newBalanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
     let newBalanceRoot = poseidon(newBalanceMidLevel);
 

@@ -4,7 +4,7 @@ import * as tmp from 'tmp-promise';
 import * as circom from 'circom';
 import { SimpleTest, TestComponent } from './base_test';
 import { TestCheckLeafExists, TestCheckLeafUpdate } from './binary_merkle_tree';
-import { TestHashBalance, TestHashAccount } from './hash_state';
+import { TestHashAccount } from './hash_state';
 import { TestDepositToNew, TestDepositToOld } from './deposit';
 
 async function generateMainTestCircom({ src, main }: TestComponent) {
@@ -37,10 +37,9 @@ async function testWithInputOutput(t: SimpleTest) {
 
 async function main() {
   try {
-    // await testWithInputOutput(new TestCheckLeafExists());
-    // await testWithInputOutput(new TestCheckLeafUpdate());
-    // await testWithInputOutput(new TestHashBalance());
-    // await testWithInputOutput(new TestHashAccount());
+    await testWithInputOutput(new TestCheckLeafExists());
+    await testWithInputOutput(new TestCheckLeafUpdate());
+    await testWithInputOutput(new TestHashAccount());
     await testWithInputOutput(new TestDepositToNew());
     await testWithInputOutput(new TestDepositToOld());
   } catch (e) {

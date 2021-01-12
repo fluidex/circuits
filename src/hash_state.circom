@@ -4,29 +4,6 @@
 include "../node_modules/circomlib/circuits/poseidon.circom";
 
 /**
- * Computes the hash of a balance state
- * State Hash = Poseidon(e0, e1)
- * e0: tokenID(32 bits)
- * e1: balance
- * @input tokenID - {Uint32} - token identifier
- * @input balance - {Uint192} - account balance
- * @output out - {Field} - resulting poseidon hash
- */
-template HashBalance() {
-    signal input tokenID;
-    signal input balance;
-
-    signal output out;
-
-    component hash = Poseidon(2);
-
-    hash.inputs[0] <== tokenID;
-    hash.inputs[1] <== balance;
-
-    hash.out ==> out;
-}
-
-/**
  * Computes the hash of an account state
  * State Hash = Poseidon(e0, e1, e2, e3)
  * e0: sign(1 bit) | nonce(40bits)
