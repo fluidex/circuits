@@ -24,7 +24,7 @@ class Account {
         }
 
         // Derive a private key wit a hash
-        this.rollupPrvKey = Buffer.from(keccak256("FLUIDEX_MOCK_ACCOUNT" + this.publicKey), "hex");
+        this.rollupPrvKey = Buffer.from(keccak256("FLUIDEX_ACCOUNT" + this.publicKey), "hex");
 
         const bjPubKey = eddsa.prv2pub(this.rollupPrvKey);
 
