@@ -13,7 +13,7 @@ const accountLevels = 2;
 class TestDepositToNew implements SimpleTest {
   getInput() {
     // input-level assignments and pre-processings
-    const auxFromIdx = 2;
+    const accountID = 2;
     const tokenID = 2;
     const loadAmount = 500;
     const prvkey = 1;
@@ -56,12 +56,12 @@ class TestDepositToNew implements SimpleTest {
     let accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
     let oldAccountRoot = poseidon(accountMidLevel);
 
-    accountLeaves[auxFromIdx] = newAccountHash;
+    accountLeaves[accountID] = newAccountHash;
     accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
     let newAccountRoot = poseidon(accountMidLevel);
 
     return {
-      auxFromIdx: Scalar.e(auxFromIdx),
+      accountID: Scalar.e(accountID),
       tokenID: Scalar.e(tokenID),
       fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16),
       fromBjjCompressed: bjjCompressedBits,
@@ -88,7 +88,7 @@ class TestDepositToNew implements SimpleTest {
 class TestDepositToOld implements SimpleTest {
   getInput() {
     // input-level assignments and pre-processings
-    const fromIdx = 2;
+    const accountID = 2;
     const nonce = 51;
     const tokenID = 2;
     const oldBalance = 500;
@@ -129,12 +129,12 @@ class TestDepositToOld implements SimpleTest {
     let accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
     let oldAccountRoot = poseidon(accountMidLevel);
 
-    accountLeaves[fromIdx] = newAccountHash;
+    accountLeaves[accountID] = newAccountHash;
     accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
     let newAccountRoot = poseidon(accountMidLevel);
     
     return {
-      fromIdx: Scalar.e(fromIdx),
+      accountID: Scalar.e(accountID),
       tokenID: Scalar.e(tokenID),
       loadAmount: Scalar.e(loadAmount),
       nonce: Scalar.e(nonce),

@@ -6,7 +6,7 @@ include "./binary_merkle_tree.circom";
  * Process a deposit_and_create_account transaction, also support create 0 balance account
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
- * @input auxFromIdx - {Uint48} - auxiliary index to create accounts
+ * @input accountID - {Uint48} - auxiliary index to create accounts
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input fromEthAddr - {Uint160} - L1 sender ethereum address
  * @input fromBjjCompressed[256]- {Array(Bool)} - babyjubjub compressed sender
@@ -20,7 +20,7 @@ include "./binary_merkle_tree.circom";
  */
 template DepositToNew(balanceLevels, accountLevels) {
     // Tx
-    signal input auxFromIdx;
+    signal input accountID;
     signal input tokenID;
 
     // For L1 TX
@@ -56,10 +56,10 @@ template DepositToNew(balanceLevels, accountLevels) {
     }
 
     // decode account_path_index
-    component bAuxFromIdx = Num2Bits(accountLevels);
-    bAuxFromIdx.in <== auxFromIdx;
+    component bAccountID = Num2Bits(accountLevels);
+    bAccountID.in <== accountID;
     for (var i = 0; i < accountLevels; i++) {
-        account_path_index[i] <== bAuxFromIdx.out[i];
+        account_path_index[i] <== bAccountID.out[i];
     }
 
     // TODO: underflow check

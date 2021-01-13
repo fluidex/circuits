@@ -6,7 +6,7 @@ include "./binary_merkle_tree.circom";
  * Process a deposit_to_existed_account transaction
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
- * @input fromIdx - {Uint48} - account index
+ * @input accountID - {Uint48} - account index
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
  * @input nonce - {Uint40} - nonce of the account leaf
@@ -25,7 +25,7 @@ include "./binary_merkle_tree.circom";
  */
 template DepositToOld(balanceLevels, accountLevels) {
     // Tx
-    signal input fromIdx;
+    signal input accountID;
     signal input tokenID;
 
     // For L1 TX
@@ -58,10 +58,10 @@ template DepositToOld(balanceLevels, accountLevels) {
     }
 
     // decode account_path_index
-    component bAuxFromIdx = Num2Bits(accountLevels);
-    bAuxFromIdx.in <== fromIdx;
+    component bAccountID = Num2Bits(accountLevels);
+    bAccountID.in <== accountID;
     for (var i = 0; i < accountLevels; i++) {
-        account_path_index[i] <== bAuxFromIdx.out[i];
+        account_path_index[i] <== bAccountID.out[i];
     }
 
     // TODO: underflow check
