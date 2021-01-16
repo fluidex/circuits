@@ -7,7 +7,6 @@ const babyJub = require("circomlib").babyJub;
 const Scalar = require("ffjavascript").Scalar;
 const utilsScalar = require("ffjavascript").utils;
 
-const txUtils = require("./tx-utils");
 const utils = require("./utils");
 
 class Account {
@@ -39,23 +38,6 @@ class Account {
         }
 
         this.bjjCompressed = utils.padZeros((utilsScalar.leBuff2int(compressedBuff)).toString(16), 64);
-    }
-
-    /**
-     * Sign rollup transaction 
-     * adds signature to the transaction
-     * adds sender data to the transaction
-     * @param {Object} tx - Transaction object
-     */
-    signTx(tx) {
-        const h = txUtils.buildHashSig(tx);
-
-        const signature = eddsa.signPoseidon(this.rollupPrvKey, h);
-        tx.r8x = signature.R8[0];
-        tx.r8y = signature.R8[1];
-        tx.s = signature.S;
-        tx.fromAx = this.ax;
-        tx.fromAy = this.ay;
     }
 };
 
