@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { poseidon } from 'circomlib';
-import { SimpleTest, TestComponent } from './base_test';
+import { SimpleTest, TestComponent } from './interface';
 
 class TestCheckLeafExists implements SimpleTest {
   getInput() {
