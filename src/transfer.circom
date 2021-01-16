@@ -25,10 +25,7 @@
  * @input oldStateRoot - {Field} - initial state root
  * @output newStateRoot - {Field} - final state root
  */
-template Transfer(nLevels) {
-    // Phases rollup_transfer_to_old-tx circuit
-        // ...
-
+template Transfer(balanceLevels, accountLevels) {
     // Tx
     signal input fromIdx;
 
@@ -72,7 +69,7 @@ template Transfer(nLevels) {
     // nonce signed by the user must match nonce of the sender account
     nonce === nonce1;
 
-    // D - compute old hash states
+    // XXX - compute old hash states
     ////////
     // oldState1 Packer
     component oldSt1Hash = HashState();
