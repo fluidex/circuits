@@ -30,9 +30,9 @@ include "./lib/binary_merkle_tree.circom";
  */
 template Transfer(balanceLevels, accountLevels) {
     // Tx
-    signal input fromIdx;
+    signal input fromAccountID;
 
-    signal input toIdx;
+    signal input toAccountID;
 
     signal input amount;
     signal input tokenID;
@@ -72,21 +72,34 @@ template Transfer(balanceLevels, accountLevels) {
     signal input newAccountRoot;
 
     // Path index
-    signal sender_balance_path_index[balanceLevels];
-    signal receiver_balance_path_index[balanceLevels];
+    signal balance_path_index[balanceLevels];
     signal sender_account_path_index[accountLevels];
     signal receiver_account_path_index[accountLevels];
 
-    var i;
+    // decode balance_path_index
+    component bTokenID = Num2Bits(balanceLevels);
+    bTokenID.in <== tokenID;
+    for (var i = 0; i < balanceLevels; i++) {
+        balance_path_index[i] <== bTokenID.out[i];
+    }
+
+    // decode account_path_index
+    component bFrom = Num2Bits(accountLevels);
+    bFrom.in <== fromAccountID;
+    for (var i = 0; i < accountLevels; i++) {
+        sender_account_path_index[i] <== bFrom.out[i];
+    }
+    component bTo = Num2Bits(accountLevels);
+    bTo.in <== toAccountID;
+    for (var i = 0; i < accountLevels; i++) {
+        receiver_account_path_index[i] <== bTo.out[i];
+    }
 
     // - check state fields
     ////////
     // sender nonce check on L2
     // nonce signed by the user must match nonce of the sender account
     nonce === nonce1;
-
-
-    // TODO: decode?
 
     // - verify eddsa signature
     ////////
@@ -121,7 +134,7 @@ template Transfer(balanceLevels, accountLevels) {
     sender_balance_checker.oldLeaf <== balance1;
     sender_balance_checker.newLeaf <== balance1 - amount;
     for (var i = 0; i < balanceLevels; i++) {
-        sender_balance_checker.path_index[i] <== sender_balance_path_index[i];
+        sender_balance_checker.path_index[i] <== balance_path_index[i];
         sender_balance_checker.path_elements[i][0] <== sender_balance_path_elements[i][0];
     }
     sender_balance_checker.oldRoot <== oldSenderBalanceRoot;
@@ -131,7 +144,7 @@ template Transfer(balanceLevels, accountLevels) {
     receiver_balance_checker.oldLeaf <== balance2;
     receiver_balance_checker.newLeaf <== balance2 + amount;
     for (var i = 0; i < balanceLevels; i++) {
-        receiver_balance_checker.path_index[i] <== receiver_balance_path_index[i];
+        receiver_balance_checker.path_index[i] <== balance_path_index[i];
         receiver_balance_checker.path_elements[i][0] <== receiver_balance_path_elements[i][0];
     }
     receiver_balance_checker.oldRoot <== oldReceiverBalanceRoot;
