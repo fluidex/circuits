@@ -1,10 +1,10 @@
 import * as path from 'path';
 import { poseidon } from 'circomlib';
-import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './base_test';
+import { Account } from '../helper.ts/account';
+import { hashAccountState } from '../helper.ts/state-utils';
 
 const Scalar = require("ffjavascript").Scalar;
-const Account = require("@hermeznetwork/commonjs").HermezAccount;
 
 // circuit-level definitions
 const balanceLevels = 2;

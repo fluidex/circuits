@@ -10,6 +10,14 @@ const utilsScalar = require("ffjavascript").utils;
 const utils = require("./utils");
 
 class Account {
+    public publicKey: string;
+    public ethAddr: string;
+    private rollupPrvKey: Buffer;
+    public ax: string;
+    public ay: string;
+    public sign: number;
+    public bjjCompressed: string;
+
     constructor(publicKey) {
         if (publicKey) {
             if (typeof(publicKey) != "string") {

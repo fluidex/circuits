@@ -1,10 +1,9 @@
 import * as path from 'path';
 import { poseidon } from 'circomlib';
 import { Scalar } from 'ffjavascript';
-import { SimpleTest, TestComponent } from './base_test';
+import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
-
-const Account = require("@hermeznetwork/commonjs").HermezAccount;
+import { SimpleTest, TestComponent } from './base_test';
 
 const balanceRoot = poseidon([BigInt(1)]);
 const prvkey = 1;
