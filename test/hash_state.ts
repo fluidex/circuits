@@ -3,7 +3,7 @@ import { poseidon } from 'circomlib';
 import { Scalar } from 'ffjavascript';
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
-import { SimpleTest, TestComponent } from './base_test';
+import { SimpleTest, TestComponent } from './interface';
 
 const balanceRoot = poseidon([BigInt(1)]);
 const prvkey = 1;
