@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { poseidon } from 'circomlib';
-import { SimpleTest, TestComponent } from './base_test';
 import { hashAccountState } from '../helper.ts/state-utils';
+import { SimpleTest, TestComponent } from './base_test';
 
 const Scalar = require("ffjavascript").Scalar;
 const Account = require("@hermeznetwork/commonjs").HermezAccount;
