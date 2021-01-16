@@ -18,7 +18,7 @@ class TestCheckLeafExists implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'binary_merkle_tree.circom'),
+      src: path.join(__dirname, '..', 'src', 'lib', 'binary_merkle_tree.circom'),
       main: 'CheckLeafExists(2)',
     };
   }
@@ -54,7 +54,7 @@ class TestCheckLeafUpdate implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'binary_merkle_tree.circom'),
+      src: path.join(__dirname, '..', 'src', 'lib', 'binary_merkle_tree.circom'),
       main: 'CheckLeafUpdate(2)',
     };
   }

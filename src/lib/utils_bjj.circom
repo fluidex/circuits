@@ -1,5 +1,5 @@
-include "../node_modules/circomlib/circuits/bitify.circom";
-include "../node_modules/circomlib/circuits/pointbits.circom";
+include "../../node_modules/circomlib/circuits/bitify.circom";
+include "../../node_modules/circomlib/circuits/pointbits.circom";
 
 /**
  * Retrieve babyjubjub y coordinate and babyjubjub sign

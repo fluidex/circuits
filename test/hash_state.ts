@@ -33,7 +33,7 @@ class TestHashAccount implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'hash_state.circom'),
+      src: path.join(__dirname, '..', 'src', 'lib', 'hash_state.circom'),
       main: 'HashAccount()',
     };
   }
