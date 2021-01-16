@@ -135,8 +135,8 @@ template Transfer(balanceLevels, accountLevels) {
     newSt2Hash.ay <== ay2;
     newSt2Hash.ethAddr <== ethAddr2;
 
-    // - check account tree update
-    ////////
+    // - account state
+    ///////
     // old sender account state hash
     component oldSenderHash = HashAccount();
     oldSenderHash.nonce <== nonce1;
@@ -151,6 +151,23 @@ template Transfer(balanceLevels, accountLevels) {
     newSenderHash.balanceRoot <== newSenderBalanceRoot;
     newSenderHash.ay <== ay1;
     newSenderHash.ethAddr <== ethAddr1;
+    // old receiver account state hash
+    component oldReceiverHash = HashAccount();
+    oldReceiverHash.nonce <== nonce2;
+    oldReceiverHash.sign <== sign2;
+    oldReceiverHash.balanceRoot <== oldReceiverBalanceRoot;
+    oldReceiverHash.ay <== ay2;
+    oldReceiverHash.ethAddr <== ethAddr2;
+    // new receiver account state hash
+    component newReceiverHash = HashAccount();
+    newReceiverHash.nonce <== nonce2;
+    newReceiverHash.sign <== sign2;
+    newReceiverHash.balanceRoot <== newReceiverBalanceRoot;
+    newReceiverHash.ay <== ay2;
+    newReceiverHash.ethAddr <== ethAddr2;
+
+    // - check account tree update
+    ///////
     // check sender update
     component sender_update_checker = CheckLeafUpdate(accountLevels);
     sender_update_checker.oldLeaf <== oldSenderHash.out;
@@ -159,6 +176,16 @@ template Transfer(balanceLevels, accountLevels) {
         sender_update_checker.path_index[i] <== sender_path_index[i];
         sender_update_checker.path_elements[i][0] <== sender_path_elements[i][0];
     }
-    sender_update_checker.oldRoot <== oldSenderRoot;
-    sender_update_checker.newRoot <== newSenderRoot;
+    sender_update_checker.oldRoot <== oldAccountRoot;
+    sender_update_checker.newRoot <== tmpAccountRoot;
+    // check receiver update
+    component receiver_update_checker = CheckLeafUpdate(accountLevels);
+    receiver_update_checker.oldLeaf <== oldReceiverHash.out;
+    receiver_update_checker.newLeaf <== newReceiverHash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        receiver_update_checker.path_index[i] <== receiver_path_index[i];
+        receiver_update_checker.path_elements[i][0] <== receiver_path_elements[i][0];
+    }
+    receiver_update_checker.oldRoot <== tmpAccountRoot;
+    receiver_update_checker.newRoot <== newAccountRoot;
 }
