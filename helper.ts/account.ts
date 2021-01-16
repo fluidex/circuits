@@ -30,6 +30,17 @@ class Account {
             this.publicKey = crypto.randomBytes(32).toString("hex");
         }
 
+        // Use Keccak-256 hash function to get public key hash
+        const hashOfPublicKey = keccak256(Buffer.from(this.publicKey, "hex"));
+
+        // Convert hash to buffer
+        const ethAddressBuffer = Buffer.from(hashOfPublicKey, "hex");
+
+        // Ethereum Address is '0x' concatenated with last 20 bytes
+        // of the public key hash
+        const ethAddress = ethAddressBuffer.slice(-20).toString("hex");
+        this.ethAddr = `0x${ethAddress}`;
+
         // Derive a private key wit a hash
         this.rollupPrvKey = Buffer.from(keccak256("FLUIDEX_ACCOUNT" + this.publicKey), "hex");
 

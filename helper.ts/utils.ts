@@ -116,7 +116,7 @@ function hashStateTree(balance, tokenId, Ax, Ay, ethAddress, nonce) {
     return { leafObj, elements: {e0, e1, e2, e3, e4}, hash: poseidonHash(entryBigInt) };
 }
 
-module.exports = {
+export {
     padding256,
     extract,
     padZeros,
