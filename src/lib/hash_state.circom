@@ -1,7 +1,7 @@
 // Refer to:
 // https://github.com/hermeznetwork/circuits/blob/master/src/lib/hash-state.circom
 
-include "../node_modules/circomlib/circuits/poseidon.circom";
+include "../../node_modules/circomlib/circuits/poseidon.circom";
 
 /**
  * Computes the hash of an account state

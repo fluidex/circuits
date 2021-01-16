@@ -1,6 +1,6 @@
-include "./utils_bjj.circom";
-include "./hash_state.circom";
-include "./binary_merkle_tree.circom";
+include "./lib/utils_bjj.circom";
+include "./lib/hash_state.circom";
+include "./lib/binary_merkle_tree.circom";
 
 /**
  * Process a deposit_to_existed_account transaction

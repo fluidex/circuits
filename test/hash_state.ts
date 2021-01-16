@@ -3,7 +3,7 @@ import { poseidon } from 'circomlib';
 import { Scalar } from 'ffjavascript';
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
-import { SimpleTest, TestComponent } from './base_test';
+import { SimpleTest, TestComponent } from './interface';
 
 const balanceRoot = poseidon([BigInt(1)]);
 const prvkey = 1;
@@ -33,7 +33,7 @@ class TestHashAccount implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'hash_state.circom'),
+      src: path.join(__dirname, '..', 'src', 'lib', 'hash_state.circom'),
       main: 'HashAccount()',
     };
   }
