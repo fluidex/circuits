@@ -118,27 +118,30 @@ template Transfer(balanceLevels, accountLevels) {
 
     // TODO: fee
 
-    // XXX - compute hash new states
+    // - check balance tree update
     ////////
-    // newState1 hash state
-    component newSt1Hash = HashState();
-    newSt1Hash.tokenID <== tokenID;
-    newSt1Hash.nonce <== nonce1 + 1;
-    newSt1Hash.sign <== sign1;
-    newSt1Hash.balance <== balance1 - amount;
-    newSt1Hash.ay <== ay1;
-    newSt1Hash.ethAddr <== ethAddr1;
+    // sender balance
+    component sender_balance_checker = CheckLeafUpdate(balanceLevels);
+    sender_balance_checker.oldLeaf <== balance1;
+    sender_balance_checker.newLeaf <== balance1 - amount;
+    for (var i = 0; i < balanceLevels; i++) {
+        sender_balance_checker.path_index[i] <== sender_balance_path_index[i];
+        sender_balance_checker.path_elements[i][0] <== sender_balance_path_elements[i][0];
+    }
+    sender_balance_checker.oldRoot <== oldSenderBalanceRoot;
+    sender_balance_checker.newRoot <== newSenderBalanceRoot;
+    // receiver balance
+    component receiver_balance_checker = CheckLeafUpdate(balanceLevels);
+    receiver_balance_checker.oldLeaf <== balance2;
+    receiver_balance_checker.newLeaf <== balance2 + amount;
+    for (var i = 0; i < balanceLevels; i++) {
+        receiver_balance_checker.path_index[i] <== receiver_balance_path_index[i];
+        receiver_balance_checker.path_elements[i][0] <== receiver_balance_path_elements[i][0];
+    }
+    receiver_balance_checker.oldRoot <== oldReceiverBalanceRoot;
+    receiver_balance_checker.newRoot <== newReceiverBalanceRoot;
 
-    // newState2 hash state
-    component newSt2Hash = HashState();
-    newSt2Hash.tokenID <== tokenID;
-    newSt2Hash.nonce <== nonce2;
-    newSt2Hash.sign <== sign2;
-    newSt2Hash.balance <== balance2 + amount;
-    newSt2Hash.ay <== ay2;
-    newSt2Hash.ethAddr <== ethAddr2;
-
-    // - account state
+    // - compute account state
     ///////
     // old sender account state hash
     component oldSenderHash = HashAccount();
