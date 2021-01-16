@@ -135,37 +135,30 @@ template Transfer(balanceLevels, accountLevels) {
     newSt2Hash.ay <== ay2;
     newSt2Hash.ethAddr <== ethAddr2;
 
-    // XXX - smt processors
+    // - check account tree update
     ////////
-    // processor 1: sender
-    component processor1 = SMTProcessor(nLevels+1) ;
-    processor1.oldRoot <== oldStateRoot;
-    for (i = 0; i < nLevels + 1; i++) {
-        processor1.siblings[i] <== siblings1[i];
+    // old sender account state hash
+    component oldSenderHash = HashAccount();
+    oldSenderHash.nonce <== nonce1;
+    oldSenderHash.sign <== sign1;
+    oldSenderHash.balanceRoot <== oldSenderBalanceRoot;
+    oldSenderHash.ay <== ay1;
+    oldSenderHash.ethAddr <== ethAddr1;
+    // new sender account state hash
+    component newSenderHash = HashAccount();
+    newSenderHash.nonce <== nonce1;
+    newSenderHash.sign <== sign1;
+    newSenderHash.balanceRoot <== newSenderBalanceRoot;
+    newSenderHash.ay <== ay1;
+    newSenderHash.ethAddr <== ethAddr1;
+    // check sender update
+    component sender_update_checker = CheckLeafUpdate(accountLevels);
+    sender_update_checker.oldLeaf <== oldSenderHash.out;
+    sender_update_checker.newLeaf <== newSenderHash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        sender_update_checker.path_index[i] <== sender_path_index[i];
+        sender_update_checker.path_elements[i][0] <== sender_path_elements[i][0];
     }
-    processor1.oldKey <== fromIdx;
-    processor1.oldValue <== oldSt1Hash.out;
-    processor1.isOld0 <== 1;
-    processor1.newKey <== fromIdx;
-    processor1.newValue <== newSt1Hash.out;
-    // update
-    processor1.fnc[0] <== 0;
-    processor1.fnc[1] <== 1;
-
-    // processor 2: receiver
-    component processor2 = SMTProcessor(nLevels+1) ;
-    processor2.oldRoot <== processor1.newRoot;
-    for (i = 0; i < nLevels + 1; i++) {
-        processor2.siblings[i] <== siblings2[i]; // TODO: siblings2 updated?
-    }
-    processor2.oldKey <== toIdx;
-    processor2.oldValue <== oldSt2Hash.out;
-    processor2.isOld0 <== 1;
-    processor2.newKey <== toIdx;
-    processor2.newValue <== newSt2Hash.out;
-    // update
-    processor2.fnc[0] <== 0;
-    processor2.fnc[1] <== 1;
-
-    processor2.newRoot ==> newStateRoot;
+    sender_update_checker.oldRoot <== oldSenderRoot;
+    sender_update_checker.newRoot <== newSenderRoot;
 }
