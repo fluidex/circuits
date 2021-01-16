@@ -25,7 +25,7 @@
  * @input oldStateRoot - {Field} - initial state root
  * @output newStateRoot - {Field} - final state root
  */
-template TransferToOld(nLevels) {
+template Transfer(nLevels) {
     // Phases rollup_transfer_to_old-tx circuit
         // ...
 

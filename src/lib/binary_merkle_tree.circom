@@ -1,8 +1,8 @@
 // Refer to:
 // https://github.com/appliedzkp/maci/blob/master/circuits/circom/trees/incrementalMerkleTree.circom
 
-include "../node_modules/circomlib/circuits/mux1.circom";
-include "../node_modules/circomlib/circuits/poseidon.circom";
+include "../../node_modules/circomlib/circuits/mux1.circom";
+include "../../node_modules/circomlib/circuits/poseidon.circom";
 
 template HashLeftRight() {
   signal input left;

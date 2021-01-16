@@ -1,6 +1,6 @@
-import { SimpleTest, TestComponent } from './base_test';
-import { poseidon } from 'circomlib';
 import * as path from 'path';
+import { poseidon } from 'circomlib';
+import { SimpleTest, TestComponent } from './interface';
 
 class TestCheckLeafExists implements SimpleTest {
   getInput() {
@@ -18,7 +18,7 @@ class TestCheckLeafExists implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'binary_merkle_tree.circom'),
+      src: path.join(__dirname, '..', 'src', 'lib', 'binary_merkle_tree.circom'),
       main: 'CheckLeafExists(2)',
     };
   }
@@ -54,7 +54,7 @@ class TestCheckLeafUpdate implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'binary_merkle_tree.circom'),
+      src: path.join(__dirname, '..', 'src', 'lib', 'binary_merkle_tree.circom'),
       main: 'CheckLeafUpdate(2)',
     };
   }

@@ -1,0 +1,109 @@
+include "./lib/utils_bjj.circom";
+include "./lib/hash_state.circom";
+include "./lib/binary_merkle_tree.circom";
+
+/**
+ * Process a deposit_and_create_account transaction, also support create 0 balance account
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
+ * @input accountID - {Uint48} - auxiliary index to create accounts
+ * @input tokenID - {Uint32} - tokenID signed in the transaction
+ * @input fromEthAddr - {Uint160} - L1 sender ethereum address
+ * @input fromBjjCompressed[256]- {Array(Bool)} - babyjubjub compressed sender
+ * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
+ * @input balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the leaf
+ * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the leaf
+ * @input oldBalanceRoot - {Field} - initial balance state root
+ * @input newBalanceRoot - {Field} - final balance state root
+ * @input oldAccountRoot - {Field} - initial account state root
+ * @input newAccountRoot - {Field} - final account state root
+ */
+template DepositToNew(balanceLevels, accountLevels) {
+    // Tx
+    signal input accountID;
+    signal input tokenID;
+
+    // For L1 TX
+    signal input fromEthAddr;
+    signal input fromBjjCompressed[256];
+    signal input loadAmount;
+
+    // State
+    signal input balance_path_elements[balanceLevels][1];
+    signal input account_path_elements[accountLevels][1];
+
+    // Roots
+    signal input oldBalanceRoot;
+    signal input newBalanceRoot;
+    signal input oldAccountRoot;
+    signal input newAccountRoot;
+
+    // Path index
+    signal balance_path_index[balanceLevels];
+    signal account_path_index[accountLevels];
+
+    // decode BjjCompressed
+    component decodeFromBjj = BitsCompressed2AySign();
+    for (var i = 0; i < 256; i++) {
+        decodeFromBjj.bjjCompressed[i] <== fromBjjCompressed[i];
+    }
+
+    // decode balance_path_index
+    component bTokenID = Num2Bits(balanceLevels);
+    bTokenID.in <== tokenID;
+    for (var i = 0; i < balanceLevels; i++) {
+        balance_path_index[i] <== bTokenID.out[i];
+    }
+
+    // decode account_path_index
+    component bAccountID = Num2Bits(accountLevels);
+    bAccountID.in <== accountID;
+    for (var i = 0; i < accountLevels; i++) {
+        account_path_index[i] <== bAccountID.out[i];
+    }
+
+    // TODO: underflow check
+
+    // TODO: overflow check
+
+    // TODO: fee
+
+    // - check balance tree update
+    ////////
+    component balance_update_checker = CheckLeafUpdate(balanceLevels);
+    balance_update_checker.oldLeaf <== 0;
+    balance_update_checker.newLeaf <== loadAmount;
+    for (var i = 0; i < balanceLevels; i++) {
+        balance_update_checker.path_index[i] <== balance_path_index[i];
+        balance_update_checker.path_elements[i][0] <== balance_path_elements[i][0];
+    }
+    balance_update_checker.oldRoot <== oldBalanceRoot;
+    balance_update_checker.newRoot <== newBalanceRoot;
+
+    // - check account tree update
+    ////////
+    // old account state hash
+    component oldAccountHash = HashAccount();
+    oldAccountHash.nonce <== 0;
+    oldAccountHash.sign <== 0;
+    oldAccountHash.balanceRoot <== oldBalanceRoot;
+    oldAccountHash.ay <== 0;
+    oldAccountHash.ethAddr <== 0;
+    // new account state hash
+    component newAccountHash = HashAccount();
+    newAccountHash.nonce <== 0;
+    newAccountHash.sign <== decodeFromBjj.sign;
+    newAccountHash.balanceRoot <== newBalanceRoot;
+    newAccountHash.ay <== decodeFromBjj.ay;
+    newAccountHash.ethAddr <== fromEthAddr;
+    // check update
+    component account_update_checker = CheckLeafUpdate(accountLevels);
+    account_update_checker.oldLeaf <== oldAccountHash.out;
+    account_update_checker.newLeaf <== newAccountHash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        account_update_checker.path_index[i] <== account_path_index[i];
+        account_update_checker.path_elements[i][0] <== account_path_elements[i][0];
+    }
+    account_update_checker.oldRoot <== oldAccountRoot;
+    account_update_checker.newRoot <== newAccountRoot;
+}
