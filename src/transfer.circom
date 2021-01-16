@@ -49,7 +49,8 @@ template Transfer(balanceLevels, accountLevels) {
     signal input balance1;
     signal input ay1;
     signal input ethAddr1;
-    signal input siblings1[nLevels+1];
+    signal input sender_balance_path_elements[balanceLevels][1];
+    signal input sender_account_path_elements[accountLevels][1];
 
     // State 2
     signal input nonce2;
@@ -58,41 +59,36 @@ template Transfer(balanceLevels, accountLevels) {
     signal input newExit;
     signal input ay2;
     signal input ethAddr2;
-    signal input siblings2[nLevels+1];
+    signal input receiver_balance_path_elements[balanceLevels][1];
+    signal input receiver_account_path_elements[accountLevels][1];
 
     // Roots
-    signal input oldStateRoot;
-    signal output newStateRoot;
+    signal input oldSenderBalanceRoot;
+    signal input newSenderBalanceRoot;
+    signal input oldReceiverBalanceRoot;
+    signal input newReceiverBalanceRoot;
+    signal input oldAccountRoot;
+    signal input tmpAccountRoot;
+    signal input newAccountRoot;
+
+    // Path index
+    signal sender_balance_path_index[balanceLevels];
+    signal receiver_balance_path_index[balanceLevels];
+    signal sender_account_path_index[accountLevels];
+    signal receiver_account_path_index[accountLevels];
 
     var i;
 
-    // XXX - check state fields
+    // - check state fields
     ////////
     // sender nonce check on L2
     // nonce signed by the user must match nonce of the sender account
     nonce === nonce1;
 
-    // XXX - compute old hash states
-    ////////
-    // oldState1 Packer
-    component oldSt1Hash = HashState();
-    oldSt1Hash.tokenID <== tokenID;
-    oldSt1Hash.nonce <== nonce1;
-    oldSt1Hash.sign <== sign1;
-    oldSt1Hash.balance <== balance1;
-    oldSt1Hash.ay <== ay1;
-    oldSt1Hash.ethAddr <== ethAddr1;
 
-    // oldState2 Packer
-    component oldSt2Hash = HashState();
-    oldSt2Hash.tokenID <== tokenID;
-    oldSt2Hash.nonce <== nonce2;
-    oldSt2Hash.sign <== sign2;
-    oldSt2Hash.balance <== balance2;
-    oldSt2Hash.ay <== ay2;
-    oldSt2Hash.ethAddr <== ethAddr2;
+    // TODO: decode?
 
-    // XXX - verify eddsa signature
+    // - verify eddsa signature
     ////////
     // computes babyjubjub X coordinate
     component getAx = AySign2Ax();
@@ -179,8 +175,8 @@ template Transfer(balanceLevels, accountLevels) {
     sender_update_checker.oldLeaf <== oldSenderHash.out;
     sender_update_checker.newLeaf <== newSenderHash.out;
     for (var i = 0; i < accountLevels; i++) {
-        sender_update_checker.path_index[i] <== sender_path_index[i];
-        sender_update_checker.path_elements[i][0] <== sender_path_elements[i][0];
+        sender_update_checker.path_index[i] <== sender_account_path_index[i];
+        sender_update_checker.path_elements[i][0] <== sender_account_path_elements[i][0];
     }
     sender_update_checker.oldRoot <== oldAccountRoot;
     sender_update_checker.newRoot <== tmpAccountRoot;
@@ -189,8 +185,8 @@ template Transfer(balanceLevels, accountLevels) {
     receiver_update_checker.oldLeaf <== oldReceiverHash.out;
     receiver_update_checker.newLeaf <== newReceiverHash.out;
     for (var i = 0; i < accountLevels; i++) {
-        receiver_update_checker.path_index[i] <== receiver_path_index[i];
-        receiver_update_checker.path_elements[i][0] <== receiver_path_elements[i][0];
+        receiver_update_checker.path_index[i] <== receiver_account_path_index[i];
+        receiver_update_checker.path_elements[i][0] <== receiver_account_path_elements[i][0];
     }
     receiver_update_checker.oldRoot <== tmpAccountRoot;
     receiver_update_checker.newRoot <== newAccountRoot;
