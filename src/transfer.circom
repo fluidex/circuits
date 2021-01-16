@@ -1,3 +1,6 @@
+include "./lib/hash_state.circom";
+include "./lib/binary_merkle_tree.circom";
+
 /**
  * Process a rollup transfer_to_old transaction
  * @param nLevels - merkle tree depth
