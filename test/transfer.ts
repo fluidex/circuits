@@ -1,10 +1,9 @@
 import * as path from 'path';
 import { poseidon } from 'circomlib';
+import { Scalar } from 'ffjavascript';
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
-
-const Scalar = require("ffjavascript").Scalar;
 
 // circuit-level definitions
 const balanceLevels = 2;
