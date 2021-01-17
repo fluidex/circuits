@@ -6,6 +6,7 @@ import { SimpleTest, TestComponent } from './interface';
 import { TestCheckLeafExists, TestCheckLeafUpdate } from './binary_merkle_tree';
 import { TestHashAccount } from './hash_state';
 import { TestDepositToNew, TestDepositToOld } from './deposit';
+import { TestTransfer } from './transfer';
 
 async function generateMainTestCircom({ src, main }: TestComponent) {
   let srcCode = `include "${src}";
@@ -42,6 +43,7 @@ async function main() {
     await testWithInputOutput(new TestHashAccount());
     await testWithInputOutput(new TestDepositToNew());
     await testWithInputOutput(new TestDepositToOld());
+    await testWithInputOutput(new TestTransfer());
   } catch (e) {
     console.error(e);
   }
