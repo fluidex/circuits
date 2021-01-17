@@ -85,7 +85,7 @@ class TestTransfer implements SimpleTest {
     const newSenderHash = hashAccountState(newSender);
 
     // receiver state
-    let receiverBalanceLeaves = [BigInt(50), BigInt(51), BigInt(balance2), BigInt(53)];
+    let receiverBalanceLeaves = [BigInt(20), BigInt(21), BigInt(balance2), BigInt(23)];
     let receiverBalanceMidLevel = [poseidon([receiverBalanceLeaves[0], receiverBalanceLeaves[1]]), poseidon([receiverBalanceLeaves[2], receiverBalanceLeaves[3]])];
     let oldReceiverBalanceRoot = poseidon(receiverBalanceMidLevel);
     receiverBalanceLeaves[tokenID] = BigInt(balance2) + BigInt(amount);
@@ -108,13 +108,16 @@ class TestTransfer implements SimpleTest {
     };
     const newReceiverHash = hashAccountState(newReceiver);
 
-    // let accountLeaves = [BigInt(20), BigInt(21), oldAccountHash, BigInt(23)];
-    // let accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
-    // let oldAccountRoot = poseidon(accountMidLevel);
-
-    // accountLeaves[accountID] = newAccountHash;
-    // accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
-    // let newAccountRoot = poseidon(accountMidLevel);
+    // account tree
+    let accountLeaves = [BigInt(70), oldReceiverHash, oldSenderHash, BigInt(73)];
+    let accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
+    let oldAccountRoot = poseidon(accountMidLevel);
+    accountLeaves[fromAccountID] = newSenderHash;
+    accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
+    let tmpAccountRoot = poseidon(accountMidLevel);
+    accountLeaves[toAccountID] = newReceiverHash;
+    accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
+    let newAccountRoot = poseidon(accountMidLevel);
     
     return {
       fromAccountID: Scalar.e(fromAccountID),
@@ -144,9 +147,9 @@ class TestTransfer implements SimpleTest {
       newSenderBalanceRoot: newSenderBalanceRoot,
       oldReceiverBalanceRoot: oldReceiverBalanceRoot,
       newReceiverBalanceRoot: newReceiverBalanceRoot,
- // * @input oldAccountRoot - {Field} - initial account state root
- // * @input tmpAccountRoot - {Field} - account state root after updating sender balance, before updating receiver balance
- // * @input newAccountRoot - {Field} - final account state root
+      oldAccountRoot: oldAccountRoot,
+      tmpAccountRoot: tmpAccountRoot,
+      newAccountRoot: newAccountRoot,
     };
   }
   getOutput() {
