@@ -10,36 +10,10 @@ const balanceLevels = 2;
 const accountLevels = 2;
 
 /**
- * @input fromAccountID - {Uint48} - sender account index
- * @input toAccountID - {Uint48} - receiver account index
- * @input amount - {Uint192} - amount to transfer from L2 sender to L2 receiver
- * @input tokenID - {Uint32} - tokenID signed in the transaction
- * @input nonce - {Uint40} - nonce signed in the transaction
  * @input sigL2Hash - {Field} - hash L2 data to sign
  * @input s - {Field} - eddsa signature field
  * @input r8x - {Field} - eddsa signature field
  * @input r8y - {Field} - eddsa signature field
- * @input nonce1 - {Uint40} - nonce of the sender leaf
- * @input sign1 - {Bool} - sign of the sender leaf
- * @input balance1 - {Uint192} - balance of the sender leaf
- * @input ay1 - {Field} - ay of the sender leaf
- * @input ethAddr1 - {Uint160} - ethAddr of the sender leaf
- * @input sender_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the sender leaf
- * @input sender_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the sender leaf
- * @input nonce2 - {Uint40} - nonce of the receiver leaf
- * @input sign2 - {Bool} - sign of the receiver leaf
- * @input balance2 - {Uint192} - balance of the receiver leaf
- * @input ay2 - {Field} - ay of the receiver leaf
- * @input ethAddr2 - {Uint160} - ethAddr of the receiver leaf
- * @input receiver_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the receiver leaf
- * @input receiver_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the receiver leaf
- * @input oldSenderBalanceRoot - {Field} - initial sender balance state root
- * @input newSenderBalanceRoot - {Field} - final sender balance state root
- * @input oldReceiverBalanceRoot - {Field} - initial receiver balance state root
- * @input newReceiverBalanceRoot - {Field} - final receiver balance state root
- * @input oldAccountRoot - {Field} - initial account state root
- * @input tmpAccountRoot - {Field} - account state root after updating sender balance, before updating receiver balance
- * @input newAccountRoot - {Field} - final account state root
  */
 class TestTransfer implements SimpleTest {
   getInput() {
@@ -109,15 +83,15 @@ class TestTransfer implements SimpleTest {
     const newReceiverHash = hashAccountState(newReceiver);
 
     // account tree
-    let accountLeaves = [BigInt(70), oldReceiverHash, oldSenderHash, BigInt(73)];
-    let accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
-    let oldAccountRoot = poseidon(accountMidLevel);
-    accountLeaves[fromAccountID] = newSenderHash;
-    accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
-    let tmpAccountRoot = poseidon(accountMidLevel);
-    accountLeaves[toAccountID] = newReceiverHash;
-    accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
-    let newAccountRoot = poseidon(accountMidLevel);
+    let oldAccountLeaves = [BigInt(70), oldReceiverHash, oldSenderHash, BigInt(73)];
+    let oldAccountMidLevel = [poseidon([oldAccountLeaves[0], oldAccountLeaves[1]]), poseidon([oldAccountLeaves[2], oldAccountLeaves[3]])];
+    let oldAccountRoot = poseidon(oldAccountMidLevel);
+    let tmpAccountLeaves = [BigInt(70), oldReceiverHash, newSenderHash, BigInt(73)];
+    let tmpAccountMidLevel = [poseidon([tmpAccountLeaves[0], tmpAccountLeaves[1]]), poseidon([tmpAccountLeaves[2], tmpAccountLeaves[3]])];
+    let tmpAccountRoot = poseidon(tmpAccountMidLevel);
+    let newAccountLeaves = [BigInt(70), newReceiverHash, newSenderHash, BigInt(73)];
+    let newAccountMidLevel = [poseidon([newAccountLeaves[0], newAccountLeaves[1]]), poseidon([newAccountLeaves[2], newAccountLeaves[3]])];
+    let newAccountRoot = poseidon(newAccountMidLevel);
     
     return {
       fromAccountID: Scalar.e(fromAccountID),
@@ -135,14 +109,14 @@ class TestTransfer implements SimpleTest {
       ay1: Scalar.fromString(account1.ay, 16),
       ethAddr1: Scalar.fromString(ethAddr1NoPrefix, 16),
       sender_balance_path_elements: [[senderBalanceLeaves[3]], [senderBalanceMidLevel[0]]],
-      // sender_account_path_elements: [[senderAccountLeaves[3]], [senderAccountMidLevel[0]]],
+      sender_account_path_elements: [[oldAccountLeaves[3]], [oldAccountMidLevel[0]]],
       nonce2: Scalar.e(nonce2),
       sign2: Scalar.e(account2.sign),
       balance2: Scalar.e(balance2),
       ay2: Scalar.fromString(account2.ay, 16),
       ethAddr2: Scalar.fromString(ethAddr2NoPrefix, 16),
       receiver_balance_path_elements: [[receiverBalanceLeaves[3]], [receiverBalanceMidLevel[0]]],
-      // receiver_account_path_elements: [[senderAccountLeaves[3]], [senderAccountMidLevel[0]]],
+      receiver_account_path_elements: [[tmpAccountLeaves[0]], [tmpAccountMidLevel[1]]],
       oldSenderBalanceRoot: oldSenderBalanceRoot,
       newSenderBalanceRoot: newSenderBalanceRoot,
       oldReceiverBalanceRoot: oldReceiverBalanceRoot,
