@@ -9,6 +9,38 @@ import { SimpleTest, TestComponent } from './interface';
 const balanceLevels = 2;
 const accountLevels = 2;
 
+/**
+ * @input fromAccountID - {Uint48} - sender account index
+ * @input toAccountID - {Uint48} - receiver account index
+ * @input amount - {Uint192} - amount to transfer from L2 sender to L2 receiver
+ * @input tokenID - {Uint32} - tokenID signed in the transaction
+ * @input nonce - {Uint40} - nonce signed in the transaction
+ * @input sigL2Hash - {Field} - hash L2 data to sign
+ * @input s - {Field} - eddsa signature field
+ * @input r8x - {Field} - eddsa signature field
+ * @input r8y - {Field} - eddsa signature field
+ * @input nonce1 - {Uint40} - nonce of the sender leaf
+ * @input sign1 - {Bool} - sign of the sender leaf
+ * @input balance1 - {Uint192} - balance of the sender leaf
+ * @input ay1 - {Field} - ay of the sender leaf
+ * @input ethAddr1 - {Uint160} - ethAddr of the sender leaf
+ * @input sender_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the sender leaf
+ * @input sender_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the sender leaf
+ * @input nonce2 - {Uint40} - nonce of the receiver leaf
+ * @input sign2 - {Bool} - sign of the receiver leaf
+ * @input balance2 - {Uint192} - balance of the receiver leaf
+ * @input ay2 - {Field} - ay of the receiver leaf
+ * @input ethAddr2 - {Uint160} - ethAddr of the receiver leaf
+ * @input receiver_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the receiver leaf
+ * @input receiver_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the receiver leaf
+ * @input oldSenderBalanceRoot - {Field} - initial sender balance state root
+ * @input newSenderBalanceRoot - {Field} - final sender balance state root
+ * @input oldReceiverBalanceRoot - {Field} - initial receiver balance state root
+ * @input newReceiverBalanceRoot - {Field} - final receiver balance state root
+ * @input oldAccountRoot - {Field} - initial account state root
+ * @input tmpAccountRoot - {Field} - account state root after updating sender balance, before updating receiver balance
+ * @input newAccountRoot - {Field} - final account state root
+ */
 class TestTransfer implements SimpleTest {
   getInput() {
     // input-level assignments and pre-processings
@@ -79,8 +111,8 @@ class TestTransfer implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'deposit_to_old.circom'),
-      main: 'DepositToOld('+balanceLevels+', '+accountLevels+ ')',
+      src: path.join(__dirname, '..', 'src', 'transfer.circom'),
+      main: 'Transfer('+balanceLevels+', '+accountLevels+ ')',
     };
   }
 }
