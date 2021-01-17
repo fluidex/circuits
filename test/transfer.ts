@@ -131,29 +131,22 @@ class TestTransfer implements SimpleTest {
       balance1: Scalar.e(balance1),
       ay1: Scalar.fromString(account1.ay, 16),
       ethAddr1: Scalar.fromString(ethAddr1NoPrefix, 16),
- // * @input sender_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the sender leaf
- // * @input sender_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the sender leaf
+      sender_balance_path_elements: [[senderBalanceLeaves[3]], [senderBalanceMidLevel[0]]],
+      // sender_account_path_elements: [[senderAccountLeaves[3]], [senderAccountMidLevel[0]]],
       nonce2: Scalar.e(nonce2),
       sign2: Scalar.e(account2.sign),
       balance2: Scalar.e(balance2),
       ay2: Scalar.fromString(account2.ay, 16),
       ethAddr2: Scalar.fromString(ethAddr2NoPrefix, 16),
- // * @input receiver_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the receiver leaf
- // * @input receiver_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the receiver leaf
- // * @input oldSenderBalanceRoot - {Field} - initial sender balance state root
- // * @input newSenderBalanceRoot - {Field} - final sender balance state root
- // * @input oldReceiverBalanceRoot - {Field} - initial receiver balance state root
- // * @input newReceiverBalanceRoot - {Field} - final receiver balance state root
+      receiver_balance_path_elements: [[receiverBalanceLeaves[3]], [receiverBalanceMidLevel[0]]],
+      // receiver_account_path_elements: [[senderAccountLeaves[3]], [senderAccountMidLevel[0]]],
+      oldSenderBalanceRoot: oldSenderBalanceRoot,
+      newSenderBalanceRoot: newSenderBalanceRoot,
+      oldReceiverBalanceRoot: oldReceiverBalanceRoot,
+      newReceiverBalanceRoot: newReceiverBalanceRoot,
  // * @input oldAccountRoot - {Field} - initial account state root
  // * @input tmpAccountRoot - {Field} - account state root after updating sender balance, before updating receiver balance
  // * @input newAccountRoot - {Field} - final account state root
-
-      // balance_path_elements: [[balanceLeaves[3]], [balanceMidLevel[0]]],
-      // oldBalanceRoot: oldBalanceRoot,
-      // newBalanceRoot: newBalanceRoot,
-      // account_path_elements: [[accountLeaves[3]], [accountMidLevel[0]]],
-      // oldAccountRoot: oldAccountRoot,
-      // newAccountRoot: newAccountRoot,
     };
   }
   getOutput() {
