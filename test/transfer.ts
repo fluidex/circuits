@@ -138,3 +138,30 @@ class TestTransfer implements SimpleTest {
 }
 
 export { TestTransfer };
+
+// function verifyTxSig(tx) {
+//     try {
+//         const h = buildHashSig(tx);
+
+//         const signature = {
+//             R8: [Scalar.e(tx.r8x), Scalar.e(tx.r8y)],
+//             S: Scalar.e(tx.s)
+//         };
+
+//         const pubKey = [Scalar.fromString(tx.fromAx, 16), Scalar.fromString(tx.fromAy, 16)];
+//         return eddsa.verifyPoseidon(h, signature, pubKey);
+//     } catch (E) {
+//         return false;
+//     }
+// }
+
+// signTx(tx) {
+//     const h = txUtils.buildHashSig(tx);
+
+//     const signature = eddsa.signPoseidon(this.rollupPrvKey, h);
+//     tx.r8x = signature.R8[0];
+//     tx.r8y = signature.R8[1];
+//     tx.s = signature.S;
+//     tx.fromAx = this.ax;
+//     tx.fromAy = this.ay;
+// }
