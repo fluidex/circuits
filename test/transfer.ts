@@ -87,6 +87,7 @@ class TestTransfer implements SimpleTest {
     let newAccountMidLevel = [poseidon([newAccountLeaves[0], newAccountLeaves[1]]), poseidon([newAccountLeaves[2], newAccountLeaves[3]])];
     let newAccountRoot = poseidon(newAccountMidLevel);
 
+    // TODO: construct tx and compute hash
     let mockTxHash = poseidon([ tokenID, amount]);
     mockTxHash = poseidon([mockTxHash, fromAccountID, nonce1, balance1]);
     mockTxHash = poseidon([mockTxHash, toAccountID, nonce2, balance2]);

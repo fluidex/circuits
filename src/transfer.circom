@@ -49,7 +49,7 @@ template Transfer(balanceLevels, accountLevels) {
     signal input tokenID;
     signal input nonce;
 
-    signal input sigL2Hash;
+    signal input sigL2Hash; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
     signal input s;
     signal input r8x;
     signal input r8y;
