@@ -171,7 +171,7 @@ template Transfer(balanceLevels, accountLevels) {
     oldSenderHash.ethAddr <== ethAddr1;
     // new sender account state hash
     component newSenderHash = HashAccount();
-    newSenderHash.nonce <== nonce1;
+    newSenderHash.nonce <== nonce1+1;
     newSenderHash.sign <== sign1;
     newSenderHash.balanceRoot <== newSenderBalanceRoot;
     newSenderHash.ay <== ay1;

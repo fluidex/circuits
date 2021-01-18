@@ -64,7 +64,7 @@ class TestTransfer implements SimpleTest {
       sign: Scalar.e(account2.sign),
       balanceRoot: oldReceiverBalanceRoot,
       ay: account2.ay,
-      ethAddr: ethAddr1NoPrefix,
+      ethAddr: ethAddr2NoPrefix,
     };
     const oldReceiverHash = hashAccountState(oldReceiver);
     const newReceiver = {
