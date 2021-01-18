@@ -42,9 +42,7 @@ include "./lib/binary_merkle_tree.circom";
 template Transfer(balanceLevels, accountLevels) {
     // Tx
     signal input fromAccountID;
-
     signal input toAccountID;
-
     signal input amount;
     signal input tokenID;
     signal input nonce;
@@ -54,7 +52,7 @@ template Transfer(balanceLevels, accountLevels) {
     signal input r8x;
     signal input r8y;
 
-    // State 1
+    // Sender state
     signal input nonce1;
     signal input sign1;
     signal input balance1;
@@ -63,7 +61,7 @@ template Transfer(balanceLevels, accountLevels) {
     signal input sender_balance_path_elements[balanceLevels][1];
     signal input sender_account_path_elements[accountLevels][1];
 
-    // State 2
+    // Receiver state
     signal input nonce2;
     signal input sign2;
     signal input balance2;
