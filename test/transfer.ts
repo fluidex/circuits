@@ -9,12 +9,6 @@ import { SimpleTest, TestComponent } from './interface';
 const balanceLevels = 2;
 const accountLevels = 2;
 
-/**
- * @input sigL2Hash - {Field} - hash L2 data to sign
- * @input s - {Field} - eddsa signature field
- * @input r8x - {Field} - eddsa signature field
- * @input r8y - {Field} - eddsa signature field
- */
 class TestTransfer implements SimpleTest {
   getInput() {
     // input-level assignments and pre-processings
@@ -138,6 +132,13 @@ class TestTransfer implements SimpleTest {
 }
 
 export { TestTransfer };
+
+/**
+ * @input sigL2Hash - {Field} - hash L2 data to sign
+ * @input s - {Field} - eddsa signature field
+ * @input r8x - {Field} - eddsa signature field
+ * @input r8y - {Field} - eddsa signature field
+ */
 
 // function verifyTxSig(tx) {
 //     try {
