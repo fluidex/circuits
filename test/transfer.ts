@@ -19,7 +19,7 @@ class TestTransfer implements SimpleTest {
     const fromAccountID = 2;
     const account1 = new Account(1);
     const ethAddr1NoPrefix = account1.ethAddr.replace("0x", "");
-    const nonce1 = 99;
+    const nonce1 = 51;
     const balance1 = 500;
 
     const toAccountID = 1;
@@ -87,15 +87,16 @@ class TestTransfer implements SimpleTest {
     let newAccountMidLevel = [poseidon([newAccountLeaves[0], newAccountLeaves[1]]), poseidon([newAccountLeaves[2], newAccountLeaves[3]])];
     let newAccountRoot = poseidon(newAccountMidLevel);
 
-    let mockTx = [ tokenID,
-                  amount,
-                  fromAccountID,
-                  nonce,
-                  balance1,
-                  toAccountID,
-                  nonce2,
-                  balance2,
-                  ];
+    // let mockTx = [ tokenID,
+    //               amount,
+    //               fromAccountID,
+    //               nonce,
+    //               balance1,
+    //               toAccountID,
+    //               nonce2,
+    //               balance2,
+    //               ];
+    let mockTx = [1, 2];
     let txHash = poseidon(mockTx);
     let signature = account1.signHash(txHash);
     
@@ -106,9 +107,9 @@ class TestTransfer implements SimpleTest {
       tokenID: Scalar.e(tokenID),
       nonce: Scalar.e(nonce),
       sigL2Hash: txHash,
-      s: signature.s,
-      r8x: signature.r8x,
-      r8y: signature.r8y,
+      s: signature.S,
+      r8x: signature.R8[0],
+      r8y: signature.R8[1],
       nonce1: Scalar.e(nonce1),
       sign1: Scalar.e(account1.sign),
       balance1: Scalar.e(balance1),
