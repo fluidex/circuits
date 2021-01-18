@@ -4,7 +4,7 @@ import { SimpleTest, TestComponent } from './interface';
 
 class TestCheckLeafExists implements SimpleTest {
   getInput() {
-    let leaves = [BigInt(10), BigInt(11), BigInt(12), BigInt(13)];
+    let leaves = [10n, 11n, 12n, 13n];
     let midLevel = [poseidon([leaves[0], leaves[1]]), poseidon([leaves[2], leaves[3]])];
     let root = poseidon(midLevel);
     // check leaves[2] in this tree
@@ -26,7 +26,7 @@ class TestCheckLeafExists implements SimpleTest {
 
 class TestCheckLeafUpdate implements SimpleTest {
   getInput() {
-    let leaves = [BigInt(10), BigInt(11), BigInt(12), BigInt(13)];
+    let leaves = [10n, 11n, 12n, 13n];
     function getSampleMerklePath() {
       let midLevel = [poseidon([leaves[0], leaves[1]]), poseidon([leaves[2], leaves[3]])];
       let root = poseidon(midLevel);
@@ -37,7 +37,7 @@ class TestCheckLeafUpdate implements SimpleTest {
       return { leaf, path_elements, path_index, root };
     }
     let { leaf: oldLeaf, path_elements, path_index, root: oldRoot } = getSampleMerklePath();
-    leaves[2] = BigInt(19);
+    leaves[2] = 19n;
     let { leaf: newLeaf, root: newRoot } = getSampleMerklePath();
     let result = {
       oldLeaf,

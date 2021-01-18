@@ -58,6 +58,14 @@ class Account {
 
         this.bjjCompressed = utils.padZeros((utilsScalar.leBuff2int(compressedBuff)).toString(16), 64);
     }
+
+    signHash(h) {
+        const signature = eddsa.signPoseidon(this.rollupPrvKey, h);
+        // r8x = signature.R8[0];
+        // r8y = signature.R8[1];
+        // s = signature.S;
+        return signature;
+    }
 };
 
 export { Account };
