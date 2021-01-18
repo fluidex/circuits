@@ -5,7 +5,7 @@ import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 
-const balanceRoot = poseidon([BigInt(1)]);
+const balanceRoot = poseidon([1n]);
 const prvkey = 1;
 const account = new Account(prvkey);
 const ethAddrNoPrefix = account.ethAddr.replace("0x", "");
@@ -19,9 +19,9 @@ const account_state = {
 class TestHashAccount implements SimpleTest {
   getInput() {
     return {
-      nonce: Scalar.e(account_state.nonce),
-      sign: Scalar.e(account_state.sign),
-      balanceRoot: Scalar.e(account_state.balanceRoot),
+      nonce: account_state.nonce,
+      sign: account_state.sign,
+      balanceRoot: account_state.balanceRoot,
       ay: Scalar.fromString(account_state.ay, 16),
       ethAddr: Scalar.fromString(account_state.ethAddr, 16),
     };
