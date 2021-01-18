@@ -87,18 +87,10 @@ class TestTransfer implements SimpleTest {
     let newAccountMidLevel = [poseidon([newAccountLeaves[0], newAccountLeaves[1]]), poseidon([newAccountLeaves[2], newAccountLeaves[3]])];
     let newAccountRoot = poseidon(newAccountMidLevel);
 
-    // let mockTx = [ tokenID,
-    //               amount,
-    //               fromAccountID,
-    //               nonce,
-    //               balance1,
-    //               toAccountID,
-    //               nonce2,
-    //               balance2,
-    //               ];
-    let mockTx = [1, 2];
-    let txHash = poseidon(mockTx);
-    let signature = account1.signHash(txHash);
+    let mockTxHash = poseidon([ tokenID, amount]);
+    mockTxHash = poseidon([mockTxHash, fromAccountID, nonce1, balance1]);
+    mockTxHash = poseidon([mockTxHash, toAccountID, nonce2, balance2]);
+    let signature = account1.signHash(mockTxHash);
     
     return {
       fromAccountID: Scalar.e(fromAccountID),
@@ -106,7 +98,7 @@ class TestTransfer implements SimpleTest {
       amount: Scalar.e(amount),
       tokenID: Scalar.e(tokenID),
       nonce: Scalar.e(nonce),
-      sigL2Hash: txHash,
+      sigL2Hash: mockTxHash,
       s: signature.S,
       r8x: signature.R8[0],
       r8y: signature.R8[1],
