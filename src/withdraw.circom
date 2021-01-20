@@ -290,7 +290,7 @@ template Withdraw(balanceLevels, accountLevels) {
     ////////
     component balanceUpdater = BalanceUpdater();
     balanceUpdater.oldStBalanceSender <== balance1;
-    balanceUpdater.oldStBalanceReceiver <== s2Balance.out;
+    balanceUpdater.oldStBalanceReceiver <== s2Balance.out; // 0 for isP2Insert, balance2 otherwise
     balanceUpdater.amount <== amount;
     balanceUpdater.loadAmount <== loadAmount;
     balanceUpdater.feeSelector <== userFee;
@@ -306,7 +306,7 @@ template Withdraw(balanceLevels, accountLevels) {
     // newState1 hash state
     component newSt1Hash = HashState();
     newSt1Hash.tokenID <== tokenID1;
-    newSt1Hash.nonce <== nonce1 + (1 - onChain);
+    newSt1Hash.nonce <== nonce1;
     newSt1Hash.sign <== sign1;
     newSt1Hash.balance <== balanceUpdater.newStBalanceSender;
     newSt1Hash.ay <== ay1;
