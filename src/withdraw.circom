@@ -222,13 +222,6 @@ template Withdraw(balanceLevels, accountLevels) {
     // perform INSERT if transaction is L1 and involves and account creation
     // the following multiplexers choose between signals if state processor is an INSERT
 
-    // INSERT: sender nonce would be 0
-    // otherwise, nonce sender account will be selected
-    component s1Nonce = Mux1();
-    s1Nonce.c[0] <== nonce1;
-    s1Nonce.c[1] <== 0;
-    s1Nonce.s <== states.isP1Insert;
-
     // INSERT: ethereum address would be taken from 'fromEthAddr' which is signed on L1 tx
     // otherwise, ethereum address sender account will be selected
     component s1EthAddr = Mux1();
@@ -379,7 +372,7 @@ template Withdraw(balanceLevels, accountLevels) {
     // newState1 hash state
     component newSt1Hash = HashState();
     newSt1Hash.tokenID <== s1TokenID.out;
-    newSt1Hash.nonce <== s1Nonce.out + (1 - onChain);
+    newSt1Hash.nonce <== nonce1 + (1 - onChain);
     newSt1Hash.sign <== sign1;
     newSt1Hash.balance <== balanceUpdater.newStBalanceSender;
     newSt1Hash.ay <== ay1;
