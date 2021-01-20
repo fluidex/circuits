@@ -194,14 +194,6 @@ template Withdraw(balanceLevels, accountLevels) {
     oldSt2Hash.ay <== ay2;
     oldSt2Hash.ethAddr <== ethAddr2;
 
-    // E - signal processor selectors
-    ////////
-    // decode BjjCompressed
-    component decodeFromBjj = BitsCompressed2AySign();
-    for (i = 0; i < 256; i++){
-        decodeFromBjj.bjjCompressed[i] <== fromBjjCompressed[i];
-    }
-
     // state processor 1 : newAccount * onChain
     // perform INSERT if transaction is L1 and involves and account creation
     // the following multiplexers choose between signals if state processor is an INSERT
