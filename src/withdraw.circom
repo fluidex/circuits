@@ -268,24 +268,10 @@ template Withdraw(balanceLevels, accountLevels) {
     // In order to not break getAx function,
     // [0, 0] is set to pass getAx if signature is not checked
 
-    // selects babyjubjub sign from states if verify signature is enabled (L2 tx and not NOP)
-    // otherwise, babyjubjub sign would be 0
-    component signSignature = Mux1();
-    signSignature.c[0] <== 0;
-    signSignature.c[1] <== sign1;
-    signSignature.s <== states.verifySignEnabled;
-
-    // selects babyjubjub Y coordinate from states if verify signature is enabled
-    // otherwise, babyjubjub Y coordinate would be 0
-    component aySignature = Mux1();
-    aySignature.c[0] <== 0;
-    aySignature.c[1] <== ay1;
-    aySignature.s <== states.verifySignEnabled;
-
     // computes babyjubjub X coordinate
     component getAx = AySign2Ax();
-    getAx.ay <== aySignature.out;
-    getAx.sign <== signSignature.out;
+    getAx.ay <== ay1;
+    getAx.sign <== sign1;
 
     // signature L2 verifier
     component sigVerifier = EdDSAPoseidonVerifier();
