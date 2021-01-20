@@ -166,28 +166,6 @@ template Withdraw(balanceLevels, accountLevels) {
     nonceChecker.in[1] <== nonce1;
     nonceChecker.enabled <== (1 - onChain);
 
-    // recipient toEthAddr
-    // if tx type is 'transferToEthAddr' or 'transferToBjj'
-    // 'toEthAddr' signed by the user must match 'ethAddr' of the receiver account
-    component checkToEthAddr = ForceEqualIfEnabled();
-    checkToEthAddr.in[0] <== toEthAddr;
-    checkToEthAddr.in[1] <== ethAddr2;
-    checkToEthAddr.enabled <== 1 - (1 - states.checkToEthAddr)*(1 - states.checkToBjj);
-
-    // recipient toBjj
-    // if tx type is 'transferToBjj'
-    // 'toBjjAy' signed by the user must match 'ay' of the receiver account
-    component toBjjAyChecker = ForceEqualIfEnabled();
-    toBjjAyChecker.in[0] <== ay2;
-    toBjjAyChecker.in[1] <== toBjjAy;
-    toBjjAyChecker.enabled <== states.checkToBjj;
-
-    // 'toBjjSign' signed by the user must match 'sign' of the receiver account
-    component toBjjSignChecker = ForceEqualIfEnabled();
-    toBjjSignChecker.in[0] <== sign2;
-    toBjjSignChecker.in[1] <== toBjjSign;
-    toBjjSignChecker.enabled <== states.checkToBjj;
-
     // sender tokenID check on L2
     // tokenID signed by the user must match tokenID of the receiver account
     component checkTokenID1 = ForceEqualIfEnabled();
