@@ -437,20 +437,6 @@ template Withdraw(balanceLevels, accountLevels) {
     balanceUpdater.nullifyAmount <== states.nullifyAmount;
 
     isAmountNullified <== balanceUpdater.isAmountNullified;
-    // H - accumulate fees
-    ////////
-    component feeAccumulator = FeeAccumulator(maxFeeTx);
-    feeAccumulator.tokenID <== tokenID;
-    feeAccumulator.fee2Charge <== balanceUpdater.fee2Charge;
-
-    for (i = 0; i < maxFeeTx; i++){
-        feeAccumulator.feePlanTokenID[i] <== feePlanTokens[i];
-        feeAccumulator.accFeeIn[i] <== accFeeIn[i];
-    }
-
-    for (i = 0; i < maxFeeTx; i++){
-        feeAccumulator.accFeeOut[i] ==> accFeeOut[i];
-    }
 
     // I - compute hash new states
     ////////
@@ -488,17 +474,9 @@ template Withdraw(balanceLevels, accountLevels) {
     processor1.fnc[0] <== states.P1_fnc0;
     processor1.fnc[1] <== states.P1_fnc1;
 
-    // select processor 2 root input
-    // depending on tx type. IF tx is an 'Exit' select 'oldExitRoot', otherwise
-    // select output root of processor 1 (state root)
-    component s3 = Mux1();
-    s3.c[0] <== processor1.newRoot;
-    s3.c[1] <== oldExitRoot;
-    s3.s <== states.isExit;
-
     // processor 2: receiver
     component processor2 = SMTProcessor(nLevels+1) ;
-    processor2.oldRoot <== s3.out;
+    processor2.oldRoot <== oldExitRoot;
     for (i = 0; i < nLevels + 1; i++) {
         processor2.siblings[i] <== siblings2[i];
     }
@@ -513,14 +491,7 @@ template Withdraw(balanceLevels, accountLevels) {
     // K - select output roots
     ////////
     // new state root
-    // if tx is an 'exit', select output root of processor 1 (sender)
-    // otherwise, select output root of processor 2 (receiver)
-    component s4 = Mux1();
-    s4.c[0] <== processor2.newRoot;
-    s4.c[1] <== processor1.newRoot;
-    s4.s <== states.isExit;
-    s4.out ==> newStateRoot;
-
+    // processor1.newRoot ==> newStateRoot;
     // new exit root
     // if tx is an 'exit', select output root of processor 2 (sender)
     // otherwise, select 'oldExitRoot' since exit root will not be updated
