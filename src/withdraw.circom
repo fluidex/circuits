@@ -198,20 +198,6 @@ template Withdraw(balanceLevels, accountLevels) {
     // perform INSERT if transaction is L1 and involves and account creation
     // the following multiplexers choose between signals if state processor is an INSERT
 
-    // INSERT: processor old key would be taken from 'oldKey1' which is set by the coordinator
-    // otherwise, key is selected from states depending on tx type
-    component s1OldKey = Mux1();
-    s1OldKey.c[0] <== states.key1;
-    s1OldKey.c[1] <== oldKey1;
-    s1OldKey.s <== states.isP1Insert;
-
-    // INSERT: processor state hash would be taken from 'oldValue1' which is set by the coordinator
-    // otherwise, state hash is selected from oldState1 Packer
-    component s1OldValue = Mux1();
-    s1OldValue.c[0] <== oldSt1Hash.out;
-    s1OldValue.c[1] <== oldValue1;
-    s1OldValue.s <== states.isP1Insert;
-
     // state processor 2 : isExit * newExit
     // perform INSERT if transaction is an 'exit' and involves and account creation on exit tree
     // Note: when exit tx is performed and it involves an account creation on the exoit tree, the account created
@@ -357,8 +343,8 @@ template Withdraw(balanceLevels, accountLevels) {
     for (i = 0; i < nLevels + 1; i++) {
         processor1.siblings[i] <== siblings1[i];
     }
-    processor1.oldKey <== s1OldKey.out;
-    processor1.oldValue <== s1OldValue.out;
+    processor1.oldKey <== states.key1;
+    processor1.oldValue <== oldSt1Hash.out;
     processor1.isOld0 <== isOld0_1;
     processor1.newKey <== states.key1;
     processor1.newValue <== newSt1Hash.out;
