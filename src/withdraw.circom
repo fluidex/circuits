@@ -182,14 +182,6 @@ template Withdraw(balanceLevels, accountLevels) {
     checkTokenID1L1.in[1] <== tokenID1;
     checkTokenID1L1.enabled <== states.isP1Insert;
 
-    // force sender fromEthAddr on L1-create-account
-    // if tx type involves an account creation, it is forced that the account created
-    // has the ethAddr signed by the user
-    component fromEthAddrChecker = ForceEqualIfEnabled();
-    fromEthAddrChecker.in[0] <== fromEthAddr;
-    fromEthAddrChecker.in[1] <== ethAddr1;
-    fromEthAddrChecker.enabled <== states.isP1Insert;
-
     // D - compute old hash states
     ////////
     // oldState1 Packer
@@ -221,13 +213,6 @@ template Withdraw(balanceLevels, accountLevels) {
     // state processor 1 : newAccount * onChain
     // perform INSERT if transaction is L1 and involves and account creation
     // the following multiplexers choose between signals if state processor is an INSERT
-
-    // INSERT: ethereum address would be taken from 'fromEthAddr' which is signed on L1 tx
-    // otherwise, ethereum address sender account will be selected
-    component s1EthAddr = Mux1();
-    s1EthAddr.c[0] <== ethAddr1;
-    s1EthAddr.c[1] <== fromEthAddr;
-    s1EthAddr.s <== states.isP1Insert;
 
     // INSERT: token identifier would be taken from 'tokenID' which is signed on L1 tx
     // otherwise, token identifier sender account will be selected
@@ -289,7 +274,7 @@ template Withdraw(balanceLevels, accountLevels) {
     // otherwise, ethereum address receiver account would be selected
     component s2EthAddr = Mux1();
     s2EthAddr.c[0] <== ethAddr2;
-    s2EthAddr.c[1] <== s1EthAddr.out;
+    s2EthAddr.c[1] <== ethAddr1;
     s2EthAddr.s <== states.isP2Insert;
 
     // INSERT: token identifier will be taken from sender leaf
@@ -376,7 +361,7 @@ template Withdraw(balanceLevels, accountLevels) {
     newSt1Hash.sign <== sign1;
     newSt1Hash.balance <== balanceUpdater.newStBalanceSender;
     newSt1Hash.ay <== ay1;
-    newSt1Hash.ethAddr <== s1EthAddr.out;
+    newSt1Hash.ethAddr <== ethAddr1;
 
     // newState2 hash state
     component newSt2Hash = HashState();
