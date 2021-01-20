@@ -68,34 +68,6 @@ include "./lib/binary_merkle_tree.circom";
  * @output newExitRoot - {Field} - final exit root
  */
 template Withdraw(balanceLevels, accountLevels) {
-    // Phases rollup-tx circuit
-        // A: compute transaction states
-        // B: check request transaction fields
-        // C: checks state fields
-        // D: compute hash old states
-        // E: signal processor selectors
-        // F: verify eddsa signature
-        // G: update balances
-        // H: accumulate fess
-        // I: compute hash new states
-        // J: smt processors
-        // K: select output roots
-
-    // Accumulate fees
-    signal input feePlanTokens[maxFeeTx];
-    signal input accFeeIn[maxFeeTx];
-    signal output accFeeOut[maxFeeTx];
-
-    // Past and future data
-    signal input futureTxCompressedDataV2[3];
-    signal input pastTxCompressedDataV2[4];
-
-    signal input futureToEthAddr[3];
-    signal input pastToEthAddr[4];
-
-    signal input futureToBjjAy[3];
-    signal input pastToBjjAy[4];
-
     // Tx
     signal input fromIdx;
     signal input auxFromIdx;
@@ -199,28 +171,6 @@ template Withdraw(balanceLevels, accountLevels) {
     states.tokenID <== tokenID;
     states.tokenID1 <== tokenID1;
     states.tokenID2 <== tokenID2;
-
-    // B - check request transaction fields
-    ////////
-    component rqTxVerifier = RqTxVerifier();
-
-    for (i = 0; i < 4; i++) {
-        rqTxVerifier.pastTxCompressedDataV2[i] <== pastTxCompressedDataV2[i];
-        rqTxVerifier.pastToEthAddr[i] <== pastToEthAddr[i];
-        rqTxVerifier.pastToBjjAy[i] <== pastToBjjAy[i];
-    }
-
-    for (i = 0; i < 3; i++) {
-        rqTxVerifier.futureTxCompressedDataV2[i] <== futureTxCompressedDataV2[i];
-        rqTxVerifier.futureToEthAddr[i] <== futureToEthAddr[i];
-        rqTxVerifier.futureToBjjAy[i] <== futureToBjjAy[i];
-    }
-
-    rqTxVerifier.rqTxCompressedDataV2 <== rqTxCompressedDataV2;
-    rqTxVerifier.rqToEthAddr <== rqToEthAddr;
-    rqTxVerifier.rqToBjjAy <== rqToBjjAy;
-
-    rqTxVerifier.rqTxOffset <== rqOffset;
 
     // C - check state fields
     ////////
