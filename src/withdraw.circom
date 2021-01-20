@@ -174,14 +174,6 @@ template Withdraw(balanceLevels, accountLevels) {
     checkTokenID2.in[1] <== tokenID2;
     checkTokenID2.enabled <== (1 - onChain)*(1 - states.isP2Insert);
 
-    // force sender tokenID on L1-create-account
-    // if tx type involves an account creation, it is forced that the account created
-    // has the tokenID signed by the user
-    component checkTokenID1L1 = ForceEqualIfEnabled();
-    checkTokenID1L1.in[0] <== tokenID;
-    checkTokenID1L1.in[1] <== tokenID1;
-    checkTokenID1L1.enabled <== states.isP1Insert;
-
     // D - compute old hash states
     ////////
     // oldState1 Packer
@@ -213,13 +205,6 @@ template Withdraw(balanceLevels, accountLevels) {
     // state processor 1 : newAccount * onChain
     // perform INSERT if transaction is L1 and involves and account creation
     // the following multiplexers choose between signals if state processor is an INSERT
-
-    // INSERT: token identifier would be taken from 'tokenID' which is signed on L1 tx
-    // otherwise, token identifier sender account will be selected
-    component s1TokenID = Mux1();
-    s1TokenID.c[0] <== tokenID1;
-    s1TokenID.c[1] <== tokenID;
-    s1TokenID.s <== states.isP1Insert;
 
     // INSERT: processor old key would be taken from 'oldKey1' which is set by the coordinator
     // otherwise, key is selected from states depending on tx type
@@ -281,7 +266,7 @@ template Withdraw(balanceLevels, accountLevels) {
     // otherwise, token identifier receiver account would be selected
     component s2TokenID = Mux1();
     s2TokenID.c[0] <== tokenID2;
-    s2TokenID.c[1] <== s1TokenID.out;
+    s2TokenID.c[1] <== tokenID1;
     s2TokenID.s <== states.isP2Insert;
 
     // INSERT: procesor old key will be taken from 'oldKey2' which is set by the coordinator
@@ -356,7 +341,7 @@ template Withdraw(balanceLevels, accountLevels) {
     ////////
     // newState1 hash state
     component newSt1Hash = HashState();
-    newSt1Hash.tokenID <== s1TokenID.out;
+    newSt1Hash.tokenID <== tokenID1;
     newSt1Hash.nonce <== nonce1 + (1 - onChain);
     newSt1Hash.sign <== sign1;
     newSt1Hash.balance <== balanceUpdater.newStBalanceSender;
