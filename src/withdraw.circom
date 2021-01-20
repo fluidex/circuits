@@ -478,11 +478,5 @@ template Withdraw(balanceLevels, accountLevels) {
     // new state root
     // processor1.newRoot ==> newStateRoot;
     // new exit root
-    // if tx is an 'exit', select output root of processor 2 (sender)
-    // otherwise, select 'oldExitRoot' since exit root will not be updated
-    component s5 = Mux1();
-    s5.c[0] <== oldExitRoot;
-    s5.c[1] <== processor2.newRoot;
-    s5.s <== states.isExit;
-    s5.out ==> newExitRoot;
+    processor2.newRoot ==> newExitRoot;
 }
