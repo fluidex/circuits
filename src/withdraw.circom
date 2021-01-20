@@ -229,13 +229,6 @@ template Withdraw(balanceLevels, accountLevels) {
     s1Balance.c[1] <== 0;
     s1Balance.s <== states.isP1Insert;
 
-    // INSERT: babyjubjub sign would be taken from 'decodeFromBjj.sign' which is the 'fromBjjCompressed' signed on L1 tx
-    // otherwise, babyjubjub sign sender account will be selected
-    component s1Sign = Mux1();
-    s1Sign.c[0] <== sign1;
-    s1Sign.c[1] <== decodeFromBjj.sign;
-    s1Sign.s <== states.isP1Insert;
-
     // INSERT: sender nonce would be 0
     // otherwise, nonce sender account will be selected
     component s1Nonce = Mux1();
@@ -288,7 +281,7 @@ template Withdraw(balanceLevels, accountLevels) {
     // otherwise, babyjubjub sign receiver account would be selected
     component s2Sign = Mux1();
     s2Sign.c[0] <== sign2;
-    s2Sign.c[1] <== s1Sign.out;
+    s2Sign.c[1] <== sign1;
     s2Sign.s <== states.isP2Insert;
 
     // INSERT: babyjubjub Y coordinate will be taken from sender leaf
@@ -345,7 +338,7 @@ template Withdraw(balanceLevels, accountLevels) {
     // otherwise, babyjubjub sign would be 0
     component signSignature = Mux1();
     signSignature.c[0] <== 0;
-    signSignature.c[1] <== s1Sign.out;
+    signSignature.c[1] <== sign1;
     signSignature.s <== states.verifySignEnabled;
 
     // selects babyjubjub Y coordinate from states if verify signature is enabled
@@ -394,7 +387,7 @@ template Withdraw(balanceLevels, accountLevels) {
     component newSt1Hash = HashState();
     newSt1Hash.tokenID <== s1TokenID.out;
     newSt1Hash.nonce <== s1Nonce.out + (1 - onChain);
-    newSt1Hash.sign <== s1Sign.out;
+    newSt1Hash.sign <== sign1;
     newSt1Hash.balance <== balanceUpdater.newStBalanceSender;
     newSt1Hash.ay <== ay1;
     newSt1Hash.ethAddr <== s1EthAddr.out;
