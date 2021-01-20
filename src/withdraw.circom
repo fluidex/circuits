@@ -161,17 +161,11 @@ template Withdraw(balanceLevels, accountLevels) {
     ////////
     // sender nonce check on L2
     // nonce signed by the user must match nonce of the sender account
-    component nonceChecker = ForceEqualIfEnabled();
-    nonceChecker.in[0] <== nonce;
-    nonceChecker.in[1] <== nonce1;
-    nonceChecker.enabled <== (1 - onChain);
+    nonce === nonce1;
 
     // sender tokenID check on L2
     // tokenID signed by the user must match tokenID of the receiver account
-    component checkTokenID1 = ForceEqualIfEnabled();
-    checkTokenID1.in[0] <== tokenID;
-    checkTokenID1.in[1] <== tokenID1;
-    checkTokenID1.enabled <== (1 - onChain);
+    tokenID === tokenID1;
 
     // receiver tokenID check on L2
     // tokenID signed by the user must match tokenID of the sender account
