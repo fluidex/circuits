@@ -222,13 +222,6 @@ template Withdraw(balanceLevels, accountLevels) {
     // perform INSERT if transaction is L1 and involves and account creation
     // the following multiplexers choose between signals if state processor is an INSERT
 
-    // INSERT: sender balance would be 0
-    // otherwise, balance sender account will be selected
-    component s1Balance = Mux1();
-    s1Balance.c[0] <== balance1;
-    s1Balance.c[1] <== 0;
-    s1Balance.s <== states.isP1Insert;
-
     // INSERT: sender nonce would be 0
     // otherwise, nonce sender account will be selected
     component s1Nonce = Mux1();
@@ -369,7 +362,7 @@ template Withdraw(balanceLevels, accountLevels) {
     // G - update balances
     ////////
     component balanceUpdater = BalanceUpdater();
-    balanceUpdater.oldStBalanceSender <== s1Balance.out;
+    balanceUpdater.oldStBalanceSender <== balance1;
     balanceUpdater.oldStBalanceReceiver <== s2Balance.out;
     balanceUpdater.amount <== amount;
     balanceUpdater.loadAmount <== loadAmount;
