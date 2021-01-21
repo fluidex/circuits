@@ -196,7 +196,7 @@ template Withdraw(balanceLevels, accountLevels) {
     // newState1 hash state
     component newSt1Hash = HashState();
     newSt1Hash.tokenID <== tokenID1;
-    newSt1Hash.nonce <== nonce1; // TODO: ???
+    newSt1Hash.nonce <== nonce1 + 1;
     newSt1Hash.sign <== sign1;
     newSt1Hash.balance <== balanceUpdater.newStBalanceSender;
     newSt1Hash.ay <== ay1;
