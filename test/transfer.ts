@@ -5,6 +5,11 @@ import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 
+enum TxType {
+  Transfer,
+  Withdraw,
+}
+
 // circuit-level definitions
 const balanceLevels = 2;
 const accountLevels = 2;
@@ -88,7 +93,7 @@ class TestTransfer implements SimpleTest {
     let newAccountRoot = poseidon(newAccountMidLevel);
 
     // TODO: construct tx and compute hash
-    let mockTxHash = poseidon([ tokenID, amount]);
+    let mockTxHash = poseidon([TxType.Transfer, tokenID, amount]);
     mockTxHash = poseidon([mockTxHash, fromAccountID, nonce1, balance1]);
     mockTxHash = poseidon([mockTxHash, toAccountID, nonce2, balance2]);
     let signature = account1.signHash(mockTxHash);
