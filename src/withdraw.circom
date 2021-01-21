@@ -68,76 +68,65 @@ include "./lib/binary_merkle_tree.circom";
  * @output newExitRoot - {Field} - final exit root
  */
 template Withdraw(balanceLevels, accountLevels) {
-    // Tx
-    signal input fromIdx;
-    signal input auxFromIdx;
+    // // Tx
+    // signal input fromIdx;
+    // signal input auxFromIdx;
 
-    signal input toIdx;
-    signal input auxToIdx;
-    signal input toBjjAy;
-    signal input toBjjSign;
-    signal input toEthAddr;
+    // signal input toIdx;
+    // signal input auxToIdx;
+    // signal input toBjjAy;
+    // signal input toBjjSign;
+    // signal input toEthAddr;
 
-    signal input amount;
-    signal input tokenID;
-    signal input nonce;
-    signal input userFee;
-    signal input rqOffset;
-    signal input onChain;
-    signal input newAccount;
+    // signal input amount;
+    // signal input tokenID;
+    // signal input nonce;
+    // signal input userFee;
+    // signal input rqOffset;
+    // signal input onChain;
+    // signal input newAccount;
 
-    signal input rqTxCompressedDataV2;
-    signal input rqToEthAddr;
-    signal input rqToBjjAy;
+    // signal input rqTxCompressedDataV2;
+    // signal input rqToEthAddr;
+    // signal input rqToBjjAy;
 
-    signal input sigL2Hash;
-    signal input s;
-    signal input r8x;
-    signal input r8y;
+    // signal input sigL2Hash;
+    // signal input s;
+    // signal input r8x;
+    // signal input r8y;
 
-    // For L1 TX
-    signal input fromEthAddr;
-    signal input fromBjjCompressed[256];
-    signal input loadAmountF;
+    // // For L1 TX
+    // signal input fromEthAddr;
+    // signal input fromBjjCompressed[256];
+    // signal input loadAmountF;
 
-    // State 1
-    signal input tokenID1;
+    // Account-balance state
     signal input nonce1;
     signal input sign1;
     signal input balance1;
     signal input ay1;
     signal input ethAddr1;
-    signal input siblings1[nLevels+1];
-    // Required for inserts and delete
-    signal input isOld0_1;
-    signal input oldKey1;
-    signal input oldValue1;
+    signal input balance_path_elements[balanceLevels][1];
+    signal input account_path_elements[accountLevels][1];
 
-    // State 2
-    signal input tokenID2;
+    // Account-exit state
     signal input nonce2;
     signal input sign2;
     signal input balance2;
-    signal input newExit;
     signal input ay2;
     signal input ethAddr2;
-    signal input siblings2[nLevels+1];
-    // Required for inserts and delete
-    signal input isOld0_2;
-    signal input oldKey2;
-    signal input oldValue2;
+    signal input exit_balance_path_elements[balanceLevels][1];
+    signal input exit_account_path_elements[accountLevels][1];
 
     // Roots
-    signal input oldStateRoot;
-    signal output newStateRoot;
-
+    signal input oldBalanceRoot;
+    signal input newBalanceRoot;
+    signal input oldExitBalanceRoot;
+    signal input newExitBalanceRoot;
+    signal input oldAccountRoot;
+    signal input newAccountRoot;
     signal input oldExitRoot;
-    signal output newExitRoot;
-
-    // Nullifier amount
-    signal output isAmountNullified;
-
-    var i;
+    signal input newExitRoot;
 
     // compute states
     component states = RollupTxStates();
