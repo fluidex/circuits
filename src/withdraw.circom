@@ -114,58 +114,19 @@ template Withdraw(balanceLevels, accountLevels) {
         account_path_index[i] <== bFrom.out[i];
     }
 
-    // D - compute old hash states
+    // - verify eddsa signature
     ////////
-    // oldState1 Packer
-    component oldSt1Hash = HashState();
-    oldSt1Hash.tokenID <== tokenID;
-    oldSt1Hash.nonce <== nonce;
-    oldSt1Hash.sign <== sign;
-    oldSt1Hash.balance <== balance;
-    oldSt1Hash.ay <== ay;
-    oldSt1Hash.ethAddr <== ethAddr;
-
-    // oldState2 Packer
-    component oldSt2Hash = HashState();
-    oldSt2Hash.tokenID <== tokenID;
-    oldSt2Hash.nonce <== 0; // exit tree leafs has always nonce 0
-    oldSt2Hash.sign <== sign;
-    oldSt2Hash.balance <== oldExitedAmount;
-    oldSt2Hash.ay <== ay;
-    oldSt2Hash.ethAddr <== ethAddr;
-
-    // INSERT: procesor old key will be taken from 'oldKey2' which is set by the coordinator
-    // otherwise, key is selected from states depending on tx type
-    component s2OldKey = Mux1();
-    s2OldKey.c[0] <== states.key2;
-    s2OldKey.c[1] <== oldKey2;
-    s2OldKey.s <== states.isP2Insert;
-
-    // INSERT: processor state hash would be taken from 'oldValue1' which is set by the coordinator
-    // otherwise, state hash is selected from states depending on tx type
-    component s2OldValue = Mux1();
-    s2OldValue.c[0] <== oldSt2Hash.out;
-    s2OldValue.c[1] <== oldValue2;
-    s2OldValue.s <== states.isP2Insert;
-
-    // F - verify eddsa signature
-    ////////
-    // Note: Account could be created with invalid Bjj key
-    // If signature is not checked, getAx is not needed
-    // In order to not break getAx function,
-    // [0, 0] is set to pass getAx if signature is not checked
-
     // computes babyjubjub X coordinate
     component getAx = AySign2Ax();
-    getAx.ay <== ay1;
-    getAx.sign <== sign1;
+    getAx.ay <== ay;
+    getAx.sign <== sign;
 
     // signature L2 verifier
     component sigVerifier = EdDSAPoseidonVerifier();
     sigVerifier.enabled <== 1;
 
     sigVerifier.Ax <== getAx.ax;
-    sigVerifier.Ay <== ay1;
+    sigVerifier.Ay <== ay;
 
     sigVerifier.S <== s;
     sigVerifier.R8x <== r8x;
@@ -173,20 +134,34 @@ template Withdraw(balanceLevels, accountLevels) {
 
     sigVerifier.M <== sigL2Hash;
 
-    // G - update balances
-    ////////
-    component balanceUpdater = BalanceUpdater();
-    balanceUpdater.oldStBalanceSender <== balance1;
-    balanceUpdater.oldStBalanceReceiver <== s2Balance.out; // 0 for isP2Insert, balance2 otherwise
-    balanceUpdater.amount <== amount;
-    balanceUpdater.loadAmount <== loadAmount;
-    balanceUpdater.feeSelector <== userFee;
-    balanceUpdater.onChain <== onChain;
-    balanceUpdater.nop <== states.nop;
-    balanceUpdater.nullifyLoadAmount <== states.nullifyLoadAmount;
-    balanceUpdater.nullifyAmount <== states.nullifyAmount;
+    // TODO: underflow check
 
-    isAmountNullified <== balanceUpdater.isAmountNullified;
+    // TODO: overflow check
+
+    // TODO: fee
+
+    // - check balance tree update
+    ////////
+    // account balance
+    component balance_checker = CheckLeafUpdate(balanceLevels);
+    balance_checker.oldLeaf <== balance;
+    balance_checker.newLeaf <== balance - amount;
+    for (var i = 0; i < balanceLevels; i++) {
+        balance_checker.path_index[i] <== balance_path_index[i];
+        balance_checker.path_elements[i][0] <== balance_path_elements[i][0];
+    }
+    balance_checker.oldRoot <== oldBalanceRoot;
+    balance_checker.newRoot <== newBalanceRoot;
+    // exit balance
+    component exit_balance_checker = CheckLeafUpdate(balanceLevels);
+    exit_balance_checker.oldLeaf <== oldExitedAmount;
+    exit_balance_checker.newLeaf <== oldExitedAmount + amount;
+    for (var i = 0; i < balanceLevels; i++) {
+        exit_balance_checker.path_index[i] <== balance_path_index[i];
+        exit_balance_checker.path_elements[i][0] <== exit_balance_path_elements[i][0];
+    }
+    exit_balance_checker.oldRoot <== oldExitBalanceRoot;
+    exit_balance_checker.newRoot <== newExitBalanceRoot;
 
     // I - compute hash new states
     ////////
