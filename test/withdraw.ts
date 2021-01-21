@@ -12,90 +12,88 @@ const accountLevels = 2;
 class TestWithdraw implements SimpleTest {
   getInput() {
     // input-level assignments and pre-processings
-    const nonce = 51;
     const tokenID = 2;
     const amount = 300n;
 
-    const fromAccountID = 2;
-    const account1 = new Account(1);
-    const ethAddr1NoPrefix = account1.ethAddr.replace("0x", "");
-    const nonce1 = 51;
-    const balance1 = 500n;
+    const accountID = 1;
+    const account = new Account(1);
+    const ethAddrNoPrefix = account.ethAddr.replace("0x", "");
+    const nonce = 51;
+    const balance = 500n;
 
-    const toAccountID = 1;
-    const account2 = new Account(2);
-    const ethAddr2NoPrefix = account2.ethAddr.replace("0x", "");
-    const nonce2 = 77;
-    const balance2 = 200n;
+    const oldExitTotal = 700n;
 
-    // sender state
-    let senderBalanceLeaves = [10n, 11n, balance1, 13n];
-    let senderBalanceMidLevel = [poseidon([senderBalanceLeaves[0], senderBalanceLeaves[1]]), poseidon([senderBalanceLeaves[2], senderBalanceLeaves[3]])];
-    let oldSenderBalanceRoot = poseidon(senderBalanceMidLevel);
-    senderBalanceLeaves[tokenID] = balance1 - amount;
-    senderBalanceMidLevel = [poseidon([senderBalanceLeaves[0], senderBalanceLeaves[1]]), poseidon([senderBalanceLeaves[2], senderBalanceLeaves[3]])];
-    let newSenderBalanceRoot = poseidon(senderBalanceMidLevel);
-    const oldSender = {
-      nonce: nonce1,
-      sign: account1.sign,
-      balanceRoot: oldSenderBalanceRoot,
-      ay: account1.ay,
-      ethAddr: ethAddr1NoPrefix,
+    // account state
+    let balanceLeaves = [10n, 11n, balance, 13n];
+    let balanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
+    let oldBalanceRoot = poseidon(balanceMidLevel);
+    balanceLeaves[tokenID] = balance - amount;
+    balanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
+    let newBalanceRoot = poseidon(balanceMidLevel);
+    const oldAccount = {
+      nonce: nonce,
+      sign: account.sign,
+      balanceRoot: oldBalanceRoot,
+      ay: account.ay,
+      ethAddr: ethAddrNoPrefix,
     };
-    const oldSenderHash = hashAccountState(oldSender);
-    const newSender = {
-      nonce: nonce1+1,
-      sign: account1.sign,
-      balanceRoot: newSenderBalanceRoot,
-      ay: account1.ay,
-      ethAddr: ethAddr1NoPrefix,
+    const oldAccountHash = hashAccountState(oldAccount);
+    const newAccount = {
+      nonce: nonce+1,
+      sign: account.sign,
+      balanceRoot: newBalanceRoot,
+      ay: account.ay,
+      ethAddr: ethAddrNoPrefix,
     };
-    const newSenderHash = hashAccountState(newSender);
+    const newAccountHash = hashAccountState(newAccount);
 
-    // receiver state
-    let receiverBalanceLeaves = [20n, 21n, balance2, 23n];
-    let receiverBalanceMidLevel = [poseidon([receiverBalanceLeaves[0], receiverBalanceLeaves[1]]), poseidon([receiverBalanceLeaves[2], receiverBalanceLeaves[3]])];
-    let oldReceiverBalanceRoot = poseidon(receiverBalanceMidLevel);
-    receiverBalanceLeaves[tokenID] = balance2 + amount;
-    receiverBalanceMidLevel = [poseidon([receiverBalanceLeaves[0], receiverBalanceLeaves[1]]), poseidon([receiverBalanceLeaves[2], receiverBalanceLeaves[3]])];
-    let newReceiverBalanceRoot = poseidon(receiverBalanceMidLevel);
-    const oldReceiver = {
-      nonce: nonce2,
-      sign: account2.sign,
-      balanceRoot: oldReceiverBalanceRoot,
-      ay: account2.ay,
-      ethAddr: ethAddr2NoPrefix,
+    // exit state
+    let exitBalanceLeaves = [0n, 21n, oldExitTotal, 0n];
+    let exitBalanceMidLevel = [poseidon([exitBalanceLeaves[0], exitBalanceLeaves[1]]), poseidon([exitBalanceLeaves[2], exitBalanceLeaves[3]])];
+    let oldExitBalanceRoot = poseidon(exitBalanceMidLevel);
+    exitBalanceLeaves[tokenID] = oldExitTotal + amount;
+    exitBalanceMidLevel = [poseidon([exitBalanceLeaves[0], exitBalanceLeaves[1]]), poseidon([exitBalanceLeaves[2], exitBalanceLeaves[3]])];
+    let newExitBalanceRoot = poseidon(exitBalanceMidLevel);
+    const oldExitAccount = {
+      nonce: 0,
+      sign: account.sign,
+      balanceRoot: oldExitBalanceRoot,
+      ay: account.ay,
+      ethAddr: ethAddrNoPrefix,
     };
-    const oldReceiverHash = hashAccountState(oldReceiver);
-    const newReceiver = {
-      nonce: nonce2,
-      sign: account2.sign,
-      balanceRoot: newReceiverBalanceRoot,
-      ay: account2.ay,
-      ethAddr: ethAddr2NoPrefix,
+    const oldExitAccountHash = hashAccountState(oldExitAccount);
+    const newExitAccount = {
+      nonce: 0,
+      sign: account.sign,
+      balanceRoot: newExitBalanceRoot,
+      ay: account.ay,
+      ethAddr: ethAddrNoPrefix,
     };
-    const newReceiverHash = hashAccountState(newReceiver);
+    const newExitAccountHash = hashAccountState(newExitAccount);
 
     // account tree
-    let oldAccountLeaves = [70n, oldReceiverHash, oldSenderHash, 73n];
-    let oldAccountMidLevel = [poseidon([oldAccountLeaves[0], oldAccountLeaves[1]]), poseidon([oldAccountLeaves[2], oldAccountLeaves[3]])];
-    let oldAccountRoot = poseidon(oldAccountMidLevel);
-    let tmpAccountLeaves = [70n, oldReceiverHash, newSenderHash, 73n];
-    let tmpAccountMidLevel = [poseidon([tmpAccountLeaves[0], tmpAccountLeaves[1]]), poseidon([tmpAccountLeaves[2], tmpAccountLeaves[3]])];
-    let tmpAccountRoot = poseidon(tmpAccountMidLevel);
-    let newAccountLeaves = [70n, newReceiverHash, newSenderHash, 73n];
-    let newAccountMidLevel = [poseidon([newAccountLeaves[0], newAccountLeaves[1]]), poseidon([newAccountLeaves[2], newAccountLeaves[3]])];
-    let newAccountRoot = poseidon(newAccountMidLevel);
+    let accountLeaves = [70n, oldAccountHash, 72n, 73n];
+    let accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
+    let oldAccountRoot = poseidon(accountMidLevel);
+    accountLeaves[accountID] = newAccountHash;
+    accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
+    let newAccountRoot = poseidon(accountMidLevel);
+    
+    // exit tree
+    let exitLeaves = [80n, oldExitAccountHash, 82n, 83n];
+    let exitMidLevel = [poseidon([exitLeaves[0], exitLeaves[1]]), poseidon([exitLeaves[2], exitLeaves[3]])];
+    let oldExitRoot = poseidon(exitMidLevel);
+    exitLeaves[accountID] = newExitAccountHash;
+    exitMidLevel = [poseidon([exitLeaves[0], exitLeaves[1]]), poseidon([exitLeaves[2], exitLeaves[3]])];
+    let newExitRoot = poseidon(exitMidLevel);
 
     // TODO: construct tx and compute hash
     let mockTxHash = poseidon([ tokenID, amount]);
-    mockTxHash = poseidon([mockTxHash, fromAccountID, nonce1, balance1]);
-    mockTxHash = poseidon([mockTxHash, toAccountID, nonce2, balance2]);
-    let signature = account1.signHash(mockTxHash);
+    mockTxHash = poseidon([mockTxHash, accountID, nonce, balance]);
+    let signature = account.signHash(mockTxHash);
     
     return {
-      fromAccountID: fromAccountID,
-      toAccountID: toAccountID,
+      accountID: accountID,
       amount: amount,
       tokenID: tokenID,
       nonce: nonce,
@@ -103,27 +101,23 @@ class TestWithdraw implements SimpleTest {
       s: signature.S,
       r8x: signature.R8[0],
       r8y: signature.R8[1],
-      nonce1: nonce1,
-      sign1: account1.sign,
-      balance1: balance1,
-      ay1: Scalar.fromString(account1.ay, 16),
-      ethAddr1: Scalar.fromString(ethAddr1NoPrefix, 16),
-      sender_balance_path_elements: [[senderBalanceLeaves[3]], [senderBalanceMidLevel[0]]],
-      sender_account_path_elements: [[oldAccountLeaves[3]], [oldAccountMidLevel[0]]],
-      nonce2: nonce2,
-      sign2: account2.sign,
-      balance2: balance2,
-      ay2: Scalar.fromString(account2.ay, 16),
-      ethAddr2: Scalar.fromString(ethAddr2NoPrefix, 16),
-      receiver_balance_path_elements: [[receiverBalanceLeaves[3]], [receiverBalanceMidLevel[0]]],
-      receiver_account_path_elements: [[tmpAccountLeaves[0]], [tmpAccountMidLevel[1]]],
-      oldSenderBalanceRoot: oldSenderBalanceRoot,
-      newSenderBalanceRoot: newSenderBalanceRoot,
-      oldReceiverBalanceRoot: oldReceiverBalanceRoot,
-      newReceiverBalanceRoot: newReceiverBalanceRoot,
+      sign: account.sign,
+      balance: balance,
+      ay: Scalar.fromString(account.ay, 16),
+      ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
+      balance_path_elements: [[balanceLeaves[3]], [balanceMidLevel[0]]],
+      account_path_elements: [[accountLeaves[0]], [accountMidLevel[1]]],
+      oldExitTotal: oldExitTotal,
+      exit_balance_path_elements: [[exitBalanceLeaves[3]], [exitBalanceMidLevel[0]]],
+      exit_account_path_elements: [[exitLeaves[0]], [exitMidLevel[1]]],
+      oldBalanceRoot: oldBalanceRoot,
+      newBalanceRoot: newBalanceRoot,
+      oldExitBalanceRoot: oldExitBalanceRoot,
+      newExitBalanceRoot: newExitBalanceRoot,
       oldAccountRoot: oldAccountRoot,
-      tmpAccountRoot: tmpAccountRoot,
       newAccountRoot: newAccountRoot,
+      oldExitRoot: oldExitRoot,
+      newExitRoot: newExitRoot,
     };
   }
   getOutput() {
