@@ -5,7 +5,7 @@ include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
 
 /**
- * Process a rollup withdrawl transaction
+ * Process a rollup withdrawal transaction
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
  * @input accountID - {Uint48} - account index
