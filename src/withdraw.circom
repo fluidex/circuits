@@ -117,16 +117,6 @@ template Withdraw(balanceLevels, accountLevels) {
     states.tokenID1 <== tokenID1;
     states.tokenID2 <== tokenID2;
 
-    // C - check state fields
-    ////////
-    // sender nonce check on L2
-    // nonce signed by the user must match nonce of the sender account
-    nonce === nonce1;
-
-    // sender tokenID check on L2
-    // tokenID signed by the user must match tokenID of the receiver account
-    tokenID === tokenID1;
-
     // D - compute old hash states
     ////////
     // oldState1 Packer
@@ -206,7 +196,7 @@ template Withdraw(balanceLevels, accountLevels) {
     // newState1 hash state
     component newSt1Hash = HashState();
     newSt1Hash.tokenID <== tokenID1;
-    newSt1Hash.nonce <== nonce1;
+    newSt1Hash.nonce <== nonce1; // TODO: ???
     newSt1Hash.sign <== sign1;
     newSt1Hash.balance <== balanceUpdater.newStBalanceSender;
     newSt1Hash.ay <== ay1;
