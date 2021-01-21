@@ -81,7 +81,7 @@ template Withdraw(balanceLevels, accountLevels) {
     signal input account_path_elements[accountLevels][1];
 
     // Account-exit state
-    signal input oldExitedAmount;
+    signal input oldExitTotal;
     signal input exit_balance_path_elements[balanceLevels][1];
     signal input exit_account_path_elements[accountLevels][1];
 
@@ -153,15 +153,15 @@ template Withdraw(balanceLevels, accountLevels) {
     balance_checker.oldRoot <== oldBalanceRoot;
     balance_checker.newRoot <== newBalanceRoot;
     // exit balance
-    component exit_balance_checker = CheckLeafUpdate(balanceLevels);
-    exit_balance_checker.oldLeaf <== oldExitedAmount;
-    exit_balance_checker.newLeaf <== oldExitedAmount + amount;
+    component exit_total_checker = CheckLeafUpdate(balanceLevels);
+    exit_total_checker.oldLeaf <== oldExitTotal;
+    exit_total_checker.newLeaf <== oldExitTotal + amount;
     for (var i = 0; i < balanceLevels; i++) {
-        exit_balance_checker.path_index[i] <== balance_path_index[i];
-        exit_balance_checker.path_elements[i][0] <== exit_balance_path_elements[i][0];
+        exit_total_checker.path_index[i] <== balance_path_index[i];
+        exit_total_checker.path_elements[i][0] <== exit_balance_path_elements[i][0];
     }
-    exit_balance_checker.oldRoot <== oldExitBalanceRoot;
-    exit_balance_checker.newRoot <== newExitBalanceRoot;
+    exit_total_checker.oldRoot <== oldExitBalanceRoot;
+    exit_total_checker.newRoot <== newExitBalanceRoot;
 
     // I - compute hash new states
     ////////
