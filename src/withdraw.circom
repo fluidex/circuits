@@ -101,20 +101,16 @@ template Withdraw(balanceLevels, accountLevels) {
     // signal input loadAmountF;
 
     // Account-balance state
-    signal input nonce1;
-    signal input sign1;
-    signal input balance1;
-    signal input ay1;
-    signal input ethAddr1;
+    // signal input nonce;
+    signal input sign;
+    signal input balance;
+    signal input ay;
+    signal input ethAddr;
     signal input balance_path_elements[balanceLevels][1];
     signal input account_path_elements[accountLevels][1];
 
     // Account-exit state
-    signal input nonce2;
-    signal input sign2;
-    signal input balance2;
-    signal input ay2;
-    signal input ethAddr2;
+    signal input oldExitedAmount;
     signal input exit_balance_path_elements[balanceLevels][1];
     signal input exit_account_path_elements[accountLevels][1];
 
