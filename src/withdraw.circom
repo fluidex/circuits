@@ -114,23 +114,6 @@ template Withdraw(balanceLevels, accountLevels) {
         account_path_index[i] <== bFrom.out[i];
     }
 
-    // // compute states
-    // component states = RollupTxStates();
-    // states.fromIdx <== fromIdx;
-    // states.toIdx <== toIdx;
-    // states.toEthAddr <== toEthAddr;
-    // states.auxFromIdx <== auxFromIdx;
-    // states.auxToIdx <== auxToIdx;
-    // states.amount <== amount;
-    // states.newExit <== newExit;
-    // states.loadAmount <== loadAmount;
-    // states.newAccount <== newAccount;
-    // states.onChain <== onChain;
-    // states.ethAddr1 <== ethAddr1;
-    // states.tokenID <== tokenID;
-    // states.tokenID1 <== tokenID1;
-    // states.tokenID2 <== tokenID2;
-
     // D - compute old hash states
     ////////
     // oldState1 Packer
@@ -179,7 +162,7 @@ template Withdraw(balanceLevels, accountLevels) {
 
     // signature L2 verifier
     component sigVerifier = EdDSAPoseidonVerifier();
-    sigVerifier.enabled <== states.verifySignEnabled;
+    sigVerifier.enabled <== 1;
 
     sigVerifier.Ax <== getAx.ax;
     sigVerifier.Ay <== ay1;
