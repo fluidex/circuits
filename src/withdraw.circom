@@ -62,7 +62,7 @@ include "./lib/binary_merkle_tree.circom";
  */
 template Withdraw(balanceLevels, accountLevels) {
     // Tx
-    signal input AccountID;
+    signal input accountID;
     signal input amount;
     signal input tokenID;
     signal input nonce;
@@ -100,42 +100,56 @@ template Withdraw(balanceLevels, accountLevels) {
     signal account_path_index[accountLevels];
     signal exit_path_index[accountLevels];
 
-    // compute states
-    component states = RollupTxStates();
-    states.fromIdx <== fromIdx;
-    states.toIdx <== toIdx;
-    states.toEthAddr <== toEthAddr;
-    states.auxFromIdx <== auxFromIdx;
-    states.auxToIdx <== auxToIdx;
-    states.amount <== amount;
-    states.newExit <== newExit;
-    states.loadAmount <== loadAmount;
-    states.newAccount <== newAccount;
-    states.onChain <== onChain;
-    states.ethAddr1 <== ethAddr1;
-    states.tokenID <== tokenID;
-    states.tokenID1 <== tokenID1;
-    states.tokenID2 <== tokenID2;
+    // decode balance_path_index
+    component bTokenID = Num2Bits(balanceLevels);
+    bTokenID.in <== tokenID;
+    for (var i = 0; i < balanceLevels; i++) {
+        balance_path_index[i] <== bTokenID.out[i];
+    }
+
+    // decode account_path_index
+    component bFrom = Num2Bits(accountLevels);
+    bFrom.in <== accountID;
+    for (var i = 0; i < accountLevels; i++) {
+        account_path_index[i] <== bFrom.out[i];
+    }
+
+    // // compute states
+    // component states = RollupTxStates();
+    // states.fromIdx <== fromIdx;
+    // states.toIdx <== toIdx;
+    // states.toEthAddr <== toEthAddr;
+    // states.auxFromIdx <== auxFromIdx;
+    // states.auxToIdx <== auxToIdx;
+    // states.amount <== amount;
+    // states.newExit <== newExit;
+    // states.loadAmount <== loadAmount;
+    // states.newAccount <== newAccount;
+    // states.onChain <== onChain;
+    // states.ethAddr1 <== ethAddr1;
+    // states.tokenID <== tokenID;
+    // states.tokenID1 <== tokenID1;
+    // states.tokenID2 <== tokenID2;
 
     // D - compute old hash states
     ////////
     // oldState1 Packer
     component oldSt1Hash = HashState();
-    oldSt1Hash.tokenID <== tokenID1;
-    oldSt1Hash.nonce <== nonce1;
-    oldSt1Hash.sign <== sign1;
-    oldSt1Hash.balance <== balance1;
-    oldSt1Hash.ay <== ay1;
-    oldSt1Hash.ethAddr <== ethAddr1;
+    oldSt1Hash.tokenID <== tokenID;
+    oldSt1Hash.nonce <== nonce;
+    oldSt1Hash.sign <== sign;
+    oldSt1Hash.balance <== balance;
+    oldSt1Hash.ay <== ay;
+    oldSt1Hash.ethAddr <== ethAddr;
 
     // oldState2 Packer
     component oldSt2Hash = HashState();
-    oldSt2Hash.tokenID <== tokenID2;
+    oldSt2Hash.tokenID <== tokenID;
     oldSt2Hash.nonce <== 0; // exit tree leafs has always nonce 0
-    oldSt2Hash.sign <== sign2;
-    oldSt2Hash.balance <== balance2;
-    oldSt2Hash.ay <== ay2;
-    oldSt2Hash.ethAddr <== ethAddr2;
+    oldSt2Hash.sign <== sign;
+    oldSt2Hash.balance <== oldExitedAmount;
+    oldSt2Hash.ay <== ay;
+    oldSt2Hash.ethAddr <== ethAddr;
 
     // INSERT: procesor old key will be taken from 'oldKey2' which is set by the coordinator
     // otherwise, key is selected from states depending on tx type
