@@ -5,60 +5,34 @@ include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
 
 /**
- * Process a rollup transaction
- * @param nLevels - merkle tree depth
- * @param maxFeeTx - absolute maximum of fee transactions
- * @input feePlanTokens[maxFeeTx] - {Array(Uint32)} - all tokens eligible to accumulate fees
- * @input accFeeIn[maxFeeTx] - {Array(Uint192)} - initial fees accumulated
- * @input futureTxCompressedDataV2[3] - {Array(Uint193)} - future transactions txCompressedDataV2
- * @input pastTxCompressedDataV2[4] - {Array(Uint193)} - past transactions toEthAddr
- * @input futureToEthAddr[3] - {Array(Uint160)} - future transactions toEthAddr
- * @input pastToEthAddr[4] - {Array(Uint160)} - past transactions toEthAddr
- * @input futureToBjjAy[3] - {Array(Field)} - future transactions toBjjAy
- * @input pastToBjjAy[4] - {Array(Field)} - past transactions toBjjAy
- * @input fromIdx - {Uint48} - index sender
- * @input auxFromIdx - {Uint48} - auxiliary index to create accounts
- * @input toIdx - {Uint48} - index receiver
- * @input auxToIdx - {Uint48} - auxiliary index when signed index receiver is set to null
- * @input toBjjAy - {Field} - bayjubjub y coordinate receiver
- * @input toBjjSign - {Bool} - babyjubjub sign receiver
- * @input toEthAddr - {Uint160} - ethereum address receiver
- * @input amount - {Uint192} - amount to transfer from L2 to L2
+ * Process a rollup withdrawl transaction
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
+ * @input accountID - {Uint48} - account index
+ * @input amount - {Uint192} - amount to withdraw from L2
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input nonce - {Uint40} - nonce signed in the transaction
- * @input userFee - {Uint16} - user fee selector
- * @input onChain - {Bool} - determines if the transaction is L1 or L2
- * @input newAccount - {Bool} - determines if transaction creates a new account
  * @input sigL2Hash - {Field} - hash L2 data to sign
  * @input s - {Field} - eddsa signature field
  * @input r8x - {Field} - eddsa signature field
  * @input r8y - {Field} - eddsa signature field
- * @input tokenID1 - {Uint32} - tokenID of the sender leaf
- * @input nonce1 - {Uint40} - nonce of the sender leaf
- * @input sign1 - {Bool} - sign of the sender leaf
- * @input balance1 - {Uint192} - balance of the sender leaf
- * @input ay1 - {Field} - ay of the sender leaf
- * @input ethAddr1 - {Uint160} - ethAddr of the sender leaf
- * @input siblings1[nLevels + 1] - {Array(Field)} - siblings merkle proof of the sender leaf
- * @input isOld0_1 - {Bool} - flag to require old key - value
- * @input oldKey1 - {Uint48} - old key of the sender leaf
- * @input oldValue1 - {Field} - old value of the sender leaf
- * @input tokenID2 - {Uint32} - tokenID of the receiver leaf
- * @input nonce2 - {Uint40} - nonce of the receiver leaf
- * @input sign2 - {Bool} - sign of the receiver leaf
- * @input balance2 - {Uint192} - balance of the receiver leaf
- * @input ay2 - {Field} - ay of the receiver leaf
- * @input ethAddr2 - {Uint160} - ethAddr of the receiver leaf
- * @input siblings2[nLevels + 1] - {Array(Field)} - siblings merkle proof of the receiver leaf
- * @input isOld0_2 - {Bool} - flag to require old key - value
- * @input oldKey2 - {Uint48} - old key of the sender leaf
- * @input oldValue2 - {Field} - old value of the sender leaf
- * @input oldStateRoot - {Field} - initial state root
+ * @input sign - {Bool} - sign of the account leaf
+ * @input balance - {Uint192} - balance of the account leaf
+ * @input ay - {Field} - ay of the account leaf
+ * @input ethAddr - {Uint160} - ethAddr of the account leaf
+ * @input balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the account tree
+ * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the account tree
+ * @input oldExitTotal - {Uint192} - amount already exit in the history
+ * @input exit_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the exit tree
+ * @input exit_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the exit tree
+ * @input oldBalanceRoot - {Field} - initial account balance state root
+ * @input newBalanceRoot - {Field} - final account balance state root
+ * @input oldExitBalanceRoot - {Field} - initial total exit amount state root
+ * @input newExitBalanceRoot - {Field} - final total exit amount state root
+ * @input oldAccountRoot - {Field} - initial acount state root
+ * @input newAccountRoot - {Field} - final acount state root
  * @input oldExitRoot - {Field} - initial exit root
- * @output isAmountNullified - {Bool} - determines if the amount is nullified
- * @output accFeeOut[maxFeeTx] - {Array(Uint192)} - final fees accumulated
- * @output newStateRoot - {Field} - final state root
- * @output newExitRoot - {Field} - final exit root
+ * @input newExitRoot - {Field} - final exit root
  */
 template Withdraw(balanceLevels, accountLevels) {
     // Tx
