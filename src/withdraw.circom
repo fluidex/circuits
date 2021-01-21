@@ -152,7 +152,7 @@ template Withdraw(balanceLevels, accountLevels) {
     }
     balance_checker.oldRoot <== oldBalanceRoot;
     balance_checker.newRoot <== newBalanceRoot;
-    // exit balance
+    // total exit
     component exit_total_checker = CheckLeafUpdate(balanceLevels);
     exit_total_checker.oldLeaf <== oldExitTotal;
     exit_total_checker.newLeaf <== oldExitTotal + amount;
@@ -163,60 +163,57 @@ template Withdraw(balanceLevels, accountLevels) {
     exit_total_checker.oldRoot <== oldExitBalanceRoot;
     exit_total_checker.newRoot <== newExitBalanceRoot;
 
-    // I - compute hash new states
-    ////////
-    // newState1 hash state
-    component newSt1Hash = HashState();
-    newSt1Hash.tokenID <== tokenID1;
-    newSt1Hash.nonce <== nonce1 + 1;
-    newSt1Hash.sign <== sign1;
-    newSt1Hash.balance <== balanceUpdater.newStBalanceSender;
-    newSt1Hash.ay <== ay1;
-    newSt1Hash.ethAddr <== ethAddr1;
+    // - compute account state
+    ///////
+    // old account state hash
+    component oldAccountHash = HashAccount();
+    oldAccountHash.nonce <== nonce;
+    oldAccountHash.sign <== sign;
+    oldAccountHash.balanceRoot <== oldBalanceRoot;
+    oldAccountHash.ay <== ay;
+    oldAccountHash.ethAddr <== ethAddr;
+    // new account state hash
+    component newAccountHash = HashAccount();
+    newAccountHash.nonce <== nonce+1;
+    newAccountHash.sign <== sign;
+    newAccountHash.balanceRoot <== newBalanceRoot;
+    newAccountHash.ay <== ay;
+    newAccountHash.ethAddr <== ethAddr;
+    // old exit account state hash
+    component oldExitHash = HashAccount();
+    oldExitHash.nonce <== 0; // exit tree leafs has always nonce 0
+    oldExitHash.sign <== sign;
+    oldExitHash.balanceRoot <== oldExitBalanceRoot;
+    oldExitHash.ay <== ay;
+    oldExitHash.ethAddr <== ethAddr;
+    // new exit account state hash
+    component newExitHash = HashAccount();
+    newExitHash.nonce <== 0; // exit tree leafs has always nonce 0
+    newExitHash.sign <== sign;
+    newExitHash.balanceRoot <== newExitBalanceRoot;
+    newExitHash.ay <== ay;
+    newExitHash.ethAddr <== ethAddr;
 
-    // newState2 hash state
-    component newSt2Hash = HashState();
-    newSt2Hash.tokenID <== s2TokenID.out;
-    newSt2Hash.nonce <== 0; // exit tree leafs has always nonce 0
-    newSt2Hash.sign <== s2Sign.out;
-    newSt2Hash.balance <== balanceUpdater.newStBalanceReceiver;
-    newSt2Hash.ay <== s2Ay.out;
-    newSt2Hash.ethAddr <== s2EthAddr.out;
-
-    // J - smt processors
-    ////////
-    // processor 1: sender
-    component processor1 = SMTProcessor(nLevels+1) ;
-    processor1.oldRoot <== oldStateRoot;
-    for (i = 0; i < nLevels + 1; i++) {
-        processor1.siblings[i] <== siblings1[i];
+    // - check account tree update
+    ///////
+    // check account tree update
+    component account_update_checker = CheckLeafUpdate(accountLevels);
+    account_update_checker.oldLeaf <== oldAccountHash.out;
+    account_update_checker.newLeaf <== newAccountHash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        account_update_checker.path_index[i] <== account_path_index[i];
+        account_update_checker.path_elements[i][0] <== account_path_elements[i][0];
     }
-    processor1.oldKey <== states.key1;
-    processor1.oldValue <== oldSt1Hash.out;
-    processor1.isOld0 <== isOld0_1;
-    processor1.newKey <== states.key1;
-    processor1.newValue <== newSt1Hash.out;
-    processor1.fnc[0] <== states.P1_fnc0;
-    processor1.fnc[1] <== states.P1_fnc1;
-
-    // processor 2: receiver
-    component processor2 = SMTProcessor(nLevels+1) ;
-    processor2.oldRoot <== oldExitRoot;
-    for (i = 0; i < nLevels + 1; i++) {
-        processor2.siblings[i] <== siblings2[i];
+    account_update_checker.oldRoot <== oldAccountRoot;
+    account_update_checker.newRoot <== newAccountRoot;
+    // check exit tree update
+    component exit_update_checker = CheckLeafUpdate(accountLevels);
+    exit_update_checker.oldLeaf <== oldExitHash.out;
+    exit_update_checker.newLeaf <== newExitHash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        exit_update_checker.path_index[i] <== account_path_index[i];
+        exit_update_checker.path_elements[i][0] <== exit_account_path_elements[i][0];
     }
-    processor2.oldKey <== s2OldKey.out;
-    processor2.oldValue <== s2OldValue.out;
-    processor2.isOld0 <== isOld0_2;
-    processor2.newKey <== states.key2;
-    processor2.newValue <== newSt2Hash.out;
-    processor2.fnc[0] <== states.P2_fnc0*balanceUpdater.isP2Nop;
-    processor2.fnc[1] <== states.P2_fnc1*balanceUpdater.isP2Nop;
-
-    // K - select output roots
-    ////////
-    // new state root
-    // processor1.newRoot ==> newStateRoot;
-    // new exit root
-    processor2.newRoot ==> newExitRoot;
+    exit_update_checker.oldRoot <== oldExitRoot;
+    exit_update_checker.newRoot <== newExitRoot;
 }
