@@ -152,13 +152,6 @@ template Withdraw(balanceLevels, accountLevels) {
     // tokenID signed by the user must match tokenID of the receiver account
     tokenID === tokenID1;
 
-    // receiver tokenID check on L2
-    // tokenID signed by the user must match tokenID of the sender account
-    component checkTokenID2 = ForceEqualIfEnabled();
-    checkTokenID2.in[0] <== tokenID;
-    checkTokenID2.in[1] <== tokenID2;
-    checkTokenID2.enabled <== (1 - onChain)*(1 - states.isP2Insert);
-
     // D - compute old hash states
     ////////
     // oldState1 Packer
@@ -173,64 +166,11 @@ template Withdraw(balanceLevels, accountLevels) {
     // oldState2 Packer
     component oldSt2Hash = HashState();
     oldSt2Hash.tokenID <== tokenID2;
-    oldSt2Hash.nonce <== nonce2;
+    oldSt2Hash.nonce <== 0; // exit tree leafs has always nonce 0
     oldSt2Hash.sign <== sign2;
     oldSt2Hash.balance <== balance2;
     oldSt2Hash.ay <== ay2;
     oldSt2Hash.ethAddr <== ethAddr2;
-
-    // state processor 1 : newAccount * onChain
-    // perform INSERT if transaction is L1 and involves and account creation
-    // the following multiplexers choose between signals if state processor is an INSERT
-
-    // state processor 2 : isExit * newExit
-    // perform INSERT if transaction is an 'exit' and involves and account creation on exit tree
-    // Note: when exit tx is performed and it involves an account creation on the exoit tree, the account created
-    // on the exit tree would be equal as the sender account
-    // the following multiplexers choose between signals if state processor is an INSERT
-
-    // INSERT: new exit account balance would be 0
-    // otherwise, balance receiver account will be selected
-    component s2Balance = Mux1();
-    s2Balance.c[0] <== balance2;
-    s2Balance.c[1] <== 0;
-    s2Balance.s <== states.isP2Insert;
-
-    // INSERT: babyjubjub sign will be taken from sender leaf
-    // otherwise, babyjubjub sign receiver account would be selected
-    component s2Sign = Mux1();
-    s2Sign.c[0] <== sign2;
-    s2Sign.c[1] <== sign1;
-    s2Sign.s <== states.isP2Insert;
-
-    // INSERT: babyjubjub Y coordinate will be taken from sender leaf
-    // otherwise, babyjubjub sign receiver account would be selected
-    component s2Ay = Mux1();
-    s2Ay.c[0] <== ay2;
-    s2Ay.c[1] <== ay1;
-    s2Ay.s <== states.isP2Insert;
-
-    // INSERT: nonce will be 0
-    // otherwise, nonce receiver account would be selected
-    // Note: exit tree leafs has always nonce 0
-    component s2Nonce = Mux1();
-    s2Nonce.c[0] <== nonce2;
-    s2Nonce.c[1] <== 0;
-    s2Nonce.s <== states.isP2Insert;
-
-    // INSERT: ethereum address will be taken from sender leaf
-    // otherwise, ethereum address receiver account would be selected
-    component s2EthAddr = Mux1();
-    s2EthAddr.c[0] <== ethAddr2;
-    s2EthAddr.c[1] <== ethAddr1;
-    s2EthAddr.s <== states.isP2Insert;
-
-    // INSERT: token identifier will be taken from sender leaf
-    // otherwise, token identifier receiver account would be selected
-    component s2TokenID = Mux1();
-    s2TokenID.c[0] <== tokenID2;
-    s2TokenID.c[1] <== tokenID1;
-    s2TokenID.s <== states.isP2Insert;
 
     // INSERT: procesor old key will be taken from 'oldKey2' which is set by the coordinator
     // otherwise, key is selected from states depending on tx type
@@ -300,7 +240,7 @@ template Withdraw(balanceLevels, accountLevels) {
     // newState2 hash state
     component newSt2Hash = HashState();
     newSt2Hash.tokenID <== s2TokenID.out;
-    newSt2Hash.nonce <== s2Nonce.out;
+    newSt2Hash.nonce <== 0; // exit tree leafs has always nonce 0
     newSt2Hash.sign <== s2Sign.out;
     newSt2Hash.balance <== balanceUpdater.newStBalanceReceiver;
     newSt2Hash.ay <== s2Ay.out;
