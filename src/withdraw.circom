@@ -27,19 +27,13 @@ include "./lib/binary_merkle_tree.circom";
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input nonce - {Uint40} - nonce signed in the transaction
  * @input userFee - {Uint16} - user fee selector
- * @input rqOffset - {Uint3} - relative linked transaction
  * @input onChain - {Bool} - determines if the transaction is L1 or L2
  * @input newAccount - {Bool} - determines if transaction creates a new account
- * @input rqTxCompressedDataV2 - {Uint193} - requested encode transaction fields together version 2
- * @input rqToEthAddr - {Uint160} - requested ethereum address receiver
- * @input rqToBjjAy - {Field} - requested babyjubjub y coordinate
  * @input sigL2Hash - {Field} - hash L2 data to sign
  * @input s - {Field} - eddsa signature field
  * @input r8x - {Field} - eddsa signature field
  * @input r8y - {Field} - eddsa signature field
  * @input fromEthAddr - {Uint160} - ethereum address sender
- * @input fromBjjCompressed[256]- {Array(Bool)} - babyjubjub compressed sender
- * @input loadAmountF - {Uint16} - amount to deposit from L1 to L2 encoded as float16
  * @input tokenID1 - {Uint32} - tokenID of the sender leaf
  * @input nonce1 - {Uint40} - nonce of the sender leaf
  * @input sign1 - {Bool} - sign of the sender leaf
@@ -82,13 +76,8 @@ template Withdraw(balanceLevels, accountLevels) {
     // signal input tokenID;
     // signal input nonce;
     // signal input userFee;
-    // signal input rqOffset;
     // signal input onChain;
     // signal input newAccount;
-
-    // signal input rqTxCompressedDataV2;
-    // signal input rqToEthAddr;
-    // signal input rqToBjjAy;
 
     // signal input sigL2Hash;
     // signal input s;
@@ -97,8 +86,6 @@ template Withdraw(balanceLevels, accountLevels) {
 
     // // For L1 TX
     // signal input fromEthAddr;
-    // signal input fromBjjCompressed[256];
-    // signal input loadAmountF;
 
     // Account-balance state
     // signal input nonce;
@@ -123,6 +110,11 @@ template Withdraw(balanceLevels, accountLevels) {
     signal input newAccountRoot;
     signal input oldExitRoot;
     signal input newExitRoot;
+
+    // Path index
+    signal balance_path_index[balanceLevels];
+    signal account_path_index[accountLevels];
+    signal exit_path_index[accountLevels];
 
     // compute states
     component states = RollupTxStates();
