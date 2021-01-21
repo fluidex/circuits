@@ -33,7 +33,6 @@ include "./lib/binary_merkle_tree.circom";
  * @input s - {Field} - eddsa signature field
  * @input r8x - {Field} - eddsa signature field
  * @input r8y - {Field} - eddsa signature field
- * @input fromEthAddr - {Uint160} - ethereum address sender
  * @input tokenID1 - {Uint32} - tokenID of the sender leaf
  * @input nonce1 - {Uint40} - nonce of the sender leaf
  * @input sign1 - {Bool} - sign of the sender leaf
@@ -62,33 +61,18 @@ include "./lib/binary_merkle_tree.circom";
  * @output newExitRoot - {Field} - final exit root
  */
 template Withdraw(balanceLevels, accountLevels) {
-    // // Tx
-    // signal input fromIdx;
-    // signal input auxFromIdx;
+    // Tx
+    signal input AccountID;
+    signal input amount;
+    signal input tokenID;
+    signal input nonce;
 
-    // signal input toIdx;
-    // signal input auxToIdx;
-    // signal input toBjjAy;
-    // signal input toBjjSign;
-    // signal input toEthAddr;
-
-    // signal input amount;
-    // signal input tokenID;
-    // signal input nonce;
-    // signal input userFee;
-    // signal input onChain;
-    // signal input newAccount;
-
-    // signal input sigL2Hash;
-    // signal input s;
-    // signal input r8x;
-    // signal input r8y;
-
-    // // For L1 TX
-    // signal input fromEthAddr;
+    signal input sigL2Hash; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
+    signal input s;
+    signal input r8x;
+    signal input r8y;
 
     // Account-balance state
-    // signal input nonce;
     signal input sign;
     signal input balance;
     signal input ay;
@@ -128,7 +112,6 @@ template Withdraw(balanceLevels, accountLevels) {
     states.loadAmount <== loadAmount;
     states.newAccount <== newAccount;
     states.onChain <== onChain;
-    states.fromEthAddr <== fromEthAddr;
     states.ethAddr1 <== ethAddr1;
     states.tokenID <== tokenID;
     states.tokenID1 <== tokenID1;
