@@ -26,8 +26,6 @@ class TestWithdraw implements SimpleTest {
     const nonce = 51;
     const balance = 500n;
 
-    const oldExitTotal = 700n;
-
     // account state
     let balanceLeaves = [10n, 11n, balance, 13n];
     let balanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
@@ -52,30 +50,6 @@ class TestWithdraw implements SimpleTest {
     };
     const newAccountHash = hashAccountState(newAccount);
 
-    // exit state
-    let exitBalanceLeaves = [0n, 21n, oldExitTotal, 0n];
-    let exitBalanceMidLevel = [poseidon([exitBalanceLeaves[0], exitBalanceLeaves[1]]), poseidon([exitBalanceLeaves[2], exitBalanceLeaves[3]])];
-    let oldExitBalanceRoot = poseidon(exitBalanceMidLevel);
-    exitBalanceLeaves[tokenID] = oldExitTotal + amount;
-    exitBalanceMidLevel = [poseidon([exitBalanceLeaves[0], exitBalanceLeaves[1]]), poseidon([exitBalanceLeaves[2], exitBalanceLeaves[3]])];
-    let newExitBalanceRoot = poseidon(exitBalanceMidLevel);
-    const oldExitAccount = {
-      nonce: 0,
-      sign: account.sign,
-      balanceRoot: oldExitBalanceRoot,
-      ay: account.ay,
-      ethAddr: ethAddrNoPrefix,
-    };
-    const oldExitAccountHash = hashAccountState(oldExitAccount);
-    const newExitAccount = {
-      nonce: 0,
-      sign: account.sign,
-      balanceRoot: newExitBalanceRoot,
-      ay: account.ay,
-      ethAddr: ethAddrNoPrefix,
-    };
-    const newExitAccountHash = hashAccountState(newExitAccount);
-
     // account tree
     let accountLeaves = [70n, oldAccountHash, 72n, 73n];
     let accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
@@ -83,14 +57,6 @@ class TestWithdraw implements SimpleTest {
     accountLeaves[accountID] = newAccountHash;
     accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
     let newAccountRoot = poseidon(accountMidLevel);
-    
-    // exit tree
-    let exitLeaves = [80n, oldExitAccountHash, 82n, 83n];
-    let exitMidLevel = [poseidon([exitLeaves[0], exitLeaves[1]]), poseidon([exitLeaves[2], exitLeaves[3]])];
-    let oldExitRoot = poseidon(exitMidLevel);
-    exitLeaves[accountID] = newExitAccountHash;
-    exitMidLevel = [poseidon([exitLeaves[0], exitLeaves[1]]), poseidon([exitLeaves[2], exitLeaves[3]])];
-    let newExitRoot = poseidon(exitMidLevel);
 
     // TODO: construct tx and compute hash
     let mockTxHash = poseidon([TxType.Withdraw, tokenID, amount]);
@@ -112,17 +78,10 @@ class TestWithdraw implements SimpleTest {
       ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
       balance_path_elements: [[balanceLeaves[3]], [balanceMidLevel[0]]],
       account_path_elements: [[accountLeaves[0]], [accountMidLevel[1]]],
-      oldExitTotal: oldExitTotal,
-      exit_balance_path_elements: [[exitBalanceLeaves[3]], [exitBalanceMidLevel[0]]],
-      exit_account_path_elements: [[exitLeaves[0]], [exitMidLevel[1]]],
       oldBalanceRoot: oldBalanceRoot,
       newBalanceRoot: newBalanceRoot,
-      oldExitBalanceRoot: oldExitBalanceRoot,
-      newExitBalanceRoot: newExitBalanceRoot,
       oldAccountRoot: oldAccountRoot,
       newAccountRoot: newAccountRoot,
-      oldExitRoot: oldExitRoot,
-      newExitRoot: newExitRoot,
     };
   }
   getOutput() {
