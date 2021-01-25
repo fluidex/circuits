@@ -7,6 +7,7 @@ import { TestCheckLeafExists, TestCheckLeafUpdate } from './binary_merkle_tree';
 import { TestHashAccount } from './hash_state';
 import { TestDepositToNew, TestDepositToOld } from './deposit';
 import { TestTransfer } from './transfer';
+import { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash } from "./rescue";
 
 async function generateMainTestCircom({ src, main }: TestComponent) {
   let srcCode = `include "${src}";
@@ -22,11 +23,15 @@ async function generateMainTestCircom({ src, main }: TestComponent) {
 
 async function testWithInputOutput(t: SimpleTest) {
   let circuit = await generateMainTestCircom(t.getComponent());
+  let logFn = console.log;
   let calculateWitnessOptions = {
     sanityCheck: true,
-    logTrigger: false,
-    logOutput: false,
-    logSet: false,
+    logTrigger: logFn,
+    logOutput: logFn,
+    logStartComponent: logFn,
+    logFinishComponent: logFn,
+    logSetSignal: logFn,
+    logGetSignal: logFn,
   };
   const witness = await circuit.calculateWitness(t.getInput(), calculateWitnessOptions);
   await circuit.checkConstraints(witness);
@@ -38,6 +43,7 @@ async function testWithInputOutput(t: SimpleTest) {
 
 async function main() {
   try {
+    await testWithInputOutput(new TestRescueHash());
     await testWithInputOutput(new TestCheckLeafExists());
     await testWithInputOutput(new TestCheckLeafUpdate());
     await testWithInputOutput(new TestHashAccount());
