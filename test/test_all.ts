@@ -7,6 +7,7 @@ import { TestCheckLeafExists, TestCheckLeafUpdate } from './binary_merkle_tree';
 import { TestHashAccount } from './hash_state';
 import { TestDepositToNew, TestDepositToOld } from './deposit';
 import { TestTransfer } from './transfer';
+import { TestWithdraw } from './withdraw';
 import { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash } from "./rescue";
 
 async function generateMainTestCircom({ src, main }: TestComponent) {
@@ -50,6 +51,7 @@ async function main() {
     await testWithInputOutput(new TestDepositToNew());
     await testWithInputOutput(new TestDepositToOld());
     await testWithInputOutput(new TestTransfer());
+    await testWithInputOutput(new TestWithdraw());
   } catch (e) {
     console.error(e);
   }
