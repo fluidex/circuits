@@ -99,7 +99,6 @@ template Withdraw(balanceLevels, accountLevels) {
 
     // - check balance tree update
     ////////
-    // account balance
     component balance_checker = CheckLeafUpdate(balanceLevels);
     balance_checker.oldLeaf <== balance;
     balance_checker.newLeaf <== balance - amount;
@@ -129,7 +128,6 @@ template Withdraw(balanceLevels, accountLevels) {
 
     // - check account tree update
     ///////
-    // check account tree update
     component account_update_checker = CheckLeafUpdate(accountLevels);
     account_update_checker.oldLeaf <== oldAccountHash.out;
     account_update_checker.newLeaf <== newAccountHash.out;
