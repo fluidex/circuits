@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -uex
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 function use_rescue() {
@@ -10,4 +12,3 @@ function use_poseidon() {
 }
 use_rescue
 #use_poseidon
-
