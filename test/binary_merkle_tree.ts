@@ -1,12 +1,12 @@
 import * as path from 'path';
-import { poseidon } from 'circomlib';
+import { hash } from '../helper.ts/hash';
 import { SimpleTest, TestComponent } from './interface';
 
 class TestCheckLeafExists implements SimpleTest {
   getInput() {
     let leaves = [10n, 11n, 12n, 13n];
-    let midLevel = [poseidon([leaves[0], leaves[1]]), poseidon([leaves[2], leaves[3]])];
-    let root = poseidon(midLevel);
+    let midLevel = [hash([leaves[0], leaves[1]]), hash([leaves[2], leaves[3]])];
+    let root = hash(midLevel);
     // check leaves[2] in this tree
     let leaf = leaves[2];
     let path_elements = [[leaves[3]], [midLevel[0]]];
@@ -28,8 +28,8 @@ class TestCheckLeafUpdate implements SimpleTest {
   getInput() {
     let leaves = [10n, 11n, 12n, 13n];
     function getSampleMerklePath() {
-      let midLevel = [poseidon([leaves[0], leaves[1]]), poseidon([leaves[2], leaves[3]])];
-      let root = poseidon(midLevel);
+      let midLevel = [hash([leaves[0], leaves[1]]), hash([leaves[2], leaves[3]])];
+      let root = hash(midLevel);
       // check leaves[2] in this tree
       let leaf = leaves[2];
       let path_elements = [[leaves[3]], [midLevel[0]]];

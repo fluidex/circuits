@@ -121,7 +121,7 @@ template RescueMimc() {
     
 }
 
-template RescueHash(nInputs) {
+template Rescue(nInputs) {
     signal input inputs[nInputs];
     signal output out;
 

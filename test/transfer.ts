@@ -1,6 +1,6 @@
 import * as path from 'path';
-import { poseidon } from 'circomlib';
-const Scalar = require("ffjavascript").Scalar;
+import { hash } from '../helper.ts/hash';
+const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
@@ -23,23 +23,29 @@ class TestTransfer implements SimpleTest {
 
     const fromAccountID = 2;
     const account1 = new Account(1);
-    const ethAddr1NoPrefix = account1.ethAddr.replace("0x", "");
+    const ethAddr1NoPrefix = account1.ethAddr.replace('0x', '');
     const nonce1 = 51;
     const balance1 = 500n;
 
     const toAccountID = 1;
     const account2 = new Account(2);
-    const ethAddr2NoPrefix = account2.ethAddr.replace("0x", "");
+    const ethAddr2NoPrefix = account2.ethAddr.replace('0x', '');
     const nonce2 = 77;
     const balance2 = 200n;
 
     // sender state
     let senderBalanceLeaves = [10n, 11n, balance1, 13n];
-    let senderBalanceMidLevel = [poseidon([senderBalanceLeaves[0], senderBalanceLeaves[1]]), poseidon([senderBalanceLeaves[2], senderBalanceLeaves[3]])];
-    let oldSenderBalanceRoot = poseidon(senderBalanceMidLevel);
+    let senderBalanceMidLevel = [
+      hash([senderBalanceLeaves[0], senderBalanceLeaves[1]]),
+      hash([senderBalanceLeaves[2], senderBalanceLeaves[3]]),
+    ];
+    let oldSenderBalanceRoot = hash(senderBalanceMidLevel);
     senderBalanceLeaves[tokenID] = balance1 - amount;
-    senderBalanceMidLevel = [poseidon([senderBalanceLeaves[0], senderBalanceLeaves[1]]), poseidon([senderBalanceLeaves[2], senderBalanceLeaves[3]])];
-    let newSenderBalanceRoot = poseidon(senderBalanceMidLevel);
+    senderBalanceMidLevel = [
+      hash([senderBalanceLeaves[0], senderBalanceLeaves[1]]),
+      hash([senderBalanceLeaves[2], senderBalanceLeaves[3]]),
+    ];
+    let newSenderBalanceRoot = hash(senderBalanceMidLevel);
     const oldSender = {
       nonce: nonce1,
       sign: account1.sign,
@@ -49,7 +55,7 @@ class TestTransfer implements SimpleTest {
     };
     const oldSenderHash = hashAccountState(oldSender);
     const newSender = {
-      nonce: nonce1+1,
+      nonce: nonce1 + 1,
       sign: account1.sign,
       balanceRoot: newSenderBalanceRoot,
       ay: account1.ay,
@@ -59,11 +65,17 @@ class TestTransfer implements SimpleTest {
 
     // receiver state
     let receiverBalanceLeaves = [20n, 21n, balance2, 23n];
-    let receiverBalanceMidLevel = [poseidon([receiverBalanceLeaves[0], receiverBalanceLeaves[1]]), poseidon([receiverBalanceLeaves[2], receiverBalanceLeaves[3]])];
-    let oldReceiverBalanceRoot = poseidon(receiverBalanceMidLevel);
+    let receiverBalanceMidLevel = [
+      hash([receiverBalanceLeaves[0], receiverBalanceLeaves[1]]),
+      hash([receiverBalanceLeaves[2], receiverBalanceLeaves[3]]),
+    ];
+    let oldReceiverBalanceRoot = hash(receiverBalanceMidLevel);
     receiverBalanceLeaves[tokenID] = balance2 + amount;
-    receiverBalanceMidLevel = [poseidon([receiverBalanceLeaves[0], receiverBalanceLeaves[1]]), poseidon([receiverBalanceLeaves[2], receiverBalanceLeaves[3]])];
-    let newReceiverBalanceRoot = poseidon(receiverBalanceMidLevel);
+    receiverBalanceMidLevel = [
+      hash([receiverBalanceLeaves[0], receiverBalanceLeaves[1]]),
+      hash([receiverBalanceLeaves[2], receiverBalanceLeaves[3]]),
+    ];
+    let newReceiverBalanceRoot = hash(receiverBalanceMidLevel);
     const oldReceiver = {
       nonce: nonce2,
       sign: account2.sign,
@@ -83,21 +95,21 @@ class TestTransfer implements SimpleTest {
 
     // account tree
     let oldAccountLeaves = [70n, oldReceiverHash, oldSenderHash, 73n];
-    let oldAccountMidLevel = [poseidon([oldAccountLeaves[0], oldAccountLeaves[1]]), poseidon([oldAccountLeaves[2], oldAccountLeaves[3]])];
-    let oldAccountRoot = poseidon(oldAccountMidLevel);
+    let oldAccountMidLevel = [hash([oldAccountLeaves[0], oldAccountLeaves[1]]), hash([oldAccountLeaves[2], oldAccountLeaves[3]])];
+    let oldAccountRoot = hash(oldAccountMidLevel);
     let tmpAccountLeaves = [70n, oldReceiverHash, newSenderHash, 73n];
-    let tmpAccountMidLevel = [poseidon([tmpAccountLeaves[0], tmpAccountLeaves[1]]), poseidon([tmpAccountLeaves[2], tmpAccountLeaves[3]])];
-    let tmpAccountRoot = poseidon(tmpAccountMidLevel);
+    let tmpAccountMidLevel = [hash([tmpAccountLeaves[0], tmpAccountLeaves[1]]), hash([tmpAccountLeaves[2], tmpAccountLeaves[3]])];
+    let tmpAccountRoot = hash(tmpAccountMidLevel);
     let newAccountLeaves = [70n, newReceiverHash, newSenderHash, 73n];
-    let newAccountMidLevel = [poseidon([newAccountLeaves[0], newAccountLeaves[1]]), poseidon([newAccountLeaves[2], newAccountLeaves[3]])];
-    let newAccountRoot = poseidon(newAccountMidLevel);
+    let newAccountMidLevel = [hash([newAccountLeaves[0], newAccountLeaves[1]]), hash([newAccountLeaves[2], newAccountLeaves[3]])];
+    let newAccountRoot = hash(newAccountMidLevel);
 
     // TODO: construct tx and compute hash
-    let mockTxHash = poseidon([TxType.Transfer, tokenID, amount]);
-    mockTxHash = poseidon([mockTxHash, fromAccountID, nonce1, balance1]);
-    mockTxHash = poseidon([mockTxHash, toAccountID, nonce2, balance2]);
+    let mockTxHash = hash([TxType.Transfer, tokenID, amount]);
+    mockTxHash = hash([mockTxHash, fromAccountID, nonce1, balance1]);
+    mockTxHash = hash([mockTxHash, toAccountID, nonce2, balance2]);
     let signature = account1.signHash(mockTxHash);
-    
+
     return {
       fromAccountID: fromAccountID,
       toAccountID: toAccountID,
@@ -137,7 +149,7 @@ class TestTransfer implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'transfer.circom'),
-      main: 'Transfer('+balanceLevels+', '+accountLevels+ ')',
+      main: 'Transfer(' + balanceLevels + ', ' + accountLevels + ')',
     };
   }
 }

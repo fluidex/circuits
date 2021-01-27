@@ -1,11 +1,11 @@
 // Refer to:
 // https://github.com/hermeznetwork/circuits/blob/master/src/lib/hash-state.circom
 
-include "../../node_modules/circomlib/circuits/poseidon.circom";
+include "rescue.circom";
 
 /**
  * Computes the hash of an account state
- * State Hash = Poseidon(e0, e1, e2, e3)
+ * State Hash = Rescue(e0, e1, e2, e3)
  * e0: sign(1 bit) | nonce(40bits)
  * e1: balanceRoot
  * e2: ay
@@ -15,7 +15,7 @@ include "../../node_modules/circomlib/circuits/poseidon.circom";
  * @input balanceRoot - {Field} - account's balance_tree root
  * @input ay - {Field} - babyjubjub Y coordinate
  * @input ethAddr - {Uint160} - etehreum address
- * @output out - {Field} - resulting poseidon hash
+ * @output out - {Field} - resulting rescue hash
  */
 template HashAccount() {
     signal input nonce;
@@ -30,7 +30,7 @@ template HashAccount() {
 
     e0 <== nonce + sign * (1 << 40);
 
-    component hash = Poseidon(4);
+    component hash = Rescue(4);
 
     hash.inputs[0] <== e0;
     hash.inputs[1] <== balanceRoot;

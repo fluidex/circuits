@@ -1,5 +1,5 @@
 include "../node_modules/circomlib/circuits/bitify.circom";
-include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
+include "lib/eddsarescue.circom";
 include "./lib/utils_bjj.circom";
 include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
@@ -79,7 +79,7 @@ template Withdraw(balanceLevels, accountLevels) {
     getAx.sign <== sign;
 
     // signature L2 verifier
-    component sigVerifier = EdDSAPoseidonVerifier();
+    component sigVerifier = EdDSARescueVerifier();
     sigVerifier.enabled <== 1;
 
     sigVerifier.Ax <== getAx.ax;

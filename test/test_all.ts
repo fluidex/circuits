@@ -8,7 +8,7 @@ import { TestHashAccount } from './hash_state';
 import { TestDepositToNew, TestDepositToOld } from './deposit';
 import { TestTransfer } from './transfer';
 import { TestWithdraw } from './withdraw';
-import { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash } from "./rescue";
+import { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash } from './rescue';
 
 async function generateMainTestCircom({ src, main }: TestComponent) {
   let srcCode = `include "${src}";

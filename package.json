@@ -1,4 +1,8 @@
 {
+  "scripts": {
+      "test": "npx ts-node ./test/test_all.ts",
+      "fmt": "prettier --write \"**/*.{js,ts}\""
+  }, 
   "devDependencies": {
     "@types/node": "^14.14.11",
     "circomlib": "^0.3.0",
