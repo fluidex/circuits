@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { poseidon } from 'circomlib';
+import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
@@ -28,11 +28,11 @@ class TestWithdraw implements SimpleTest {
 
     // account state
     let balanceLeaves = [10n, 11n, balance, 13n];
-    let balanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
-    let oldBalanceRoot = poseidon(balanceMidLevel);
+    let balanceMidLevel = [hash([balanceLeaves[0], balanceLeaves[1]]), hash([balanceLeaves[2], balanceLeaves[3]])];
+    let oldBalanceRoot = hash(balanceMidLevel);
     balanceLeaves[tokenID] = balance - amount;
-    balanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
-    let newBalanceRoot = poseidon(balanceMidLevel);
+    balanceMidLevel = [hash([balanceLeaves[0], balanceLeaves[1]]), hash([balanceLeaves[2], balanceLeaves[3]])];
+    let newBalanceRoot = hash(balanceMidLevel);
     const oldAccount = {
       nonce: nonce,
       sign: account.sign,
@@ -52,15 +52,15 @@ class TestWithdraw implements SimpleTest {
 
     // account tree
     let accountLeaves = [70n, oldAccountHash, 72n, 73n];
-    let accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
-    let oldAccountRoot = poseidon(accountMidLevel);
+    let accountMidLevel = [hash([accountLeaves[0], accountLeaves[1]]), hash([accountLeaves[2], accountLeaves[3]])];
+    let oldAccountRoot = hash(accountMidLevel);
     accountLeaves[accountID] = newAccountHash;
-    accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
-    let newAccountRoot = poseidon(accountMidLevel);
+    accountMidLevel = [hash([accountLeaves[0], accountLeaves[1]]), hash([accountLeaves[2], accountLeaves[3]])];
+    let newAccountRoot = hash(accountMidLevel);
 
     // TODO: construct tx and compute hash
-    let mockTxHash = poseidon([TxType.Withdraw, tokenID, amount]);
-    mockTxHash = poseidon([mockTxHash, accountID, nonce, balance]);
+    let mockTxHash = hash([TxType.Withdraw, tokenID, amount]);
+    mockTxHash = hash([mockTxHash, accountID, nonce, balance]);
     let signature = account.signHash(mockTxHash);
 
     return {

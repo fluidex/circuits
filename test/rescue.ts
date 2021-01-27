@@ -1,5 +1,4 @@
 import * as path from 'path';
-import { poseidon } from 'circomlib';
 import { SimpleTest, TestComponent } from './interface';
 
 class TestPow5 implements SimpleTest {
@@ -66,7 +65,7 @@ class TestRescueHash implements SimpleTest {
     const cycles = Math.ceil(inputLen / RATE);
     return {
       src: path.join(__dirname, '..', 'src', 'lib', 'rescue.circom'),
-      main: `RescueHash(${inputLen})`,
+      main: `Rescue(${inputLen})`,
     };
   }
 }

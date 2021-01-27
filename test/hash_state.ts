@@ -1,11 +1,11 @@
 import * as path from 'path';
-import { poseidon } from 'circomlib';
+import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 
-const balanceRoot = poseidon([1n]);
+const balanceRoot = hash([1n]);
 const prvkey = 1;
 const account = new Account(prvkey);
 const ethAddrNoPrefix = account.ethAddr.replace('0x', '');

@@ -2,10 +2,11 @@ const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
 const keccak256 = require('js-sha3').keccak256;
 const crypto = require('crypto');
-const eddsa = require('circomlib').eddsa;
+const eddsa = require('./eddsa');
 const babyJub = require('circomlib').babyJub;
 const Scalar = require('ffjavascript').Scalar;
 const utilsScalar = require('ffjavascript').utils;
+import { hash } from '../helper.ts/hash';
 
 const utils = require('./utils');
 
@@ -60,7 +61,7 @@ class Account {
   }
 
   signHash(h) {
-    const signature = eddsa.signPoseidon(this.rollupPrvKey, h);
+    const signature = eddsa.signWithHasher(this.rollupPrvKey, h, hash);
     // r8x = signature.R8[0];
     // r8y = signature.R8[1];
     // s = signature.S;

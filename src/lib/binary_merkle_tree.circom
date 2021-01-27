@@ -2,7 +2,7 @@
 // https://github.com/appliedzkp/maci/blob/master/circuits/circom/trees/incrementalMerkleTree.circom
 
 include "../../node_modules/circomlib/circuits/mux1.circom";
-include "../../node_modules/circomlib/circuits/poseidon.circom";
+include "rescue.circom";
 
 template HashLeftRight() {
   signal input left;
@@ -10,7 +10,7 @@ template HashLeftRight() {
 
   signal output hash;
 
-  component hasher = Poseidon(2);
+  component hasher = Rescue(2);
   left ==> hasher.inputs[0];
   right ==> hasher.inputs[1];
 

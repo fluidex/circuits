@@ -1,5 +1,5 @@
 const Scalar = require('ffjavascript').Scalar;
-const poseidonHash = require('circomlib').poseidon;
+import { hash } from '../helper.ts/hash';
 
 /**
  * Encode an account state object into an array
@@ -18,10 +18,10 @@ function accountState2Array(st) {
 /**
  * Return the hash of an account state object
  * @param {Object} st - Merkle tree account state object
- * @returns {Scalar} Resulting poseidon hash
+ * @returns {Scalar} Resulting hash
  */
 function hashAccountState(st) {
-  return poseidonHash(accountState2Array(st));
+  return hash(accountState2Array(st));
 }
 
 export { hashAccountState };

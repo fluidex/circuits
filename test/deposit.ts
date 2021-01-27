@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { poseidon } from 'circomlib';
+import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
@@ -25,12 +25,12 @@ class TestDepositToNew implements SimpleTest {
 
     // balance tree
     let balanceLeaves = [10n, 11n, 0n, 13n];
-    let balanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
-    let oldBalanceRoot = poseidon(balanceMidLevel);
+    let balanceMidLevel = [hash([balanceLeaves[0], balanceLeaves[1]]), hash([balanceLeaves[2], balanceLeaves[3]])];
+    let oldBalanceRoot = hash(balanceMidLevel);
 
     balanceLeaves[tokenID] = loadAmount;
-    balanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
-    let newBalanceRoot = poseidon(balanceMidLevel);
+    balanceMidLevel = [hash([balanceLeaves[0], balanceLeaves[1]]), hash([balanceLeaves[2], balanceLeaves[3]])];
+    let newBalanceRoot = hash(balanceMidLevel);
 
     // account tree
     const oldAccount = {
@@ -52,12 +52,12 @@ class TestDepositToNew implements SimpleTest {
     const newAccountHash = hashAccountState(newAccount);
 
     let accountLeaves = [20n, 21n, oldAccountHash, 23n];
-    let accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
-    let oldAccountRoot = poseidon(accountMidLevel);
+    let accountMidLevel = [hash([accountLeaves[0], accountLeaves[1]]), hash([accountLeaves[2], accountLeaves[3]])];
+    let oldAccountRoot = hash(accountMidLevel);
 
     accountLeaves[accountID] = newAccountHash;
-    accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
-    let newAccountRoot = poseidon(accountMidLevel);
+    accountMidLevel = [hash([accountLeaves[0], accountLeaves[1]]), hash([accountLeaves[2], accountLeaves[3]])];
+    let newAccountRoot = hash(accountMidLevel);
 
     return {
       accountID: accountID,
@@ -98,12 +98,12 @@ class TestDepositToOld implements SimpleTest {
 
     // balance tree
     let balanceLeaves = [10n, 11n, oldBalance, 13n];
-    let balanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
-    let oldBalanceRoot = poseidon(balanceMidLevel);
+    let balanceMidLevel = [hash([balanceLeaves[0], balanceLeaves[1]]), hash([balanceLeaves[2], balanceLeaves[3]])];
+    let oldBalanceRoot = hash(balanceMidLevel);
 
     balanceLeaves[tokenID] = oldBalance + loadAmount;
-    balanceMidLevel = [poseidon([balanceLeaves[0], balanceLeaves[1]]), poseidon([balanceLeaves[2], balanceLeaves[3]])];
-    let newBalanceRoot = poseidon(balanceMidLevel);
+    balanceMidLevel = [hash([balanceLeaves[0], balanceLeaves[1]]), hash([balanceLeaves[2], balanceLeaves[3]])];
+    let newBalanceRoot = hash(balanceMidLevel);
 
     // account tree
     const oldAccount = {
@@ -125,12 +125,12 @@ class TestDepositToOld implements SimpleTest {
     const newAccountHash = hashAccountState(newAccount);
 
     let accountLeaves = [20n, 21n, oldAccountHash, 23n];
-    let accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
-    let oldAccountRoot = poseidon(accountMidLevel);
+    let accountMidLevel = [hash([accountLeaves[0], accountLeaves[1]]), hash([accountLeaves[2], accountLeaves[3]])];
+    let oldAccountRoot = hash(accountMidLevel);
 
     accountLeaves[accountID] = newAccountHash;
-    accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
-    let newAccountRoot = poseidon(accountMidLevel);
+    accountMidLevel = [hash([accountLeaves[0], accountLeaves[1]]), hash([accountLeaves[2], accountLeaves[3]])];
+    let newAccountRoot = hash(accountMidLevel);
 
     return {
       accountID: accountID,

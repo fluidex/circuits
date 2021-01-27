@@ -1,5 +1,5 @@
 const Scalar = require('ffjavascript').Scalar;
-const poseidonHash = require('circomlib').poseidon;
+import { hash } from '../helper.ts/hash';
 const crypto = require('crypto');
 const babyJub = require('circomlib').babyJub;
 
@@ -113,7 +113,7 @@ function hashStateTree(balance, tokenId, Ax, Ay, ethAddress, nonce) {
     nonce,
   };
   // Hash entry and object
-  return { leafObj, elements: { e0, e1, e2, e3, e4 }, hash: poseidonHash(entryBigInt) };
+  return { leafObj, elements: { e0, e1, e2, e3, e4 }, hash: hash(entryBigInt) };
 }
 
 export { padding256, extract, padZeros, hashStateTree, sha256Snark };
