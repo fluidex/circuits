@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { poseidon } from 'circomlib';
-const Scalar = require("ffjavascript").Scalar;
+const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
@@ -8,13 +8,13 @@ import { SimpleTest, TestComponent } from './interface';
 const balanceRoot = poseidon([1n]);
 const prvkey = 1;
 const account = new Account(prvkey);
-const ethAddrNoPrefix = account.ethAddr.replace("0x", "");
+const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
 const account_state = {
-    nonce: 49,
-    sign: account.sign,
-    balanceRoot: balanceRoot,
-    ay: account.ay,
-    ethAddr: ethAddrNoPrefix,
+  nonce: 49,
+  sign: account.sign,
+  balanceRoot: balanceRoot,
+  ay: account.ay,
+  ethAddr: ethAddrNoPrefix,
 };
 class TestHashAccount implements SimpleTest {
   getInput() {
@@ -39,4 +39,4 @@ class TestHashAccount implements SimpleTest {
   }
 }
 
-export { TestHashAccount }
+export { TestHashAccount };

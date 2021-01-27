@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { poseidon } from 'circomlib';
-const Scalar = require("ffjavascript").Scalar;
+const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
@@ -17,7 +17,7 @@ class TestDepositToNew implements SimpleTest {
     const loadAmount = 500n;
     const prvkey = 1;
     const account = new Account(prvkey);
-    const ethAddrNoPrefix = account.ethAddr.replace("0x", "");
+    const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
     // convert bjjCompressed to bits
     const bjjCompressed = Scalar.fromString(account.bjjCompressed, 16);
     const bjjCompressedBits = Scalar.bits(bjjCompressed);
@@ -37,8 +37,8 @@ class TestDepositToNew implements SimpleTest {
       nonce: 0,
       sign: 0,
       balanceRoot: oldBalanceRoot,
-      ay: "0",
-      ethAddr: "0",
+      ay: '0',
+      ethAddr: '0',
     };
     const oldAccountHash = hashAccountState(oldAccount);
 
@@ -79,7 +79,7 @@ class TestDepositToNew implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'deposit_to_new.circom'),
-      main: 'DepositToNew('+balanceLevels+', '+accountLevels+ ')',
+      main: 'DepositToNew(' + balanceLevels + ', ' + accountLevels + ')',
     };
   }
 }
@@ -94,7 +94,7 @@ class TestDepositToOld implements SimpleTest {
     const loadAmount = 500n;
     const prvkey = 1;
     const account = new Account(prvkey);
-    const ethAddrNoPrefix = account.ethAddr.replace("0x", "");
+    const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
 
     // balance tree
     let balanceLeaves = [10n, 11n, oldBalance, 13n];
@@ -131,7 +131,7 @@ class TestDepositToOld implements SimpleTest {
     accountLeaves[accountID] = newAccountHash;
     accountMidLevel = [poseidon([accountLeaves[0], accountLeaves[1]]), poseidon([accountLeaves[2], accountLeaves[3]])];
     let newAccountRoot = poseidon(accountMidLevel);
-    
+
     return {
       accountID: accountID,
       tokenID: tokenID,
@@ -155,7 +155,7 @@ class TestDepositToOld implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'deposit_to_old.circom'),
-      main: 'DepositToOld('+balanceLevels+', '+accountLevels+ ')',
+      main: 'DepositToOld(' + balanceLevels + ', ' + accountLevels + ')',
     };
   }
 }

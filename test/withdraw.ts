@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { poseidon } from 'circomlib';
-const Scalar = require("ffjavascript").Scalar;
+const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
@@ -22,7 +22,7 @@ class TestWithdraw implements SimpleTest {
 
     const accountID = 1;
     const account = new Account(1);
-    const ethAddrNoPrefix = account.ethAddr.replace("0x", "");
+    const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
     const nonce = 51;
     const balance = 500n;
 
@@ -42,7 +42,7 @@ class TestWithdraw implements SimpleTest {
     };
     const oldAccountHash = hashAccountState(oldAccount);
     const newAccount = {
-      nonce: nonce+1,
+      nonce: nonce + 1,
       sign: account.sign,
       balanceRoot: newBalanceRoot,
       ay: account.ay,
@@ -62,7 +62,7 @@ class TestWithdraw implements SimpleTest {
     let mockTxHash = poseidon([TxType.Withdraw, tokenID, amount]);
     mockTxHash = poseidon([mockTxHash, accountID, nonce, balance]);
     let signature = account.signHash(mockTxHash);
-    
+
     return {
       accountID: accountID,
       amount: amount,
@@ -90,7 +90,7 @@ class TestWithdraw implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'withdraw.circom'),
-      main: 'Withdraw('+balanceLevels+', '+accountLevels+ ')',
+      main: 'Withdraw(' + balanceLevels + ', ' + accountLevels + ')',
     };
   }
 }
