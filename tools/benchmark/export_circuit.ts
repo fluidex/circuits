@@ -11,4 +11,4 @@ function exportCircuit(testClass, locDir) {
 	fs.writeFileSync(locDir + '/circuit.circom', circuitSrc);
 }
 
-exportCircuit((new TestTransfer()), 'data/transfer')
+exportCircuit((new TestTransfer_5_5()), 'data/transfer')
