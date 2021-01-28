@@ -79,7 +79,7 @@ class TestDepositToNew implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'deposit_to_new.circom'),
-      main: 'DepositToNew(' + balanceLevels + ', ' + accountLevels + ')',
+      main: `DepositToNew(${balanceLevels}, ${accountLevels})`,
     };
   }
 }
@@ -155,7 +155,7 @@ class TestDepositToOld implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'deposit_to_old.circom'),
-      main: 'DepositToOld(' + balanceLevels + ', ' + accountLevels + ')',
+      main: `DepositToOld(${balanceLevels}, ${accountLevels})`,
     };
   }
 }

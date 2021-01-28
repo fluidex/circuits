@@ -34,10 +34,9 @@ function getTestCase() {
 
     // sender state
     let senderBalanceLeaves = [];
-    for (let i = 0; i < 2**balanceLevels; i++) {
-      senderBalanceLeaves.push(10n + BigInt(i));
-    }
-    senderBalanceLeaves[tokenID] = balance1; // TODO: check index bounds
+    for (let i = 0; i < 2**balanceLevels; i++) senderBalanceLeaves.push(10n + BigInt(i));
+    // TODO: check index bounds
+    senderBalanceLeaves[tokenID] = balance1;
     let oldSenderBalanceProof = getBTreeProof(senderBalanceLeaves, tokenID);
     senderBalanceLeaves[tokenID] = balance1 - amount;
     let newSenderBalanceProof = getBTreeProof(senderBalanceLeaves, tokenID);
@@ -60,10 +59,9 @@ function getTestCase() {
 
     // receiver state
     let receiverBalanceLeaves = [];
-    for (let i = 0; i < 2**balanceLevels; i++) {
-      receiverBalanceLeaves.push(20n + BigInt(i));
-    }
-    receiverBalanceLeaves[tokenID] = balance2; // TODO: check index bounds
+    for (let i = 0; i < 2**balanceLevels; i++) receiverBalanceLeaves.push(20n + BigInt(i));
+    // TODO: check index bounds
+    receiverBalanceLeaves[tokenID] = balance2;
     let oldReceiverBalanceProof = getBTreeProof(receiverBalanceLeaves, tokenID);
     receiverBalanceLeaves[tokenID] = balance2 + amount;
     let newReceiverBalanceProof = getBTreeProof(receiverBalanceLeaves, tokenID);
@@ -86,9 +84,8 @@ function getTestCase() {
 
     // account tree
     let accountLeaves = [];
-    for (let i = 0; i < 2**accountLevels; i++) {
-      accountLeaves.push(70n + BigInt(i));
-    }
+    for (let i = 0; i < 2**accountLevels; i++) accountLeaves.push(70n + BigInt(i));
+    // TODO: check index bounds
     accountLeaves[fromAccountID] = oldSenderHash;
     accountLeaves[toAccountID] = oldReceiverHash;
     let oldAccountProof = getBTreeProof(accountLeaves, fromAccountID);
@@ -207,7 +204,7 @@ class TestTransfer implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'transfer.circom'),
-      main: 'Transfer(' + balanceLevels + ', ' + accountLevels + ')',
+      main: `Transfer(${balanceLevels}, ${accountLevels})`,
     };
   }
 }

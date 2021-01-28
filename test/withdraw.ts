@@ -4,11 +4,7 @@ const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
-
-enum TxType {
-  Transfer,
-  Withdraw,
-}
+import { TxType } from './types';
 
 // circuit-level definitions
 const balanceLevels = 2;
@@ -90,7 +86,7 @@ class TestWithdraw implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'withdraw.circom'),
-      main: 'Withdraw(' + balanceLevels + ', ' + accountLevels + ')',
+      main: `Withdraw(${balanceLevels}, ${accountLevels})`,
     };
   }
 }
