@@ -2,12 +2,10 @@ include "./rescue_constants.circom";
 
 template Pow5() {
     signal input in;
+    signal tmp;
     signal output out;
-    signal in2;
-    signal in4;
-    in2 <== in*in;
-    in4 <== in2*in2;
-    out <== in4*in;
+    tmp <-- in**5;
+    out <== tmp;
 }
 
 template InvPow5() {
