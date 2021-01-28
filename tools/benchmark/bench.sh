@@ -41,7 +41,7 @@ function bench_plonk_plonkit() {
     popd
 }
 
-#prepare_data
+prepare_data
 bench_groth16_zkutil
 bench_plonk_plonkit
 echo -e "\n\n =========== benchmark results: ================= \n"

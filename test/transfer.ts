@@ -4,15 +4,11 @@ const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
-
-enum TxType {
-  Transfer,
-  Withdraw,
-}
+import { TxType } from './types';
 
 // circuit-level definitions
-const balanceLevels = 5;
-const accountLevels = 5;
+const balanceLevels = 10;
+const accountLevels = 10;
 
 function getTestCase() {
     // input-level assignments and pre-processings
@@ -189,17 +185,20 @@ class TestTransfer implements SimpleTest {
       ethAddr2: test_case.ethAddr2,
       receiver_balance_path_elements: test_case.receiver_balance_path_elements,
       receiver_account_path_elements: test_case.receiver_account_path_elements,
-      oldSenderBalanceRoot: test_case.oldSenderBalanceRoot,
-      newSenderBalanceRoot: test_case.newSenderBalanceRoot,
-      oldReceiverBalanceRoot: test_case.oldReceiverBalanceRoot,
-      newReceiverBalanceRoot: test_case.newReceiverBalanceRoot,
+      // oldSenderBalanceRoot: test_case.oldSenderBalanceRoot,
+      // newSenderBalanceRoot: test_case.newSenderBalanceRoot,
+      // oldReceiverBalanceRoot: test_case.oldReceiverBalanceRoot,
+      // newReceiverBalanceRoot: test_case.newReceiverBalanceRoot,
       oldAccountRoot: test_case.oldAccountRoot,
-      tmpAccountRoot: test_case.tmpAccountRoot,
-      newAccountRoot: test_case.newAccountRoot,
+      // tmpAccountRoot: test_case.tmpAccountRoot,
+      // newAccountRoot: test_case.newAccountRoot,
     };
   }
   getOutput() {
-    return {};
+    let test_case = getTestCase();
+    return {
+      newAccountRoot: test_case.newAccountRoot,
+    };
   }
   getComponent(): TestComponent {
     return {
