@@ -14,8 +14,7 @@ enum TxType {
 const balanceLevels = 5;
 const accountLevels = 5;
 
-class TestTransfer implements SimpleTest {
-  getInput() {
+function getTestCase() {
     // input-level assignments and pre-processings
     const nonce = 51;
     const tokenID = 2;
@@ -136,16 +135,6 @@ class TestTransfer implements SimpleTest {
       tmpAccountRoot: tmpAccountProof.root,
       newAccountRoot: newAccountProof.root,
     };
-  }
-  getOutput() {
-    return {};
-  }
-  getComponent(): TestComponent {
-    return {
-      src: path.join(__dirname, '..', 'src', 'transfer.circom'),
-      main: 'Transfer(' + balanceLevels + ', ' + accountLevels + ')',
-    };
-  }
 }
 
 function getBTreeProof(leaves, index) {
@@ -173,6 +162,53 @@ function getBTreeProof(leaves, index) {
   return {
     root: tmpLeaves[0],
     path_elements: path_elements,
+  }
+}
+
+class TestTransfer implements SimpleTest {
+  getInput() {
+    let test_case = getTestCase();
+    return {
+      fromAccountID: test_case.fromAccountID,
+      toAccountID: test_case.toAccountID,
+      amount: test_case.amount,
+      tokenID: test_case.tokenID,
+      nonce: test_case.nonce,
+      sigL2Hash: test_case.sigL2Hash,
+      s: test_case.s,
+      r8x: test_case.r8x,
+      r8y: test_case.r8y,
+      nonce1: test_case.nonce1,
+      sign1: test_case.sign1,
+      balance1: test_case.balance1,
+      ay1: test_case.ay1,
+      ethAddr1: test_case.ethAddr1,
+      sender_balance_path_elements: test_case.sender_balance_path_elements,
+      sender_account_path_elements: test_case.sender_account_path_elements,
+      nonce2: test_case.nonce2,
+      sign2: test_case.sign2,
+      balance2: test_case.balance2,
+      ay2: test_case.ay2,
+      ethAddr2: test_case.ethAddr2,
+      receiver_balance_path_elements: test_case.receiver_balance_path_elements,
+      receiver_account_path_elements: test_case.receiver_account_path_elements,
+      oldSenderBalanceRoot: test_case.oldSenderBalanceRoot,
+      newSenderBalanceRoot: test_case.newSenderBalanceRoot,
+      oldReceiverBalanceRoot: test_case.oldReceiverBalanceRoot,
+      newReceiverBalanceRoot: test_case.newReceiverBalanceRoot,
+      oldAccountRoot: test_case.oldAccountRoot,
+      tmpAccountRoot: test_case.tmpAccountRoot,
+      newAccountRoot: test_case.newAccountRoot,
+    };
+  }
+  getOutput() {
+    return {};
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'transfer.circom'),
+      main: 'Transfer(' + balanceLevels + ', ' + accountLevels + ')',
+    };
   }
 }
 
