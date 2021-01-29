@@ -13,6 +13,7 @@ template DecodeTx() {
     signal output accountID1;
     signal output accountID2;
     signal output fromEthAddr;
+    // TODO: refactor
     signal output fromBjjCompressed[256];
 
     tokenID <== in[0];
