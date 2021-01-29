@@ -7,20 +7,22 @@ function TxTypeWithdraw() { return 3; }
  * @input in - {Field} - encoded transaction
  */
 template DecodeTx() {
-    signal input in[260];
+    signal input in[8];
 
     signal output tokenID;
+    signal output amount;
     signal output accountID1;
     signal output accountID2;
     signal output fromEthAddr;
-    // TODO: refactor
-    signal output fromBjjCompressed[256];
+    signal output sign;
+    signal output ay;
 
     tokenID <== in[0];
-    accountID1 <== in[1];
-    accountID2 <== in[2];
-    fromEthAddr <== in[3];
-    for (var i = 0; i < 256; i++) {
-        fromBjjCompressed[i] <== in[i+4];
-    }
+    amount <== in[1];
+    accountID1 <== in[2];
+    accountID2 <== in[3];
+    accountID2 <== in[4];
+    fromEthAddr <== in[5];
+    sign <== in[6];
+    ay <== in[7];
 }
