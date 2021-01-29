@@ -58,7 +58,7 @@ template Block(nTx, balanceLevels, accountLevels) {
         processDepositToNew.enabled <== enableDepositToNew.out;
         processDepositToNew.accountID <== decodedTx.accountID1;
         processDepositToNew.tokenID <== decodedTx.tokenID;
-        processDepositToNew.fromEthAddr <== decodedTx.fromEthAddr;
+        processDepositToNew.ethAddr <== decodedTx.ethAddr;
         processDepositToNew.sign <== decodedTx.sign;
         processDepositToNew.ay <== decodedTx.ay;
         processDepositToNew.amount <== decodedTx.amount;
@@ -79,18 +79,28 @@ template Block(nTx, balanceLevels, accountLevels) {
         processDepositToOld.enabled <== enableDepositToOld.out;
         processDepositToOld.accountID <== decodedTx.accountID1;
         processDepositToOld.tokenID <== decodedTx.tokenID;
-        processDepositToOld.fromEthAddr <== decodedTx.fromEthAddr;
+        processDepositToOld.ethAddr <== decodedTx.ethAddr;
         processDepositToOld.sign <== decodedTx.sign;
         processDepositToOld.ay <== decodedTx.ay;
         processDepositToOld.amount <== decodedTx.amount;
-        for (var j = 0; j < balanceLevels; j++) {
-            processDepositToOld.balance_path_elements[j] <== balance_path_elements[i][j];
-        }
-        for (var j = 0; j < accountLevels; j++) {
-            processDepositToOld.account_path_elements[j][0] <== account_path_elements[i][j][0];
-        }
-        processDepositToOld.oldAccountRoot <== oldAccountRoots[i];
-        processDepositToOld.newAccountRoot <== newAccountRoots[i];
+        // for (var j = 0; j < balanceLevels; j++) {
+        //     processDepositToOld.balance_path_elements[j] <== balance_path_elements[i][j];
+        // }
+        // for (var j = 0; j < accountLevels; j++) {
+        //     processDepositToOld.account_path_elements[j][0] <== account_path_elements[i][j][0];
+        // }
+        // processDepositToOld.oldAccountRoot <== oldAccountRoots[i];
+        // processDepositToOld.newAccountRoot <== newAccountRoots[i];
+
+
+ // * @input nonce - {Uint40} - nonce of the account leaf
+ // * @input balance - {Uint192} - balance of the account leaf
+ // * @input balance_path_index[balanceLevels] - {Array(Bool)} - index position on the balance tree from leaf to root 
+ // * @input balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the leaf
+ // * @input account_path_index[accountLevels] - {Array(Bool)} - index position on the account tree from leaf to root 
+ // * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the leaf
+ // * @input oldAccountRoot - {Field} - initial account state root
+ // * @input newAccountRoot - {Field} - final account state root
     }
 }
 

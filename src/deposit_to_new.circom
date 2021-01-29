@@ -8,7 +8,7 @@ include "./lib/binary_merkle_tree.circom";
  * @param accountLevels - account tree depth
  * @input accountID - {Uint48} - auxiliary index to create accounts
  * @input tokenID - {Uint32} - tokenID signed in the transaction
- * @input fromEthAddr - {Uint160} - L1 sender ethereum address
+ * @input ethAddr - {Uint160} - L1 sender ethereum address
  * @input sign - {Bool} - bjj sign of the account leaf
  * @input ay - {Field} - bjj ay of the account leaf
  * @input amount - {Uint192} - amount to deposit from L1 to L2
@@ -25,7 +25,7 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal input tokenID;
 
     // For L1 TX
-    signal input fromEthAddr;
+    signal input ethAddr;
     signal input sign;
     signal input ay;
     signal input amount;
@@ -90,7 +90,7 @@ template DepositToNew(balanceLevels, accountLevels) {
     newAccountHash.sign <== sign;
     newAccountHash.balanceRoot <== new_balance_tree.root;
     newAccountHash.ay <== ay;
-    newAccountHash.ethAddr <== fromEthAddr;
+    newAccountHash.ethAddr <== ethAddr;
     // check update
     component account_update_checker = CheckLeafUpdate(accountLevels);
     account_update_checker.enabled <== enabled;

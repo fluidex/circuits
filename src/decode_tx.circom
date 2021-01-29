@@ -13,7 +13,7 @@ template DecodeTx() {
     signal output amount;
     signal output accountID1;
     signal output accountID2;
-    signal output fromEthAddr;
+    signal output ethAddr;
     signal output sign;
     signal output ay;
 
@@ -22,7 +22,7 @@ template DecodeTx() {
     accountID1 <== in[2];
     accountID2 <== in[3];
     accountID2 <== in[4];
-    fromEthAddr <== in[5];
+    ethAddr <== in[5];
     sign <== in[6];
     ay <== in[7];
 }
