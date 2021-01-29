@@ -4,7 +4,7 @@ function TxTypeTransfer() { return 2; }
 function TxTypeWithdraw() { return 3; }
 
 /**
- * @input in - {Field} - encoded transaction
+ * @input in - {Array(Field)} - encoded transaction
  */
 template DecodeTx() {
     signal input in[18];
@@ -55,5 +55,4 @@ template DecodeTx() {
     s <== in[15];
     r8x <== in[16];
     r8y <== in[17];
-
 }
