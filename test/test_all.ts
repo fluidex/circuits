@@ -46,7 +46,9 @@ async function main() {
   try {
     await testWithInputOutput(new TestRescueHash());
     await testWithInputOutput(new TestCheckLeafExists());
+    await testWithInputOutput(new TestCheckLeafExistsDisable());
     await testWithInputOutput(new TestCheckLeafUpdate());
+    await testWithInputOutput(new TestCheckLeafUpdateDisable());
     await testWithInputOutput(new TestHashAccount());
     await testWithInputOutput(new TestDepositToNew());
     await testWithInputOutput(new TestDepositToOld());
