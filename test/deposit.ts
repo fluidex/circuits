@@ -18,10 +18,6 @@ function initDepositToNew() {
   const prvkey = 1;
   const account = new Account(prvkey);
   const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
-  // convert bjjCompressed to bits
-  const bjjCompressed = Scalar.fromString(account.bjjCompressed, 16);
-  const bjjCompressedBits = Scalar.bits(bjjCompressed);
-  while (bjjCompressedBits.length < 256) bjjCompressedBits.push(0);
 
   // balance tree
   let balanceLeaves = [];
@@ -62,7 +58,8 @@ function initDepositToNew() {
     accountID: accountID,
     tokenID: tokenID,
     fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16),
-    fromBjjCompressed: bjjCompressedBits,
+    sign: account.sign,
+    ay: Scalar.fromString(account.ay, 16),
     loadAmount: loadAmount,
     balance_path_elements: oldBalanceProof.path_elements,
     oldBalanceRoot: oldBalanceProof.root,
@@ -145,7 +142,8 @@ class TestDepositToNew implements SimpleTest {
       accountID: deposit_to_new_test_case.accountID,
       tokenID: deposit_to_new_test_case.tokenID,
       fromEthAddr: deposit_to_new_test_case.fromEthAddr,
-      fromBjjCompressed: deposit_to_new_test_case.fromBjjCompressed,
+      sign: deposit_to_new_test_case.sign,
+      ay: deposit_to_new_test_case.ay,
       loadAmount: deposit_to_new_test_case.loadAmount,
       balance_path_elements: deposit_to_new_test_case.balance_path_elements,
       account_path_elements: deposit_to_new_test_case.account_path_elements,

@@ -22,8 +22,6 @@ include "./lib/binary_merkle_tree.circom";
  * @input ethAddr - {Uint160} - ethAddr of the account leaf
  * @input balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the account tree
  * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the account tree
- * @input oldBalanceRoot - {Field} - initial account balance state root
- * @input newBalanceRoot - {Field} - final account balance state root
  * @input oldAccountRoot - {Field} - initial acount state root
  * @input newAccountRoot - {Field} - final acount state root
  */
