@@ -44,13 +44,15 @@ template Block(nTx, balanceLevels, accountLevels) {
 
     // process each transaction
     for (var i = 0; i < nTx; i++) {
-        // try process deposit_to_new
-        component enableDecodeTxDepositToNew = IsEqual();
-        enableDecodeTxDepositToNew.in[0] <== txsType[i];
-        enableDecodeTxDepositToNew.in[1] <== TxTypeDepositToNew();
         component decodedTx = DecodeTx();
+        decodedTx.in <== encodedTxs[i];
+
+        // try process deposit_to_new
+        component enableDepositToNew = IsEqual();
+        enableDepositToNew.in[0] <== txsType[i];
+        enableDepositToNew.in[1] <== TxTypeDepositToNew();
         component processDepositToNew = DepositToNew(balanceLevels, accountLevels);
-        processDepositToNew.enabled <== enableDecodeTxDepositToNew.out;
+        processDepositToNew.enabled <== enableDepositToNew.out;
         processDepositToNew.accountID <== decodedTx.accountID1;
         processDepositToNew.tokenID <== decodedTx.tokenID;
         processDepositToNew.fromEthAddr <== decodedTx.fromEthAddr;
@@ -65,6 +67,27 @@ template Block(nTx, balanceLevels, accountLevels) {
         }
         processDepositToNew.oldAccountRoot <== oldAccountRoots[i];
         processDepositToNew.newAccountRoot <== newAccountRoots[i];
+
+        // try process deposit_to_old
+        component enableDepositToOld = IsEqual();
+        enableDepositToOld.in[0] <== txsType[i];
+        enableDepositToOld.in[1] <== TxTypeDepositToOld();
+        component processDepositToOld = DepositToOld(balanceLevels, accountLevels);
+        processDepositToOld.enabled <== enableDepositToOld.out;
+        processDepositToOld.accountID <== decodedTx.accountID1;
+        processDepositToOld.tokenID <== decodedTx.tokenID;
+        processDepositToOld.fromEthAddr <== decodedTx.fromEthAddr;
+        processDepositToOld.sign <== decodedTx.sign;
+        processDepositToOld.ay <== decodedTx.ay;
+        processDepositToOld.amount <== decodedTx.amount;
+        for (var j = 0; j < balanceLevels; j++) {
+            processDepositToOld.balance_path_elements[j] <== balance_path_elements[i][j];
+        }
+        for (var j = 0; j < accountLevels; j++) {
+            processDepositToOld.account_path_elements[j][0] <== account_path_elements[i][j][0];
+        }
+        processDepositToOld.oldAccountRoot <== oldAccountRoots[i];
+        processDepositToOld.newAccountRoot <== newAccountRoots[i];
     }
 }
 
