@@ -71,12 +71,8 @@ template Transfer(balanceLevels, accountLevels) {
     signal input receiver_account_path_elements[accountLevels][1];
 
     // Roots
-    // signal input oldSenderBalanceRoot;
-    // signal output newSenderBalanceRoot;
-    // signal input oldReceiverBalanceRoot;
-    // signal output newReceiverBalanceRoot;
     signal input oldAccountRoot;
-    signal output newAccountRoot;
+    signal input newAccountRoot;
 
     // Path index
     signal balance_path_index[balanceLevels];
@@ -134,29 +130,29 @@ template Transfer(balanceLevels, accountLevels) {
 
     // TODO: fee
 
-    // - balance tree update
+    // - balance tree
     ////////
     // sender balance
-    component old_sender_balance = CalculateRootFromMerklePath(balanceLevels);
-    component new_sender_balance = CalculateRootFromMerklePath(balanceLevels);
-    old_sender_balance.leaf <== balance1;
-    new_sender_balance.leaf <== balance1 - amount;
+    component old_sender_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    component new_sender_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    old_sender_balance_tree.leaf <== balance1;
+    new_sender_balance_tree.leaf <== balance1 - amount;
     for (var i = 0; i < balanceLevels; i++) {
-        old_sender_balance.path_index[i] <== balance_path_index[i];
-        old_sender_balance.path_elements[i][0] <== sender_balance_path_elements[i][0];
-        new_sender_balance.path_index[i] <== balance_path_index[i];
-        new_sender_balance.path_elements[i][0] <== sender_balance_path_elements[i][0];
+        old_sender_balance_tree.path_index[i] <== balance_path_index[i];
+        old_sender_balance_tree.path_elements[i][0] <== sender_balance_path_elements[i][0];
+        new_sender_balance_tree.path_index[i] <== balance_path_index[i];
+        new_sender_balance_tree.path_elements[i][0] <== sender_balance_path_elements[i][0];
     }
     // receiver balance
-    component old_receiver_balance = CalculateRootFromMerklePath(balanceLevels);
-    component new_receiver_balance = CalculateRootFromMerklePath(balanceLevels);
-    old_receiver_balance.leaf <== balance2;
-    new_receiver_balance.leaf <== balance2 + amount;
+    component old_receiver_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    component new_receiver_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    old_receiver_balance_tree.leaf <== balance2;
+    new_receiver_balance_tree.leaf <== balance2 + amount;
     for (var i = 0; i < balanceLevels; i++) {
-        old_receiver_balance.path_index[i] <== balance_path_index[i];
-        old_receiver_balance.path_elements[i][0] <== receiver_balance_path_elements[i][0];
-        new_receiver_balance.path_index[i] <== balance_path_index[i];
-        new_receiver_balance.path_elements[i][0] <== receiver_balance_path_elements[i][0];
+        old_receiver_balance_tree.path_index[i] <== balance_path_index[i];
+        old_receiver_balance_tree.path_elements[i][0] <== receiver_balance_path_elements[i][0];
+        new_receiver_balance_tree.path_index[i] <== balance_path_index[i];
+        new_receiver_balance_tree.path_elements[i][0] <== receiver_balance_path_elements[i][0];
     }
 
     // - compute account state
@@ -165,32 +161,32 @@ template Transfer(balanceLevels, accountLevels) {
     component oldSenderHash = HashAccount();
     oldSenderHash.nonce <== nonce1;
     oldSenderHash.sign <== sign1;
-    oldSenderHash.balanceRoot <== old_sender_balance.root;
+    oldSenderHash.balanceRoot <== old_sender_balance_tree.root;
     oldSenderHash.ay <== ay1;
     oldSenderHash.ethAddr <== ethAddr1;
     // new sender account state hash
     component newSenderHash = HashAccount();
     newSenderHash.nonce <== nonce1+1;
     newSenderHash.sign <== sign1;
-    newSenderHash.balanceRoot <== new_sender_balance.root;
+    newSenderHash.balanceRoot <== new_sender_balance_tree.root;
     newSenderHash.ay <== ay1;
     newSenderHash.ethAddr <== ethAddr1;
     // old receiver account state hash
     component oldReceiverHash = HashAccount();
     oldReceiverHash.nonce <== nonce2;
     oldReceiverHash.sign <== sign2;
-    oldReceiverHash.balanceRoot <== old_receiver_balance.root;
+    oldReceiverHash.balanceRoot <== old_receiver_balance_tree.root;
     oldReceiverHash.ay <== ay2;
     oldReceiverHash.ethAddr <== ethAddr2;
     // new receiver account state hash
     component newReceiverHash = HashAccount();
     newReceiverHash.nonce <== nonce2;
     newReceiverHash.sign <== sign2;
-    newReceiverHash.balanceRoot <== new_receiver_balance.root;
+    newReceiverHash.balanceRoot <== new_receiver_balance_tree.root;
     newReceiverHash.ay <== ay2;
     newReceiverHash.ethAddr <== ethAddr2;
 
-    // - account tree update
+    // - account tree
     ///////
     // sender
     component sender_checker = CheckLeafExists(accountLevels);
@@ -211,19 +207,13 @@ template Transfer(balanceLevels, accountLevels) {
     sender_updater.root ==> tmpAccountRoot;
 
     // receiver
-    component receiver_checker = CheckLeafExists(accountLevels);
+    component receiver_update_checker = CheckLeafUpdate(accountLevels);
+    receiver_update_checker.oldLeaf <== oldReceiverHash.out;
+    receiver_update_checker.newLeaf <== newReceiverHash.out;
     for (var i = 0; i < accountLevels; i++) {
-        receiver_checker.path_index[i] <== receiver_account_path_index[i];
-        receiver_checker.path_elements[i][0] <== receiver_account_path_elements[i][0];
+        receiver_update_checker.path_index[i] <== receiver_account_path_index[i];
+        receiver_update_checker.path_elements[i][0] <== receiver_account_path_elements[i][0];
     }
-    receiver_checker.leaf <== oldReceiverHash.out;
-    receiver_checker.root <== tmpAccountRoot;
-
-    component receiver_updater = CalculateRootFromMerklePath(accountLevels);
-    receiver_updater.leaf <== newReceiverHash.out;
-    for (var i = 0; i < accountLevels; i++) {
-        receiver_updater.path_index[i] <== receiver_account_path_index[i];
-        receiver_updater.path_elements[i][0] <== receiver_account_path_elements[i][0];
-    }
-    receiver_updater.root ==> newAccountRoot;
+    receiver_update_checker.oldRoot <== tmpAccountRoot;
+    receiver_update_checker.newRoot <== newAccountRoot;
 }

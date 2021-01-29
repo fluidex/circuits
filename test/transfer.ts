@@ -7,10 +7,10 @@ import { SimpleTest, TestComponent } from './interface';
 import { TxType } from './types';
 
 // circuit-level definitions
-const balanceLevels = 10;
-const accountLevels = 10;
+const balanceLevels = 5;
+const accountLevels = 5;
 
-function getTestCase() {
+function initTestCase() {
     // input-level assignments and pre-processings
     const nonce = 51;
     const tokenID = 2;
@@ -158,9 +158,9 @@ function getBTreeProof(leaves, index) {
   }
 }
 
+let test_case = initTestCase();
 class TestTransfer implements SimpleTest {
   getInput() {
-    let test_case = getTestCase();
     return {
       fromAccountID: test_case.fromAccountID,
       toAccountID: test_case.toAccountID,
@@ -185,20 +185,12 @@ class TestTransfer implements SimpleTest {
       ethAddr2: test_case.ethAddr2,
       receiver_balance_path_elements: test_case.receiver_balance_path_elements,
       receiver_account_path_elements: test_case.receiver_account_path_elements,
-      // oldSenderBalanceRoot: test_case.oldSenderBalanceRoot,
-      // newSenderBalanceRoot: test_case.newSenderBalanceRoot,
-      // oldReceiverBalanceRoot: test_case.oldReceiverBalanceRoot,
-      // newReceiverBalanceRoot: test_case.newReceiverBalanceRoot,
       oldAccountRoot: test_case.oldAccountRoot,
-      // tmpAccountRoot: test_case.tmpAccountRoot,
-      // newAccountRoot: test_case.newAccountRoot,
+      newAccountRoot: test_case.newAccountRoot,
     };
   }
   getOutput() {
-    let test_case = getTestCase();
-    return {
-      newAccountRoot: test_case.newAccountRoot,
-    };
+    return {};
   }
   getComponent(): TestComponent {
     return {
