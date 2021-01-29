@@ -97,6 +97,7 @@ function initTestCase() {
     let signature = account1.signHash(mockTxHash);
 
     return {
+      enabled: 1,
       fromAccountID: fromAccountID,
       toAccountID: toAccountID,
       amount: amount,
@@ -134,6 +135,7 @@ let test_case = initTestCase();
 class TestTransfer implements SimpleTest {
   getInput() {
     return {
+      enabled: test_case.enabled,
       fromAccountID: test_case.fromAccountID,
       toAccountID: test_case.toAccountID,
       amount: test_case.amount,

@@ -58,6 +58,7 @@ function initDepositToNew() {
   let newAccountProof = getBTreeProof(accountLeaves, accountID);
 
   return {
+    enabled: 1,
     accountID: accountID,
     tokenID: tokenID,
     fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16),
@@ -118,6 +119,7 @@ function initDepositToOld() {
   let newAccountProof = getBTreeProof(accountLeaves, accountID);
 
   return {
+    enabled: 1,
     accountID: accountID,
     tokenID: tokenID,
     loadAmount: loadAmount,
@@ -139,6 +141,7 @@ let deposit_to_new_test_case = initDepositToNew();
 class TestDepositToNew implements SimpleTest {
   getInput() {
     return {
+      enabled: deposit_to_new_test_case.enabled,
       accountID: deposit_to_new_test_case.accountID,
       tokenID: deposit_to_new_test_case.tokenID,
       fromEthAddr: deposit_to_new_test_case.fromEthAddr,
@@ -165,6 +168,7 @@ let deposit_to_old_test_case = initDepositToOld();
 class TestDepositToOld implements SimpleTest {
   getInput() {
     return {
+      enabled: deposit_to_old_test_case.enabled,
       accountID: deposit_to_old_test_case.accountID,
       tokenID: deposit_to_old_test_case.tokenID,
       loadAmount: deposit_to_old_test_case.loadAmount,

@@ -40,6 +40,8 @@ include "./lib/binary_merkle_tree.circom";
  * @input newAccountRoot - {Field} - final account state root
  */
 template Transfer(balanceLevels, accountLevels) {
+    signal input enabled;
+
     // Tx
     signal input fromAccountID;
     signal input toAccountID;
@@ -190,6 +192,7 @@ template Transfer(balanceLevels, accountLevels) {
     ///////
     // sender
     component sender_checker = CheckLeafExists(accountLevels);
+    sender_checker.enabled <== enabled;
     for (var i = 0; i < accountLevels; i++) {
         sender_checker.path_index[i] <== sender_account_path_index[i];
         sender_checker.path_elements[i][0] <== sender_account_path_elements[i][0];
@@ -208,6 +211,7 @@ template Transfer(balanceLevels, accountLevels) {
 
     // receiver
     component receiver_update_checker = CheckLeafUpdate(accountLevels);
+    receiver_update_checker.enabled <== enabled;
     receiver_update_checker.oldLeaf <== oldReceiverHash.out;
     receiver_update_checker.newLeaf <== newReceiverHash.out;
     for (var i = 0; i < accountLevels; i++) {

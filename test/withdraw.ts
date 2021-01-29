@@ -61,6 +61,7 @@ function initTestCase() {
   let signature = account.signHash(mockTxHash);
 
   return {
+    enabled: 1,
     accountID: accountID,
     amount: amount,
     tokenID: tokenID,
@@ -86,6 +87,7 @@ let test_case = initTestCase();
 class TestWithdraw implements SimpleTest {
   getInput() {
     return {
+      enabled: test_case.enabled,
       accountID: test_case.accountID,
       amount: test_case.amount,
       tokenID: test_case.tokenID,
