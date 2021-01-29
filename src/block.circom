@@ -7,11 +7,11 @@ include "./withdraw.circom";
 
 /**
  * Process a rollup block and transactions inside
- * @param nTx - number of transactions
+ * @param nTxs - number of transactions
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
 
- * @input encodedTxs[nTx] - {Array(Field)} - encoded transactions
+ * @input encodedTxs[nTxs] - {Array(Field)} - encoded transactions
 
  ...
 
@@ -21,33 +21,33 @@ include "./withdraw.circom";
  // path_elements...
 
 
- * @input oldAccountRoots[nTx] - {Array(Field)} - initial account state root
- * @input newAccountRoots[nTx] - {Array(Field)} - final account state root
+ * @input oldAccountRoots[nTxs] - {Array(Field)} - initial account state root
+ * @input newAccountRoots[nTxs] - {Array(Field)} - final account state root
  */
 
-// TODO: assert nTx>1
-template Block(nTx, balanceLevels, accountLevels) {
+// TODO: assert nTxs>1
+template Block(nTxs, balanceLevels, accountLevels) {
 	// transactions
-    signal input txsType[nTx];
+    signal input txsType[nTxs];
 	// TODO: private?
-    signal input encodedTxs[nTx][18];
+    signal input encodedTxs[nTxs][18];
 
     // State
     // index meanings: [tx idx][sender or receiver][levels][siblings]
-    signal input balance_path_elements[nTx][2][balanceLevels][1];
-    signal input account_path_elements[nTx][2][accountLevels][1];
+    signal input balance_path_elements[nTxs][2][balanceLevels][1];
+    signal input account_path_elements[nTxs][2][accountLevels][1];
 
     // roots
-    signal input oldAccountRoots[nTx];
-    signal input newAccountRoots[nTx];
+    signal input oldAccountRoots[nTxs];
+    signal input newAccountRoots[nTxs];
 
 	// thisOldRoot === lastNewRoot
-    for (var i = 1; i < nTx; i++) {
+    for (var i = 1; i < nTxs; i++) {
 		oldAccountRoots[i] === newAccountRoots[i-1];
     }
 
     // process each transaction
-    for (var i = 0; i < nTx; i++) {
+    for (var i = 0; i < nTxs; i++) {
         component decodedTx = DecodeTx();
         for (var j = 0; j < 18; j++) {
             decodedTx.in[j] <== encodedTxs[i][j];
