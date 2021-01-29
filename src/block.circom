@@ -32,8 +32,8 @@ template Block(nTx, balanceLevels, accountLevels) {
     signal input encodedTxs[nTx][18];
 
     // State
-    signal input balance_path_elements[nTx][balanceLevels][1];
-    signal input account_path_elements[nTx][accountLevels][1];
+    signal input balance_path_elements[nTx][2][balanceLevels][1];
+    signal input account_path_elements[nTx][2][accountLevels][1];
 
     // roots
     signal input oldAccountRoots[nTx];
@@ -64,10 +64,10 @@ template Block(nTx, balanceLevels, accountLevels) {
         processDepositToNew.ay <== decodedTx.ay2;
         processDepositToNew.amount <== decodedTx.amount;
         for (var j = 0; j < balanceLevels; j++) {
-            processDepositToNew.balance_path_elements[j] <== balance_path_elements[i][j];
+            processDepositToNew.balance_path_elements[j] <== balance_path_elements[i][0][j];
         }
         for (var j = 0; j < accountLevels; j++) {
-            processDepositToNew.account_path_elements[j][0] <== account_path_elements[i][j][0];
+            processDepositToNew.account_path_elements[j][0] <== account_path_elements[i][0][j][0];
         }
         processDepositToNew.oldAccountRoot <== oldAccountRoots[i];
         processDepositToNew.newAccountRoot <== newAccountRoots[i];
@@ -87,10 +87,10 @@ template Block(nTx, balanceLevels, accountLevels) {
         processDepositToOld.nonce <== decodedTx.nonce2;
         processDepositToOld.balance <== decodedTx.balance2;
         for (var j = 0; j < balanceLevels; j++) {
-            processDepositToOld.balance_path_elements[j] <== balance_path_elements[i][j];
+            processDepositToOld.balance_path_elements[j] <== balance_path_elements[i][1][j];
         }
         for (var j = 0; j < accountLevels; j++) {
-            processDepositToOld.account_path_elements[j][0] <== account_path_elements[i][j][0];
+            processDepositToOld.account_path_elements[j][0] <== account_path_elements[i][1][j][0];
         }
         processDepositToOld.oldAccountRoot <== oldAccountRoots[i];
         processDepositToOld.newAccountRoot <== newAccountRoots[i];
@@ -120,21 +120,16 @@ template Block(nTx, balanceLevels, accountLevels) {
         processTransfer.s <== decodedTx.s;
         processTransfer.r8x <== decodedTx.r8x;
         processTransfer.r8y <== decodedTx.r8y;
-
-        // for (var j = 0; j < balanceLevels; j++) {
-        //     processTransfer.balance_path_elements[j] <== balance_path_elements[i][j];
-        // }
-        // for (var j = 0; j < accountLevels; j++) {
-        //     processTransfer.account_path_elements[j][0] <== account_path_elements[i][j][0];
-        // }
+        for (var j = 0; j < balanceLevels; j++) {
+            processTransfer.sender_balance_path_elements[j] <== balance_path_elements[i][0][j];
+            processTransfer.receiver_balance_path_elements[j] <== balance_path_elements[i][1][j];
+        }
+        for (var j = 0; j < accountLevels; j++) {
+            processTransfer.sender_account_path_elements[j][0] <== account_path_elements[i][0][j][0];
+            processTransfer.receiver_account_path_elements[j][0] <== account_path_elements[i][1][j][0];
+        }
         processTransfer.oldAccountRoot <== oldAccountRoots[i];
         processTransfer.newAccountRoot <== newAccountRoots[i];
-
-
-    // signal input sender_balance_path_elements[balanceLevels][1];
-    // signal input sender_account_path_elements[accountLevels][1];
-    // signal input receiver_balance_path_elements[balanceLevels][1];
-    // signal input receiver_account_path_elements[accountLevels][1];
     }
 }
 
