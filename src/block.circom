@@ -1,6 +1,7 @@
 include "../node_modules/circomlib/circuits/compconstant.circom";
 include "./decode_tx.circom";
 include "./deposit_to_new.circom";
+include "./deposit_to_old.circom";
 
 /**
  * Process a rollup block and transactions inside
@@ -27,7 +28,7 @@ template Block(nTx, balanceLevels, accountLevels) {
 	// transactions
     signal input txsType[nTx];
 	// TODO: private?
-    signal input encodedTxs[nTx];
+    signal input encodedTxs[nTx][8];
 
     // State
     signal input balance_path_elements[nTx][balanceLevels][1];
@@ -45,7 +46,9 @@ template Block(nTx, balanceLevels, accountLevels) {
     // process each transaction
     for (var i = 0; i < nTx; i++) {
         component decodedTx = DecodeTx();
-        decodedTx.in <== encodedTxs[i];
+        for (var j = 0; j < 8; j++) {
+            decodedTx.in[j] <== encodedTxs[i][j];
+        }
 
         // try process deposit_to_new
         component enableDepositToNew = IsEqual();
