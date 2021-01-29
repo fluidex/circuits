@@ -35,13 +35,17 @@ function bench_plonk_plonkit() {
     fi
     pushd $CIRCUIT_DIR
     rm vk.bin || true # TODO: add overwrite option to plonkit
+    plonkit analyse
     plonkit export-verification-key --srs_monomial_form $KEY --circuit circuit.r1cs.json --vk vk.bin
     (time plonkit prove --srs_monomial_form $KEY --circuit circuit.r1cs.json --witness witness.json --proof proof.bin) 2>plonkit.time
     plonkit verify --proof proof.bin --verification_key vk.bin
     popd
+    node print_large_constraints.js 
 }
 
-#prepare_data
+mkdir -p $CIRCUIT_DIR 
+npx ts-node export_circuit.ts
+prepare_data
 bench_groth16_zkutil
 bench_plonk_plonkit
 echo -e "\n\n =========== benchmark results: ================= \n"
