@@ -161,6 +161,3 @@ template Block(nTxs, balanceLevels, accountLevels) {
         processWithdraw.newAccountRoot <== newAccountRoots[i];
     }
 }
-
-// TODO: remove this
-component main = Block(2, 1, 1);
