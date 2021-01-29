@@ -32,6 +32,7 @@ template Block(nTx, balanceLevels, accountLevels) {
     signal input encodedTxs[nTx][18];
 
     // State
+    // index meanings: [tx idx][sender or receiver][levels][1]
     signal input balance_path_elements[nTx][2][balanceLevels][1];
     signal input account_path_elements[nTx][2][accountLevels][1];
 
