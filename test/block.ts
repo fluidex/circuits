@@ -38,7 +38,7 @@ function initTestCase() {
 		ay: account1.ay,
 		ethAddr: ethAddr1NoPrefix,
     };
-    const account1Hash = hashAccountState(account1State);
+    let account1Hash = hashAccountState(account1State);
 
     // account2 state
 	let account2BalanceLeaves :Array<BigInt> = new Array(2**balanceLevels); account2BalanceLeaves.fill(0n, 0, 2**balanceLevels);
@@ -50,7 +50,7 @@ function initTestCase() {
 		ay: '0',
 		ethAddr: '0',
     };
-    const account2Hash = hashAccountState(account2State);
+    let account2Hash = hashAccountState(account2State);
 
 	let txsType :Array<number> = new Array(nTxs); txsType.fill(0, 0, nTxs);
 	let encodedTxs :Array<BigInt> = new Array(nTxs); encodedTxs.fill(0n, 0, nTxs);
