@@ -1,5 +1,4 @@
 include "../node_modules/circomlib/circuits/bitify.circom";
-include "./lib/utils_bjj.circom";
 include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
 
@@ -19,8 +18,6 @@ include "./lib/binary_merkle_tree.circom";
  * @input balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the leaf
  * @input account_path_index[accountLevels] - {Array(Bool)} - index position on the account tree from leaf to root 
  * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the leaf
- * @input oldBalanceRoot - {Field} - initial balance state root
- * @input newBalanceRoot - {Field} - final balance state root
  * @input oldAccountRoot - {Field} - initial account state root
  * @input newAccountRoot - {Field} - final account state root
  */

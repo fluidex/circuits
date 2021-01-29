@@ -1,5 +1,4 @@
 include "../node_modules/circomlib/circuits/bitify.circom";
-include "./lib/utils_bjj.circom";
 include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
 
@@ -10,12 +9,11 @@ include "./lib/binary_merkle_tree.circom";
  * @input accountID - {Uint48} - auxiliary index to create accounts
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input fromEthAddr - {Uint160} - L1 sender ethereum address
- * @input fromBjjCompressed[256]- {Array(Bool)} - babyjubjub compressed sender
+ * @input sign - {Bool} - bjj sign of the account leaf
+ * @input ay - {Field} - bjj ay of the account leaf
  * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
  * @input balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the leaf
  * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the leaf
- * @input oldBalanceRoot - {Field} - initial balance state root
- * @input newBalanceRoot - {Field} - final balance state root
  * @input oldAccountRoot - {Field} - initial account state root
  * @input newAccountRoot - {Field} - final account state root
  */
@@ -26,7 +24,8 @@ template DepositToNew(balanceLevels, accountLevels) {
 
     // For L1 TX
     signal input fromEthAddr;
-    signal input fromBjjCompressed[256];
+    signal input sign;
+    signal input ay;
     signal input loadAmount;
 
     // State
@@ -40,12 +39,6 @@ template DepositToNew(balanceLevels, accountLevels) {
     // Path index
     signal balance_path_index[balanceLevels];
     signal account_path_index[accountLevels];
-
-    // decode BjjCompressed
-    component decodeFromBjj = BitsCompressed2AySign();
-    for (var i = 0; i < 256; i++) {
-        decodeFromBjj.bjjCompressed[i] <== fromBjjCompressed[i];
-    }
 
     // decode balance_path_index
     component bTokenID = Num2Bits(balanceLevels);
@@ -92,9 +85,9 @@ template DepositToNew(balanceLevels, accountLevels) {
     // new account state hash
     component newAccountHash = HashAccount();
     newAccountHash.nonce <== 0;
-    newAccountHash.sign <== decodeFromBjj.sign;
+    newAccountHash.sign <== sign;
     newAccountHash.balanceRoot <== new_balance_tree.root;
-    newAccountHash.ay <== decodeFromBjj.ay;
+    newAccountHash.ay <== ay;
     newAccountHash.ethAddr <== fromEthAddr;
     // check update
     component account_update_checker = CheckLeafUpdate(accountLevels);
