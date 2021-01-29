@@ -18,6 +18,7 @@ function initTestCase() {
 	const accountID1 = 2;
 	const account1 = new Account(1);
 	const ethAddr1NoPrefix = account1.ethAddr.replace('0x', '');
+	let nonce1 = 99; 
 	let balance1 = 300n;
 	// newAccount
 	const accountID2 = 1;
@@ -29,8 +30,27 @@ function initTestCase() {
     for (let i = 0; i < 2**balanceLevels; i++) account1BalanceLeaves.push(10n + BigInt(i));
     // TODO: check index bounds
     account1BalanceLeaves[tokenID] = balance1;
+    let account1BalanceProof = common.getBTreeProof(account1BalanceLeaves, tokenID);
+    let account1State = {
+      nonce: nonce1,
+      sign: account1.sign,
+      balanceRoot: account1BalanceProof.root,
+      ay: account1.ay,
+      ethAddr: ethAddr1NoPrefix,
+    };
+    const account1Hash = hashAccountState(account1State);
+
     // account2 state
 	let account2BalanceLeaves :Array<BigInt> = new Array(2**balanceLevels); account2BalanceLeaves.fill(0n, 0, 2**balanceLevels);
+    let account2BalanceProof = common.getBTreeProof(account2BalanceLeaves, tokenID);
+    let account2State = {
+      nonce: nonce2,
+      sign: account2.sign,
+      balanceRoot: account2BalanceProof.root,
+      ay: account2.ay,
+      ethAddr: ethAddr2NoPrefix,
+    };
+    const account2Hash = hashAccountState(account2State);
 
 	let txsType :Array<number> = new Array(nTxs); txsType.fill(0, 0, nTxs);
 	let encodedTxs :Array<BigInt> = new Array(nTxs); encodedTxs.fill(0n, 0, nTxs);
