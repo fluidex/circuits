@@ -48,8 +48,6 @@ template Withdraw(balanceLevels, accountLevels) {
     signal input account_path_elements[accountLevels][1];
 
     // Roots
-    signal input oldBalanceRoot;
-    signal input newBalanceRoot;
     signal input oldAccountRoot;
     signal input newAccountRoot;
 
@@ -99,15 +97,16 @@ template Withdraw(balanceLevels, accountLevels) {
 
     // - check balance tree update
     ////////
-    component balance_checker = CheckLeafUpdate(balanceLevels);
-    balance_checker.oldLeaf <== balance;
-    balance_checker.newLeaf <== balance - amount;
+    component old_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    component new_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    old_balance_tree.leaf <== balance;
+    new_balance_tree.leaf <== balance - amount;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_checker.path_index[i] <== balance_path_index[i];
-        balance_checker.path_elements[i][0] <== balance_path_elements[i][0];
+        old_balance_tree.path_index[i] <== balance_path_index[i];
+        old_balance_tree.path_elements[i][0] <== balance_path_elements[i][0];
+        new_balance_tree.path_index[i] <== balance_path_index[i];
+        new_balance_tree.path_elements[i][0] <== balance_path_elements[i][0];
     }
-    balance_checker.oldRoot <== oldBalanceRoot;
-    balance_checker.newRoot <== newBalanceRoot;
 
     // - compute account state
     ///////
@@ -115,14 +114,14 @@ template Withdraw(balanceLevels, accountLevels) {
     component oldAccountHash = HashAccount();
     oldAccountHash.nonce <== nonce;
     oldAccountHash.sign <== sign;
-    oldAccountHash.balanceRoot <== oldBalanceRoot;
+    oldAccountHash.balanceRoot <== old_balance_tree.root;
     oldAccountHash.ay <== ay;
     oldAccountHash.ethAddr <== ethAddr;
     // new account state hash
     component newAccountHash = HashAccount();
     newAccountHash.nonce <== nonce+1;
     newAccountHash.sign <== sign;
-    newAccountHash.balanceRoot <== newBalanceRoot;
+    newAccountHash.balanceRoot <== new_balance_tree.root;
     newAccountHash.ay <== ay;
     newAccountHash.ethAddr <== ethAddr;
 

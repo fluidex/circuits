@@ -4,18 +4,13 @@ const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
-
-enum TxType {
-  Transfer,
-  Withdraw,
-}
+import { TxType, getBTreeProof } from './common';
 
 // circuit-level definitions
 const balanceLevels = 5;
 const accountLevels = 5;
 
-class TestTransfer implements SimpleTest {
-  getInput() {
+function initTestCase() {
     // input-level assignments and pre-processings
     const nonce = 51;
     const tokenID = 2;
@@ -35,10 +30,9 @@ class TestTransfer implements SimpleTest {
 
     // sender state
     let senderBalanceLeaves = [];
-    for (let i = 0; i < 2**balanceLevels; i++) {
-      senderBalanceLeaves.push(10n + BigInt(i));
-    }
-    senderBalanceLeaves[tokenID] = balance1; // TODO: check index bounds
+    for (let i = 0; i < 2**balanceLevels; i++) senderBalanceLeaves.push(10n + BigInt(i));
+    // TODO: check index bounds
+    senderBalanceLeaves[tokenID] = balance1;
     let oldSenderBalanceProof = getBTreeProof(senderBalanceLeaves, tokenID);
     senderBalanceLeaves[tokenID] = balance1 - amount;
     let newSenderBalanceProof = getBTreeProof(senderBalanceLeaves, tokenID);
@@ -61,10 +55,9 @@ class TestTransfer implements SimpleTest {
 
     // receiver state
     let receiverBalanceLeaves = [];
-    for (let i = 0; i < 2**balanceLevels; i++) {
-      receiverBalanceLeaves.push(20n + BigInt(i));
-    }
-    receiverBalanceLeaves[tokenID] = balance2; // TODO: check index bounds
+    for (let i = 0; i < 2**balanceLevels; i++) receiverBalanceLeaves.push(20n + BigInt(i));
+    // TODO: check index bounds
+    receiverBalanceLeaves[tokenID] = balance2;
     let oldReceiverBalanceProof = getBTreeProof(receiverBalanceLeaves, tokenID);
     receiverBalanceLeaves[tokenID] = balance2 + amount;
     let newReceiverBalanceProof = getBTreeProof(receiverBalanceLeaves, tokenID);
@@ -87,9 +80,8 @@ class TestTransfer implements SimpleTest {
 
     // account tree
     let accountLeaves = [];
-    for (let i = 0; i < 2**accountLevels; i++) {
-      accountLeaves.push(70n + BigInt(i));
-    }
+    for (let i = 0; i < 2**accountLevels; i++) accountLeaves.push(70n + BigInt(i));
+    // TODO: check index bounds
     accountLeaves[fromAccountID] = oldSenderHash;
     accountLeaves[toAccountID] = oldReceiverHash;
     let oldAccountProof = getBTreeProof(accountLeaves, fromAccountID);
@@ -136,6 +128,38 @@ class TestTransfer implements SimpleTest {
       tmpAccountRoot: tmpAccountProof.root,
       newAccountRoot: newAccountProof.root,
     };
+}
+
+let test_case = initTestCase();
+class TestTransfer implements SimpleTest {
+  getInput() {
+    return {
+      fromAccountID: test_case.fromAccountID,
+      toAccountID: test_case.toAccountID,
+      amount: test_case.amount,
+      tokenID: test_case.tokenID,
+      nonce: test_case.nonce,
+      sigL2Hash: test_case.sigL2Hash,
+      s: test_case.s,
+      r8x: test_case.r8x,
+      r8y: test_case.r8y,
+      nonce1: test_case.nonce1,
+      sign1: test_case.sign1,
+      balance1: test_case.balance1,
+      ay1: test_case.ay1,
+      ethAddr1: test_case.ethAddr1,
+      sender_balance_path_elements: test_case.sender_balance_path_elements,
+      sender_account_path_elements: test_case.sender_account_path_elements,
+      nonce2: test_case.nonce2,
+      sign2: test_case.sign2,
+      balance2: test_case.balance2,
+      ay2: test_case.ay2,
+      ethAddr2: test_case.ethAddr2,
+      receiver_balance_path_elements: test_case.receiver_balance_path_elements,
+      receiver_account_path_elements: test_case.receiver_account_path_elements,
+      oldAccountRoot: test_case.oldAccountRoot,
+      newAccountRoot: test_case.newAccountRoot,
+    };
   }
   getOutput() {
     return {};
@@ -143,36 +167,8 @@ class TestTransfer implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'transfer.circom'),
-      main: 'Transfer(' + balanceLevels + ', ' + accountLevels + ')',
+      main: `Transfer(${balanceLevels}, ${accountLevels})`,
     };
-  }
-}
-
-function getBTreeProof(leaves, index) {
-  // TODO: assert even length
-  // TODO: check index bounds
-
-  let tmpLeaves = leaves;
-  let path_elements = [];
-
-  while(tmpLeaves.length != 1){
-    if (index%2==0){
-      path_elements.push([tmpLeaves[index+1]]);
-    } else {
-      path_elements.push([tmpLeaves[index-1]]);
-    };
-
-    let tempMidLeaves = [];
-    for (let i = 0; (i+1) < tmpLeaves.length; i+=2) {
-      tempMidLeaves.push(hash([tmpLeaves[i], tmpLeaves[i+1]]));
-    }
-    tmpLeaves = tempMidLeaves;
-    index = Math.trunc(index/2);
-  }
-
-  return {
-    root: tmpLeaves[0],
-    path_elements: path_elements,
   }
 }
 
