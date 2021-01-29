@@ -3,6 +3,7 @@ include "./decode_tx.circom";
 include "./deposit_to_new.circom";
 include "./deposit_to_old.circom";
 include "./transfer.circom";
+include "./withdraw.circom";
 
 /**
  * Process a rollup block and transactions inside
@@ -131,6 +132,33 @@ template Block(nTx, balanceLevels, accountLevels) {
         }
         processTransfer.oldAccountRoot <== oldAccountRoots[i];
         processTransfer.newAccountRoot <== newAccountRoots[i];
+
+        // try process withdraw
+        component enableWithdraw = IsEqual();
+        enableWithdraw.in[0] <== txsType[i];
+        enableWithdraw.in[1] <== TxTypeWithdraw();
+        component processWithdraw = Withdraw(balanceLevels, accountLevels);
+        processWithdraw.enabled <== enableWithdraw.out;
+        processWithdraw.accountID <== decodedTx.accountID1;
+        processWithdraw.tokenID <== decodedTx.tokenID;
+        processWithdraw.amount <== decodedTx.amount;
+        processWithdraw.nonce <== decodedTx.nonce1;
+        processWithdraw.sign <== decodedTx.sign1;
+        processWithdraw.ay <== decodedTx.ay1;
+        processWithdraw.ethAddr <== decodedTx.ethAddr1;
+        processWithdraw.balance <== decodedTx.balance1;
+        processWithdraw.sigL2Hash <== decodedTx.sigL2Hash;
+        processWithdraw.s <== decodedTx.s;
+        processWithdraw.r8x <== decodedTx.r8x;
+        processWithdraw.r8y <== decodedTx.r8y;
+        for (var j = 0; j < balanceLevels; j++) {
+            processWithdraw.balance_path_elements[j] <== balance_path_elements[i][0][j];
+        }
+        for (var j = 0; j < accountLevels; j++) {
+            processWithdraw.account_path_elements[j][0] <== account_path_elements[i][0][j][0];
+        }
+        processWithdraw.oldAccountRoot <== oldAccountRoots[i];
+        processWithdraw.newAccountRoot <== newAccountRoots[i];
     }
 }
 
