@@ -31,12 +31,7 @@ include "./lib/binary_merkle_tree.circom";
  * @input ethAddr2 - {Uint160} - ethAddr of the receiver leaf
  * @input receiver_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the receiver leaf
  * @input receiver_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the receiver leaf
- * @input oldSenderBalanceRoot - {Field} - initial sender balance state root
- * @input newSenderBalanceRoot - {Field} - final sender balance state root
- * @input oldReceiverBalanceRoot - {Field} - initial receiver balance state root
- * @input newReceiverBalanceRoot - {Field} - final receiver balance state root
  * @input oldAccountRoot - {Field} - initial account state root
- * @input tmpAccountRoot - {Field} - account state root after updating sender balance, before updating receiver balance
  * @input newAccountRoot - {Field} - final account state root
  */
 template Transfer(balanceLevels, accountLevels) {
