@@ -8,10 +8,10 @@ include "./lib/binary_merkle_tree.circom";
  * @param accountLevels - account tree depth
  * @input accountID - {Uint48} - auxiliary index to create accounts
  * @input tokenID - {Uint32} - tokenID signed in the transaction
- * @input fromEthAddr - {Uint160} - L1 sender ethereum address
+ * @input ethAddr - {Uint160} - L1 sender ethereum address
  * @input sign - {Bool} - bjj sign of the account leaf
  * @input ay - {Field} - bjj ay of the account leaf
- * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
+ * @input amount - {Uint192} - amount to deposit from L1 to L2
  * @input balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the leaf
  * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the leaf
  * @input oldAccountRoot - {Field} - initial account state root
@@ -23,10 +23,10 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal input tokenID;
 
     // For L1 TX
-    signal input fromEthAddr;
+    signal input ethAddr;
     signal input sign;
     signal input ay;
-    signal input loadAmount;
+    signal input amount;
 
     // State
     signal input balance_path_elements[balanceLevels][1];
@@ -65,7 +65,7 @@ template DepositToNew(balanceLevels, accountLevels) {
     component old_balance_tree = CalculateRootFromMerklePath(balanceLevels);
     component new_balance_tree = CalculateRootFromMerklePath(balanceLevels);
     old_balance_tree.leaf <== 0;
-    new_balance_tree.leaf <== loadAmount;
+    new_balance_tree.leaf <== amount;
     for (var i = 0; i < balanceLevels; i++) {
         old_balance_tree.path_index[i] <== balance_path_index[i];
         old_balance_tree.path_elements[i][0] <== balance_path_elements[i][0];
@@ -88,7 +88,7 @@ template DepositToNew(balanceLevels, accountLevels) {
     newAccountHash.sign <== sign;
     newAccountHash.balanceRoot <== new_balance_tree.root;
     newAccountHash.ay <== ay;
-    newAccountHash.ethAddr <== fromEthAddr;
+    newAccountHash.ethAddr <== ethAddr;
     // check update
     component account_update_checker = CheckLeafUpdate(accountLevels);
     account_update_checker.oldLeaf <== oldAccountHash.out;

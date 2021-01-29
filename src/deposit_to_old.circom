@@ -8,7 +8,7 @@ include "./lib/binary_merkle_tree.circom";
  * @param accountLevels - account tree depth
  * @input accountID - {Uint48} - account index
  * @input tokenID - {Uint32} - tokenID signed in the transaction
- * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
+ * @input amount - {Uint192} - amount to deposit from L1 to L2
  * @input nonce - {Uint40} - nonce of the account leaf
  * @input sign - {Bool} - sign of the account leaf
  * @input balance - {Uint192} - balance of the account leaf
@@ -27,7 +27,7 @@ template DepositToOld(balanceLevels, accountLevels) {
     signal input tokenID;
 
     // For L1 TX
-    signal input loadAmount;
+    signal input amount;
 
     // State
     signal input nonce;
@@ -71,7 +71,7 @@ template DepositToOld(balanceLevels, accountLevels) {
     component old_balance_tree = CalculateRootFromMerklePath(balanceLevels);
     component new_balance_tree = CalculateRootFromMerklePath(balanceLevels);
     old_balance_tree.leaf <== balance;
-    new_balance_tree.leaf <== balance + loadAmount;
+    new_balance_tree.leaf <== balance + amount;
     for (var i = 0; i < balanceLevels; i++) {
         old_balance_tree.path_index[i] <== balance_path_index[i];
         old_balance_tree.path_elements[i][0] <== balance_path_elements[i][0];
