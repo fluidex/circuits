@@ -56,8 +56,7 @@ template Block(nTx, balanceLevels, accountLevels) {
         processDepositToNew.fromEthAddr <== decodedTx.fromEthAddr;
         processDepositToNew.sign <== decodedTx.sign;
         processDepositToNew.ay <== decodedTx.ay;
-        // TODO: rename to amount
-        processDepositToNew.loadAmount <== decodedTx.amount;
+        processDepositToNew.amount <== decodedTx.amount;
         for (var j = 0; j < balanceLevels; j++) {
             processDepositToNew.balance_path_elements[j] <== balance_path_elements[i][j];
         }

@@ -11,7 +11,7 @@ include "./lib/binary_merkle_tree.circom";
  * @input fromEthAddr - {Uint160} - L1 sender ethereum address
  * @input sign - {Bool} - bjj sign of the account leaf
  * @input ay - {Field} - bjj ay of the account leaf
- * @input loadAmount - {Uint192} - amount to deposit from L1 to L2
+ * @input amount - {Uint192} - amount to deposit from L1 to L2
  * @input balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the leaf
  * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the leaf
  * @input oldAccountRoot - {Field} - initial account state root
@@ -28,7 +28,7 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal input fromEthAddr;
     signal input sign;
     signal input ay;
-    signal input loadAmount;
+    signal input amount;
 
     // State
     signal input balance_path_elements[balanceLevels][1];
@@ -67,7 +67,7 @@ template DepositToNew(balanceLevels, accountLevels) {
     component old_balance_tree = CalculateRootFromMerklePath(balanceLevels);
     component new_balance_tree = CalculateRootFromMerklePath(balanceLevels);
     old_balance_tree.leaf <== 0;
-    new_balance_tree.leaf <== loadAmount;
+    new_balance_tree.leaf <== amount;
     for (var i = 0; i < balanceLevels; i++) {
         old_balance_tree.path_index[i] <== balance_path_index[i];
         old_balance_tree.path_elements[i][0] <== balance_path_elements[i][0];

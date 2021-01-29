@@ -14,7 +14,7 @@ function initDepositToNew() {
   // input-level assignments and pre-processings
   const accountID = 2;
   const tokenID = 2;
-  const loadAmount = 500n;
+  const amount = 500n;
   const prvkey = 1;
   const account = new Account(prvkey);
   const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
@@ -25,7 +25,7 @@ function initDepositToNew() {
   // TODO: check index bounds
   balanceLeaves[tokenID] = 0;
   let oldBalanceProof = getBTreeProof(balanceLeaves, tokenID);
-  balanceLeaves[tokenID] = loadAmount;
+  balanceLeaves[tokenID] = amount;
   let newBalanceProof = getBTreeProof(balanceLeaves, tokenID);
 
   // account tree
@@ -60,7 +60,7 @@ function initDepositToNew() {
     fromEthAddr: Scalar.fromString(ethAddrNoPrefix, 16),
     sign: account.sign,
     ay: Scalar.fromString(account.ay, 16),
-    loadAmount: loadAmount,
+    amount: amount,
     balance_path_elements: oldBalanceProof.path_elements,
     oldBalanceRoot: oldBalanceProof.root,
     newBalanceRoot: newBalanceProof.root,
@@ -76,7 +76,7 @@ function initDepositToOld() {
   const nonce = 51;
   const tokenID = 2;
   const oldBalance = 500n;
-  const loadAmount = 500n;
+  const amount = 500n;
   const prvkey = 1;
   const account = new Account(prvkey);
   const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
@@ -87,7 +87,7 @@ function initDepositToOld() {
   // TODO: check index bounds
   balanceLeaves[tokenID] = oldBalance;
   let oldBalanceProof = getBTreeProof(balanceLeaves, tokenID);
-  balanceLeaves[tokenID] = oldBalance + loadAmount;
+  balanceLeaves[tokenID] = oldBalance + amount;
   let newBalanceProof = getBTreeProof(balanceLeaves, tokenID);
 
   // account tree
@@ -119,7 +119,7 @@ function initDepositToOld() {
     enabled: 1,
     accountID: accountID,
     tokenID: tokenID,
-    loadAmount: loadAmount,
+    amount: amount,
     nonce: nonce,
     sign: account.sign,
     ay: Scalar.fromString(account.ay, 16),
@@ -144,7 +144,7 @@ class TestDepositToNew implements SimpleTest {
       fromEthAddr: deposit_to_new_test_case.fromEthAddr,
       sign: deposit_to_new_test_case.sign,
       ay: deposit_to_new_test_case.ay,
-      loadAmount: deposit_to_new_test_case.loadAmount,
+      amount: deposit_to_new_test_case.amount,
       balance_path_elements: deposit_to_new_test_case.balance_path_elements,
       account_path_elements: deposit_to_new_test_case.account_path_elements,
       oldAccountRoot: deposit_to_new_test_case.oldAccountRoot,
@@ -169,7 +169,7 @@ class TestDepositToOld implements SimpleTest {
       enabled: deposit_to_old_test_case.enabled,
       accountID: deposit_to_old_test_case.accountID,
       tokenID: deposit_to_old_test_case.tokenID,
-      loadAmount: deposit_to_old_test_case.loadAmount,
+      amount: deposit_to_old_test_case.amount,
       nonce: deposit_to_old_test_case.nonce,
       sign: deposit_to_old_test_case.sign,
       ay: deposit_to_old_test_case.ay,
