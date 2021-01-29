@@ -7,7 +7,7 @@ function TxTypeWithdraw() { return 3; }
  * @input in - {Field} - encoded transaction
  */
 template DecodeTx() {
-    signal input in[14];
+    signal input in[18];
 
     signal output tokenID;
     signal output amount;
@@ -24,6 +24,11 @@ template DecodeTx() {
     signal output nonce2;
     signal output balance1;
     signal output balance2;
+
+    signal output sigL2Hash;
+    signal output s;
+    signal output r8x;
+    signal output r8y;
 
     tokenID <== in[0];
     amount <== in[1];
@@ -45,5 +50,10 @@ template DecodeTx() {
     
     balance1 <== in[12];
     balance2 <== in[13];
+    
+    sigL2Hash <== in[14];
+    s <== in[15];
+    r8x <== in[16];
+    r8y <== in[17];
 
 }

@@ -29,7 +29,7 @@ template Block(nTx, balanceLevels, accountLevels) {
 	// transactions
     signal input txsType[nTx];
 	// TODO: private?
-    signal input encodedTxs[nTx][14];
+    signal input encodedTxs[nTx][18];
 
     // State
     signal input balance_path_elements[nTx][balanceLevels][1];
@@ -47,7 +47,7 @@ template Block(nTx, balanceLevels, accountLevels) {
     // process each transaction
     for (var i = 0; i < nTx; i++) {
         component decodedTx = DecodeTx();
-        for (var j = 0; j < 14; j++) {
+        for (var j = 0; j < 18; j++) {
             decodedTx.in[j] <== encodedTxs[i][j];
         }
 
@@ -116,6 +116,10 @@ template Block(nTx, balanceLevels, accountLevels) {
         processTransfer.ethAddr2 <== decodedTx.ethAddr2;
         processTransfer.balance1 <== decodedTx.balance1;
         processTransfer.balance2 <== decodedTx.balance2;
+        processTransfer.sigL2Hash <== decodedTx.sigL2Hash;
+        processTransfer.s <== decodedTx.s;
+        processTransfer.r8x <== decodedTx.r8x;
+        processTransfer.r8y <== decodedTx.r8y;
 
         // for (var j = 0; j < balanceLevels; j++) {
         //     processTransfer.balance_path_elements[j] <== balance_path_elements[i][j];
@@ -127,10 +131,6 @@ template Block(nTx, balanceLevels, accountLevels) {
         processTransfer.newAccountRoot <== newAccountRoots[i];
 
 
-    // signal input sigL2Hash; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
-    // signal input s;
-    // signal input r8x;
-    // signal input r8y;
     // signal input sender_balance_path_elements[balanceLevels][1];
     // signal input sender_account_path_elements[accountLevels][1];
     // signal input receiver_balance_path_elements[balanceLevels][1];
