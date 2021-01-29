@@ -73,35 +73,6 @@ function initDepositToNew() {
   };
 }
 
-let deposit_to_new_test_case = initDepositToNew();
-class TestDepositToNew implements SimpleTest {
-  getInput() {
-    return {
-      accountID: deposit_to_new_test_case.accountID,
-      tokenID: deposit_to_new_test_case.tokenID,
-      fromEthAddr: deposit_to_new_test_case.fromEthAddr,
-      fromBjjCompressed: deposit_to_new_test_case.fromBjjCompressed,
-      loadAmount: deposit_to_new_test_case.loadAmount,
-      balance_path_elements: deposit_to_new_test_case.balance_path_elements,
-      oldBalanceRoot: deposit_to_new_test_case.oldBalanceRoot,
-      newBalanceRoot: deposit_to_new_test_case.newBalanceRoot,
-      account_path_elements: deposit_to_new_test_case.account_path_elements,
-      oldAccountRoot: deposit_to_new_test_case.oldAccountRoot,
-      newAccountRoot: deposit_to_new_test_case.newAccountRoot,      
-    };
-  }
-  getOutput() {
-    return {};
-  }
-  getComponent(): TestComponent {
-    return {
-      src: path.join(__dirname, '..', 'src', 'deposit_to_new.circom'),
-      main: `DepositToNew(${balanceLevels}, ${accountLevels})`,
-    };
-  }
-}
-
-
 function initDepositToOld() {
   // input-level assignments and pre-processings
   const accountID = 2;
@@ -167,6 +138,32 @@ function initDepositToOld() {
   };
 }
 
+let deposit_to_new_test_case = initDepositToNew();
+class TestDepositToNew implements SimpleTest {
+  getInput() {
+    return {
+      accountID: deposit_to_new_test_case.accountID,
+      tokenID: deposit_to_new_test_case.tokenID,
+      fromEthAddr: deposit_to_new_test_case.fromEthAddr,
+      fromBjjCompressed: deposit_to_new_test_case.fromBjjCompressed,
+      loadAmount: deposit_to_new_test_case.loadAmount,
+      balance_path_elements: deposit_to_new_test_case.balance_path_elements,
+      account_path_elements: deposit_to_new_test_case.account_path_elements,
+      oldAccountRoot: deposit_to_new_test_case.oldAccountRoot,
+      newAccountRoot: deposit_to_new_test_case.newAccountRoot,      
+    };
+  }
+  getOutput() {
+    return {};
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'deposit_to_new.circom'),
+      main: `DepositToNew(${balanceLevels}, ${accountLevels})`,
+    };
+  }
+}
+
 let deposit_to_old_test_case = initDepositToOld();
 class TestDepositToOld implements SimpleTest {
   getInput() {
@@ -180,8 +177,6 @@ class TestDepositToOld implements SimpleTest {
       balance: deposit_to_old_test_case.balance,
       ethAddr: deposit_to_old_test_case.ethAddr,
       balance_path_elements: deposit_to_old_test_case.balance_path_elements,
-      oldBalanceRoot: deposit_to_old_test_case.oldBalanceRoot,
-      newBalanceRoot: deposit_to_old_test_case.newBalanceRoot,
       account_path_elements: deposit_to_old_test_case.account_path_elements,
       oldAccountRoot: deposit_to_old_test_case.oldAccountRoot,
       newAccountRoot: deposit_to_old_test_case.newAccountRoot,      

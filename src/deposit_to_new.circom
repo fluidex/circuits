@@ -34,8 +34,6 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal input account_path_elements[accountLevels][1];
 
     // Roots
-    signal input oldBalanceRoot;
-    signal input newBalanceRoot;
     signal input oldAccountRoot;
     signal input newAccountRoot;
 
@@ -71,15 +69,16 @@ template DepositToNew(balanceLevels, accountLevels) {
 
     // - check balance tree update
     ////////
-    component balance_update_checker = CheckLeafUpdate(balanceLevels);
-    balance_update_checker.oldLeaf <== 0;
-    balance_update_checker.newLeaf <== loadAmount;
+    component old_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    component new_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    old_balance_tree.leaf <== 0;
+    new_balance_tree.leaf <== loadAmount;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_update_checker.path_index[i] <== balance_path_index[i];
-        balance_update_checker.path_elements[i][0] <== balance_path_elements[i][0];
+        old_balance_tree.path_index[i] <== balance_path_index[i];
+        old_balance_tree.path_elements[i][0] <== balance_path_elements[i][0];
+        new_balance_tree.path_index[i] <== balance_path_index[i];
+        new_balance_tree.path_elements[i][0] <== balance_path_elements[i][0];
     }
-    balance_update_checker.oldRoot <== oldBalanceRoot;
-    balance_update_checker.newRoot <== newBalanceRoot;
 
     // - check account tree update
     ////////
@@ -87,14 +86,14 @@ template DepositToNew(balanceLevels, accountLevels) {
     component oldAccountHash = HashAccount();
     oldAccountHash.nonce <== 0;
     oldAccountHash.sign <== 0;
-    oldAccountHash.balanceRoot <== oldBalanceRoot;
+    oldAccountHash.balanceRoot <== old_balance_tree.root;
     oldAccountHash.ay <== 0;
     oldAccountHash.ethAddr <== 0;
     // new account state hash
     component newAccountHash = HashAccount();
     newAccountHash.nonce <== 0;
     newAccountHash.sign <== decodeFromBjj.sign;
-    newAccountHash.balanceRoot <== newBalanceRoot;
+    newAccountHash.balanceRoot <== new_balance_tree.root;
     newAccountHash.ay <== decodeFromBjj.ay;
     newAccountHash.ethAddr <== fromEthAddr;
     // check update

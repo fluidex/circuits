@@ -98,8 +98,6 @@ class TestWithdraw implements SimpleTest {
       ethAddr: test_case.ethAddr,
       balance_path_elements: test_case.balance_path_elements,
       account_path_elements: test_case.account_path_elements,
-      oldBalanceRoot: test_case.oldBalanceRoot,
-      newBalanceRoot: test_case.newBalanceRoot,
       oldAccountRoot: test_case.oldAccountRoot,
       newAccountRoot: test_case.newAccountRoot,      
     };
