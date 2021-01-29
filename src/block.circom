@@ -2,6 +2,7 @@ include "../node_modules/circomlib/circuits/compconstant.circom";
 include "./decode_tx.circom";
 include "./deposit_to_new.circom";
 include "./deposit_to_old.circom";
+include "./transfer.circom";
 
 /**
  * Process a rollup block and transactions inside
@@ -93,6 +94,47 @@ template Block(nTx, balanceLevels, accountLevels) {
         }
         processDepositToOld.oldAccountRoot <== oldAccountRoots[i];
         processDepositToOld.newAccountRoot <== newAccountRoots[i];
+
+        // try process transfer
+        component enableTransfer = IsEqual();
+        enableTransfer.in[0] <== txsType[i];
+        enableTransfer.in[1] <== TxTypeTransfer();
+        component processTransfer = Transfer(balanceLevels, accountLevels);
+        processTransfer.enabled <== enableTransfer.out;
+        processTransfer.fromAccountID <== decodedTx.accountID1;
+        processTransfer.toAccountID <== decodedTx.accountID2;
+        processTransfer.tokenID <== decodedTx.tokenID;
+        processTransfer.amount <== decodedTx.amount;
+        processTransfer.nonce <== decodedTx.nonce1;
+        processTransfer.nonce1 <== decodedTx.nonce1;
+        processTransfer.nonce2 <== decodedTx.nonce2;
+        processTransfer.sign1 <== decodedTx.sign1;
+        processTransfer.sign2 <== decodedTx.sign2;
+        processTransfer.ay1 <== decodedTx.ay1;
+        processTransfer.ay2 <== decodedTx.ay2;
+        processTransfer.ethAddr1 <== decodedTx.ethAddr1;
+        processTransfer.ethAddr2 <== decodedTx.ethAddr2;
+        processTransfer.balance1 <== decodedTx.balance1;
+        processTransfer.balance2 <== decodedTx.balance2;
+
+        // for (var j = 0; j < balanceLevels; j++) {
+        //     processTransfer.balance_path_elements[j] <== balance_path_elements[i][j];
+        // }
+        // for (var j = 0; j < accountLevels; j++) {
+        //     processTransfer.account_path_elements[j][0] <== account_path_elements[i][j][0];
+        // }
+        processTransfer.oldAccountRoot <== oldAccountRoots[i];
+        processTransfer.newAccountRoot <== newAccountRoots[i];
+
+
+    // signal input sigL2Hash; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
+    // signal input s;
+    // signal input r8x;
+    // signal input r8y;
+    // signal input sender_balance_path_elements[balanceLevels][1];
+    // signal input sender_account_path_elements[accountLevels][1];
+    // signal input receiver_balance_path_elements[balanceLevels][1];
+    // signal input receiver_account_path_elements[accountLevels][1];
     }
 }
 
