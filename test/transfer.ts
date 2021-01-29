@@ -4,7 +4,7 @@ const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
-import { TxType } from './types';
+import { TxType } from './common';
 
 // circuit-level definitions
 const balanceLevels = 5;
