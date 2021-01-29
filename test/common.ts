@@ -8,6 +8,28 @@ enum TxType {
   Withdraw,
 }
 
+const TxLength = 18;
+enum TxDetailIdx {
+  TokenID,
+  Amount,
+  AccountID1,
+  AccountID2,
+  EthAddr1,
+  EthAddr2,
+  Sign1,
+  Sign2,
+  Ay1,
+  Ay2,
+  Nonce1,
+  Nonce2,
+  Balance1,
+  Balance2,
+  SigL2Hash,
+  S,
+  R8x,
+  R8y,
+}
+
 function getBTreeProof(leaves, index) {
   // TODO: assert even length
   // TODO: check index bounds
@@ -36,4 +58,7 @@ function getBTreeProof(leaves, index) {
   }
 }
 
-export { TxType, getBTreeProof };
+export {
+  TxType, TxLength, TxDetailIdx,
+  getBTreeProof
+};
