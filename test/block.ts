@@ -29,20 +29,21 @@ function initTestCase() {
     for (let i = 0; i < 2**balanceLevels; i++) account1BalanceLeaves.push(10n + BigInt(i));
     // TODO: check index bounds
     account1BalanceLeaves[tokenID] = balance1;
+    // account2 state
 	let account2BalanceLeaves :Array<BigInt> = new Array(2**balanceLevels); account2BalanceLeaves.fill(0n, 0, 2**balanceLevels);
 
-	let txsType :Array<BigInt> = new Array(nTxs); txsType.fill(0n, 0, nTxs);
+	let txsType :Array<number> = new Array(nTxs); txsType.fill(0, 0, nTxs);
 	let encodedTxs :Array<BigInt> = new Array(nTxs); encodedTxs.fill(0n, 0, nTxs);
 	let encodedTx :Array<BigInt> = new Array(common.TxLength); encodedTx.fill(0n, 0, common.TxLength);
 
     // deposit_to_new
     txsType.push(common.TxType.DepositToNew);
-    encodedTx[common.TxDetailIdx.TokenID] = tokenID;
+    encodedTx[common.TxDetailIdx.TokenID] = Scalar.e(tokenID);
     encodedTx[common.TxDetailIdx.Amount] = 200n;
-    encodedTx[common.TxDetailIdx.AccountID2] = accountID2;
+    encodedTx[common.TxDetailIdx.AccountID2] = Scalar.e(accountID2);
     encodedTx[common.TxDetailIdx.EthAddr2] = Scalar.fromString(ethAddr2NoPrefix, 16);
-    encodedTx[common.TxDetailIdx.Sign2] = account2.sign;
-    encodedTx[common.TxDetailIdx.Ay2] = account2.ay;
+    encodedTx[common.TxDetailIdx.Sign2] = Scalar.e(account2.sign);
+    encodedTx[common.TxDetailIdx.Ay2] = Scalar.fromString(account2.ay, 16);
 
 
 
