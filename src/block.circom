@@ -64,10 +64,10 @@ template Block(nTx, balanceLevels, accountLevels) {
         processDepositToNew.ay <== decodedTx.ay2;
         processDepositToNew.amount <== decodedTx.amount;
         for (var j = 0; j < balanceLevels; j++) {
-            processDepositToNew.balance_path_elements[j] <== balance_path_elements[i][0][j];
+            processDepositToNew.balance_path_elements[j] <== balance_path_elements[i][1][j];
         }
         for (var j = 0; j < accountLevels; j++) {
-            processDepositToNew.account_path_elements[j][0] <== account_path_elements[i][0][j][0];
+            processDepositToNew.account_path_elements[j][0] <== account_path_elements[i][1][j][0];
         }
         processDepositToNew.oldAccountRoot <== oldAccountRoots[i];
         processDepositToNew.newAccountRoot <== newAccountRoots[i];
