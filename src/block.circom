@@ -51,9 +51,9 @@ template Block(nTx, balanceLevels, accountLevels) {
         component decodedTx = DecodeTx();
         component processDepositToNew = DepositToNew(balanceLevels, accountLevels);
         processDepositToNew.enabled <== enableDecodeTxDepositToNew.out;
-        processDepositToNew.accountID <== decodedTx.accountID;
+        processDepositToNew.accountID <== decodedTx.accountID1;
         processDepositToNew.tokenID <== decodedTx.tokenID;
-        processDepositToNew.fromEthAddr <== decodedTx.tokenID;
+        processDepositToNew.fromEthAddr <== decodedTx.fromEthAddr;
         for (var j = 0; j < 256; j++) {
             processDepositToNew.fromBjjCompressed[j] <== decodedTx.fromBjjCompressed[j];
         }
