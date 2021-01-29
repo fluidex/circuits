@@ -32,11 +32,11 @@ function initTestCase() {
     account1BalanceLeaves[tokenID] = balance1;
     let account1BalanceProof = common.getBTreeProof(account1BalanceLeaves, tokenID);
     let account1State = {
-      nonce: nonce1,
-      sign: account1.sign,
-      balanceRoot: account1BalanceProof.root,
-      ay: account1.ay,
-      ethAddr: ethAddr1NoPrefix,
+		nonce: nonce1,
+		sign: account1.sign,
+		balanceRoot: account1BalanceProof.root,
+		ay: account1.ay,
+		ethAddr: ethAddr1NoPrefix,
     };
     const account1Hash = hashAccountState(account1State);
 
@@ -44,11 +44,11 @@ function initTestCase() {
 	let account2BalanceLeaves :Array<BigInt> = new Array(2**balanceLevels); account2BalanceLeaves.fill(0n, 0, 2**balanceLevels);
     let account2BalanceProof = common.getBTreeProof(account2BalanceLeaves, tokenID);
     let account2State = {
-      nonce: nonce2,
-      sign: account2.sign,
-      balanceRoot: account2BalanceProof.root,
-      ay: account2.ay,
-      ethAddr: ethAddr2NoPrefix,
+		nonce: 0,
+		sign: 0,
+		balanceRoot: account2BalanceProof.root,
+		ay: '0',
+		ethAddr: '0',
     };
     const account2Hash = hashAccountState(account2State);
 
