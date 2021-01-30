@@ -58,14 +58,19 @@ function initTestCase() {
 	// TODO: check index bounds
 	accountLeaves[accountID1] = account1Hash;
 	accountLeaves[accountID2] = account2Hash;
-	let account1Proof = getBTreeProof(accountLeaves, accountID1);
-	let account2Proof = getBTreeProof(accountLeaves, accountID2);
+	let account1Proof = common.getBTreeProof(accountLeaves, accountID1);
+	let account2Proof = common.getBTreeProof(accountLeaves, accountID2);
 
 	let txsType :Array<number> = new Array(nTxs); txsType.fill(0, 0, nTxs);
-	let encodedTxs :Array<BigInt> = new Array(nTxs); encodedTxs.fill(0n, 0, nTxs);
+	let encodedTxs = [];
+	let balance_path_elements = [];
+	let account_path_elements = [];
+	let oldAccountRoots = [];
+	let newAccountRoots = [];
+
 	let encodedTx :Array<BigInt> = new Array(common.TxLength); encodedTx.fill(0n, 0, common.TxLength);
 
-    // deposit_to_new
+    // 1st tx: deposit_to_new
     txsType.push(common.TxType.DepositToNew);
     encodedTx[common.TxDetailIdx.TokenID] = Scalar.e(tokenID);
     encodedTx[common.TxDetailIdx.Amount] = 200n;
@@ -73,11 +78,16 @@ function initTestCase() {
     encodedTx[common.TxDetailIdx.EthAddr2] = Scalar.fromString(ethAddr2NoPrefix, 16);
     encodedTx[common.TxDetailIdx.Sign2] = Scalar.e(account2.sign);
     encodedTx[common.TxDetailIdx.Ay2] = Scalar.fromString(account2.ay, 16);
-
+	encodedTxs.push(encodedTx);
 
 
 	return {
 		txsType: txsType,
+		encodedTxs: encodedTxs,
+		balance_path_elements: balance_path_elements,
+		account_path_elements: account_path_elements,
+		oldAccountRoots: oldAccountRoots,
+		newAccountRoots: newAccountRoots,
 	};
 }
 
@@ -86,6 +96,11 @@ class TestBlock implements SimpleTest {
 	getInput() {
 		return {
 			txsType: test_case.txsType,
+			encodedTxs: test_case.encodedTxs,
+			balance_path_elements: test_case.balance_path_elements,
+			account_path_elements: test_case.account_path_elements,
+			oldAccountRoots: test_case.oldAccountRoots,
+			newAccountRoots: test_case.newAccountRoots,
 		};
 	}
 	getOutput() {
