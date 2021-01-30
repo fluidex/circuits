@@ -176,6 +176,7 @@ function initTestCase() {
     account1BalanceLeaves[tokenID] -= amount;
     account1BalanceProof = common.getBTreeProof(account1BalanceLeaves, tokenID);
     account1State.balanceRoot = account1BalanceProof.root;
+    account1State.nonce += 1;
     account1Hash = hashAccountState(account1State);
     accountLeaves[accountID1] = account1Hash;
     account2BalanceLeaves[tokenID] = BigInt(account2BalanceLeaves[tokenID]) + amount;
