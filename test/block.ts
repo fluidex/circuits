@@ -18,8 +18,6 @@ function initTestCase() {
     const accountID1 = 2;
     const account1 = new Account(1);
     const ethAddr1NoPrefix = account1.ethAddr.replace('0x', '');
-    let nonce1 = 99; 
-    let balance1 = 300n;
     // newAccount
     const accountID2 = 1;
     const account2 = new Account(2);
@@ -29,10 +27,10 @@ function initTestCase() {
     let account1BalanceLeaves = [];
     for (let i = 0; i < 2**balanceLevels; i++) account1BalanceLeaves.push(10n + BigInt(i));
     // TODO: check index bounds
-    account1BalanceLeaves[tokenID] = balance1;
+    account1BalanceLeaves[tokenID] = 300n;
     let account1BalanceProof = common.getBTreeProof(account1BalanceLeaves, tokenID);
     let account1State = {
-        nonce: nonce1,
+        nonce: 99,
         sign: account1.sign,
         balanceRoot: account1BalanceProof.root,
         ay: account1.ay,
@@ -116,7 +114,7 @@ function initTestCase() {
     encodedTx[common.TxDetailIdx.Ay2] = Scalar.fromString(account1.ay, 16);
     encodedTx[common.TxDetailIdx.Amount] = amount;
     encodedTx[common.TxDetailIdx.Nonce2] = Scalar.e(account1State.nonce);
-    encodedTx[common.TxDetailIdx.Balance2] = Scalar.e(balance1);
+    encodedTx[common.TxDetailIdx.Balance2] = Scalar.e(account1BalanceLeaves[tokenID]]);
     encodedTxs.push(encodedTx);
     balance_path_elements_item = new Array(2);
     balance_path_elements_item[0] = account1BalanceProof.path_elements; // whatever
@@ -128,7 +126,7 @@ function initTestCase() {
     account_path_elements.push(account_path_elements_item);
     oldAccountRoots.push(account1Proof.root);
     // execute tx
-    account1BalanceLeaves[tokenID] = balance1 + amount;
+    account1BalanceLeaves[tokenID] += amount;
     account1BalanceProof = common.getBTreeProof(account1BalanceLeaves, tokenID);
     account1State.balanceRoot = account1BalanceProof.root;
     account1Hash = hashAccountState(account1State);
@@ -136,6 +134,36 @@ function initTestCase() {
     account1Proof = common.getBTreeProof(accountLeaves, accountID1);
     account2Proof = common.getBTreeProof(accountLeaves, accountID2);
     newAccountRoots.push(account1Proof.root);
+
+    // 3rd tx: transfer
+    amount = 100n;
+    // txsType.push(common.TxType.Transfer);
+    encodedTx = new Array(common.TxLength); encodedTx.fill(0n, 0, common.TxLength);
+    encodedTx[common.TxDetailIdx.AccountID1] = Scalar.e(accountID1);
+    encodedTx[common.TxDetailIdx.AccountID2] = Scalar.e(accountID2);
+    encodedTx[common.TxDetailIdx.TokenID] = Scalar.e(tokenID);
+    encodedTx[common.TxDetailIdx.Amount] = amount;
+    encodedTx[common.TxDetailIdx.Nonce1] = Scalar.e(account1State.nonce);
+    encodedTx[common.TxDetailIdx.Nonce2] = Scalar.e(account2State.nonce);
+    encodedTx[common.TxDetailIdx.Sign1] = Scalar.e(account1.sign);
+    encodedTx[common.TxDetailIdx.Sign2] = Scalar.e(account2.sign);
+    encodedTx[common.TxDetailIdx.Ay1] = Scalar.fromString(account1.ay, 16);
+    encodedTx[common.TxDetailIdx.Ay2] = Scalar.fromString(account2.ay, 16);
+    encodedTx[common.TxDetailIdx.EthAddr1] = Scalar.fromString(ethAddr1NoPrefix, 16);
+    encodedTx[common.TxDetailIdx.EthAddr2] = Scalar.fromString(ethAddr2NoPrefix, 16);
+    encodedTx[common.TxDetailIdx.Balance1] = Scalar.e(account1BalanceLeaves[tokenID]);
+    encodedTx[common.TxDetailIdx.Balance2] = Scalar.e(account2BalanceLeaves[tokenID]);
+    // TODO: construct tx and compute hash
+    let mockTxHashTransfer = hash([common.TxType.Transfer, tokenID, amount]);
+    mockTxHashTransfer = hash([mockTxHashTransfer, accountID1, account1State.nonce, account1BalanceLeaves[tokenID]]);
+    mockTxHashTransfer = hash([mockTxHashTransfer, accountID2, account2State.nonce, account2BalanceLeaves[tokenID]]);
+    let sigTransfer = account1.signHash(mockTxHashTransfer);
+    encodedTx[common.TxDetailIdx.sigL2Hash] = mockTxHashTransfer;
+    encodedTx[common.TxDetailIdx.s] = mockTxHashTransfer;
+    encodedTx[common.TxDetailIdx.r8x] = sigTransfer.R8[0];
+    encodedTx[common.TxDetailIdx.r8y] = sigTransfer.R8[1];
+    encodedTxs.push(encodedTx);
+
 
     return {
         txsType: txsType,
