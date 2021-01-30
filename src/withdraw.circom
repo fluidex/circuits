@@ -78,7 +78,7 @@ template Withdraw(balanceLevels, accountLevels) {
 
     // signature L2 verifier
     component sigVerifier = EdDSARescueVerifier();
-    sigVerifier.enabled <== 1;
+    sigVerifier.enabled <== enabled;
 
     sigVerifier.Ax <== getAx.ax;
     sigVerifier.Ay <== ay;
