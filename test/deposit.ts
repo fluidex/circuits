@@ -20,11 +20,10 @@ function initDepositToNew() {
   const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
 
   // balance tree
-  let balanceLeaves = [];
-  for (let i = 0; i < 2**balanceLevels; i++) balanceLeaves.push(10n + BigInt(i));
-  // TODO: check index bounds
-  balanceLeaves[tokenID] = 0;
+  let balanceLeaves: Array<BigInt> = new Array(2**balanceLevels);
+  balanceLeaves.fill(0n, 0, 2**balanceLevels);
   let oldBalanceProof = getBTreeProof(balanceLeaves, tokenID);
+  // TODO: check index bounds
   balanceLeaves[tokenID] = amount;
   let newBalanceProof = getBTreeProof(balanceLeaves, tokenID);
 
