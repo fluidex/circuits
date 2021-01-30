@@ -1,9 +1,11 @@
-const circuitPath = './data/transfer/';
+const path = require('path');
+
+const circuitPath = process.argv.slice(2)[0];
 const numGatesThreshold = 100;
 const numComponentThreshold = 5;
 
-const j = require(circuitPath + 'circuit.r1cs.json');
-const stats = require(circuitPath + 'analyse.json');
+const j = require(path.join(__dirname, circuitPath, 'circuit.r1cs.json'));
+const stats = require(path.join(__dirname, circuitPath, 'analyse.json'));
 
 function extractComponent(name) {
   const arr = name.split('.');
@@ -23,7 +25,7 @@ async function main() {
     return s;
   }
   const loadS = (await import('../../node_modules/snarkjs/src/loadsyms.js')).default;
-  const sym = await loadS(circuitPath + 'circuit.sym');
+  const sym = await loadS(path.join(__dirname, circuitPath, 'circuit.sym'));
   function printComponentsOfVars(s) {
     let s2 = new Map();
     for (let elem of s) {
