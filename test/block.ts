@@ -71,18 +71,43 @@ function initTestCase() {
     let encodedTx :Array<BigInt> = new Array(common.TxLength); encodedTx.fill(0n, 0, common.TxLength);
 
     // 1st tx: deposit_to_new
+    let amount = 200n
     txsType.push(common.TxType.DepositToNew);
     encodedTx[common.TxDetailIdx.TokenID] = Scalar.e(tokenID);
-    encodedTx[common.TxDetailIdx.Amount] = 200n;
+    encodedTx[common.TxDetailIdx.Amount] = amount;
     encodedTx[common.TxDetailIdx.AccountID2] = Scalar.e(accountID2);
     encodedTx[common.TxDetailIdx.EthAddr2] = Scalar.fromString(ethAddr2NoPrefix, 16);
     encodedTx[common.TxDetailIdx.Sign2] = Scalar.e(account2.sign);
     encodedTx[common.TxDetailIdx.Ay2] = Scalar.fromString(account2.ay, 16);
     encodedTxs.push(encodedTx);
+    let balance_path_elements_item = new Array(2);
+    balance_path_elements_item[1] = account2BalanceProof.path_elements;
+    balance_path_elements.push(balance_path_elements_item);
+    let account_path_elements_item = new Array(2);
+    account_path_elements_item[1] = account2Proof.path_elements;
+    account_path_elements.push(account_path_elements_item);
+    oldAccountRoots.push(account2Proof.root);
+    // execute tx
+    account2BalanceLeaves[tokenID] = amount;
+    account2BalanceProof = common.getBTreeProof(account2BalanceLeaves, tokenID);
+    account2State = {
+        nonce: 0,
+        sign: account2.sign,
+        balanceRoot: account2BalanceProof.root,
+        ay: account2.ay,
+        ethAddr: ethAddr2NoPrefix,
+    };
+    account2Hash = hashAccountState(account2State);
+    accountLeaves[accountID2] = account2Hash;
+    account2Proof = common.getBTreeProof(accountLeaves, accountID2);
+    newAccountRoots.push(account2Proof.root);
 
     // console.log(txsType);
     // console.log(encodedTx);
-    // console.log(encodedTxs);
+    console.log(balance_path_elements[0]);
+    console.log(account_path_elements[0]);
+    console.log(oldAccountRoots);
+    console.log(newAccountRoots);
 
     return {
         txsType: txsType,
@@ -100,10 +125,10 @@ class TestBlock implements SimpleTest {
         return {
             txsType: test_case.txsType,
             encodedTxs: test_case.encodedTxs,
-            // balance_path_elements: test_case.balance_path_elements,
-            // account_path_elements: test_case.account_path_elements,
-            // oldAccountRoots: test_case.oldAccountRoots,
-            // newAccountRoots: test_case.newAccountRoots,
+            balance_path_elements: test_case.balance_path_elements,
+            account_path_elements: test_case.account_path_elements,
+            oldAccountRoots: test_case.oldAccountRoots,
+            newAccountRoots: test_case.newAccountRoots,
         };
     }
     getOutput() {
