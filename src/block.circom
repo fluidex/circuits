@@ -37,16 +37,19 @@ template Block(nTxs, balanceLevels, accountLevels) {
 
     // decode each transaction
     component decodedTx[nTxs];
-    component enableDepositToNew[nTxs];
-    component enableDepositToOld[nTxs];
-    component enableTransfer[nTxs];
-    component enableWithdraw[nTxs];
     for (var i = 0; i < nTxs; i++) {
         decodedTx[i] = DecodeTx();
         for (var j = 0; j < 18; j++) {
             decodedTx[i].in[j] <== encodedTxs[i][j];
         }
+    }
 
+    // check transaction type
+    component enableDepositToNew[nTxs];
+    component enableDepositToOld[nTxs];
+    component enableTransfer[nTxs];
+    component enableWithdraw[nTxs];
+    for (var i = 0; i < nTxs; i++) {
         enableDepositToNew[i] = IsEqual();
         enableDepositToNew[i].in[0] <== txsType[i];
         enableDepositToNew[i].in[1] <== TxTypeDepositToNew();
@@ -64,11 +67,11 @@ template Block(nTxs, balanceLevels, accountLevels) {
         enableWithdraw[i].in[1] <== TxTypeWithdraw();
     }
 
+    // process each transaction
     component processDepositToNew[nTxs];
     component processDepositToOld[nTxs];
     component processTransfer[nTxs];
     component processWithdraw[nTxs];
-    // process each transaction
     for (var i = 0; i < nTxs; i++) {
         // try process deposit_to_new
         processDepositToNew[i] = DepositToNew(balanceLevels, accountLevels);
