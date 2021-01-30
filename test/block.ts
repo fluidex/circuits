@@ -7,7 +7,7 @@ import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 
 // circuit-level definitions
-const nTxs = 3;
+const nTxs = 4;
 const balanceLevels = 2;
 const accountLevels = 2;
 
@@ -193,7 +193,7 @@ function initTestCase() {
 
     // 4st tx: withdraw
     amount = 150n;
-    // txsType.push(common.TxType.Withdraw);
+    txsType.push(common.TxType.Withdraw);
     encodedTx = new Array(common.TxLength); encodedTx.fill(0n, 0, common.TxLength);
     encodedTx[common.TxDetailIdx.AccountID1] = Scalar.e(accountID2);
     encodedTx[common.TxDetailIdx.TokenID] = Scalar.e(tokenID);
@@ -210,11 +210,28 @@ function initTestCase() {
     let sigWithdraw = account1.signHash(mockTxHashWithdraw);
     encodedTx[common.TxDetailIdx.SigL2Hash] = mockTxHashWithdraw;
     encodedTx[common.TxDetailIdx.S] = sigWithdraw.S;
-    encodedTx[common.TxDetailIdx.R8x] = sigTransfer.R8[0];
-    encodedTx[common.TxDetailIdx.R8y] = sigTransfer.R8[1];
-    // encodedTxs.push(encodedTx);
-    
-    
+    encodedTx[common.TxDetailIdx.R8x] = sigWithdraw.R8[0];
+    encodedTx[common.TxDetailIdx.R8y] = sigWithdraw.R8[1];
+    encodedTxs.push(encodedTx);
+    balance_path_elements_item = new Array(2);
+    balance_path_elements_item[0] = account2BalanceProof.path_elements;
+    balance_path_elements_item[1] = account2BalanceProof.path_elements; // whatever
+    balance_path_elements.push(balance_path_elements_item);
+    account_path_elements_item = new Array(2);
+    account_path_elements_item[0] = account2Proof.path_elements;
+    account_path_elements_item[1] = account2Proof.path_elements; // whatever
+    account_path_elements.push(account_path_elements_item);
+    oldAccountRoots.push(account2Proof.root);
+    // execute tx
+    account2BalanceLeaves[tokenID] = BigInt(account2BalanceLeaves[tokenID]) - amount;
+    account2BalanceProof = common.getBTreeProof(account2BalanceLeaves, tokenID);
+    account2State.balanceRoot = account2BalanceProof.root;
+    account2State.nonce += 1;
+    account2Hash = hashAccountState(account2State);
+    accountLeaves[accountID2] = account2Hash;
+    account1Proof = common.getBTreeProof(accountLeaves, accountID1);
+    account2Proof = common.getBTreeProof(accountLeaves, accountID2);
+    newAccountRoots.push(account2Proof.root);
 
     return {
         txsType: txsType,
