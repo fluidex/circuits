@@ -7,7 +7,7 @@ import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 
 // circuit-level definitions
-const nTxs = 2;
+const nTxs = 3;
 const balanceLevels = 2;
 const accountLevels = 2;
 
@@ -114,7 +114,7 @@ function initTestCase() {
     encodedTx[common.TxDetailIdx.Ay2] = Scalar.fromString(account1.ay, 16);
     encodedTx[common.TxDetailIdx.Amount] = amount;
     encodedTx[common.TxDetailIdx.Nonce2] = Scalar.e(account1State.nonce);
-    encodedTx[common.TxDetailIdx.Balance2] = Scalar.e(account1BalanceLeaves[tokenID]]);
+    encodedTx[common.TxDetailIdx.Balance2] = Scalar.e(account1BalanceLeaves[tokenID]);
     encodedTxs.push(encodedTx);
     balance_path_elements_item = new Array(2);
     balance_path_elements_item[0] = account1BalanceProof.path_elements; // whatever
@@ -137,7 +137,7 @@ function initTestCase() {
 
     // 3rd tx: transfer
     amount = 100n;
-    // txsType.push(common.TxType.Transfer);
+    txsType.push(common.TxType.Transfer);
     encodedTx = new Array(common.TxLength); encodedTx.fill(0n, 0, common.TxLength);
     encodedTx[common.TxDetailIdx.AccountID1] = Scalar.e(accountID1);
     encodedTx[common.TxDetailIdx.AccountID2] = Scalar.e(accountID2);
@@ -158,11 +158,34 @@ function initTestCase() {
     mockTxHashTransfer = hash([mockTxHashTransfer, accountID1, account1State.nonce, account1BalanceLeaves[tokenID]]);
     mockTxHashTransfer = hash([mockTxHashTransfer, accountID2, account2State.nonce, account2BalanceLeaves[tokenID]]);
     let sigTransfer = account1.signHash(mockTxHashTransfer);
-    encodedTx[common.TxDetailIdx.sigL2Hash] = mockTxHashTransfer;
-    encodedTx[common.TxDetailIdx.s] = mockTxHashTransfer;
-    encodedTx[common.TxDetailIdx.r8x] = sigTransfer.R8[0];
-    encodedTx[common.TxDetailIdx.r8y] = sigTransfer.R8[1];
+    encodedTx[common.TxDetailIdx.SigL2Hash] = mockTxHashTransfer;
+    encodedTx[common.TxDetailIdx.S] = mockTxHashTransfer;
+    encodedTx[common.TxDetailIdx.R8x] = sigTransfer.R8[0];
+    encodedTx[common.TxDetailIdx.R8y] = sigTransfer.R8[1];
     encodedTxs.push(encodedTx);
+    balance_path_elements_item = new Array(2);
+    balance_path_elements_item[0] = account1BalanceProof.path_elements;
+    balance_path_elements_item[1] = account2BalanceProof.path_elements;
+    balance_path_elements.push(balance_path_elements_item);
+    account_path_elements_item = new Array(2);
+    account_path_elements_item[0] = account1Proof.path_elements; // whatever
+    account_path_elements_item[1] = account2Proof.path_elements;
+    account_path_elements.push(account_path_elements_item);
+    oldAccountRoots.push(account1Proof.root);
+    // execute tx
+    account1BalanceLeaves[tokenID] -= amount;
+    account1BalanceProof = common.getBTreeProof(account1BalanceLeaves, tokenID);
+    account1State.balanceRoot = account1BalanceProof.root;
+    account1Hash = hashAccountState(account1State);
+    accountLeaves[accountID1] = account1Hash;
+    account2BalanceLeaves[tokenID] = BigInt(account2BalanceLeaves[tokenID]) + amount;
+    account2BalanceProof = common.getBTreeProof(account2BalanceLeaves, tokenID);
+    account2State.balanceRoot = account2BalanceProof.root;
+    account2Hash = hashAccountState(account2State);
+    accountLeaves[accountID2] = account2Hash;
+    account1Proof = common.getBTreeProof(accountLeaves, accountID1);
+    account2Proof = common.getBTreeProof(accountLeaves, accountID2);
+    newAccountRoots.push(account2Proof.root);
 
 
     return {
