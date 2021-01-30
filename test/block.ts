@@ -71,7 +71,7 @@ function initTestCase() {
     let encodedTx :Array<BigInt> = new Array(common.TxLength); encodedTx.fill(0n, 0, common.TxLength);
 
     // 1st tx: deposit_to_new
-    let amount = 200n
+    let amount = 200n;
     txsType.push(common.TxType.DepositToNew);
     encodedTx[common.TxDetailIdx.TokenID] = Scalar.e(tokenID);
     encodedTx[common.TxDetailIdx.Amount] = amount;
