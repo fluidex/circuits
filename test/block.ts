@@ -108,7 +108,7 @@ function initTestCase() {
     // 2nd tx: deposit_to_old
     amount = 300n;
     txsType.push(common.TxType.DepositToOld);
-    encodedTx.fill(0n, 0, common.TxLength);
+    encodedTx = new Array(common.TxLength); encodedTx.fill(0n, 0, common.TxLength);
     encodedTx[common.TxDetailIdx.AccountID2] = Scalar.e(accountID1);
     encodedTx[common.TxDetailIdx.TokenID] = Scalar.e(tokenID);
     encodedTx[common.TxDetailIdx.EthAddr2] = Scalar.fromString(ethAddr1NoPrefix, 16);
