@@ -7,7 +7,7 @@ import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 
 // circuit-level definitions
-const nTxs = 1;
+const nTxs = 2;
 const balanceLevels = 2;
 const accountLevels = 2;
 
@@ -101,8 +101,41 @@ function initTestCase() {
     };
     account2Hash = hashAccountState(account2State);
     accountLeaves[accountID2] = account2Hash;
+    account1Proof = common.getBTreeProof(accountLeaves, accountID1);
     account2Proof = common.getBTreeProof(accountLeaves, accountID2);
     newAccountRoots.push(account2Proof.root);
+
+    // 2nd tx: deposit_to_old
+    amount = 300n;
+    txsType.push(common.TxType.DepositToNew);
+    encodedTx.fill(0n, 0, common.TxLength);
+    encodedTx[common.TxDetailIdx.AccountID2] = Scalar.e(accountID1);
+    encodedTx[common.TxDetailIdx.TokenID] = Scalar.e(tokenID);
+    encodedTx[common.TxDetailIdx.EthAddr2] = Scalar.fromString(ethAddr1NoPrefix, 16);
+    encodedTx[common.TxDetailIdx.Sign2] = Scalar.e(account1.sign);
+    encodedTx[common.TxDetailIdx.Ay2] = Scalar.fromString(account1.ay, 16);
+    encodedTx[common.TxDetailIdx.Amount] = amount;
+    encodedTx[common.TxDetailIdx.Nonce2] = Scalar.e(account1State.nonce);
+    encodedTx[common.TxDetailIdx.Balance2] = Scalar.e(balance1);
+    encodedTxs.push(encodedTx);
+    balance_path_elements_item = new Array(2);
+    balance_path_elements_item[0] = account1BalanceProof.path_elements; // whatever
+    balance_path_elements_item[1] = account1BalanceProof.path_elements;
+    balance_path_elements.push(balance_path_elements_item);
+    account_path_elements_item = new Array(2);
+    account_path_elements_item[0] = account1Proof.path_elements; // whatever
+    account_path_elements_item[1] = account1Proof.path_elements;
+    account_path_elements.push(account_path_elements_item);
+    oldAccountRoots.push(account1Proof.root);
+    // execute tx
+    account1BalanceLeaves[tokenID] = balance1 + amount;
+    account1BalanceProof = common.getBTreeProof(account1BalanceLeaves, tokenID);
+    account1State.balanceRoot = account1BalanceProof.root;
+    account1Hash = hashAccountState(account1State);
+    accountLeaves[accountID1] = account1Hash;
+    account1Proof = common.getBTreeProof(accountLeaves, accountID1);
+    account2Proof = common.getBTreeProof(accountLeaves, accountID2);
+    newAccountRoots.push(account1Proof.root);
 
     return {
         txsType: txsType,
