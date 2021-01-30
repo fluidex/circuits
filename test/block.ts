@@ -61,7 +61,7 @@ function initTestCase() {
 	let account1Proof = common.getBTreeProof(accountLeaves, accountID1);
 	let account2Proof = common.getBTreeProof(accountLeaves, accountID2);
 
-	let txsType :Array<number> = new Array(nTxs); txsType.fill(0, 0, nTxs);
+	let txsType = [];
 	let encodedTxs = [];
 	let balance_path_elements = [];
 	let account_path_elements = [];
@@ -80,14 +80,17 @@ function initTestCase() {
     encodedTx[common.TxDetailIdx.Ay2] = Scalar.fromString(account2.ay, 16);
 	encodedTxs.push(encodedTx);
 
+	// console.log(txsType);
+	// console.log(encodedTx);
+	// console.log(encodedTxs);
 
 	return {
 		txsType: txsType,
 		encodedTxs: encodedTxs,
-		// balance_path_elements: balance_path_elements,
-		// account_path_elements: account_path_elements,
-		// oldAccountRoots: oldAccountRoots,
-		// newAccountRoots: newAccountRoots,
+		balance_path_elements: balance_path_elements,
+		account_path_elements: account_path_elements,
+		oldAccountRoots: oldAccountRoots,
+		newAccountRoots: newAccountRoots,
 	};
 }
 
