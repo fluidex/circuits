@@ -205,9 +205,8 @@ function initTestCase() {
     encodedTx[common.TxDetailIdx.Balance1] = Scalar.e(account2BalanceLeaves[tokenID]);
     // TODO: construct tx and compute hash
     let mockTxHashWithdraw = hash([common.TxType.Withdraw, tokenID, amount]);
-    mockTxHashWithdraw = hash([mockTxHashWithdraw, accountID1, account1State.nonce, account1BalanceLeaves[tokenID]]);
     mockTxHashWithdraw = hash([mockTxHashWithdraw, accountID2, account2State.nonce, account2BalanceLeaves[tokenID]]);
-    let sigWithdraw = account1.signHash(mockTxHashWithdraw);
+    let sigWithdraw = account2.signHash(mockTxHashWithdraw);
     encodedTx[common.TxDetailIdx.SigL2Hash] = mockTxHashWithdraw;
     encodedTx[common.TxDetailIdx.S] = sigWithdraw.S;
     encodedTx[common.TxDetailIdx.R8x] = sigWithdraw.R8[0];
