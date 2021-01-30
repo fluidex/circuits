@@ -47,11 +47,11 @@ template Block(nTxs, balanceLevels, accountLevels) {
     }
 
     // decode each transaction
-    component decodedTx[i];
+    component decodedTx[nTxs];
     for (var i = 0; i < nTxs; i++) {
         decodedTx[i] = DecodeTx();
         for (var j = 0; j < 18; j++) {
-            decodedTx.in[j] <== encodedTxs[i][j];
+            decodedTx[i].in[j] <== encodedTxs[i][j];
         }
     }
 
