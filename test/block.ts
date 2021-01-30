@@ -104,7 +104,7 @@ function initTestCase() {
     newAccountRoots.push(account2Proof.root);
 
     // 2nd tx: deposit_to_old
-    amount = 300n;
+    amount = 100n;
     txsType.push(common.TxType.DepositToOld);
     encodedTx = new Array(common.TxLength); encodedTx.fill(0n, 0, common.TxLength);
     encodedTx[common.TxDetailIdx.AccountID2] = Scalar.e(accountID1);
@@ -136,7 +136,7 @@ function initTestCase() {
     newAccountRoots.push(account1Proof.root);
 
     // 3rd tx: transfer
-    amount = 100n;
+    amount = 50n;
     txsType.push(common.TxType.Transfer);
     encodedTx = new Array(common.TxLength); encodedTx.fill(0n, 0, common.TxLength);
     encodedTx[common.TxDetailIdx.AccountID1] = Scalar.e(accountID1);
@@ -159,7 +159,7 @@ function initTestCase() {
     mockTxHashTransfer = hash([mockTxHashTransfer, accountID2, account2State.nonce, account2BalanceLeaves[tokenID]]);
     let sigTransfer = account1.signHash(mockTxHashTransfer);
     encodedTx[common.TxDetailIdx.SigL2Hash] = mockTxHashTransfer;
-    encodedTx[common.TxDetailIdx.S] = mockTxHashTransfer;
+    encodedTx[common.TxDetailIdx.S] = sigTransfer.S;
     encodedTx[common.TxDetailIdx.R8x] = sigTransfer.R8[0];
     encodedTx[common.TxDetailIdx.R8y] = sigTransfer.R8[1];
     encodedTxs.push(encodedTx);
@@ -168,9 +168,8 @@ function initTestCase() {
     balance_path_elements_item[1] = account2BalanceProof.path_elements;
     balance_path_elements.push(balance_path_elements_item);
     account_path_elements_item = new Array(2);
-    account_path_elements_item[0] = account1Proof.path_elements; // whatever
-    account_path_elements_item[1] = account2Proof.path_elements;
-    account_path_elements.push(account_path_elements_item);
+    account_path_elements_item[0] = account1Proof.path_elements;
+    // leave account_path_elements_item[0] to fill later, when calculating temp tree 
     oldAccountRoots.push(account1Proof.root);
     // execute tx
     account1BalanceLeaves[tokenID] -= amount;
@@ -179,6 +178,10 @@ function initTestCase() {
     account1State.nonce += 1;
     account1Hash = hashAccountState(account1State);
     accountLeaves[accountID1] = account1Hash;
+    // tmp tree
+    account2Proof = common.getBTreeProof(accountLeaves, accountID2);
+    account_path_elements_item[1] = account2Proof.path_elements;
+    account_path_elements.push(account_path_elements_item);
     account2BalanceLeaves[tokenID] = BigInt(account2BalanceLeaves[tokenID]) + amount;
     account2BalanceProof = common.getBTreeProof(account2BalanceLeaves, tokenID);
     account2State.balanceRoot = account2BalanceProof.root;
@@ -188,6 +191,30 @@ function initTestCase() {
     account2Proof = common.getBTreeProof(accountLeaves, accountID2);
     newAccountRoots.push(account2Proof.root);
 
+    // 4st tx: withdraw
+    amount = 150n;
+    // txsType.push(common.TxType.Withdraw);
+    encodedTx = new Array(common.TxLength); encodedTx.fill(0n, 0, common.TxLength);
+    encodedTx[common.TxDetailIdx.AccountID1] = Scalar.e(accountID2);
+    encodedTx[common.TxDetailIdx.TokenID] = Scalar.e(tokenID);
+    encodedTx[common.TxDetailIdx.Amount] = amount;
+    encodedTx[common.TxDetailIdx.Nonce1] = Scalar.e(account2State.nonce);
+    encodedTx[common.TxDetailIdx.Sign1] = Scalar.e(account2.sign);
+    encodedTx[common.TxDetailIdx.Ay1] = Scalar.fromString(account2.ay, 16);
+    encodedTx[common.TxDetailIdx.EthAddr1] = Scalar.fromString(ethAddr2NoPrefix, 16);
+    encodedTx[common.TxDetailIdx.Balance1] = Scalar.e(account2BalanceLeaves[tokenID]);
+    // TODO: construct tx and compute hash
+    let mockTxHashWithdraw = hash([common.TxType.Withdraw, tokenID, amount]);
+    mockTxHashWithdraw = hash([mockTxHashWithdraw, accountID1, account1State.nonce, account1BalanceLeaves[tokenID]]);
+    mockTxHashWithdraw = hash([mockTxHashWithdraw, accountID2, account2State.nonce, account2BalanceLeaves[tokenID]]);
+    let sigWithdraw = account1.signHash(mockTxHashWithdraw);
+    encodedTx[common.TxDetailIdx.SigL2Hash] = mockTxHashWithdraw;
+    encodedTx[common.TxDetailIdx.S] = sigWithdraw.S;
+    encodedTx[common.TxDetailIdx.R8x] = sigTransfer.R8[0];
+    encodedTx[common.TxDetailIdx.R8y] = sigTransfer.R8[1];
+    // encodedTxs.push(encodedTx);
+    
+    
 
     return {
         txsType: txsType,
