@@ -81,11 +81,11 @@ function initTestCase() {
     encodedTx[common.TxDetailIdx.Ay2] = Scalar.fromString(account2.ay, 16);
     encodedTxs.push(encodedTx);
     let balance_path_elements_item = new Array(2);
-    balance_path_elements_item[0] = account2BalanceProof.path_elements;
+    balance_path_elements_item[0] = account2BalanceProof.path_elements; // whatever
     balance_path_elements_item[1] = account2BalanceProof.path_elements;
     balance_path_elements.push(balance_path_elements_item);
     let account_path_elements_item = new Array(2);
-    account_path_elements_item[0] = account2Proof.path_elements;
+    account_path_elements_item[0] = account2Proof.path_elements; // whatever
     account_path_elements_item[1] = account2Proof.path_elements;
     account_path_elements.push(account_path_elements_item);
     oldAccountRoots.push(account2Proof.root);

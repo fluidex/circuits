@@ -10,22 +10,13 @@ include "./withdraw.circom";
  * @param nTxs - number of transactions
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
-
  * @input encodedTxs[nTxs] - {Array(Field)} - encoded transactions
-
- ...
-
- // balance...
-
-
- // path_elements...
-
-
- * @input oldAccountRoots[nTxs] - {Array(Field)} - initial account state root
- * @input newAccountRoots[nTxs] - {Array(Field)} - final account state root
+ * @input balance_path_elements[nTxs][2][balanceLevels][1] - {Array(Array(Array(Array(Field))))} - balance tree path elements for each transaction
+ * @input account_path_elements[nTxs][2][balanceLevels][1] - {Array(Array(Array(Array(Field))))} - account tree path elements for each transaction
+ * @input oldAccountRoots[nTxs] - {Array(Field)} - initial account state root for each transaction 
+ * @input newAccountRoots[nTxs] - {Array(Field)} - final account state root for each transaction
  */
 
-// TODO: assert nTxs>1
 template Block(nTxs, balanceLevels, accountLevels) {
     // transactions
     signal input txsType[nTxs];
