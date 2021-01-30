@@ -121,6 +121,7 @@ function initTestCase() {
     balance_path_elements_item = new Array(2);
     balance_path_elements_item[0] = account1BalanceProof.path_elements; // whatever
     balance_path_elements_item[1] = account1BalanceProof.path_elements;
+    // console.log(balance_path_elements_item);
     balance_path_elements.push(balance_path_elements_item);
     account_path_elements_item = new Array(2);
     account_path_elements_item[0] = account1Proof.path_elements; // whatever
@@ -129,13 +130,27 @@ function initTestCase() {
     oldAccountRoots.push(account1Proof.root);
     // execute tx
     account1BalanceLeaves[tokenID] = balance1 + amount;
+    // console.log(account1BalanceProof);
     account1BalanceProof = common.getBTreeProof(account1BalanceLeaves, tokenID);
+    // console.log(account1BalanceProof);
     account1State.balanceRoot = account1BalanceProof.root;
     account1Hash = hashAccountState(account1State);
+    console.log(accountLeaves);
     accountLeaves[accountID1] = account1Hash;
+    console.log(accountLeaves);
+    console.log(account1Proof);
     account1Proof = common.getBTreeProof(accountLeaves, accountID1);
+    console.log(account1Proof);
     account2Proof = common.getBTreeProof(accountLeaves, accountID2);
+    console.log(account2Proof);
     newAccountRoots.push(account1Proof.root);
+
+    // console.log(balance_path_elements[0]);
+    // console.log(balance_path_elements[1]);
+    // console.log(account_path_elements[0]);
+    // console.log(account_path_elements[1]);
+    // console.log(oldAccountRoots);
+    // console.log(newAccountRoots);
 
     return {
         txsType: txsType,

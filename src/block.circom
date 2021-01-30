@@ -110,7 +110,8 @@ template Block(nTxs, balanceLevels, accountLevels) {
 
         // try process transfer
         processTransfer[i] = Transfer(balanceLevels, accountLevels);
-        processTransfer[i].enabled <== enableTransfer[i].out;
+        // processTransfer[i].enabled <== enableTransfer[i].out;
+        processTransfer[i].enabled <== 0;
         processTransfer[i].fromAccountID <== decodedTx.accountID1;
         processTransfer[i].toAccountID <== decodedTx.accountID2;
         processTransfer[i].tokenID <== decodedTx.tokenID;
@@ -143,7 +144,8 @@ template Block(nTxs, balanceLevels, accountLevels) {
 
         // try process withdraw
         processWithdraw[i] = Withdraw(balanceLevels, accountLevels);
-        processWithdraw[i].enabled <== enableWithdraw[i].out;
+        // processWithdraw[i].enabled <== enableWithdraw[i].out;
+        processWithdraw[i].enabled <== 0;
         processWithdraw[i].accountID <== decodedTx.accountID1;
         processWithdraw[i].tokenID <== decodedTx.tokenID;
         processWithdraw[i].amount <== decodedTx.amount;
