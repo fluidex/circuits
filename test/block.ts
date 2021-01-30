@@ -129,20 +129,20 @@ function initTestCase() {
     account_path_elements.push(account_path_elements_item);
     oldAccountRoots.push(account1Proof.root);
     // execute tx
-    account1BalanceLeaves[tokenID] = balance1 + amount;
     // console.log(account1BalanceProof);
+    account1BalanceLeaves[tokenID] = balance1 + amount;
     account1BalanceProof = common.getBTreeProof(account1BalanceLeaves, tokenID);
     // console.log(account1BalanceProof);
     account1State.balanceRoot = account1BalanceProof.root;
     account1Hash = hashAccountState(account1State);
-    console.log(accountLeaves);
+    // console.log(accountLeaves);
     accountLeaves[accountID1] = account1Hash;
-    console.log(accountLeaves);
-    console.log(account1Proof);
+    // console.log(accountLeaves);
+    // console.log(account1Proof);
     account1Proof = common.getBTreeProof(accountLeaves, accountID1);
-    console.log(account1Proof);
+    // console.log(account1Proof);
     account2Proof = common.getBTreeProof(accountLeaves, accountID2);
-    console.log(account2Proof);
+    // console.log(account2Proof);
     newAccountRoots.push(account1Proof.root);
 
     // console.log(balance_path_elements[0]);
