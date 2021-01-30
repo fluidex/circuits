@@ -79,8 +79,10 @@ template DepositToOld(balanceLevels, accountLevels) {
         new_balance_tree.path_elements[i][0] <== balance_path_elements[i][0];
     }
 
-    log(old_balance_tree.root);
-    log(new_balance_tree.root);
+    log(old_balance_tree.leaf);
+    // log(old_balance_tree.root);
+    log(new_balance_tree.leaf);
+    // log(new_balance_tree.root);
 
     // - check account tree update
     ////////

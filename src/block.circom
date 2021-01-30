@@ -73,12 +73,12 @@ template Block(nTxs, balanceLevels, accountLevels) {
         // try process deposit_to_new
         processDepositToNew[i] = DepositToNew(balanceLevels, accountLevels);
         processDepositToNew[i].enabled <== enableDepositToNew[i].out;
-        processDepositToNew[i].accountID <== decodedTx.accountID2;
-        processDepositToNew[i].tokenID <== decodedTx.tokenID;
-        processDepositToNew[i].ethAddr <== decodedTx.ethAddr2;
-        processDepositToNew[i].sign <== decodedTx.sign2;
-        processDepositToNew[i].ay <== decodedTx.ay2;
-        processDepositToNew[i].amount <== decodedTx.amount;
+        processDepositToNew[i].accountID <== decodedTx[i].accountID2;
+        processDepositToNew[i].tokenID <== decodedTx[i].tokenID;
+        processDepositToNew[i].ethAddr <== decodedTx[i].ethAddr2;
+        processDepositToNew[i].sign <== decodedTx[i].sign2;
+        processDepositToNew[i].ay <== decodedTx[i].ay2;
+        processDepositToNew[i].amount <== decodedTx[i].amount;
         for (var j = 0; j < balanceLevels; j++) {
             processDepositToNew[i].balance_path_elements[j] <== balance_path_elements[i][1][j];
         }
@@ -91,14 +91,14 @@ template Block(nTxs, balanceLevels, accountLevels) {
         // try process deposit_to_old
         processDepositToOld[i] = DepositToOld(balanceLevels, accountLevels);
         processDepositToOld[i].enabled <== enableDepositToOld[i].out;
-        processDepositToOld[i].accountID <== decodedTx.accountID2;
-        processDepositToOld[i].tokenID <== decodedTx.tokenID;
-        processDepositToOld[i].ethAddr <== decodedTx.ethAddr2;
-        processDepositToOld[i].sign <== decodedTx.sign2;
-        processDepositToOld[i].ay <== decodedTx.ay2;
-        processDepositToOld[i].amount <== decodedTx.amount;
-        processDepositToOld[i].nonce <== decodedTx.nonce2;
-        processDepositToOld[i].balance <== decodedTx.balance2;
+        processDepositToOld[i].accountID <== decodedTx[i].accountID2;
+        processDepositToOld[i].tokenID <== decodedTx[i].tokenID;
+        processDepositToOld[i].ethAddr <== decodedTx[i].ethAddr2;
+        processDepositToOld[i].sign <== decodedTx[i].sign2;
+        processDepositToOld[i].ay <== decodedTx[i].ay2;
+        processDepositToOld[i].amount <== decodedTx[i].amount;
+        processDepositToOld[i].nonce <== decodedTx[i].nonce2;
+        processDepositToOld[i].balance <== decodedTx[i].balance2;
         for (var j = 0; j < balanceLevels; j++) {
             processDepositToOld[i].balance_path_elements[j] <== balance_path_elements[i][1][j];
         }
@@ -110,27 +110,26 @@ template Block(nTxs, balanceLevels, accountLevels) {
 
         // try process transfer
         processTransfer[i] = Transfer(balanceLevels, accountLevels);
-        // processTransfer[i].enabled <== enableTransfer[i].out;
-        processTransfer[i].enabled <== 0;
-        processTransfer[i].fromAccountID <== decodedTx.accountID1;
-        processTransfer[i].toAccountID <== decodedTx.accountID2;
-        processTransfer[i].tokenID <== decodedTx.tokenID;
-        processTransfer[i].amount <== decodedTx.amount;
-        processTransfer[i].nonce <== decodedTx.nonce1;
-        processTransfer[i].nonce1 <== decodedTx.nonce1;
-        processTransfer[i].nonce2 <== decodedTx.nonce2;
-        processTransfer[i].sign1 <== decodedTx.sign1;
-        processTransfer[i].sign2 <== decodedTx.sign2;
-        processTransfer[i].ay1 <== decodedTx.ay1;
-        processTransfer[i].ay2 <== decodedTx.ay2;
-        processTransfer[i].ethAddr1 <== decodedTx.ethAddr1;
-        processTransfer[i].ethAddr2 <== decodedTx.ethAddr2;
-        processTransfer[i].balance1 <== decodedTx.balance1;
-        processTransfer[i].balance2 <== decodedTx.balance2;
-        processTransfer[i].sigL2Hash <== decodedTx.sigL2Hash;
-        processTransfer[i].s <== decodedTx.s;
-        processTransfer[i].r8x <== decodedTx.r8x;
-        processTransfer[i].r8y <== decodedTx.r8y;
+        processTransfer[i].enabled <== enableTransfer[i].out;
+        processTransfer[i].fromAccountID <== decodedTx[i].accountID1;
+        processTransfer[i].toAccountID <== decodedTx[i].accountID2;
+        processTransfer[i].tokenID <== decodedTx[i].tokenID;
+        processTransfer[i].amount <== decodedTx[i].amount;
+        processTransfer[i].nonce <== decodedTx[i].nonce1;
+        processTransfer[i].nonce1 <== decodedTx[i].nonce1;
+        processTransfer[i].nonce2 <== decodedTx[i].nonce2;
+        processTransfer[i].sign1 <== decodedTx[i].sign1;
+        processTransfer[i].sign2 <== decodedTx[i].sign2;
+        processTransfer[i].ay1 <== decodedTx[i].ay1;
+        processTransfer[i].ay2 <== decodedTx[i].ay2;
+        processTransfer[i].ethAddr1 <== decodedTx[i].ethAddr1;
+        processTransfer[i].ethAddr2 <== decodedTx[i].ethAddr2;
+        processTransfer[i].balance1 <== decodedTx[i].balance1;
+        processTransfer[i].balance2 <== decodedTx[i].balance2;
+        processTransfer[i].sigL2Hash <== decodedTx[i].sigL2Hash;
+        processTransfer[i].s <== decodedTx[i].s;
+        processTransfer[i].r8x <== decodedTx[i].r8x;
+        processTransfer[i].r8y <== decodedTx[i].r8y;
         for (var j = 0; j < balanceLevels; j++) {
             processTransfer[i].sender_balance_path_elements[j] <== balance_path_elements[i][0][j];
             processTransfer[i].receiver_balance_path_elements[j] <== balance_path_elements[i][1][j];
@@ -144,20 +143,19 @@ template Block(nTxs, balanceLevels, accountLevels) {
 
         // try process withdraw
         processWithdraw[i] = Withdraw(balanceLevels, accountLevels);
-        // processWithdraw[i].enabled <== enableWithdraw[i].out;
-        processWithdraw[i].enabled <== 0;
-        processWithdraw[i].accountID <== decodedTx.accountID1;
-        processWithdraw[i].tokenID <== decodedTx.tokenID;
-        processWithdraw[i].amount <== decodedTx.amount;
-        processWithdraw[i].nonce <== decodedTx.nonce1;
-        processWithdraw[i].sign <== decodedTx.sign1;
-        processWithdraw[i].ay <== decodedTx.ay1;
-        processWithdraw[i].ethAddr <== decodedTx.ethAddr1;
-        processWithdraw[i].balance <== decodedTx.balance1;
-        processWithdraw[i].sigL2Hash <== decodedTx.sigL2Hash;
-        processWithdraw[i].s <== decodedTx.s;
-        processWithdraw[i].r8x <== decodedTx.r8x;
-        processWithdraw[i].r8y <== decodedTx.r8y;
+        processWithdraw[i].enabled <== enableWithdraw[i].out;
+        processWithdraw[i].accountID <== decodedTx[i].accountID1;
+        processWithdraw[i].tokenID <== decodedTx[i].tokenID;
+        processWithdraw[i].amount <== decodedTx[i].amount;
+        processWithdraw[i].nonce <== decodedTx[i].nonce1;
+        processWithdraw[i].sign <== decodedTx[i].sign1;
+        processWithdraw[i].ay <== decodedTx[i].ay1;
+        processWithdraw[i].ethAddr <== decodedTx[i].ethAddr1;
+        processWithdraw[i].balance <== decodedTx[i].balance1;
+        processWithdraw[i].sigL2Hash <== decodedTx[i].sigL2Hash;
+        processWithdraw[i].s <== decodedTx[i].s;
+        processWithdraw[i].r8x <== decodedTx[i].r8x;
+        processWithdraw[i].r8y <== decodedTx[i].r8y;
         for (var j = 0; j < balanceLevels; j++) {
             processWithdraw[i].balance_path_elements[j] <== balance_path_elements[i][0][j];
         }
