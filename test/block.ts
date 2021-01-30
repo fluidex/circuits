@@ -7,7 +7,7 @@ import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 
 // circuit-level definitions
-const nTxs = 4;
+const nTxs = 1;
 const balanceLevels = 2;
 const accountLevels = 2;
 
@@ -84,10 +84,10 @@ function initTestCase() {
 	return {
 		txsType: txsType,
 		encodedTxs: encodedTxs,
-		balance_path_elements: balance_path_elements,
-		account_path_elements: account_path_elements,
-		oldAccountRoots: oldAccountRoots,
-		newAccountRoots: newAccountRoots,
+		// balance_path_elements: balance_path_elements,
+		// account_path_elements: account_path_elements,
+		// oldAccountRoots: oldAccountRoots,
+		// newAccountRoots: newAccountRoots,
 	};
 }
 
@@ -97,10 +97,10 @@ class TestBlock implements SimpleTest {
 		return {
 			txsType: test_case.txsType,
 			encodedTxs: test_case.encodedTxs,
-			balance_path_elements: test_case.balance_path_elements,
-			account_path_elements: test_case.account_path_elements,
-			oldAccountRoots: test_case.oldAccountRoots,
-			newAccountRoots: test_case.newAccountRoots,
+			// balance_path_elements: test_case.balance_path_elements,
+			// account_path_elements: test_case.account_path_elements,
+			// oldAccountRoots: test_case.oldAccountRoots,
+			// newAccountRoots: test_case.newAccountRoots,
 		};
 	}
 	getOutput() {

@@ -46,13 +46,17 @@ template Block(nTxs, balanceLevels, accountLevels) {
 		oldAccountRoots[i] === newAccountRoots[i-1];
     }
 
-    // process each transaction
+    // decode each transaction
+    component decodedTx[i];
     for (var i = 0; i < nTxs; i++) {
-        component decodedTx = DecodeTx();
+        decodedTx[i] = DecodeTx();
         for (var j = 0; j < 18; j++) {
             decodedTx.in[j] <== encodedTxs[i][j];
         }
+    }
 
+    // process each transaction
+    for (var i = 0; i < nTxs; i++) {
         // try process deposit_to_new
         component enableDepositToNew = IsEqual();
         enableDepositToNew.in[0] <== txsType[i];
