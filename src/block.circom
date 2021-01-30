@@ -27,9 +27,9 @@ include "./withdraw.circom";
 
 // TODO: assert nTxs>1
 template Block(nTxs, balanceLevels, accountLevels) {
-	// transactions
+    // transactions
     signal input txsType[nTxs];
-	// TODO: private?
+    // TODO: private?
     signal input encodedTxs[nTxs][18];
 
     // State
@@ -41,9 +41,9 @@ template Block(nTxs, balanceLevels, accountLevels) {
     signal input oldAccountRoots[nTxs];
     signal input newAccountRoots[nTxs];
 
-	// thisOldRoot === lastNewRoot
+    // thisOldRoot === lastNewRoot
     for (var i = 1; i < nTxs; i++) {
-		oldAccountRoots[i] === newAccountRoots[i-1];
+        oldAccountRoots[i] === newAccountRoots[i-1];
     }
 
     // decode each transaction
