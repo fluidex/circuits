@@ -169,7 +169,7 @@ function initTestCase() {
     balance_path_elements.push(balance_path_elements_item);
     account_path_elements_item = new Array(2);
     account_path_elements_item[0] = account1Proof.path_elements;
-    // leave account_path_elements_item[0] to fill later, when calculating temp tree 
+    // leave account_path_elements_item[1] to fill later, when calculating temp tree 
     oldAccountRoots.push(account1Proof.root);
     // execute tx
     account1BalanceLeaves[tokenID] -= amount;
