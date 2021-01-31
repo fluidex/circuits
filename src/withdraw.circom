@@ -26,6 +26,8 @@ include "./lib/binary_merkle_tree.circom";
  * @input newAccountRoot - {Field} - final acount state root
  */
 template Withdraw(balanceLevels, accountLevels) {
+    signal input enabled;
+
     // Tx
     signal input accountID;
     signal input amount;
@@ -76,7 +78,7 @@ template Withdraw(balanceLevels, accountLevels) {
 
     // signature L2 verifier
     component sigVerifier = EdDSARescueVerifier();
-    sigVerifier.enabled <== 1;
+    sigVerifier.enabled <== enabled;
 
     sigVerifier.Ax <== getAx.ax;
     sigVerifier.Ay <== ay;
@@ -126,6 +128,7 @@ template Withdraw(balanceLevels, accountLevels) {
     // - check account tree update
     ///////
     component account_update_checker = CheckLeafUpdate(accountLevels);
+    account_update_checker.enabled <== enabled;
     account_update_checker.oldLeaf <== oldAccountHash.out;
     account_update_checker.newLeaf <== newAccountHash.out;
     for (var i = 0; i < accountLevels; i++) {

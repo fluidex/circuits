@@ -2,6 +2,7 @@
 // https://github.com/appliedzkp/maci/blob/master/circuits/circom/trees/incrementalMerkleTree.circom
 
 include "../../node_modules/circomlib/circuits/mux1.circom";
+include "../../node_modules/circomlib/circuits/comparators.circom";
 include "rescue.circom";
 
 template HashLeftRight() {
@@ -55,6 +56,8 @@ template CalculateRootFromMerklePath(n_levels) {
 template CheckLeafExists(levels){
   // Ensures that a leaf exists within a merkletree with given `root`
 
+  signal input enabled;
+
   // levels is depth of tree
   signal input leaf;
 
@@ -70,10 +73,14 @@ template CheckLeafExists(levels){
     merkletree.path_elements[i][0] <== path_elements[i][0];
   }
 
-  root === merkletree.root;
+  component check = ForceEqualIfEnabled();
+  check.enabled <== enabled;
+  check.in[0] <== root;
+  check.in[1] <== merkletree.root;
 }
 
 template CheckLeafUpdate(levels) {
+  signal input enabled;
   signal input oldLeaf;
   signal input newLeaf;
   signal private input path_elements[levels][1];
@@ -81,6 +88,7 @@ template CheckLeafUpdate(levels) {
   signal input oldRoot;
   signal input newRoot;
   component oldTree = CheckLeafExists(levels);
+  oldTree.enabled <== enabled;
   oldTree.leaf <== oldLeaf;
   // we should implement batch signal assign & constrain later, to avoid the boilerplate code
   for (var i = 0; i < levels; i++) {
@@ -89,6 +97,7 @@ template CheckLeafUpdate(levels) {
   }
   oldTree.root <== oldRoot;
   component newTree = CheckLeafExists(levels);
+  newTree.enabled <== enabled;
   newTree.leaf <== newLeaf;
   for (var i = 0; i < levels; i++) {
     newTree.path_index[i] <== path_index[i];

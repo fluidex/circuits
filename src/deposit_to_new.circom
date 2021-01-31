@@ -18,6 +18,8 @@ include "./lib/binary_merkle_tree.circom";
  * @input newAccountRoot - {Field} - final account state root
  */
 template DepositToNew(balanceLevels, accountLevels) {
+    signal input enabled;
+
     // Tx
     signal input accountID;
     signal input tokenID;
@@ -91,6 +93,7 @@ template DepositToNew(balanceLevels, accountLevels) {
     newAccountHash.ethAddr <== ethAddr;
     // check update
     component account_update_checker = CheckLeafUpdate(accountLevels);
+    account_update_checker.enabled <== enabled;
     account_update_checker.oldLeaf <== oldAccountHash.out;
     account_update_checker.newLeaf <== newAccountHash.out;
     for (var i = 0; i < accountLevels; i++) {
