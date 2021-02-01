@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import { TestTransfer } from "../../test/transfer"
+import { TestBlock } from "../../test/block"
 const { unstringifyBigInt, stringifyBigInts } = require("ffjavascript").utils;
 
 function exportCircuit(testClass, locDir) {
@@ -11,4 +12,5 @@ function exportCircuit(testClass, locDir) {
 	fs.writeFileSync(locDir + '/circuit.circom', circuitSrc);
 }
 
-exportCircuit((new TestTransfer()), 'data/transfer')
+//exportCircuit((new TestTransfer()), 'data/transfer')
+exportCircuit((new TestBlock()), 'data/block')
