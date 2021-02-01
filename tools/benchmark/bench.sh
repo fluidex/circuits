@@ -1,7 +1,7 @@
 #!/bin/bash
 set -uex
 
-export CIRCUIT_DIR=data/transfer
+export CIRCUIT_DIR=data/block
 
 function prepare_data() {
     echo process circuit in $CIRCUIT_DIR
@@ -40,7 +40,7 @@ function bench_plonk_plonkit() {
     (time plonkit prove --srs_monomial_form $KEY --circuit circuit.r1cs.json --witness witness.json --proof proof.bin) 2>plonkit.time
     plonkit verify --proof proof.bin --verification_key vk.bin
     popd
-    node print_large_constraints.js $CIRCUIT_DIR
+    node profile_gates.js $CIRCUIT_DIR
 }
 
 mkdir -p $CIRCUIT_DIR 

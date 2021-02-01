@@ -1,8 +1,10 @@
 #!/bin/bash
 set -ex
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 pushd $CIRCUIT_DIR
-npx circom circuit.circom --r1cs --wasm --sym -v
+node --stack-size=65500 $DIR/../../node_modules/circom/cli.js circuit.circom --r1cs --wasm --sym -v
 npx snarkjs r1cs export json circuit.r1cs circuit.r1cs.json
 
 # generate the witness using snarkjs
