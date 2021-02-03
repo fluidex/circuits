@@ -1,7 +1,10 @@
 #!/bin/bash
 set -uex
 
-export CIRCUIT_DIR=data/block
+
+PLONKIT_BIN=plonkit
+CIRCUIT=transfer
+export CIRCUIT_DIR=data/$CIRCUIT
 
 function prepare_data() {
     echo process circuit in $CIRCUIT_DIR
@@ -31,20 +34,20 @@ function bench_plonk_plonkit() {
     KEY=`pwd`/keys/plonk/2pow${CIRCUIT_POW}.key
     if [ ! -f $KEY ]; then
         mkdir -p keys/plonk
-        plonkit setup --power ${CIRCUIT_POW} --srs_monomial_form $KEY
+        $PLONKIT_BIN setup --power ${CIRCUIT_POW} --srs_monomial_form $KEY
     fi
     pushd $CIRCUIT_DIR
-    rm vk.bin || true # TODO: add overwrite option to plonkit
-    plonkit analyse
-    plonkit export-verification-key --srs_monomial_form $KEY --circuit circuit.r1cs.json --vk vk.bin
-    (time plonkit prove --srs_monomial_form $KEY --circuit circuit.r1cs.json --witness witness.json --proof proof.bin) 2>plonkit.time
-    plonkit verify --proof proof.bin --verification_key vk.bin
+    rm vk.bin || true # TODO: add overwrite option to $PLONKIT_BIN
+    $PLONKIT_BIN analyse
+    $PLONKIT_BIN export-verification-key --srs_monomial_form $KEY --circuit circuit.r1cs.json --vk vk.bin
+    (time $PLONKIT_BIN prove --srs_monomial_form $KEY --circuit circuit.r1cs.json --witness witness.json --proof proof.bin) 2>plonkit.time
+    $PLONKIT_BIN verify --proof proof.bin --verification_key vk.bin
     popd
     node profile_gates.js $CIRCUIT_DIR
 }
 
-mkdir -p $CIRCUIT_DIR 
-npx ts-node export_circuit.ts
+mkdir -p $CIRCUIT_DIR
+npx ts-node export_circuit.ts $CIRCUIT_DIR
 prepare_data
 bench_groth16_zkutil
 bench_plonk_plonkit
