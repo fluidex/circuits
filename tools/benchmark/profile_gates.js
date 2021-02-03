@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 const circuitPath = process.argv.slice(2)[0];
 const numGatesThreshold = 100;
@@ -9,6 +10,81 @@ const stats = require(path.join(__dirname, circuitPath, 'analyse.json'));
 
 const printLargeConstaints = false;
 
+const profileOutputFile = path.join(__dirname, circuitPath, 'profile.json');
+const sunburstOutputFile = path.join('graph', 'data.js');
+
+function almostEq(a, b, eps = 1e-5) {
+  return a * (1 - eps) < b && b < a * (1 + eps);
+}
+
+function writeJson(fileName, j) {
+  if (fileName.endsWith('.json')) {
+    fs.writeFileSync(fileName, JSON.stringify(j, null, 4));
+  } else if (fileName.endsWith('.js')) {
+    fs.writeFileSync(fileName, 'const data = ' + JSON.stringify(j, null, 4));
+  } else {
+    console.log('invalid file name, skip', fileName);
+  }
+}
+
+function sunburstConvertData(compToCost) {
+  const discardRatio = 0.005;
+  let sum = 0;
+  compToCost.forEach((v) => (sum += v));
+  let sunburtTree = { name: 'root', children: [], value: 0 };
+  for (const [k, v] of compToCost.entries()) {
+    sunburtInsert(sunburtTree, k.split('.'), v);
+  }
+  let sum2 = 0;
+  sunburtTree.children.forEach((v) => (sum2 += v.value));
+  if (!almostEq(sum2, sum)) {
+    console.log('not equal', sum2, sum);
+    throw 'incorrect sum';
+  }
+  traverse(sunburtTree, function (elem) {
+    if (elem.value < sum * discardRatio) {
+      elem.label = { show: false };
+    }
+  });
+  return sunburtTree.children.find((elem) => elem.name == 'main').children;
+
+  // p: Array<string>
+  // eg: sunburtInsert(sunburtTree, ['main', 'comp1'], 3)
+  function traverse(root, f) {
+    f(root);
+    for (let elem of root.children) {
+      traverse(elem, f);
+    }
+  }
+  function sunburtInsert(root, p, value) {
+    if (root == null) {
+      throw 'empty root';
+    }
+    //console.log('sunburtInsert', root.name, p);
+    if (p === '' && p === []) {
+      throw 'invalid path:' + p;
+    }
+    const pathElem = p[0];
+    const isLeaf = p.length == 1;
+    let idx = root.children.findIndex((elem) => elem.name == pathElem);
+    //  if (isLeaf && idx != -1) {
+    //    throw 'error: duplicate entry:' + p;
+    //  }
+    if (idx == -1) {
+      // insert
+      idx = root.children.length;
+      root.children.push({
+        name: pathElem,
+        value: 0,
+        children: [],
+      });
+    }
+    root.children[idx].value += value;
+    if (!isLeaf) {
+      sunburtInsert(root.children[idx], p.slice(1), value);
+    }
+  }
+}
 function extractComponent(name) {
   if (name == 'one') {
     return name;
@@ -18,6 +94,7 @@ function extractComponent(name) {
   return arr.join('.');
 }
 async function main() {
+  const loadSym = (await import('../../node_modules/snarkjs/src/loadsyms.js')).default;
   let contributionMap = new Map();
   let compToCost = new Map();
   let expensiveConstaints = [];
@@ -32,8 +109,7 @@ async function main() {
     }
     return s;
   }
-  const loadS = (await import('../../node_modules/snarkjs/src/loadsyms.js')).default;
-  const sym = await loadS(path.join(__dirname, circuitPath, 'circuit.sym'));
+  const sym = await loadSym(path.join(__dirname, circuitPath, 'circuit.sym'));
   function amortizeCost(s, cost) {
     const arr = sym.varIdx2Name[s].split('|');
     const amortizedCost = cost / arr.length;
@@ -101,14 +177,23 @@ async function main() {
     amortizeCost(sid, cost);
   }
   let sum = 0;
-  for (let [comp, cost] of [...compToCost.entries()].sort((a, b) => a[1] - b[1])) {
-    sum += cost;
-    console.log(comp, cost.toFixed(2));
-  }
-  console.log('\ntotal_gates', sum.toFixed(2))
+  compToCost.forEach((v) => (sum += v));
+  console.log('\ntotal_gates', sum.toFixed(2));
   if (Math.abs(sum - stats.num_gates) > 0.01) {
     throw 'profile gates wrong';
   }
+  if (sunburstOutputFile != '') {
+    const sunburstData = sunburstConvertData(compToCost);
+    writeJson(sunburstOutputFile, sunburstData);
+  }
+  if (profileOutputFile == '') {
+    // stdout
+    for (let [comp, cost] of [...compToCost.entries()].sort((a, b) => a[1] - b[1])) {
+      console.log(comp, cost.toFixed(2));
+    }
+  } else {
+    writeJson(profileOutputFile, Object.fromEntries(compToCost));
+  }
 }
 
-main().catch(console.log);
+main().catch((err) => console.log('Err:' + err));
