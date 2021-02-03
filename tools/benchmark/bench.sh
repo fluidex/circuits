@@ -3,7 +3,7 @@ set -uex
 
 
 PLONKIT_BIN=plonkit
-CIRCUIT=transfer
+CIRCUIT=block
 export CIRCUIT_DIR=data/$CIRCUIT
 
 function prepare_data() {
@@ -43,7 +43,7 @@ function bench_plonk_plonkit() {
     (time $PLONKIT_BIN prove --srs_monomial_form $KEY --circuit circuit.r1cs.json --witness witness.json --proof proof.bin) 2>plonkit.time
     $PLONKIT_BIN verify --proof proof.bin --verification_key vk.bin
     popd
-    node profile_gates.js $CIRCUIT_DIR
+    node profile_circuit.js $CIRCUIT_DIR
 }
 
 mkdir -p $CIRCUIT_DIR
