@@ -3,51 +3,100 @@ const fs = require('fs');
 const circom = require('circom');
 
 const printLargeConstaints = false;
-const circuitType = 'plonk';
+const circuitLoadType = 'auto';
+const forceRecompile = false;
 
 const circuitPath = process.argv.slice(2)[0];
-const absCircuitPath = path.join(__dirname, circuitPath);
-const profileOutputFile = path.join(absCircuitPath, 'profile.json');
+//const absCircuitPath = path.join(__dirname, circuitPath);
 const sunburstOutputFile = path.join('graph', 'data.js');
-
-const r1cs = require(path.join(absCircuitPath, 'circuit.r1cs.json'));
 
 function almostEq(a, b, eps = 1e-5) {
   return a * (1 - eps) < b && b < a * (1 + eps);
 }
 
-function getVarsOfConstraint(cid) {
-  const lc = r1cs.constraints[cid];
+function getVarsOfConstraint(constraints, cid) {
+  const lc = constraints[cid];
   const s = new Set();
   for (let x of lc) {
     for (let v in x) {
-      s.add(v);
+      s.add(Number(v));
     }
   }
 
   return s;
 }
-function loadCostsOfConstraints(circuitPath, mode = 'plonk') {
-  let result = new Map();
-  if (mode == 'plonk') {
-    const stats = require(path.join(circuitPath, 'analyse.json'));
+async function loadCircuit(circuitPath, circuitType) {
+  let fullPath = path.resolve(process.cwd(), circuitPath);
+  if (fs.lstatSync(fullPath).isDirectory()) {
+    // use default
+    fullPath = path.join(fullPath, 'circuit.circom');
+  }
+  const dirName = path.dirname(fullPath);
+  const baseName = path.basename(fullPath, '.circom');
+  const fullBaseName = path.join(dirName, baseName);
+  console.log('circuit:', baseName);
+  // TODO: use bin file to speed up
+  const r1csFile = fullBaseName + '.r1cs.json';
+  const symFile = fullBaseName + '.sym';
+  let constraints;
+  let sym = new Map();
+  sym.set(0, 'one');
+  if (fs.existsSync(r1csFile) && fs.existsSync(symFile) && !forceRecompile) {
+    console.log('loading', r1csFile);
+    constraints = require(r1csFile).constraints;
+    const loadSym = (await import('../../node_modules/snarkjs/src/loadsyms.js')).default;
+    console.log('loading', symFile);
+    const symMap = await loadSym(symFile);
+    for (const [varIdx, name] of Object.entries(symMap.varIdx2Name)) {
+      sym.set(Number(varIdx), name.split('|'));
+    }
+  } else {
+    console.log('compiling', fullPath);
+    const cmd = `cd ${dirName} && npx circom ${baseName}.circom --r1cs --wasm --sym -v && npx snarkjs r1cs export json ${baseName}.r1cs ${baseName}.r1cs.json`;
+    console.log(`you can run '${cmd}' to avoid compiling every time`);
+    let circuit = await circom.tester(fullPath, { reduceConstraints: false });
+    await circuit.loadConstraints();
+    await circuit.loadSymbols();
+    for (const [name, symbol] of Object.entries(circuit.symbols)) {
+      if (sym.has(symbol.varIdx)) {
+        sym.set(symbol.varIdx, [...sym.get(symbol.varIdx), name]);
+      } else {
+        sym.set(symbol.varIdx, [name]);
+      }
+    }
+    constraints = circuit.constraints;
+    //await circuit.release();
+  }
+  let result = { constraints, sym, dirName };
+  return { ...result, ...loadCostsOfConstraints(constraints, dirName, circuitType) };
+}
+
+function loadCostsOfConstraints(constraints, circuitDir, circuitType) {
+  let constraintToCost = new Map();
+  const plonkAnalyseFile = path.join(circuitDir, 'analyse.json');
+  if (circuitType == 'auto') {
+    circuitType = fs.existsSync(plonkAnalyseFile) ? 'plonk' : 'groth16';
+  }
+  console.log('circuitType', circuitType);
+  if (circuitType == 'plonk') {
+    const stats = require(plonkAnalyseFile);
     for (let item of stats.constraint_stats) {
       const { name, num_gates } = item;
       const cid = Number(name);
-      result.set(cid, num_gates);
+      constraintToCost.set(cid, num_gates);
     }
-  } else if (mode == 'groth16') {
-    for (let i = 0; i < r1cs.constraints.length; i++) {
-      if (getVarsOfConstraint(i).size == 0) {
+  } else if (circuitType == 'groth16') {
+    for (let i = 0; i < constraints.length; i++) {
+      if (getVarsOfConstraint(constraints, i).size == 0) {
         //console.log('trivial constraints', cid, r1cs.constraints[cid])
         continue;
       }
-      result.set(i, 1);
+      constraintToCost.set(i, 1);
     }
   } else {
     throw 'invalid circuit type';
   }
-  return result;
+  return { circuitType, constraintToCost };
 }
 
 function writeJson(fileName, j) {
@@ -114,10 +163,11 @@ function extractComponent(name) {
   return arr.join('.');
 }
 async function main() {
-  const loadSym = (await import('../../node_modules/snarkjs/src/loadsyms.js')).default;
-  const sym = await loadSym(path.join(absCircuitPath, 'circuit.sym'));
-  function assignCostFromSignalToComp(compToCost, sid, cost, amortize = true, mergeCompArray = true) {
-    const arr = sym.varIdx2Name[sid].split('|');
+  function assignCostFromSignalToComp(sym, compToCost, sid, cost, amortize = true, mergeCompArray = true) {
+    const arr = sym.get(sid);
+    if (arr == null) {
+      console.log({ sym, sid, arr });
+    }
     const amortizedCost = amortize ? cost / arr.length : cost;
     for (let comp of arr) {
       let compName = extractComponent(comp);
@@ -131,9 +181,7 @@ async function main() {
       }
     }
   }
-
-  // loop the profile data
-  const constraintToCost = loadCostsOfConstraints(absCircuitPath, circuitType);
+  const { sym, constraints, constraintToCost, circuitType, dirName } = await loadCircuit(circuitPath, circuitLoadType);
   // sum costs
   let totalCost1 = 0;
   for (let [cid, cost] of constraintToCost.entries()) {
@@ -146,10 +194,10 @@ async function main() {
     for (let [cid, cost] of constraintToCost.entries()) {
       if (cost > 100) {
         console.log(`\n constraint_id: ${cid}, num_gates: ${cost}, detail:`);
-        let sids = getVarsOfConstraint(cid);
+        let sids = getVarsOfConstraint(constraints, cid);
         let costMap = new Map();
         for (let sid of sids) {
-          assignCostFromSignalToComp(costMap, sid, 1, false, false);
+          assignCostFromSignalToComp(sym, costMap, sid, 1, false, false);
         }
         for (let [compName, cost] of costMap) {
           if (cost >= 5) {
@@ -163,7 +211,7 @@ async function main() {
   // first estimate costs of signals from costs of constraints
   let signalToCost = new Map();
   for (let [cid, cost] of constraintToCost.entries()) {
-    const vars = getVarsOfConstraint(cid);
+    const vars = getVarsOfConstraint(constraints, cid);
     const singleVarCost = cost / vars.size;
     for (let s of vars) {
       if (signalToCost.has(s)) {
@@ -183,7 +231,7 @@ async function main() {
   // second estimate costs of components from costs of signals
   let compToCost = new Map();
   for (let [sid, cost] of signalToCost) {
-    assignCostFromSignalToComp(compToCost, sid, cost);
+    assignCostFromSignalToComp(sym, compToCost, sid, cost);
   }
   let totalCost3 = 0;
   compToCost.forEach((v) => (totalCost3 += v));
@@ -211,6 +259,7 @@ async function main() {
     let sunburtData = selectSubtree(costTree, ['main']).children;
     writeJson(sunburstOutputFile, sunburtData);
   }
+  const profileOutputFile = path.join(dirName, 'profile.json');
   if (profileOutputFile == '') {
     // stdout
     for (let [comp, cost] of [...compToCost.entries()].sort((a, b) => a[1] - b[1])) {
@@ -221,4 +270,4 @@ async function main() {
   }
 }
 
-main().catch((err) => console.log('Err:' + err));
+main().catch((err) => console.log(err.stack));
