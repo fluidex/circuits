@@ -1,7 +1,7 @@
 var dom = document.getElementById('container');
 var myChart = echarts.init(dom);
 var app = {};
-const labelRotate = 0; //'tangential';
+const labelRotate = 0;//'radial' //'tangential';
 var option = {
   series: {
     type: 'sunburst',
