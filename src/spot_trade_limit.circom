@@ -76,21 +76,27 @@
 // }
 
 template SpotTradeLimit(balanceLevels, accountLevels) {
+	// TODO:
 	// orderA
 
 
+	// TODO:
 	// orderB
 
 
+	// TODO:
 	// balanceS_A
 
 
+	// TODO:
 	// balanceB_A
 
 
+	// TODO:
 	// balanceS_B
 
 
+	// TODO:
 	// balanceB_B
 
 
@@ -102,41 +108,51 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	// fillS_B
 
 
-	// isSpotTradeTx
+	/// isSpotTradeTx
 	// type === typeSpotTradeLimit
 	// should must be?
 	// let's skip it
 
 
+	// TODO:
 	// tradeHistory_A
 
 
+	// TODO:
 	// tradeHistory_B
 
 
+	// TODO:
 	// orderMatching
 
 
+	// TODO:
 	// feeCalculatorA
 
 
+	// TODO:
 	// feeCalculatorB
 
 
+	// TODO:
 	/* Token Transfers */
 	// Actual trade
 	// fillSA_from_balanceSA_to_balanceBB
 	// fillSB_from_balanceSB_to_balanceBA
 
 
-	// feeA_from_balanceBA_to_balanceAO
+	/// feeA_from_balanceBA_to_balanceAO
+	// looks like charged by exchange, skip for now
 
 
-	// feeB_from_balanceBB_to_balanceBO
+	/// feeB_from_balanceBB_to_balanceBO
+	// looks like charged by exchange, skip for now
 
 
-	// protocolFeeA_from_balanceAO_to_balanceAP
+	/// protocolFeeA_from_balanceAO_to_balanceAP
+	// what the heck is this? skip
 
 
-	// protocolFeeB_from_balanceBO_to_balanceBP
+	/// protocolFeeB_from_balanceBO_to_balanceBP
+	// what the heck is this? skip
 }
