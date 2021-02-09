@@ -1,6 +1,4 @@
-
 // template SpotTradeLimit(balanceLevels, accountLevels) {
-
 //     a 是 taker
 //     b 是 maker
 
@@ -12,15 +10,6 @@
 //     // check balance
 //     // account A, buyer, seller
 //     // account B, buyer, seller
-
-
-// 	/* Token Transfers */
-// 	// Actual trade
-//     // 错了，这个才是最重要的最核心的
-
-
-//     // account&balance status
-//     // update it
 // }
 
 template SpotTradeLimit(balanceLevels, accountLevels) {
@@ -112,6 +101,10 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	// Actual trade
 	// fillSA_from_balanceSA_to_balanceBB
 	// fillSB_from_balanceSB_to_balanceBA
+
+
+	//  // account&balance status
+	//  // update it
 
 
 	// TODO: feeA_from_balanceBA_to_balanceAO
