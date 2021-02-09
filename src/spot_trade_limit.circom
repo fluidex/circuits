@@ -10,19 +10,13 @@
 //     // orderB
 
 //     // check balance
-// 	// account A, buyer, seller
-// 	// account B, buyer, seller
-
+//     // account A, buyer, seller
+//     // account B, buyer, seller
 
 
 // 	/* Token Transfers */
 // 	// Actual trade
 //     // 错了，这个才是最重要的最核心的
-
-
-
-//     // tx fee...
-// 	// trade fee....
 
 
 //     // account&balance status
@@ -109,13 +103,8 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 
 	// TODO: check timestamp & 2 orders' validUntil
 
-
-	// TODO:
-	// feeCalculatorA
-
-
-	// TODO:
-	// feeCalculatorB
+	// TODO: feeCalculatorA
+	// TODO: feeCalculatorB
 
 
 	// TODO:
@@ -125,18 +114,8 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	// fillSB_from_balanceSB_to_balanceBA
 
 
-	/// feeA_from_balanceBA_to_balanceAO
-	// looks like charged by exchange, skip for now
-
-
-	/// feeB_from_balanceBB_to_balanceBO
-	// looks like charged by exchange, skip for now
-
-
-	/// protocolFeeA_from_balanceAO_to_balanceAP
-	// what the heck is this? skip
-
-
-	/// protocolFeeB_from_balanceBO_to_balanceBP
-	// what the heck is this? skip
+	// TODO: feeA_from_balanceBA_to_balanceAO
+	// TODO: feeB_from_balanceBB_to_balanceBO
+	// TODO: protocolFeeA_from_balanceAO_to_balanceAP
+	// TODO: protocolFeeB_from_balanceBO_to_balanceBP
 }
