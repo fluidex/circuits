@@ -66,12 +66,6 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	// fillS_B
 
 
-	/// isSpotTradeTx
-	// type === typeSpotTradeLimit
-	// should must be?
-	// let's skip it
-
-
 	// TODO:
 	// tradeHistory_A_storage_leaf_ID
 	// why leq?
@@ -90,10 +84,30 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	// orderB,
 	// state.accountA.account.owner,
 	// state.accountB.account.owner,
-	// tradeHistory_A.getData(),
-	// tradeHistory_B.getData(),
+	// tradeHistory_A.getData(),: filledA
+	// tradeHistory_B.getData(),: filledB
 	// fillS_A.value(),
 	// fillS_B.value(),
+	requireOrderFillsA(pb, constants, orderA, filledA, fillS_A, fillS_B, FMT(prefix, ".requireOrderFillsA")),
+	requireOrderFillsA.orderA
+	requireOrderFillsA.filledA
+	requireOrderFillsA.fillS_A
+	requireOrderFillsA.fillS_B
+	requireOrderFillsB(pb, constants, orderB, filledB, fillS_B, fillS_A, FMT(prefix, ".requireOrderFillsB")),
+	requireOrderFillsB.orderB
+	requireOrderFillsB.filledB
+	requireOrderFillsB.fillS_B
+	requireOrderFillsB.fillS_A
+	orderA.tokenS === orderB.tokenB;
+	orderA.tokenB === orderB.tokenS;
+
+	validateTakerA
+		ownerB, orderA.taker
+	validateTakerB
+		ownerA, orderB.taker
+
+
+	// TODO: check timestamp & 2 orders' validUntil
 
 
 	// TODO:
