@@ -80,27 +80,25 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	orderA.tokenS != orderA.tokenB;
 	orderA.amountS != 0;
 	orderA.amountB != 0;
+	// TODO: check signature
 
 
 	// orderB
 	orderB.tokenS != orderB.tokenB;
 	orderB.amountS != 0;
 	orderB.amountB != 0;
+	// TODO: check signature
 
 
-	// TODO:
 	// balanceS_A
 
 
-	// TODO:
 	// balanceB_A
 
 
-	// TODO:
 	// balanceS_B
 
 
-	// TODO:
 	// balanceB_B
 
 
