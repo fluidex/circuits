@@ -14,23 +14,6 @@
 // 	// account B, buyer, seller
 
 
-//     // TODO:
-//     // + float?
-//     // + what is S?
-//     signal input fillS_A;
-//     signal input fillS_B;
-//     // 就是 parse 一下 float 这个后面再说
-
-
-//     // Trade history
-//     tradeHistory_A
-//     tradeHistory_B
-//     // 这个就是 read storage 看看和我们怎么结合怎么搞
-
-
-//     // prove match
-//     // 这个才是最重要的最核心的
-//     orderMatching
 
 // 	/* Token Transfers */
 // 	// Actual trade
@@ -90,15 +73,27 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 
 
 	// TODO:
-	// tradeHistory_A
+	// tradeHistory_A_storage_leaf_ID
+	// why leq?
 
 
 	// TODO:
-	// tradeHistory_B
+	// tradeHistory_B_storage_leaf_ID
+	// why leq?
 
 
 	// TODO:
 	// orderMatching
+	orderMatching.
+	// state.timestamp,
+	// orderA,
+	// orderB,
+	// state.accountA.account.owner,
+	// state.accountB.account.owner,
+	// tradeHistory_A.getData(),
+	// tradeHistory_B.getData(),
+	// fillS_A.value(),
+	// fillS_B.value(),
 
 
 	// TODO:
