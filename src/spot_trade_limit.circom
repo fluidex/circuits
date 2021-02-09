@@ -90,16 +90,10 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	// TODO: check signature
 
 
-	// balanceS_A
-
-
-	// balanceB_A
-
-
-	// balanceS_B
-
-
-	// balanceB_B
+	signal input balanceS_A;
+	signal input balanceB_A;
+	signal input balanceS_B;
+	signal input balanceB_B;
 
 
 	/// decode fillS_A, assume that it's already decoded
