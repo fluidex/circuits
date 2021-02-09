@@ -2,7 +2,6 @@
 //     a 是 taker
 //     b 是 maker
 
-
 //     // check orders
 //     // orderA
 //     // orderB
@@ -92,8 +91,6 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 
 	// TODO: check timestamp & 2 orders' validUntil
 
-	// TODO: feeCalculatorA
-	// TODO: feeCalculatorB
 
 
 	// TODO:
@@ -107,6 +104,8 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	//  // update it
 
 
+	// TODO: feeCalculatorA
+	// TODO: feeCalculatorB
 	// TODO: feeA_from_balanceBA_to_balanceAO
 	// TODO: feeB_from_balanceBB_to_balanceBO
 	// TODO: protocolFeeA_from_balanceAO_to_balanceAP
