@@ -85,8 +85,12 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 
 	validateTakerA
 		ownerB, orderA.taker
+		accountB.account.owner === orderA.taker
+		// TODO: address match? setOutput(TXV_SIGNATURE_REQUIRED_B, state.constants._0);?
 	validateTakerB
 		ownerA, orderB.taker
+		accountA.account.owner === orderB.taker
+		// TODO: address match? setOutput(TXV_SIGNATURE_REQUIRED_B, state.constants._0);?
 
 
 	// TODO: check timestamp & 2 orders' validUntil
