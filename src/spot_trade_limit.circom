@@ -1,35 +1,6 @@
 
 // template SpotTradeLimit(balanceLevels, accountLevels) {
 
-//     signal input OrderA;
-// 	// tokenS(pb, NUM_BITS_TOKEN, FMT(prefix, ".tokenS")),
-// 	// tokenB(pb, NUM_BITS_TOKEN, FMT(prefix, ".tokenB")),
-// 	// amountS(pb, NUM_BITS_AMOUNT, FMT(prefix, ".amountS")),
-// 	// amountB(pb, NUM_BITS_AMOUNT, FMT(prefix, ".amountB")),
-// 	// validUntil(pb, NUM_BITS_TIMESTAMP, FMT(prefix, ".validUntil")),
-// 	// maxFeeBips(pb, NUM_BITS_BIPS, FMT(prefix, ".maxFeeBips")),
-// 	// fillAmountBorS(pb, 1, FMT(prefix, ".fillAmountBorS")),
-// 	// taker(make_variable(pb, FMT(prefix, ".taker"))),
-// 	// tokenS_neq_tokenB
-// 	// amountS_notZero
-// 	// amountB_notZero
-//     // signature
-
-//     signal input OrderB;
-// 	// tokenS(pb, NUM_BITS_TOKEN, FMT(prefix, ".tokenS")),
-// 	// tokenB(pb, NUM_BITS_TOKEN, FMT(prefix, ".tokenB")),
-// 	// amountS(pb, NUM_BITS_AMOUNT, FMT(prefix, ".amountS")),
-// 	// amountB(pb, NUM_BITS_AMOUNT, FMT(prefix, ".amountB")),
-// 	// validUntil(pb, NUM_BITS_TIMESTAMP, FMT(prefix, ".validUntil")),
-// 	// maxFeeBips(pb, NUM_BITS_BIPS, FMT(prefix, ".maxFeeBips")),
-// 	// fillAmountBorS(pb, 1, FMT(prefix, ".fillAmountBorS")),
-// 	// taker(make_variable(pb, FMT(prefix, ".taker"))),
-// 	// tokenS_neq_tokenB
-// 	// amountS_notZero
-// 	// amountB_notZero
-//     // signature
-
-
 //     a 是 taker
 //     b 是 maker
 
@@ -81,6 +52,10 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	orderA.amountS != 0;
 	orderA.amountB != 0;
 	// TODO: check signature
+	// TODO: validUntil
+	// TODO: fillAmountBorS
+	// TODO: maker taker?
+	// TODO: fee
 
 
 	// orderB
@@ -88,6 +63,10 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	orderB.amountS != 0;
 	orderB.amountB != 0;
 	// TODO: check signature
+	// TODO: validUntil
+	// TODO: fillAmountBorS
+	// TODO: maker taker?
+	// TODO: fee
 
 
 	signal input balanceS_A;
