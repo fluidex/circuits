@@ -56,14 +56,8 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 
 	// TODO:
 	/// orderMatching
-	// orderA,
-	// orderB,
-	// state.accountA.account.owner,
-	// state.accountB.account.owner,
 	// tradeHistory_A.getData(),: filledA
 	// tradeHistory_B.getData(),: filledB
-	// fillS_A.value(),
-	// fillS_B.value(),
 	requireOrderFillsA(pb, constants, orderA, filledA, fillS_A, fillS_B, FMT(prefix, ".requireOrderFillsA")),
 	requireOrderFillsA.orderA
 	requireOrderFillsA.filledA
