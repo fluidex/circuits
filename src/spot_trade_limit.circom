@@ -58,14 +58,14 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 
 	// TODO:
 	/// orderMatching
+
 	// tradeHistory_A.getData(),: filledA
 	// tradeHistory_B.getData(),: filledB
 	requireOrderFillsA(pb, constants, orderA, filledA, fillS_A, fillS_B, FMT(prefix, ".requireOrderFillsA")),
 		requireFillRate
-			orderA.amountS
-			orderA.amountB
-			fillS_A
-			fillS_B
+			// (fillS_A/fillS_B) * 1000 <= (orderA.amountS/orderA.amountB) * 1001
+			(fillS_A * orderA.amountB * 1000) <= (fillS_B * orderA.amountS * 1001)
+			(fillS_B != 0 && fillS_A != 0) || (fillS_B == 0 && fillS_A == 0)
 		requireFillLimit
 			fillAmount = fillS_B or fillS_A
 			fillLimit = orderA.amountB or orderA.amountS
@@ -74,10 +74,9 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 
 	requireOrderFillsB(pb, constants, orderB, filledB, fillS_B, fillS_A, FMT(prefix, ".requireOrderFillsB")),
 		requireFillRate
-			orderB.amountS
-			orderB.amountB
-			fillS_B
-			fillS_A
+			// (fillS_B/fillS_A) * 1000 <= (orderB.amountS/orderB.amountB) * 1001
+			(fillS_B * orderB.amountB * 1000) <= (fillS_A * orderB.amountS * 1001)
+			(fillS_B != 0 && fillS_A != 0) || (fillS_B == 0 && fillS_A == 0)
 		requireFillLimit
 			fillAmount = fillS_A or fillS_B
 			fillLimit = orderB.amountB or orderB.amountS
