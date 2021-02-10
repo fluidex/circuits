@@ -59,15 +59,29 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	// tradeHistory_A.getData(),: filledA
 	// tradeHistory_B.getData(),: filledB
 	requireOrderFillsA(pb, constants, orderA, filledA, fillS_A, fillS_B, FMT(prefix, ".requireOrderFillsA")),
-	requireOrderFillsA.orderA
-	requireOrderFillsA.filledA
-	requireOrderFillsA.fillS_A
-	requireOrderFillsA.fillS_B
+		requireFillRate
+			orderA.amountS
+			orderA.amountB
+			fillS_A
+			fillS_B
+		requireFillLimit
+			fillAmount = fillS_B or fillS_A
+			fillLimit = orderA.amountB or orderA.amountS
+			filledAfter = filledA + fillAmount;
+			filledAfter <= fillLimit;
+
 	requireOrderFillsB(pb, constants, orderB, filledB, fillS_B, fillS_A, FMT(prefix, ".requireOrderFillsB")),
-	requireOrderFillsB.orderB
-	requireOrderFillsB.filledB
-	requireOrderFillsB.fillS_B
-	requireOrderFillsB.fillS_A
+		requireFillRate
+			orderB.amountS
+			orderB.amountB
+			fillS_B
+			fillS_A
+		requireFillLimit
+			fillAmount = fillS_A or fillS_B
+			fillLimit = orderB.amountB or orderB.amountS
+			filledAfter = filledB + fillAmount;
+			filledAfter <= fillLimit;
+
 	orderA.tokenS === orderB.tokenB;
 	orderA.tokenB === orderB.tokenS;
 
