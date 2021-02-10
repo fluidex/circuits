@@ -46,12 +46,14 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 
 	// TODO:
 	// tradeHistory_A_storage_leaf_ID
-	// why leq?
+	// why leq? 看起来像是为了逐步递增
+	// data empty?
 
 
 	// TODO:
 	// tradeHistory_B_storage_leaf_ID
-	// why leq?
+	// why leq? 看起来像是为了逐步递增
+	// data empty?
 
 
 	// TODO:
@@ -85,14 +87,8 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	orderA.tokenS === orderB.tokenB;
 	orderA.tokenB === orderB.tokenS;
 
-	// I think we can skip this
-	// validateTakerA
-		// ownerB, orderA.taker
-		(accountB.account.owner === orderA.taker) || (takerOpen)
-	// I think we can skip this
-	// validateTakerB
-		// ownerA, orderB.taker
-		(accountA.account.owner === orderB.taker) || (takerOpen)
+	(accountB.account.owner === orderA.taker) || (0 === orderA.taker)
+	(accountA.account.owner === orderB.taker) || (0 === orderB.taker)
 
 
 	// TODO: check timestamp & 2 orders' validUntil
