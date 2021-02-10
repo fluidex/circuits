@@ -17,10 +17,8 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	orderA.amountS != 0;
 	orderA.amountB != 0;
 	// TODO: check signature
-	// TODO: validUntil
 	// TODO: fillAmountBorS
 	// TODO: maker taker?
-	// TODO: fee
 
 
 	// orderB
@@ -28,10 +26,8 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	orderB.amountS != 0;
 	orderB.amountB != 0;
 	// TODO: check signature
-	// TODO: validUntil
 	// TODO: fillAmountBorS
 	// TODO: maker taker?
-	// TODO: fee
 
 
 	signal input balanceS_A;
@@ -59,9 +55,7 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 
 
 	// TODO:
-	// orderMatching
-	orderMatching.
-	// state.timestamp,
+	/// orderMatching
 	// orderA,
 	// orderB,
 	// state.accountA.account.owner,
@@ -83,14 +77,14 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	orderA.tokenS === orderB.tokenB;
 	orderA.tokenB === orderB.tokenS;
 
-	validateTakerA
-		ownerB, orderA.taker
-		accountB.account.owner === orderA.taker
-		// TODO: address match? setOutput(TXV_SIGNATURE_REQUIRED_B, state.constants._0);?
-	validateTakerB
-		ownerA, orderB.taker
-		accountA.account.owner === orderB.taker
-		// TODO: address match? setOutput(TXV_SIGNATURE_REQUIRED_B, state.constants._0);?
+	// I think we can skip this
+	// validateTakerA
+		// ownerB, orderA.taker
+		(accountB.account.owner === orderA.taker) || (takerOpen)
+	// I think we can skip this
+	// validateTakerB
+		// ownerA, orderB.taker
+		(accountA.account.owner === orderB.taker) || (takerOpen)
 
 
 	// TODO: check timestamp & 2 orders' validUntil
