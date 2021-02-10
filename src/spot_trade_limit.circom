@@ -102,14 +102,5 @@ template SpotTradeLimit(balanceLevels, accountLevels) {
 	// fillSB_from_balanceSB_to_balanceBA
 
 
-	//  // account&balance status
-	//  // update it
-
-
-	// TODO: feeCalculatorA
-	// TODO: feeCalculatorB
-	// TODO: feeA_from_balanceBA_to_balanceAO
-	// TODO: feeB_from_balanceBB_to_balanceBO
-	// TODO: protocolFeeA_from_balanceAO_to_balanceAP
-	// TODO: protocolFeeB_from_balanceBO_to_balanceBP
+	// TODO: tx fee & trading fee
 }
