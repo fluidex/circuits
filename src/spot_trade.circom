@@ -26,10 +26,10 @@ template SpotTrade(balanceLevels, accountLevels) {
 	
 	signal input order1_thisget;
 	signal input order2_thisget;
-	// order1_thisget != 0;
+	// order1_thisget > 0;
 	component order1_thisget_check = amountcheck();
 	order1_thisget_check.in <== order1_thisget;
-	// order2_thisget != 0;
+	// order2_thisget > 0;
 	component order2_thisget_check = amountcheck();
 	order2_thisget_check.in <== order2_thisget;
 
