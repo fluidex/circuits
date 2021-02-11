@@ -1,6 +1,15 @@
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
 
+
+template amountcheck() {
+	signal input amount;
+	gt0 = GreaterThan(192);
+	gt0.in[0] <== amount;
+	gt0.in[1] <== 0;
+	gt0.out === 1;
+}
+
 // TODO: maker taker (related to fee), according to timestamp: order1 maker, order2 taker
 // TODO: is tradeHistory_storage_leaf necessary?
 template SpotTrade(balanceLevels, accountLevels) {
@@ -18,15 +27,11 @@ template SpotTrade(balanceLevels, accountLevels) {
 	signal input order1_thisget;
 	signal input order2_thisget;
 	// order1_thisget != 0;
-	component order1_thisget_gt0 = GreaterThan(192);
-	order1_thisget_gt0.in[0] = order1_thisget;
-	order1_thisget_gt0.in[1] = 0;
-	order1_thisget_gt0.out === 1;
+	component order1_thisget_check = amountcheck();
+	order1_thisget_check.in <== order1_thisget;
 	// order2_thisget != 0;
-	component order2_thisget_gt0 = GreaterThan(192);
-	order2_thisget_gt0.in[0] = order2_thisget;
-	order2_thisget_gt0.in[1] = 0;
-	order2_thisget_gt0.out === 1;
+	component order2_thisget_check = amountcheck();
+	order2_thisget_check.in <== order2_thisget;
 
 	/// price check
 	// (order2_thisget/order1_thisget) * 1000 <= (order1_amountsell/order1_amountbuy) * 1001
