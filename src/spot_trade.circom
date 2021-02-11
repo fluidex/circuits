@@ -88,6 +88,7 @@ template updateOrder(orderLevels) {
     // - check order tree update
     ////////
     component order_update_checker = CheckLeafUpdate(orderLevels);
+    signal input order_path_elements[orderLevels][1];
     order_update_checker.enabled <== 1;
     order_update_checker.oldLeaf <== oldOrderHash.out;
     order_update_checker.newLeaf <== newOrderHash.out;
@@ -163,8 +164,37 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
 	// TODO: tx fee & trading fee
 
 
-	// TODO: update order filled_amount
-	component order1_updater = updateOrder();
+	/// update order 1
+    signal input order1_path_elements[orderLevels][1];
+	component order1_updater = updateOrder(orderLevels);
+	order1_updater.orderID <== order1_id;
+	order1_updater.tokensell <== order1_tokensell;
+	order1_updater.tokenbuy <== order1_tokenbuy;
+	order1_updater.filled_sell <== order1_filledsell;
+	order1_updater.this_sell <== order2_thisget;
+	order1_updater.total_sell <== order1_amountsell;
+	order1_updater.filled_buy <== order1_filledbuy;
+	order1_updater.this_buy <== order1_thisget;
+	order1_updater.total_buy <== order1_amountbuy;
+    for (var i = 0; i < orderLevels; i++) {
+        order1_updater.path_elements[i][0] <== order1_path_elements[i][0];
+    }
+
+	/// update order 2
+    signal input order2_path_elements[orderLevels][1];
+	component order2_updater = updateOrder(orderLevels);
+	order2_updater.orderID <== order2_id;
+	order2_updater.tokensell <== order2_tokensell;
+	order2_updater.tokenbuy <== order2_tokenbuy;
+	order2_updater.filled_sell <== order2_filledsell;
+	order2_updater.this_sell <== order1_thisget;
+	order2_updater.total_sell <== order2_amountsell;
+	order2_updater.filled_buy <== order2_filledbuy;
+	order2_updater.this_buy <== order2_thisget;
+	order2_updater.total_buy <== order2_amountbuy;
+    for (var i = 0; i < orderLevels; i++) {
+        order2_updater.path_elements[i][0] <== order2_path_elements[i][0];
+    }
 
 
 
