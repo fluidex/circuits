@@ -23,9 +23,26 @@ template priceCheck() {
 	valid.out === 1;
 }
 
-template filledCheck() {
-	(order1_filledsell + order2_thisget < order1_amountsell) || (order1_filledbuy + order1_thisget < order1_amountbuy);
-	(order2_filledsell + order1_thisget < order2_amountsell) || (order2_filledbuy + order2_thisget < order2_amountbuy);
+// (filled_sell + this_sell <= total_sell) || (filled_buy + this_buy <= total_buy)
+template fillLimitCheck() {
+	signal input filled_sell;
+	signal input this_sell;
+	signal input total_sell;
+	signal input filled_buy;
+	signal input this_buy;
+	signal input total_buy;
+
+	component sellLimit = LessEqThan(192);
+	sellLimit.in[0] <== filled_sell + this_sell;
+	sellLimit.in[1] <== total_sell;
+	component buyLimit = LessEqThan(192);
+	buyLimit.in[0] <== filled_buy + this_buy;
+	buyLimit.in[1] <== total_buy;
+
+	limitCheck = OR();
+	limitCheck.a <== sellLimit.out;
+	limitCheck.b <== buyLimit.out;
+	limitCheck.out === 1;
 }
 
 // TODO: maker taker (related to fee), according to timestamp: order1 maker, order2 taker
@@ -64,6 +81,28 @@ template SpotTrade(balanceLevels, accountLevels) {
 	order2_pricecheck.this_buy <== order2_thisget;
 	order2_pricecheck.total_sell <== order2_amountsell;
 	order2_pricecheck.total_buy <== order1_amountbuy;
+
+	/// order1 fill_limit check
+	signal input order1_filledsell;
+	signal input order1_filledbuy;
+	component order1_filledcheck = fillLimitCheck();
+	order1_filledcheck.filled_sell <== order1_filledsell;
+	order1_filledcheck.this_sell <== order2_thisget;
+	order1_filledcheck.total_sell <== order1_amountsell;
+	order1_filledcheck.filled_buy <== order1_filledbuy;
+	order1_filledcheck.this_buy <== order1_thisget;
+	order1_filledcheck.total_buy <== order1_amountbuy;
+
+	/// order2 fill_limit check
+	signal input order2_filledsell;
+	signal input order2_filledbuy;
+	component order2_filledcheck = fillLimitCheck();
+	order2_filledcheck.filled_sell <== order2_filledsell;
+	order2_filledcheck.this_sell <== order1_thisget;
+	order2_filledcheck.total_sell <== order2_amountsell;
+	order2_filledcheck.filled_buy <== order2_filledbuy;
+	order2_filledcheck.this_buy <== order2_thisget;
+	order2_filledcheck.total_buy <== order2_amountbuy;
 
 	// TODO: check timestamp & 2 orders' validUntil
 	// TODO: tx fee & trading fee
