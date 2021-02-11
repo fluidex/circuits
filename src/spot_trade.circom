@@ -5,37 +5,37 @@ include "../node_modules/circomlib/circuits/gates.circom";
 // TODO: is tradeHistory_storage_leaf necessary?
 template SpotTrade(balanceLevels, accountLevels) {
 	signal input order1_tokensell;
-	signal input order1_wantsell;
+	signal input order1_amountsell;
 	signal input order1_tokenbuy;
-	signal input order1_wantbuy;
+	signal input order1_amountbuy;
 	signal input order2_tokensell;
-	signal input order2_wantsell;
+	signal input order2_amountsell;
 	signal input order2_tokenbuy;
-	signal input order2_wantbuy;
+	signal input order2_amountbuy;
 	order1_tokensell === order2_tokenbuy;
 	order1_tokenbuy === order2_tokensell;
 	
-	signal input order1_get;
-	signal input order2_get;
-	// order1_get != 0;
-	component order1_get_gt0 = GreaterThan(192);
-	order1_get_gt0.in[0] = order1_get;
-	order1_get_gt0.in[1] = 0;
-	order1_get_gt0.out === 1;
-	// order2_get != 0;
-	component order2_get_gt0 = GreaterThan(192);
-	order2_get_gt0.in[0] = order2_get;
-	order2_get_gt0.in[1] = 0;
-	order2_get_gt0.out === 1;
+	signal input order1_thisget;
+	signal input order2_thisget;
+	// order1_thisget != 0;
+	component order1_thisget_gt0 = GreaterThan(192);
+	order1_thisget_gt0.in[0] = order1_thisget;
+	order1_thisget_gt0.in[1] = 0;
+	order1_thisget_gt0.out === 1;
+	// order2_thisget != 0;
+	component order2_thisget_gt0 = GreaterThan(192);
+	order2_thisget_gt0.in[0] = order2_thisget;
+	order2_thisget_gt0.in[1] = 0;
+	order2_thisget_gt0.out === 1;
 
 	/// price check
-	// (order2_get/order1_get) * 1000 <= (order1_wantsell/order1_wantbuy) * 1001
-	(order2_get * order1_wantbuy * 1000) <= (order1_get * order1_wantsell * 1001)
-	// (order1_get/order2_get) * 1000 <= (order2_wantsell/order2_wantbuy) * 1001
-	(order1_get * order2_wantbuy * 1000) <= (order2_get * order2_wantsell * 1001)
+	// (order2_thisget/order1_thisget) * 1000 <= (order1_amountsell/order1_amountbuy) * 1001
+	(order2_thisget * order1_amountbuy * 1000) <= (order1_thisget * order1_amountsell * 1001)
+	// (order1_thisget/order2_thisget) * 1000 <= (order2_amountsell/order2_amountbuy) * 1001
+	(order1_thisget * order2_amountbuy * 1000) <= (order2_thisget * order2_amountsell * 1001)
 
-	(order1_filledsell + order2_get < order1_wantsell) || (order1_filledbuy + order1_get < order1_wantbuy);
-	(order2_filledsell + order1_get < order2_wantsell) || (order2_filledbuy + order2_get < order2_wantbuy);
+	(order1_filledsell + order2_thisget < order1_amountsell) || (order1_filledbuy + order1_thisget < order1_amountbuy);
+	(order2_filledsell + order1_thisget < order2_amountsell) || (order2_filledbuy + order2_thisget < order2_amountbuy);
 
 
 	// TODO: check timestamp & 2 orders' validUntil
