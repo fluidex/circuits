@@ -39,3 +39,35 @@ template HashAccount() {
 
     hash.out ==> out;
 }
+
+/**
+ * Computes the hash of an order state
+ * Order Hash = Rescue(tokensell, tokenbuy, filled_sell, filled_buy, total_sell, total_buy)
+ * @input tokensell - {Uint40} - token to sell
+ * @input tokenbuy - {Uint40} - token to buy
+ * @input filled_sell - {Field} - token to sell
+ * @input filled_buy - {Field} - token to sell
+ * @input total_sell - {Field} - token to sell
+ * @input total_buy - {Field} - token to sell
+ * @output out - {Field} - resulting rescue hash
+ */
+template HashOrder() {
+    signal input tokensell;
+    signal input tokenbuy;
+    signal input filled_sell;
+    signal input filled_buy;
+    signal input total_sell;
+    signal input total_buy;
+
+    signal output out;
+
+    component hash = Rescue(6);
+    hash.inputs[0] <== tokensell;
+    hash.inputs[1] <== tokenbuy;
+    hash.inputs[2] <== filled_sell;
+    hash.inputs[3] <== filled_buy;
+    hash.inputs[4] <== total_sell;
+    hash.inputs[5] <== total_buy;
+
+    hash.out ==> out;
+}

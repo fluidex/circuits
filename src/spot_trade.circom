@@ -1,5 +1,6 @@
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
+include "./lib/hash_state.circom";
 
 template amountCheck() {
 	signal input amount;
@@ -45,13 +46,66 @@ template fillLimitCheck() {
 	limitCheck.out === 1;
 }
 
+// TODO: delete order if fullfilled
+template updateOrder(orderLevels) {
+	signal input orderID;
+	signal input tokensell;
+	signal input tokenbuy;
+	signal input filled_sell;
+	signal input this_sell;
+	signal input total_sell;
+	signal input filled_buy;
+	signal input this_buy;
+	signal input total_buy;
+
+   // decode order_path_index
+    component bOrderID = Num2Bits(orderLevels);
+    bOrderID.in <== orderID;
+    for (var i = 0; i < orderLevels; i++) {
+        order_path_index[i] <== bOrderID.out[i];
+    }
+
+    component oldOrderHash = HashOrder();
+    oldOrderHash.tokensell <== tokensell;
+    oldOrderHash.tokenbuy <== tokenbuy;
+	oldOrderHash.filled_sell <== filled_sell;
+	oldOrderHash.filled_buy <== filled_buy;
+	oldOrderHash.total_sell <== total_sell;
+	oldOrderHash.total_buy <== total_buy;
+
+    // TODO: underflow check
+
+    // TODO: overflow check
+
+    component newOrderHash = HashOrder();
+    newOrderHash.tokensell <== tokensell;
+    newOrderHash.tokenbuy <== tokenbuy;
+	newOrderHash.filled_sell <== filled_sell + this_sell;
+	newOrderHash.filled_buy <== filled_buy + this_buy;
+	newOrderHash.total_sell <== total_sell;
+	newOrderHash.total_buy <== total_buy;
+
+    // - check order tree update
+    ////////
+    component order_update_checker = CheckLeafUpdate(orderLevels);
+    order_update_checker.enabled <== 1;
+    order_update_checker.oldLeaf <== oldOrderHash.out;
+    order_update_checker.newLeaf <== newOrderHash.out;
+    for (var i = 0; i < orderLevels; i++) {
+        order_update_checker.path_index[i] <== order_path_index[i];
+        order_update_checker.path_elements[i][0] <== order_path_elements[i][0];
+    }
+}
+
 // TODO: maker taker (related to fee), according to timestamp: order1 maker, order2 taker
 // TODO: is tradeHistory_storage_leaf necessary?
-template SpotTrade(balanceLevels, accountLevels) {
+template SpotTrade(orderLevels, balanceLevels, accountLevels) {
+	signal input order1_id;
 	signal input order1_tokensell;
 	signal input order1_amountsell;
 	signal input order1_tokenbuy;
 	signal input order1_amountbuy;
+	signal input order2_id;
 	signal input order2_tokensell;
 	signal input order2_amountsell;
 	signal input order2_tokenbuy;
@@ -104,11 +158,16 @@ template SpotTrade(balanceLevels, accountLevels) {
 	order2_filledcheck.this_buy <== order2_thisget;
 	order2_filledcheck.total_buy <== order2_amountbuy;
 
+
 	// TODO: check timestamp & 2 orders' validUntil
 	// TODO: tx fee & trading fee
 
+
 	// TODO: update order filled_amount
-	// TODO: delete order if fullfilled
+	component order1_updater = updateOrder();
+
+
+
 
 	// TODO:
 	/* Token Transfers */
