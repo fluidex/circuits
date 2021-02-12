@@ -2,7 +2,7 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState } from '../helper.ts/state-utils';
+import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 
 const balanceRoot = hash([1n]);
@@ -15,6 +15,7 @@ const account_state = {
   balanceRoot: balanceRoot,
   ay: account.ay,
   ethAddr: ethAddrNoPrefix,
+  orderRoot: getGenesisOrderRoot(),
 };
 class TestHashAccount implements SimpleTest {
   getInput() {
@@ -24,6 +25,7 @@ class TestHashAccount implements SimpleTest {
       balanceRoot: account_state.balanceRoot,
       ay: Scalar.fromString(account_state.ay, 16),
       ethAddr: Scalar.fromString(account_state.ethAddr, 16),
+      orderRoot: account_state.orderRoot,
     };
   }
   getOutput() {
