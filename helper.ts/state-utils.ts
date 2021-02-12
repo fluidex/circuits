@@ -28,7 +28,9 @@ function hashAccountState(st) {
   return hash(accountState2Array(st));
 }
 
-// TODO: calculate from orderLevels
+// TODO:
+// 1. calculate from orderLevels
+// 2. avoid calculating every time in tests
 function getGenesisOrderRoot() {
 	return 0n;
 }

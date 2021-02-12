@@ -2,7 +2,7 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState } from '../helper.ts/state-utils';
+import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import { getBTreeProof } from './common';
 
@@ -34,6 +34,7 @@ function initDepositToNew() {
     balanceRoot: oldBalanceProof.root,
     ay: '0',
     ethAddr: '0',
+    orderRoot: getGenesisOrderRoot(),
   };
   const oldAccountHash = hashAccountState(oldAccount);
   const newAccount = {
@@ -42,6 +43,7 @@ function initDepositToNew() {
     balanceRoot: newBalanceProof.root,
     ay: account.ay,
     ethAddr: ethAddrNoPrefix,
+    orderRoot: getGenesisOrderRoot(),
   };
   const newAccountHash = hashAccountState(newAccount);
   let accountLeaves = [];
@@ -96,6 +98,7 @@ function initDepositToOld() {
     balanceRoot: oldBalanceProof.root,
     ay: account.ay,
     ethAddr: ethAddrNoPrefix,
+    orderRoot: getGenesisOrderRoot(),
   };
   const oldAccountHash = hashAccountState(oldAccount);
   const newAccount = {
@@ -104,6 +107,7 @@ function initDepositToOld() {
     balanceRoot: newBalanceProof.root,
     ay: account.ay,
     ethAddr: ethAddrNoPrefix,
+    orderRoot: getGenesisOrderRoot(),
   };
   const newAccountHash = hashAccountState(newAccount);
   let accountLeaves = [];
@@ -124,6 +128,7 @@ function initDepositToOld() {
     ay: Scalar.fromString(account.ay, 16),
     balance: oldBalance,
     ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
+    orderRoot: oldAccount.orderRoot,
     balance_path_elements: oldBalanceProof.path_elements,
     oldBalanceRoot: oldBalanceProof.root,
     newBalanceRoot: newBalanceProof.root,
@@ -174,6 +179,7 @@ class TestDepositToOld implements SimpleTest {
       ay: deposit_to_old_test_case.ay,
       balance: deposit_to_old_test_case.balance,
       ethAddr: deposit_to_old_test_case.ethAddr,
+      orderRoot: deposit_to_old_test_case.orderRoot,
       balance_path_elements: deposit_to_old_test_case.balance_path_elements,
       account_path_elements: deposit_to_old_test_case.account_path_elements,
       oldAccountRoot: deposit_to_old_test_case.oldAccountRoot,

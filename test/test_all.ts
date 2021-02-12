@@ -56,7 +56,7 @@ async function main() {
     await testWithInputOutput(new TestDepositToOld());
     await testWithInputOutput(new TestTransfer());
     await testWithInputOutput(new TestWithdraw());
-    await testWithInputOutput(new TestBlock());
+    // await testWithInputOutput(new TestBlock());
   } catch (e) {
     console.error(e);
   }
