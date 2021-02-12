@@ -88,6 +88,8 @@ template updateOrder(orderLevels) {
     // - check order tree update
     ////////
     component order_update_checker = CheckLeafUpdate(orderLevels);
+    signal input oldOrderRoot;
+    signal input newOrderRoot;
     signal input order_path_elements[orderLevels][1];
     order_update_checker.enabled <== 1;
     order_update_checker.oldLeaf <== oldOrderHash.out;
@@ -96,6 +98,8 @@ template updateOrder(orderLevels) {
         order_update_checker.path_index[i] <== order_path_index[i];
         order_update_checker.path_elements[i][0] <== order_path_elements[i][0];
     }
+    order_update_checker.oldRoot <== oldOrderRoot;
+    order_update_checker.newRoot <== newOrderRoot;
 }
 
 // TODO: maker taker (related to fee), according to timestamp: order1 maker, order2 taker
@@ -179,6 +183,8 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     for (var i = 0; i < orderLevels; i++) {
         order1_updater.path_elements[i][0] <== order1_path_elements[i][0];
     }
+    order1_updater.oldOrderRoot <== old_order1_root;
+    order1_updater.newOrderRoot <== new_order1_root;
 
     /// update order 2
     signal input order2_path_elements[orderLevels][1];
@@ -195,6 +201,8 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     for (var i = 0; i < orderLevels; i++) {
         order2_updater.path_elements[i][0] <== order2_path_elements[i][0];
     }
+    order2_updater.oldOrderRoot <== old_order2_root;
+    order2_updater.newOrderRoot <== new_order2_root;
 
 
 
