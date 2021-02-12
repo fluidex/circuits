@@ -35,7 +35,6 @@ template DepositToOld(balanceLevels, accountLevels) {
     signal input balance;
     signal input ay;
     signal input ethAddr;
-    signal input orderRoot;
     signal input balance_path_elements[balanceLevels][1];
     signal input account_path_elements[accountLevels][1];
 
@@ -89,7 +88,6 @@ template DepositToOld(balanceLevels, accountLevels) {
     oldAccountHash.balanceRoot <== old_balance_tree.root;
     oldAccountHash.ay <== ay;
     oldAccountHash.ethAddr <== ethAddr;
-    oldAccountHash.orderRoot <== orderRoot;
     // new account state hash
     component newAccountHash = HashAccount();
     newAccountHash.nonce <== nonce;
@@ -97,7 +95,6 @@ template DepositToOld(balanceLevels, accountLevels) {
     newAccountHash.balanceRoot <== new_balance_tree.root;
     newAccountHash.ay <== ay;
     newAccountHash.ethAddr <== ethAddr;
-    newAccountHash.orderRoot <== orderRoot;
     // check update
     component account_update_checker = CheckLeafUpdate(accountLevels);
     account_update_checker.enabled <== enabled;

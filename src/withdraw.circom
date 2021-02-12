@@ -44,7 +44,6 @@ template Withdraw(balanceLevels, accountLevels) {
     signal input balance;
     signal input ay;
     signal input ethAddr;
-    signal input orderRoot;
     signal input balance_path_elements[balanceLevels][1];
     signal input account_path_elements[accountLevels][1];
 
@@ -118,7 +117,6 @@ template Withdraw(balanceLevels, accountLevels) {
     oldAccountHash.balanceRoot <== old_balance_tree.root;
     oldAccountHash.ay <== ay;
     oldAccountHash.ethAddr <== ethAddr;
-    oldAccountHash.orderRoot <== orderRoot;
     // new account state hash
     component newAccountHash = HashAccount();
     newAccountHash.nonce <== nonce+1;
@@ -126,7 +124,6 @@ template Withdraw(balanceLevels, accountLevels) {
     newAccountHash.balanceRoot <== new_balance_tree.root;
     newAccountHash.ay <== ay;
     newAccountHash.ethAddr <== ethAddr;
-    newAccountHash.orderRoot <== orderRoot;
 
     // - check account tree update
     ///////

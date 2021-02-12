@@ -84,7 +84,6 @@ template DepositToNew(balanceLevels, accountLevels) {
     oldAccountHash.balanceRoot <== old_balance_tree.root;
     oldAccountHash.ay <== 0;
     oldAccountHash.ethAddr <== 0;
-    oldAccountHash.orderRoot <== getGenesisOrderRoot();
     // new account state hash
     component newAccountHash = HashAccount();
     newAccountHash.nonce <== 0;
@@ -92,7 +91,6 @@ template DepositToNew(balanceLevels, accountLevels) {
     newAccountHash.balanceRoot <== new_balance_tree.root;
     newAccountHash.ay <== ay;
     newAccountHash.ethAddr <== ethAddr;
-    newAccountHash.orderRoot <== getGenesisOrderRoot();
     // check update
     component account_update_checker = CheckLeafUpdate(accountLevels);
     account_update_checker.enabled <== enabled;
