@@ -15,6 +15,7 @@ include "rescue.circom";
  * @input balanceRoot - {Field} - account's balance_tree root
  * @input ay - {Field} - babyjubjub Y coordinate
  * @input ethAddr - {Uint160} - etehreum address
+ * @input orderRoot - {Field} - account's order_tree root
  * @output out - {Field} - resulting rescue hash
  */
 template HashAccount() {
@@ -30,12 +31,13 @@ template HashAccount() {
 
     e0 <== nonce + sign * (1 << 40);
 
-    component hash = Rescue(4);
+    component hash = Rescue(5);
 
     hash.inputs[0] <== e0;
     hash.inputs[1] <== balanceRoot;
     hash.inputs[2] <== ay;
     hash.inputs[3] <== ethAddr;
+    hash.inputs[4] <== orderRoot;
 
     hash.out ==> out;
 }

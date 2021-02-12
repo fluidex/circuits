@@ -245,8 +245,10 @@ template tradeTransfer(balanceLevels, accountLevels) {
     signal input receiver_account_path_elements[accountLevels][1];
 
     // Roots
-    signal input oldOrderRoot;
-    signal input newOrderRoot;
+    signal input oldOrder1Root;
+    signal input oldOrder2Root;
+    signal input newOrder1Root;
+    signal input newOrder2Root;
     signal input oldAccountRoot;
     signal input newAccountRoot;
 
@@ -314,13 +316,15 @@ template tradeTransfer(balanceLevels, accountLevels) {
     oldSenderHash.balanceRoot <== old_sender_balance_tree.root;
     oldSenderHash.ay <== ay1;
     oldSenderHash.ethAddr <== ethAddr1;
+    oldSenderHash.orderRoot <== oldOrder1Root;
     // new sender account state hash
     component newSenderHash = HashAccount();
-    newSenderHash.nonce <== nonce1+1;
+    newSenderHash.nonce <== nonce1;
     newSenderHash.sign <== sign1;
     newSenderHash.balanceRoot <== new_sender_balance_tree.root;
     newSenderHash.ay <== ay1;
     newSenderHash.ethAddr <== ethAddr1;
+    newSenderHash.orderRoot <== newOrder1Root;
     // old receiver account state hash
     component oldReceiverHash = HashAccount();
     oldReceiverHash.nonce <== nonce2;
@@ -328,6 +332,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     oldReceiverHash.balanceRoot <== old_receiver_balance_tree.root;
     oldReceiverHash.ay <== ay2;
     oldReceiverHash.ethAddr <== ethAddr2;
+    oldReceiverHash.orderRoot <== oldOrder2Root;
     // new receiver account state hash
     component newReceiverHash = HashAccount();
     newReceiverHash.nonce <== nonce2;
@@ -335,6 +340,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     newReceiverHash.balanceRoot <== new_receiver_balance_tree.root;
     newReceiverHash.ay <== ay2;
     newReceiverHash.ethAddr <== ethAddr2;
+    newReceiverHash.orderRoot <== newOrder2Root;
 
     // - account tree
     ///////
