@@ -55,7 +55,6 @@ template Transfer(balanceLevels, accountLevels) {
     signal input balance1;
     signal input ay1;
     signal input ethAddr1;
-    signal input orderRoot1;
     signal input sender_balance_path_elements[balanceLevels][1];
     signal input sender_account_path_elements[accountLevels][1];
 
@@ -65,7 +64,6 @@ template Transfer(balanceLevels, accountLevels) {
     signal input balance2;
     signal input ay2;
     signal input ethAddr2;
-    signal input orderRoot2;
     signal input receiver_balance_path_elements[balanceLevels][1];
     signal input receiver_account_path_elements[accountLevels][1];
 
@@ -163,7 +161,6 @@ template Transfer(balanceLevels, accountLevels) {
     oldSenderHash.balanceRoot <== old_sender_balance_tree.root;
     oldSenderHash.ay <== ay1;
     oldSenderHash.ethAddr <== ethAddr1;
-    oldSenderHash.orderRoot <== orderRoot1;
     // new sender account state hash
     component newSenderHash = HashAccount();
     newSenderHash.nonce <== nonce1+1;
@@ -171,7 +168,6 @@ template Transfer(balanceLevels, accountLevels) {
     newSenderHash.balanceRoot <== new_sender_balance_tree.root;
     newSenderHash.ay <== ay1;
     newSenderHash.ethAddr <== ethAddr1;
-    newSenderHash.orderRoot <== orderRoot1;
     // old receiver account state hash
     component oldReceiverHash = HashAccount();
     oldReceiverHash.nonce <== nonce2;
@@ -179,7 +175,6 @@ template Transfer(balanceLevels, accountLevels) {
     oldReceiverHash.balanceRoot <== old_receiver_balance_tree.root;
     oldReceiverHash.ay <== ay2;
     oldReceiverHash.ethAddr <== ethAddr2;
-    oldReceiverHash.orderRoot <== orderRoot2;
     // new receiver account state hash
     component newReceiverHash = HashAccount();
     newReceiverHash.nonce <== nonce2;
@@ -187,7 +182,6 @@ template Transfer(balanceLevels, accountLevels) {
     newReceiverHash.balanceRoot <== new_receiver_balance_tree.root;
     newReceiverHash.ay <== ay2;
     newReceiverHash.ethAddr <== ethAddr2;
-    newReceiverHash.orderRoot <== orderRoot2;
 
     // - account tree
     ///////
