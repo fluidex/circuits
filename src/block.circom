@@ -27,6 +27,7 @@ template Block(nTxs, balanceLevels, accountLevels) {
     signal input account_path_elements[nTxs][2][accountLevels][1];
 
     // roots
+    signal input orderRoots[nTxs][2];
     signal input oldAccountRoots[nTxs];
     signal input newAccountRoots[nTxs];
 
@@ -97,6 +98,7 @@ template Block(nTxs, balanceLevels, accountLevels) {
         processDepositToOld[i].accountID <== decodedTx[i].accountID2;
         processDepositToOld[i].tokenID <== decodedTx[i].tokenID;
         processDepositToOld[i].ethAddr <== decodedTx[i].ethAddr2;
+        processDepositToOld[i].orderRoot <== orderRoots[i][0];
         processDepositToOld[i].sign <== decodedTx[i].sign2;
         processDepositToOld[i].ay <== decodedTx[i].ay2;
         processDepositToOld[i].amount <== decodedTx[i].amount;
@@ -127,6 +129,8 @@ template Block(nTxs, balanceLevels, accountLevels) {
         processTransfer[i].ay2 <== decodedTx[i].ay2;
         processTransfer[i].ethAddr1 <== decodedTx[i].ethAddr1;
         processTransfer[i].ethAddr2 <== decodedTx[i].ethAddr2;
+        processTransfer[i].orderRoot1 <== orderRoots[i][0];
+        processTransfer[i].orderRoot2 <== orderRoots[i][1];
         processTransfer[i].balance1 <== decodedTx[i].balance1;
         processTransfer[i].balance2 <== decodedTx[i].balance2;
         processTransfer[i].sigL2Hash <== decodedTx[i].sigL2Hash;
@@ -154,6 +158,7 @@ template Block(nTxs, balanceLevels, accountLevels) {
         processWithdraw[i].sign <== decodedTx[i].sign1;
         processWithdraw[i].ay <== decodedTx[i].ay1;
         processWithdraw[i].ethAddr <== decodedTx[i].ethAddr1;
+        processWithdraw[i].orderRoot <== orderRoots[i][0];
         processWithdraw[i].balance <== decodedTx[i].balance1;
         processWithdraw[i].sigL2Hash <== decodedTx[i].sigL2Hash;
         processWithdraw[i].s <== decodedTx[i].s;
