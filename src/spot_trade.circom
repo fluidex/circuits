@@ -105,6 +105,8 @@ template updateOrder(orderLevels) {
 // TODO: maker taker (related to fee), according to timestamp: order1 maker, order2 taker
 // TODO: is tradeHistory_storage_leaf necessary?
 template SpotTrade(orderLevels, balanceLevels, accountLevels) {
+    // TODO: signal input enabled;
+
     signal input order1_id;
     signal input order1_tokensell;
     signal input order1_amountsell;
@@ -205,15 +207,165 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order2_updater.newOrderRoot <== new_order2_root;
 
 
+    signal input order1_AccountID;
+    signal input order2_AccountID;
+    component transfer_1to2 = tradeTransfer(balanceLevels, accountLevels);
+    transfer_1to2.fromAccountID = order1_AccountID;
+    transfer_1to2.toAccountID = order2_AccountID;
+    transfer_1to2.amount = order2_thisget;
+    transfer_1to2.tokenID = order1_tokensell;
 
+}
 
-    // TODO:
-    /* Token Transfers */
-    // Actual trade
-    // transfer order 1 sell to order 2 buy
-    // transfer order 2 sell to order 1 buy
-    signal input balance1_tokensell;
-    signal input balance1_tokenbuy;
-    signal input balance2_tokensell;
-    signal input balance2_tokenbuy;
+template tradeTransfer(balanceLevels, accountLevels) {
+    signal input enabled;
+
+    // Tx
+    signal input fromAccountID;
+    signal input toAccountID;
+    signal input amount;
+    signal input tokenID;
+
+    // Sender state
+    signal input nonce1;
+    signal input sign1;
+    signal input balance1;
+    signal input ay1;
+    signal input ethAddr1;
+    signal input sender_balance_path_elements[balanceLevels][1];
+    signal input sender_account_path_elements[accountLevels][1];
+
+    // Receiver state
+    signal input nonce2;
+    signal input sign2;
+    signal input balance2;
+    signal input ay2;
+    signal input ethAddr2;
+    signal input receiver_balance_path_elements[balanceLevels][1];
+    signal input receiver_account_path_elements[accountLevels][1];
+
+    // Roots
+    signal input oldOrderRoot;
+    signal input newOrderRoot;
+    signal input oldAccountRoot;
+    signal input newAccountRoot;
+
+    // Path index
+    signal balance_path_index[balanceLevels];
+    signal sender_account_path_index[accountLevels];
+    signal receiver_account_path_index[accountLevels];
+
+    // decode balance_path_index
+    component bTokenID = Num2Bits(balanceLevels);
+    bTokenID.in <== tokenID;
+    for (var i = 0; i < balanceLevels; i++) {
+        balance_path_index[i] <== bTokenID.out[i];
+    }
+
+    // decode account_path_index
+    component bFrom = Num2Bits(accountLevels);
+    bFrom.in <== fromAccountID;
+    for (var i = 0; i < accountLevels; i++) {
+        sender_account_path_index[i] <== bFrom.out[i];
+    }
+    component bTo = Num2Bits(accountLevels);
+    bTo.in <== toAccountID;
+    for (var i = 0; i < accountLevels; i++) {
+        receiver_account_path_index[i] <== bTo.out[i];
+    }
+
+    // TODO: underflow check
+
+    // TODO: overflow check
+
+    // TODO: fee
+
+    // - balance tree
+    ////////
+    // sender balance
+    component old_sender_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    component new_sender_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    old_sender_balance_tree.leaf <== balance1;
+    new_sender_balance_tree.leaf <== balance1 - amount;
+    for (var i = 0; i < balanceLevels; i++) {
+        old_sender_balance_tree.path_index[i] <== balance_path_index[i];
+        old_sender_balance_tree.path_elements[i][0] <== sender_balance_path_elements[i][0];
+        new_sender_balance_tree.path_index[i] <== balance_path_index[i];
+        new_sender_balance_tree.path_elements[i][0] <== sender_balance_path_elements[i][0];
+    }
+    // receiver balance
+    component old_receiver_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    component new_receiver_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    old_receiver_balance_tree.leaf <== balance2;
+    new_receiver_balance_tree.leaf <== balance2 + amount;
+    for (var i = 0; i < balanceLevels; i++) {
+        old_receiver_balance_tree.path_index[i] <== balance_path_index[i];
+        old_receiver_balance_tree.path_elements[i][0] <== receiver_balance_path_elements[i][0];
+        new_receiver_balance_tree.path_index[i] <== balance_path_index[i];
+        new_receiver_balance_tree.path_elements[i][0] <== receiver_balance_path_elements[i][0];
+    }
+
+    // - compute account state
+    ///////
+    // old sender account state hash
+    component oldSenderHash = HashAccount();
+    oldSenderHash.nonce <== nonce1;
+    oldSenderHash.sign <== sign1;
+    oldSenderHash.balanceRoot <== old_sender_balance_tree.root;
+    oldSenderHash.ay <== ay1;
+    oldSenderHash.ethAddr <== ethAddr1;
+    // new sender account state hash
+    component newSenderHash = HashAccount();
+    newSenderHash.nonce <== nonce1+1;
+    newSenderHash.sign <== sign1;
+    newSenderHash.balanceRoot <== new_sender_balance_tree.root;
+    newSenderHash.ay <== ay1;
+    newSenderHash.ethAddr <== ethAddr1;
+    // old receiver account state hash
+    component oldReceiverHash = HashAccount();
+    oldReceiverHash.nonce <== nonce2;
+    oldReceiverHash.sign <== sign2;
+    oldReceiverHash.balanceRoot <== old_receiver_balance_tree.root;
+    oldReceiverHash.ay <== ay2;
+    oldReceiverHash.ethAddr <== ethAddr2;
+    // new receiver account state hash
+    component newReceiverHash = HashAccount();
+    newReceiverHash.nonce <== nonce2;
+    newReceiverHash.sign <== sign2;
+    newReceiverHash.balanceRoot <== new_receiver_balance_tree.root;
+    newReceiverHash.ay <== ay2;
+    newReceiverHash.ethAddr <== ethAddr2;
+
+    // - account tree
+    ///////
+    // sender
+    component sender_checker = CheckLeafExists(accountLevels);
+    sender_checker.enabled <== enabled;
+    for (var i = 0; i < accountLevels; i++) {
+        sender_checker.path_index[i] <== sender_account_path_index[i];
+        sender_checker.path_elements[i][0] <== sender_account_path_elements[i][0];
+    }
+    sender_checker.leaf <== oldSenderHash.out;
+    sender_checker.root <== oldAccountRoot;
+
+    component sender_updater = CalculateRootFromMerklePath(accountLevels);
+    sender_updater.leaf <== newSenderHash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        sender_updater.path_index[i] <== sender_account_path_index[i];
+        sender_updater.path_elements[i][0] <== sender_account_path_elements[i][0];
+    }
+    signal tmpAccountRoot;
+    sender_updater.root ==> tmpAccountRoot;
+
+    // receiver
+    component receiver_update_checker = CheckLeafUpdate(accountLevels);
+    receiver_update_checker.enabled <== enabled;
+    receiver_update_checker.oldLeaf <== oldReceiverHash.out;
+    receiver_update_checker.newLeaf <== newReceiverHash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        receiver_update_checker.path_index[i] <== receiver_account_path_index[i];
+        receiver_update_checker.path_elements[i][0] <== receiver_account_path_elements[i][0];
+    }
+    receiver_update_checker.oldRoot <== tmpAccountRoot;
+    receiver_update_checker.newRoot <== newAccountRoot;
 }
