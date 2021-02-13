@@ -45,13 +45,15 @@ template HashAccount() {
 
 /**
  * Computes the hash of an order state
- * Order Hash = Rescue(tokensell, tokenbuy, filled_sell, filled_buy, total_sell, total_buy)
- * @input tokensell - {Uint40} - token to sell
- * @input tokenbuy - {Uint40} - token to buy
+ * Order Hash = Rescue(e0, filled_sell, filled_buy, total_sell, total_buy)
+ * e0: tokensell(32bits) | tokenbuy(32bits) | tokenbuy(2bits)
+ * @input tokensell - {Uint32} - token to sell
+ * @input tokenbuy - {Uint32} - token to buy
  * @input filled_sell - {Field} - token to sell
  * @input filled_buy - {Field} - token to sell
  * @input total_sell - {Field} - token to sell
  * @input total_buy - {Field} - token to sell
+ * @input total_buy - {Uint2} - order status
  * @output out - {Field} - resulting rescue hash
  */
 // TODO: compress tokens & status
@@ -66,14 +68,15 @@ template HashOrder() {
 
     signal output out;
 
-    component hash = Rescue(7);
-    hash.inputs[0] <== tokensell;
-    hash.inputs[1] <== tokenbuy;
-    hash.inputs[2] <== filled_sell;
-    hash.inputs[3] <== filled_buy;
-    hash.inputs[4] <== total_sell;
-    hash.inputs[5] <== total_buy;
-    hash.inputs[6] <== status;
+    signal e0; // build e0 element
+    e0 <== status + tokenbuy * (1 << 32) + tokensell * (1 << 64);
+
+    component hash = Rescue(5);
+    hash.inputs[0] <== e0;
+    hash.inputs[1] <== filled_sell;
+    hash.inputs[2] <== filled_buy;
+    hash.inputs[3] <== total_sell;
+    hash.inputs[4] <== total_buy;
 
     hash.out ==> out;
 }

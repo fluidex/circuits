@@ -22,6 +22,7 @@ include "./lib/binary_merkle_tree.circom";
  * @input balance1 - {Uint192} - balance of the sender leaf
  * @input ay1 - {Field} - ay of the sender leaf
  * @input ethAddr1 - {Uint160} - ethAddr of the sender leaf
+ * @input orderRoot1 - {Field} - order root of the sender leaf
  * @input sender_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the sender leaf
  * @input sender_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the sender leaf
  * @input nonce2 - {Uint40} - nonce of the receiver leaf
@@ -29,6 +30,7 @@ include "./lib/binary_merkle_tree.circom";
  * @input balance2 - {Uint192} - balance of the receiver leaf
  * @input ay2 - {Field} - ay of the receiver leaf
  * @input ethAddr2 - {Uint160} - ethAddr of the receiver leaf
+ * @input orderRoot2 - {Field} - order root of the receiver leaf
  * @input receiver_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the receiver leaf
  * @input receiver_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the receiver leaf
  * @input oldAccountRoot - {Field} - initial account state root
