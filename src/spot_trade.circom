@@ -154,7 +154,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order1_thisget_check.enabled <== enabled;
     order1_thisget_check.amount <== order1_thisget;
     // order2_thisget > 0;
-    component order2_thisget_check = amountcheck();
+    component order2_thisget_check = amountCheck();
     order2_thisget_check.enabled <== enabled;
     order2_thisget_check.amount <== order2_thisget;
 
