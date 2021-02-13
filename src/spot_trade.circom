@@ -24,7 +24,8 @@ template priceCheck() {
     valid.out === 1;
 }
 
-// TODO: according to side
+// TODO: use sell for filled or use buy for filled?
+// for now we have both. but usually for bz we only have one filled, according to types. 
 // (filled_sell + this_sell <= total_sell) || (filled_buy + this_buy <= total_buy)
 template fillLimitCheck() {
     signal input filled_sell;
