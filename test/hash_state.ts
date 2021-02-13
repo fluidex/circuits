@@ -48,7 +48,7 @@ const order_state = {
     filled_buy: 0,
     total_sell: 100,
     total_buy: 1000,
-    status: 0, 
+    status: 0,
 };
 
 class TestHashOrder implements SimpleTest {
