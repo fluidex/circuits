@@ -365,7 +365,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
 
     // - compute account state
     ///////
-    // // old account 1 state hash
+    // old account 1 state hash
     component oldAccount1Hash = HashAccount();
     oldAccount1Hash.nonce <== nonce1;
     oldAccount1Hash.sign <== sign1;
@@ -373,15 +373,15 @@ template tradeTransfer(balanceLevels, accountLevels) {
     oldAccount1Hash.ay <== ay1;
     oldAccount1Hash.ethAddr <== ethAddr1;
     oldAccount1Hash.orderRoot <== oldOrder1Root;
-    // // new sender account state hash
-    // component newSenderHash = HashAccount();
-    // newSenderHash.nonce <== nonce1;
-    // newSenderHash.sign <== sign1;
-    // newSenderHash.balanceRoot <== new_sender_balance_tree.root;
-    // newSenderHash.ay <== ay1;
-    // newSenderHash.ethAddr <== ethAddr1;
-    // newSenderHash.orderRoot <== newOrder1Root;
-    // // old account 2 state hash
+    // new account 1 state hash
+    component newAccount1Hash = HashAccount();
+    newAccount1Hash.nonce <== nonce1;
+    newAccount1Hash.sign <== sign1;
+    newAccount1Hash.balanceRoot <== new_account1_balance_tree.root;
+    newAccount1Hash.ay <== ay1;
+    newAccount1Hash.ethAddr <== ethAddr1;
+    newAccount1Hash.orderRoot <== newOrder1Root;
+    // old account 2 state hash
     component oldAccount2Hash = HashAccount();
     oldAccount2Hash.nonce <== nonce2;
     oldAccount2Hash.sign <== sign2;
@@ -389,14 +389,14 @@ template tradeTransfer(balanceLevels, accountLevels) {
     oldAccount2Hash.ay <== ay2;
     oldAccount2Hash.ethAddr <== ethAddr2;
     oldAccount2Hash.orderRoot <== oldOrder2Root;
-    // // new receiver account state hash
-    // component newReceiverHash = HashAccount();
-    // newReceiverHash.nonce <== nonce2;
-    // newReceiverHash.sign <== sign2;
-    // newReceiverHash.balanceRoot <== new_receiver_balance_tree.root;
-    // newReceiverHash.ay <== ay2;
-    // newReceiverHash.ethAddr <== ethAddr2;
-    // newReceiverHash.orderRoot <== newOrder2Root;
+    // new account 2 state hash
+    component newAccount2Hash = HashAccount();
+    newAccount2Hash.nonce <== nonce2;
+    newAccount2Hash.sign <== sign2;
+    newAccount2Hash.balanceRoot <== new_account2_balance_tree.root;
+    newAccount2Hash.ay <== ay2;
+    newAccount2Hash.ethAddr <== ethAddr2;
+    newAccount2Hash.orderRoot <== newOrder2Root;
 
     // - account tree
     ///////
