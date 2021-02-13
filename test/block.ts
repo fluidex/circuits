@@ -2,7 +2,7 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState } from '../helper.ts/state-utils';
+import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 
@@ -12,6 +12,8 @@ const balanceLevels = 2;
 const accountLevels = 2;
 
 function initTestCase() {
+    const genesisOrderRoot = getGenesisOrderRoot();
+
     const tokenID = 0;
 
     // oldAccount
@@ -35,6 +37,7 @@ function initTestCase() {
         balanceRoot: account1BalanceProof.root,
         ay: account1.ay,
         ethAddr: ethAddr1NoPrefix,
+        orderRoot: genesisOrderRoot,
     };
     let account1Hash = hashAccountState(account1State);
 
@@ -47,6 +50,7 @@ function initTestCase() {
         balanceRoot: account2BalanceProof.root,
         ay: '0',
         ethAddr: '0',
+        orderRoot: genesisOrderRoot,
     };
     let account2Hash = hashAccountState(account2State);
 
@@ -63,6 +67,7 @@ function initTestCase() {
     let encodedTxs = [];
     let balance_path_elements = [];
     let account_path_elements = [];
+    let orderRoots = [];
     let oldAccountRoots = [];
     let newAccountRoots = [];
 
@@ -86,6 +91,7 @@ function initTestCase() {
     account_path_elements_item[0] = account2Proof.path_elements; // whatever
     account_path_elements_item[1] = account2Proof.path_elements;
     account_path_elements.push(account_path_elements_item);
+    orderRoots.push([genesisOrderRoot, genesisOrderRoot]);
     oldAccountRoots.push(account2Proof.root);
     // execute tx
     account2BalanceLeaves[tokenID] = amount;
@@ -96,6 +102,7 @@ function initTestCase() {
         balanceRoot: account2BalanceProof.root,
         ay: account2.ay,
         ethAddr: ethAddr2NoPrefix,
+        orderRoot: genesisOrderRoot,
     };
     account2Hash = hashAccountState(account2State);
     accountLeaves[accountID2] = account2Hash;
@@ -124,6 +131,7 @@ function initTestCase() {
     account_path_elements_item[0] = account1Proof.path_elements; // whatever
     account_path_elements_item[1] = account1Proof.path_elements;
     account_path_elements.push(account_path_elements_item);
+    orderRoots.push([genesisOrderRoot, genesisOrderRoot]);
     oldAccountRoots.push(account1Proof.root);
     // execute tx
     account1BalanceLeaves[tokenID] += amount;
@@ -169,6 +177,7 @@ function initTestCase() {
     balance_path_elements.push(balance_path_elements_item);
     account_path_elements_item = new Array(2);
     account_path_elements_item[0] = account1Proof.path_elements;
+    orderRoots.push([genesisOrderRoot, genesisOrderRoot]);
     // leave account_path_elements_item[1] to fill later, when calculating temp tree 
     oldAccountRoots.push(account1Proof.root);
     // execute tx
@@ -220,6 +229,7 @@ function initTestCase() {
     account_path_elements_item[0] = account2Proof.path_elements;
     account_path_elements_item[1] = account2Proof.path_elements; // whatever
     account_path_elements.push(account_path_elements_item);
+    orderRoots.push([genesisOrderRoot, genesisOrderRoot]);
     oldAccountRoots.push(account2Proof.root);
     // execute tx
     account2BalanceLeaves[tokenID] = BigInt(account2BalanceLeaves[tokenID]) - amount;
@@ -237,6 +247,7 @@ function initTestCase() {
         encodedTxs: encodedTxs,
         balance_path_elements: balance_path_elements,
         account_path_elements: account_path_elements,
+        orderRoots: orderRoots,
         oldAccountRoots: oldAccountRoots,
         newAccountRoots: newAccountRoots,
     };
@@ -250,6 +261,7 @@ class TestBlock implements SimpleTest {
             encodedTxs: test_case.encodedTxs,
             balance_path_elements: test_case.balance_path_elements,
             account_path_elements: test_case.account_path_elements,
+            orderRoots: test_case.orderRoots,
             oldAccountRoots: test_case.oldAccountRoots,
             newAccountRoots: test_case.newAccountRoots,
         };

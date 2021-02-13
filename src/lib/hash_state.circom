@@ -24,6 +24,7 @@ template HashAccount() {
     signal input balanceRoot;
     signal input ay;
     signal input ethAddr;
+    signal input orderRoot;
 
     signal output out;
 
@@ -72,4 +73,9 @@ template HashOrder() {
     hash.inputs[5] <== total_buy;
 
     hash.out ==> out;
+}
+
+function getGenesisOrderRoot() {
+    // TODO: calculate from orderLevels
+    return 0
 }
