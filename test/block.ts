@@ -8,8 +8,8 @@ import * as common from './common';
 
 // circuit-level definitions
 const nTxs = 4;
-const balanceLevels = 2;
-const accountLevels = 2;
+const balanceLevels = 1;
+const accountLevels = 1;
 
 function initTestCase() {
     const genesisOrderRoot = getGenesisOrderRoot();
@@ -17,11 +17,11 @@ function initTestCase() {
     const tokenID = 0;
 
     // oldAccount
-    const accountID1 = 2;
+    const accountID1 = 1;
     const account1 = new Account(1);
     const ethAddr1NoPrefix = account1.ethAddr.replace('0x', '');
     // newAccount
-    const accountID2 = 1;
+    const accountID2 = 0;
     const account2 = new Account(2);
     const ethAddr2NoPrefix = account2.ethAddr.replace('0x', '');
 
