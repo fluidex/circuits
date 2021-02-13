@@ -10,6 +10,8 @@ import { TxType, getBTreeProof } from './common';
 const balanceLevels = 2;
 const accountLevels = 2;
 
+const genesisOrderRoot = getGenesisOrderRoot();
+
 function initTestCase() {
   // input-level assignments and pre-processings
   const tokenID = 2;
@@ -35,7 +37,7 @@ function initTestCase() {
     balanceRoot: oldBalanceProof.root,
     ay: account.ay,
     ethAddr: ethAddrNoPrefix,
-    orderRoot: getGenesisOrderRoot(),
+    orderRoot: genesisOrderRoot,
   };
   const oldAccountHash = hashAccountState(oldAccount);
   const newAccount = {
@@ -44,7 +46,7 @@ function initTestCase() {
     balanceRoot: newBalanceProof.root,
     ay: account.ay,
     ethAddr: ethAddrNoPrefix,
-    orderRoot: getGenesisOrderRoot(),
+    orderRoot: genesisOrderRoot,
   };
   const newAccountHash = hashAccountState(newAccount);
 

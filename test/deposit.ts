@@ -10,6 +10,8 @@ import { getBTreeProof } from './common';
 const balanceLevels = 2;
 const accountLevels = 2;
 
+const genesisOrderRoot = getGenesisOrderRoot();
+
 function initDepositToNew() {
   // input-level assignments and pre-processings
   const accountID = 2;
@@ -34,7 +36,7 @@ function initDepositToNew() {
     balanceRoot: oldBalanceProof.root,
     ay: '0',
     ethAddr: '0',
-    orderRoot: getGenesisOrderRoot(),
+    orderRoot: genesisOrderRoot,
   };
   const oldAccountHash = hashAccountState(oldAccount);
   const newAccount = {
@@ -43,7 +45,7 @@ function initDepositToNew() {
     balanceRoot: newBalanceProof.root,
     ay: account.ay,
     ethAddr: ethAddrNoPrefix,
-    orderRoot: getGenesisOrderRoot(),
+    orderRoot: genesisOrderRoot,
   };
   const newAccountHash = hashAccountState(newAccount);
   let accountLeaves = [];
@@ -98,7 +100,7 @@ function initDepositToOld() {
     balanceRoot: oldBalanceProof.root,
     ay: account.ay,
     ethAddr: ethAddrNoPrefix,
-    orderRoot: getGenesisOrderRoot(),
+    orderRoot: genesisOrderRoot,
   };
   const oldAccountHash = hashAccountState(oldAccount);
   const newAccount = {
@@ -107,7 +109,7 @@ function initDepositToOld() {
     balanceRoot: newBalanceProof.root,
     ay: account.ay,
     ethAddr: ethAddrNoPrefix,
-    orderRoot: getGenesisOrderRoot(),
+    orderRoot: genesisOrderRoot,
   };
   const newAccountHash = hashAccountState(newAccount);
   let accountLeaves = [];
