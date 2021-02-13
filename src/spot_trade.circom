@@ -209,6 +209,8 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
 
     /// update order 1
     signal input order1_path_elements[orderLevels][1];
+    signal input old_order1_root;
+    signal input new_order1_root;
     component order1_updater = updateOrder(orderLevels);
     order1_updater.enabled <== enabled;
     order1_updater.orderID <== order1_id;
@@ -223,13 +225,15 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order1_updater.old_status <== 0; // TODO:
     order1_updater.new_status <== 0; // TODO:
     for (var i = 0; i < orderLevels; i++) {
-        order1_updater.path_elements[i][0] <== order1_path_elements[i][0];
+        order1_updater.order_path_elements[i][0] <== order1_path_elements[i][0];
     }
     order1_updater.oldOrderRoot <== old_order1_root;
     order1_updater.newOrderRoot <== new_order1_root;
 
     /// update order 2
     signal input order2_path_elements[orderLevels][1];
+    signal input old_order2_root;
+    signal input new_order2_root;
     component order2_updater = updateOrder(orderLevels);
     order2_updater.enabled <== enabled;
     order2_updater.orderID <== order2_id;
@@ -244,7 +248,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order2_updater.old_status <== 0; // TODO:
     order2_updater.new_status <== 0; // TODO:
     for (var i = 0; i < orderLevels; i++) {
-        order2_updater.path_elements[i][0] <== order2_path_elements[i][0];
+        order2_updater.order_path_elements[i][0] <== order2_path_elements[i][0];
     }
     order2_updater.oldOrderRoot <== old_order2_root;
     order2_updater.newOrderRoot <== new_order2_root;
@@ -268,7 +272,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     signal input old_account1_path_elements[accountLevels][1];
     signal input old_account2_balance_path_elements[balanceLevels][1];
     signal input tmp_account2_balance_path_elements[balanceLevels][1];
-    signal input old_account2_path_elements[accountLevels][1];
+    signal input tmp_account2_path_elements[accountLevels][1];
     component transfer = tradeTransfer(balanceLevels, accountLevels);
     transfer.enabled <== enabled;
     transfer.accountID1 <== order1_accountID;
@@ -307,7 +311,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
         transfer.tmp_account2_balance_path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
     }
     for (var i = 0; i < accountLevels; i++) {
-        transfer.old_account2_path_elements[i][0] <== old_account2_path_elements[i][0];
+        transfer.tmp_account2_path_elements[i][0] <== tmp_account2_path_elements[i][0];
     }
 }
 
@@ -515,5 +519,3 @@ template tradeTransfer(balanceLevels, accountLevels) {
     new_account_checker.oldRoot <== tmpAccountRoot;
     new_account_checker.newRoot <== newAccountRoot;
 }
-
-component main = SpotTrade(2,2,2);
