@@ -247,12 +247,64 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
 
     signal input order1_accountID;
     signal input order2_accountID;
+    signal input order1_account_nonce;
+    signal input order2_account_nonce;
+    signal input order1_account_sign;
+    signal input order2_account_sign;
+    signal input order1_account_ay;
+    signal input order2_account_ay;
+    signal input order1_account_ethAddr;
+    signal input order2_account_ethAddr;
+    signal input order1_token_sell_balance;
+    signal input order1_token_buy_balance;
+    signal input order2_token_sell_balance;
+    signal input order2_token_buy_balance;
+    signal input old_account1_balance_path_elements[balanceLevels][1];
+    signal input tmp_account1_balance_path_elements[balanceLevels][1];
+    signal input old_account1_path_elements[accountLevels][1];
+    signal input old_account2_balance_path_elements[balanceLevels][1];
+    signal input tmp_account2_balance_path_elements[balanceLevels][1];
+    signal input old_account2_path_elements[accountLevels][1];
     component transfer = tradeTransfer(balanceLevels, accountLevels);
     transfer.enabled <== enabled;
     transfer.accountID1 <== order1_accountID;
     transfer.accountID2 <== order2_accountID;
     transfer.amount_1to2 <== order2_thisget;
     transfer.amount_2to1 <== order1_thisget;
+    transfer.tokenID_1to2 <== order1_tokensell;
+    transfer.tokenID_2to1 <== order2_tokensell;
+    transfer.nonce1 <== order1_account_nonce;
+    transfer.sign1 <== order1_account_sign;
+    transfer.account1_balance_sell <== order1_token_sell_balance;
+    transfer.account1_balance_buy <== order1_token_buy_balance;
+    transfer.ay1 <== order1_account_ay;
+    transfer.ethAddr1 <== order1_account_ethAddr;
+    transfer.oldOrder1Root <== old_order1_root;
+    transfer.newOrder1Root <== new_order1_root;
+    for (var i = 0; i < balanceLevels; i++) {
+        transfer.old_account1_balance_path_elements[i][0] <== old_account1_balance_path_elements[i][0];
+        transfer.tmp_account1_balance_path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
+    }
+    for (var i = 0; i < accountLevels; i++) {
+        transfer.old_account1_path_elements[i][0] <== old_account1_path_elements[i][0];
+    }
+    transfer.nonce2 <== order2_account_nonce;
+    transfer.sign2 <== order2_account_sign;
+    transfer.account2_balance_sell <== order2_token_sell_balance;
+    transfer.account2_balance_buy <== order2_token_buy_balance;
+    transfer.ay2 <== order2_account_ay;
+    transfer.ethAddr2 <== order2_account_ethAddr;
+    transfer.oldOrder2Root <== old_order2_root;
+    transfer.newOrder2Root <== new_order2_root;
+    transfer.oldAccountRoot <== old_order2_root;
+    transfer.newAccountRoot <== new_order2_root;
+    for (var i = 0; i < balanceLevels; i++) {
+        transfer.old_account2_balance_path_elements[i][0] <== old_account2_balance_path_elements[i][0];
+        transfer.tmp_account2_balance_path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
+    }
+    for (var i = 0; i < accountLevels; i++) {
+        transfer.old_account2_path_elements[i][0] <== old_account2_path_elements[i][0];
+    }
 }
 
 template tradeTransfer(balanceLevels, accountLevels) {
