@@ -92,39 +92,41 @@ function initTestCase() {
     order2_amountsell: order2_amountsell,
     order2_tokenbuy: tokenID_1to2,
     order2_amountbuy: order2_amountbuy,
-    order1_thisget: amount_2to1,
-    order2_thisget: amount_1to2,
+    amount_2to1: amount_2to1,
+    amount_1to2: amount_1to2,
     order1_filledsell: oldOrder1.filled_sell,
     order1_filledbuy: oldOrder1.filled_buy,
     order2_filledsell: oldOrder2.filled_sell,
     order2_filledbuy: oldOrder2.filled_buy,
 
-//
-    accountID1: accountID1,
-    accountID2: accountID2,
-    // amount_1to2: amount_1to2,
-    // amount_2to1: amount_2to1,
-    // tokenID_1to2: tokenID_1to2,
-    // tokenID_2to1: tokenID_2to1,
-    // nonce1: nonce1,
-    // sign1: account1.sign,
-    // account1_balance_sell: account1_balance_sell,
-    // account1_balance_buy: account1_balance_buy,
-    // ay1: Scalar.fromString(account1.ay, 16),
-    // ethAddr1: Scalar.fromString(ethAddr1NoPrefix, 16),
-    // // TODO: old_account1_balance_path_elements: oldAccount1BalanceProof.path_elements,
-    // // TODO: tmp_account1_balance_path_elements: oldAccount1BalanceProof.path_elements,
-    // // TODO: old_account1_path_elements: oldAccount1BalanceProof.path_elements,
+    // signal input order1_path_elements[orderLevels][1];
+    // signal input old_order1_root;
+    // signal input new_order1_root;
+    // signal input order2_path_elements[orderLevels][1];
+    // signal input old_order2_root;
+    // signal input new_order2_root;
 
-    // nonce2: nonce2,
-    // sign2: account2.sign,
-    // account2_balance_sell: account2_balance_sell,
-    // account2_balance_buy: account2_balance_buy,
-    // ay2: Scalar.fromString(account2.ay, 16),
-    // ethAddr2: Scalar.fromString(ethAddr2NoPrefix, 16),
-    // // TODO: old_account2_balance_path_elements
-    // // TODO: tmp_account2_balance_path_elements
-    // // TODO: tmp_account2_path_elements
+    order1_accountID: accountID1,
+    order2_accountID: accountID2,
+    order1_account_nonce: nonce1,
+    order2_account_nonce: nonce2,
+    order1_account_sign: account1.sign,
+    order2_account_sign: account2.sign,
+    order1_account_ay: Scalar.fromString(account1.ay, 16),
+    order2_account_ay: Scalar.fromString(account2.ay, 16),
+    order1_account_ethAddr: Scalar.fromString(ethAddr1NoPrefix, 16),
+    order2_account_ethAddr: Scalar.fromString(ethAddr2NoPrefix, 16),
+    order1_token_sell_balance: account1_balance_sell,
+    order1_token_buy_balance: account1_balance_buy,
+    order2_token_sell_balance: account2_balance_sell,
+    order2_token_buy_balance: account2_balance_buy,
+
+    // signal input old_account1_balance_path_elements[balanceLevels][1];
+    // signal input tmp_account1_balance_path_elements[balanceLevels][1];
+    // signal input old_account1_path_elements[accountLevels][1];
+    // signal input old_account2_balance_path_elements[balanceLevels][1];
+    // signal input tmp_account2_balance_path_elements[balanceLevels][1];
+    // signal input tmp_account2_path_elements[accountLevels][1];
   };
 }
 
