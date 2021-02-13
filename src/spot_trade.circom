@@ -24,6 +24,7 @@ template priceCheck() {
     valid.out === 1;
 }
 
+// TODO: according to side
 // (filled_sell + this_sell <= total_sell) || (filled_buy + this_buy <= total_buy)
 template fillLimitCheck() {
     signal input filled_sell;
@@ -214,15 +215,61 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order2_updater.oldOrderRoot <== old_order2_root;
     order2_updater.newOrderRoot <== new_order2_root;
 
-
     signal input order1_AccountID;
+    signal input nonce1;
+    signal input sign1;
+    signal input ay1;
+    signal input ethAddr1;
+    signal input order1_tokensell_balance;
+    signal input order1_tokenbuy_balance;
+    signal input order1_tokensell_balance_path_elements[balanceLevels][1];
+    signal input order1_tokenbuy_balance_path_elements[balanceLevels][1];
+    signal input order1_account_path_elements[accountLevels][1];
+
     signal input order2_AccountID;
+    signal input nonce2;
+    signal input sign2;
+    signal input ay2;
+    signal input ethAddr2;
+    signal input order2_tokensell_balance;
+    signal input order2_tokenbuy_balance;
+    signal input order2_tokensell_balance_path_elements[balanceLevels][1];
+    signal input order2_tokenbuy_balance_path_elements[balanceLevels][1];
+    signal input order2_account_path_elements[accountLevels][1];
+
     component transfer_1to2 = tradeTransfer(balanceLevels, accountLevels);
     transfer_1to2.fromAccountID = order1_AccountID;
     transfer_1to2.toAccountID = order2_AccountID;
     transfer_1to2.amount = order2_thisget;
     transfer_1to2.tokenID = order1_tokensell;
-
+    transfer_1to2.nonce1 = nonce1;
+    transfer_1to2.sign1 = sign1;
+    transfer_1to2.balance1 = order1_tokensell_balance;
+    transfer_1to2.ay1 = ay1;
+    transfer_1to2.ethAddr1 = ethAddr1;
+    for (var i = 0; i < balanceLevels; i++) {
+        transfer_1to2.sender_balance_path_elements[i][0] <== order1_tokensell_balance_path_elements[i][0];
+    }
+    for (var i = 0; i < accountLevels; i++) {
+        transfer_1to2.sender_account_path_elements[i][0] <== order1_account_path_elements[i][0];
+    }
+    transfer_1to2.nonce2 = nonce2;
+    transfer_1to2.sign2 = sign2;
+    transfer_1to2.balance2 = order2_tokenbuy_balance;
+    transfer_1to2.ay2 = ay2;
+    transfer_1to2.ethAddr2 = ethAddr2;
+    for (var i = 0; i < balanceLevels; i++) {
+        transfer_1to2.receiver_balance_path_elements[i][0] <== order2_tokenbuy_balance_path_elements[i][0];
+    }
+    for (var i = 0; i < accountLevels; i++) {
+        transfer_1to2.receiver_account_path_elements[i][0] <== order2_account_path_elements[i][0];
+    }
+    transfer_1to2.oldOrder1Root;
+    transfer_1to2.oldOrder2Root;
+    transfer_1to2.newOrder1Root;
+    transfer_1to2.newOrder2Root;
+    transfer_1to2.oldAccountRoot;
+    transfer_1to2.newAccountRoot;
 }
 
 template tradeTransfer(balanceLevels, accountLevels) {
