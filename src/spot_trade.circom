@@ -26,7 +26,8 @@ template priceCheck() {
     signal input total_sell;
     signal input total_buy;
 
-    component valid = LessEqThan(394); // 192+192+10=394
+    // TODO: overflow check
+    component valid = LessEqThan(252);
     valid.in[0] <== this_sell * total_buy * 1000;
     valid.in[1] <== this_buy * total_sell * 1001;
 
