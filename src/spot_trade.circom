@@ -151,6 +151,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order1_tokensell === order2_tokenbuy;
     order1_tokenbuy === order2_tokensell;
     
+    // TODO: rename
     signal input order1_thisget;
     signal input order2_thisget;
     // order1_thisget > 0;
