@@ -66,13 +66,14 @@ template HashOrder() {
 
     signal output out;
 
-    component hash = Rescue(6);
+    component hash = Rescue(7);
     hash.inputs[0] <== tokensell;
     hash.inputs[1] <== tokenbuy;
     hash.inputs[2] <== filled_sell;
     hash.inputs[3] <== filled_buy;
     hash.inputs[4] <== total_sell;
     hash.inputs[5] <== total_buy;
+    hash.inputs[6] <== status;
 
     hash.out ==> out;
 }
