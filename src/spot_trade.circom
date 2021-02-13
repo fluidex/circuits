@@ -242,10 +242,9 @@ template tradeTransfer(balanceLevels, accountLevels) {
     signal input account1_balance_buy;
     signal input ay1;
     signal input ethAddr1;
-    // TODO:
-    signal input sender_balance_path_elements[balanceLevels][1];
-    // TODO:
-    signal input sender_account_path_elements[accountLevels][1];
+    signal input old_account1_balance_path_elements[balanceLevels][1];
+    signal input tmp_account1_balance_path_elements[balanceLevels][1];
+    signal input old_account1_path_elements[accountLevels][1];
 
     // order2 account state
     signal input nonce2;
@@ -254,10 +253,9 @@ template tradeTransfer(balanceLevels, accountLevels) {
     signal input account2_balance_buy;
     signal input ay2;
     signal input ethAddr2;
-    // TODO:
-    signal input receiver_balance_path_elements[balanceLevels][1];
-    // TODO:
-    signal input receiver_account_path_elements[accountLevels][1];
+    signal input old_account2_balance_path_elements[balanceLevels][1];
+    signal input tmp_account2_balance_path_elements[balanceLevels][1];
+    signal input tmp_account2_path_elements[accountLevels][1];
 
     // Roots
     signal input oldOrder1Root;
@@ -265,7 +263,6 @@ template tradeTransfer(balanceLevels, accountLevels) {
     signal input newOrder1Root;
     signal input newOrder2Root;
     signal input oldAccountRoot;
-    // TODO: add more?
     signal input newAccountRoot;
 
     signal balance_1to2_path_index[balanceLevels];
