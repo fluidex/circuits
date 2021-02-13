@@ -43,6 +43,43 @@ template HashAccount() {
     hash.out ==> out;
 }
 
+/**
+ * Computes the hash of an order state
+ * Order Hash = Rescue(e0, filled_sell, filled_buy, total_sell, total_buy)
+ * e0: tokensell(32bits) | tokenbuy(32bits) | tokenbuy(2bits)
+ * @input tokensell - {Uint32} - token to sell
+ * @input tokenbuy - {Uint32} - token to buy
+ * @input filled_sell - {Field} - token to sell
+ * @input filled_buy - {Field} - token to sell
+ * @input total_sell - {Field} - token to sell
+ * @input total_buy - {Field} - token to sell
+ * @input status - {Uint2} - order status
+ * @output out - {Field} - resulting rescue hash
+ */
+template HashOrder() {
+    signal input tokensell;
+    signal input tokenbuy;
+    signal input filled_sell;
+    signal input filled_buy;
+    signal input total_sell;
+    signal input total_buy;
+    signal input status; // open, filled, closed
+
+    signal output out;
+
+    signal e0; // build e0 element
+    e0 <== tokensell * (1 << 64) + tokenbuy * (1 << 32) + status;
+
+    component hash = Rescue(5);
+    hash.inputs[0] <== e0;
+    hash.inputs[1] <== filled_sell;
+    hash.inputs[2] <== filled_buy;
+    hash.inputs[3] <== total_sell;
+    hash.inputs[4] <== total_buy;
+
+    hash.out ==> out;
+}
+
 function getGenesisOrderRoot() {
     // TODO: calculate from orderLevels
     return 0

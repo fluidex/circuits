@@ -13,6 +13,7 @@ include "./withdraw.circom";
  * @input encodedTxs[nTxs] - {Array(Field)} - encoded transactions
  * @input balance_path_elements[nTxs][2][balanceLevels][1] - {Array(Array(Array(Array(Field))))} - balance tree path elements for each transaction
  * @input account_path_elements[nTxs][2][balanceLevels][1] - {Array(Array(Array(Array(Field))))} - account tree path elements for each transaction
+ * @input orderRoots[nTxs][2] - {Array(Field)} - order roots for order maker taker account 
  * @input oldAccountRoots[nTxs] - {Array(Field)} - initial account state root for each transaction 
  * @input newAccountRoots[nTxs] - {Array(Field)} - final account state root for each transaction
  */

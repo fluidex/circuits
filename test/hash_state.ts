@@ -2,7 +2,7 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
+import { hashAccountState, hashOrderState, getGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 
 const balanceRoot = hash([1n]);
@@ -41,4 +41,39 @@ class TestHashAccount implements SimpleTest {
   }
 }
 
-export { TestHashAccount };
+const order_state = {
+    tokensell: 1,
+    tokenbuy: 2,
+    filled_sell: 0,
+    filled_buy: 0,
+    total_sell: 100,
+    total_buy: 1000,
+    status: 0,
+};
+
+class TestHashOrder implements SimpleTest {
+  getInput() {
+    return {
+      tokensell: order_state.tokensell,
+      tokenbuy: order_state.tokenbuy,
+      filled_sell: order_state.filled_sell,
+      filled_buy: order_state.filled_buy,
+      total_sell: order_state.total_sell,
+      total_buy: order_state.total_buy,
+      status: order_state.status, 
+    };
+  }
+  getOutput() {
+    return {
+      out: hashOrderState(order_state),
+    };
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'lib', 'hash_state.circom'),
+      main: 'HashOrder()',
+    };
+  }  
+}
+
+export { TestHashAccount, TestHashOrder };
