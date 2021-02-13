@@ -401,33 +401,33 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // - account tree
     ///////
     // account 1
-    component account1_checker = CheckLeafExists(accountLevels);
-    account1_checker.enabled <== enabled;
+    component old_account_checker = CheckLeafExists(accountLevels);
+    old_account_checker.enabled <== enabled;
     for (var i = 0; i < accountLevels; i++) {
-        account1_checker.path_index[i] <== account1_path_index[i];
-        account1_checker.path_elements[i][0] <== old_account1_path_elements[i][0]; // TODO: old & temp?
+        old_account_checker.path_index[i] <== account1_path_index[i];
+        old_account_checker.path_elements[i][0] <== old_account1_path_elements[i][0];
     }
-    account1_checker.leaf <== oldAccount1Hash.out;
-    account1_checker.root <== oldAccountRoot;
+    old_account_checker.leaf <== oldAccount1Hash.out;
+    old_account_checker.root <== oldAccountRoot;
 
-    // component sender_updater = CalculateRootFromMerklePath(accountLevels);
-    // sender_updater.leaf <== newSenderHash.out;
-    // for (var i = 0; i < accountLevels; i++) {
-    //     sender_updater.path_index[i] <== sender_account_path_index[i];
-    //     sender_updater.path_elements[i][0] <== sender_account_path_elements[i][0];
-    // }
-    // signal tmpAccountRoot;
-    // sender_updater.root ==> tmpAccountRoot;
+    component tmp_account_updater = CalculateRootFromMerklePath(accountLevels);
+    tmp_account_updater.leaf <== newAccount1Hash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        tmp_account_updater.path_index[i] <== account1_path_index[i];
+        tmp_account_updater.path_elements[i][0] <== old_account1_path_elements[i][0];
+    }
+    signal tmpAccountRoot;
+    tmp_account_updater.root ==> tmpAccountRoot;
 
-    // // receiver
-    // component receiver_update_checker = CheckLeafUpdate(accountLevels);
-    // receiver_update_checker.enabled <== enabled;
-    // receiver_update_checker.oldLeaf <== oldReceiverHash.out;
-    // receiver_update_checker.newLeaf <== newReceiverHash.out;
-    // for (var i = 0; i < accountLevels; i++) {
-    //     receiver_update_checker.path_index[i] <== receiver_account_path_index[i];
-    //     receiver_update_checker.path_elements[i][0] <== receiver_account_path_elements[i][0];
-    // }
-    // receiver_update_checker.oldRoot <== tmpAccountRoot;
-    // receiver_update_checker.newRoot <== newAccountRoot;
+    // account 2
+    component new_account_checker = CheckLeafUpdate(accountLevels);
+    new_account_checker.enabled <== enabled;
+    new_account_checker.oldLeaf <== oldAccount2Hash.out;
+    new_account_checker.newLeaf <== newAccount2Hash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        new_account_checker.path_index[i] <== account2_path_index[i];
+        new_account_checker.path_elements[i][0] <== tmp_account2_path_elements[i][0];
+    }
+    new_account_checker.oldRoot <== tmpAccountRoot;
+    new_account_checker.newRoot <== newAccountRoot;
 }
