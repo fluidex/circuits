@@ -6,7 +6,7 @@ import { SimpleTest, TestComponent } from './interface';
 import { TestCheckLeafExists, TestCheckLeafExistsDisable,
           TestCheckLeafUpdate, TestCheckLeafUpdateDisable } from './binary_merkle_tree';
 import { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash } from './rescue';
-import { TestHashAccount } from './hash_state';
+import { TestHashAccount, TestHashOrder } from './hash_state';
 import { TestDepositToNew, TestDepositToOld } from './deposit';
 import { TestTransfer } from './transfer';
 import { TestWithdraw } from './withdraw';
@@ -52,6 +52,7 @@ async function main() {
     await testWithInputOutput(new TestCheckLeafUpdate());
     await testWithInputOutput(new TestCheckLeafUpdateDisable());
     await testWithInputOutput(new TestHashAccount());
+    await testWithInputOutput(new TestHashOrder());
     await testWithInputOutput(new TestDepositToNew());
     await testWithInputOutput(new TestDepositToOld());
     await testWithInputOutput(new TestTransfer());
