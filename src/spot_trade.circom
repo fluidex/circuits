@@ -2,19 +2,25 @@ include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
 include "./lib/hash_state.circom";
 
-// TODO: enabled
 template amountCheck() {
+    signal input enabled;
+
     signal input amount;
     component gt0 = GreaterThan(192);
     gt0.in[0] <== amount;
     gt0.in[1] <== 0;
-    gt0.out === 1;
+
+    component check = ForceEqualIfEnabled();
+    check.enabled <== enabled;
+    check.in[0] <== gt0.out;
+    check.in[1] <== 1;
 }
 
-// TODO: enabled
 // (this_sell/this_buy) * 1000 <= (total_sell/total_buy) * 1001
 // (this_sell * total_buy * 1000) <= (this_buy * total_sell * 1001)
 template priceCheck() {
+    signal input enabled;
+
     signal input this_sell;
     signal input this_buy;
     signal input total_sell;
@@ -23,14 +29,19 @@ template priceCheck() {
     component valid = LessEqThan(394); // 192+192+10=394
     valid.in[0] <== this_sell * total_buy * 1000;
     valid.in[1] <== this_buy * total_sell * 1001;
-    valid.out === 1;
+
+    component check = ForceEqualIfEnabled();
+    check.enabled <== enabled;
+    check.in[0] <== valid.out;
+    check.in[1] <== 1;
 }
 
-// TODO: enabled
 // TODO: use sell for filled or use buy for filled?
 // for now we have both. but usually for bz we only have one filled, according to types. 
 // (filled_sell + this_sell <= total_sell) || (filled_buy + this_buy <= total_buy)
 template fillLimitCheck() {
+    signal input enabled;
+
     signal input filled_sell;
     signal input this_sell;
     signal input total_sell;
@@ -48,13 +59,18 @@ template fillLimitCheck() {
     limitCheck = OR();
     limitCheck.a <== sellLimit.out;
     limitCheck.b <== buyLimit.out;
-    limitCheck.out === 1;
+
+    component check = ForceEqualIfEnabled();
+    check.enabled <== enabled;
+    check.in[0] <== limitCheck.out;
+    check.in[1] <== 1;
 }
 
-// TODO: enabled
 // TODO: delete order if fullfilled
 // TODO: refactor to cacal & output root
 template updateOrder(orderLevels) {
+    signal input enabled;
+
     signal input orderID;
     signal input tokensell;
     signal input tokenbuy;
@@ -102,7 +118,7 @@ template updateOrder(orderLevels) {
     signal input oldOrderRoot;
     signal input newOrderRoot;
     signal input order_path_elements[orderLevels][1];
-    order_update_checker.enabled <== 1;
+    order_update_checker.enabled <== enabled;
     order_update_checker.oldLeaf <== oldOrderHash.out;
     order_update_checker.newLeaf <== newOrderHash.out;
     for (var i = 0; i < orderLevels; i++) {
@@ -116,7 +132,7 @@ template updateOrder(orderLevels) {
 // TODO: maker taker (related to fee), according to timestamp: order1 maker, order2 taker
 // TODO: is tradeHistory_storage_leaf necessary?
 template SpotTrade(orderLevels, balanceLevels, accountLevels) {
-    // TODO: signal input enabled;
+    signal input enabled;
 
     signal input order1_id;
     signal input order1_tokensell;
@@ -135,13 +151,16 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     signal input order2_thisget;
     // order1_thisget > 0;
     component order1_thisget_check = amountCheck();
+    order1_thisget_check.enabled <== enabled;
     order1_thisget_check.in <== order1_thisget;
     // order2_thisget > 0;
     component order2_thisget_check = amountcheck();
+    order2_thisget_check.enabled <== enabled;
     order2_thisget_check.in <== order2_thisget;
 
     /// order1 price check
     component order1_pricecheck = priceCheck();
+    order1_pricecheck.enabled <== enabled;
     order1_pricecheck.this_sell <== order2_thisget;
     order1_pricecheck.this_buy <== order1_thisget;
     order1_pricecheck.total_sell <== order1_amountsell;
@@ -149,6 +168,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
 
     /// order2 price check
     component order2_pricecheck = priceCheck();
+    order2_pricecheck.enabled <== enabled;
     order2_pricecheck.this_sell <== order1_thisget;
     order2_pricecheck.this_buy <== order2_thisget;
     order2_pricecheck.total_sell <== order2_amountsell;
@@ -158,6 +178,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     signal input order1_filledsell;
     signal input order1_filledbuy;
     component order1_filledcheck = fillLimitCheck();
+    order1_filledcheck.enabled <== enabled;
     order1_filledcheck.filled_sell <== order1_filledsell;
     order1_filledcheck.this_sell <== order2_thisget;
     order1_filledcheck.total_sell <== order1_amountsell;
@@ -169,6 +190,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     signal input order2_filledsell;
     signal input order2_filledbuy;
     component order2_filledcheck = fillLimitCheck();
+    order2_filledcheck.enabled <== enabled;
     order2_filledcheck.filled_sell <== order2_filledsell;
     order2_filledcheck.this_sell <== order1_thisget;
     order2_filledcheck.total_sell <== order2_amountsell;
@@ -184,6 +206,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     /// update order 1
     signal input order1_path_elements[orderLevels][1];
     component order1_updater = updateOrder(orderLevels);
+    order1_updater.enabled <== enabled;
     order1_updater.orderID <== order1_id;
     order1_updater.tokensell <== order1_tokensell;
     order1_updater.tokenbuy <== order1_tokenbuy;
@@ -204,6 +227,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     /// update order 2
     signal input order2_path_elements[orderLevels][1];
     component order2_updater = updateOrder(orderLevels);
+    order2_updater.enabled <== enabled;
     order2_updater.orderID <== order2_id;
     order2_updater.tokensell <== order2_tokensell;
     order2_updater.tokenbuy <== order2_tokenbuy;
@@ -221,7 +245,14 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order2_updater.oldOrderRoot <== old_order2_root;
     order2_updater.newOrderRoot <== new_order2_root;
 
-    // component transfer = tradeTransfer(balanceLevels, accountLevels);
+    signal input order1_accountID;
+    signal input order2_accountID;
+    component transfer = tradeTransfer(balanceLevels, accountLevels);
+    transfer.enabled <== enabled;
+    transfer.accountID1 <== order1_accountID;
+    transfer.accountID2 <== order2_accountID;
+    transfer.amount_1to2 <== order2_thisget;
+    transfer.amount_2to1 <== order1_thisget;
 }
 
 template tradeTransfer(balanceLevels, accountLevels) {
