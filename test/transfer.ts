@@ -10,6 +10,8 @@ import { TxType, getBTreeProof } from './common';
 const balanceLevels = 5;
 const accountLevels = 5;
 
+const genesisOrderRoot = getGenesisOrderRoot();
+
 function initTestCase() {
     // input-level assignments and pre-processings
     const nonce = 51;
@@ -42,7 +44,7 @@ function initTestCase() {
       balanceRoot: oldSenderBalanceProof.root,
       ay: account1.ay,
       ethAddr: ethAddr1NoPrefix,
-      orderRoot: getGenesisOrderRoot(),
+      orderRoot: genesisOrderRoot,
     };
     const oldSenderHash = hashAccountState(oldSender);
     const newSender = {
@@ -51,7 +53,7 @@ function initTestCase() {
       balanceRoot: newSenderBalanceProof.root,
       ay: account1.ay,
       ethAddr: ethAddr1NoPrefix,
-      orderRoot: getGenesisOrderRoot(),
+      orderRoot: genesisOrderRoot,
     };
     const newSenderHash = hashAccountState(newSender);
 
@@ -69,7 +71,7 @@ function initTestCase() {
       balanceRoot: oldReceiverBalanceProof.root,
       ay: account2.ay,
       ethAddr: ethAddr2NoPrefix,
-      orderRoot: getGenesisOrderRoot(),
+      orderRoot: genesisOrderRoot,
     };
     const oldReceiverHash = hashAccountState(oldReceiver);
     const newReceiver = {
@@ -78,7 +80,7 @@ function initTestCase() {
       balanceRoot: newReceiverBalanceProof.root,
       ay: account2.ay,
       ethAddr: ethAddr2NoPrefix,
-      orderRoot: getGenesisOrderRoot(),
+      orderRoot: genesisOrderRoot,
     };
     const newReceiverHash = hashAccountState(newReceiver);
 
