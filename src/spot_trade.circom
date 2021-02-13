@@ -1,5 +1,6 @@
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
+include "./lib/binary_merkle_tree.circom";
 include "./lib/hash_state.circom";
 
 template amountCheck() {
@@ -57,7 +58,7 @@ template fillLimitCheck() {
     buyLimit.in[0] <== filled_buy + this_buy;
     buyLimit.in[1] <== total_buy;
 
-    limitCheck = OR();
+    component limitCheck = OR();
     limitCheck.a <== sellLimit.out;
     limitCheck.b <== buyLimit.out;
 
@@ -83,6 +84,8 @@ template updateOrder(orderLevels) {
     signal input total_buy;
     signal input old_status;
     signal input new_status;
+
+    signal order_path_index[orderLevels];
 
    // decode order_path_index
     component bOrderID = Num2Bits(orderLevels);
