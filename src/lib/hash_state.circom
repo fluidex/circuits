@@ -54,6 +54,7 @@ template HashAccount() {
  * @input total_buy - {Field} - token to sell
  * @output out - {Field} - resulting rescue hash
  */
+// TODO: compress tokens & status
 template HashOrder() {
     signal input tokensell;
     signal input tokenbuy;
@@ -61,6 +62,7 @@ template HashOrder() {
     signal input filled_buy;
     signal input total_sell;
     signal input total_buy;
+    signal input status; // open, filled, closed
 
     signal output out;
 
