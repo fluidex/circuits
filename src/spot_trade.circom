@@ -2,6 +2,7 @@ include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
 include "./lib/hash_state.circom";
 
+// TODO: enabled
 template amountCheck() {
     signal input amount;
     component gt0 = GreaterThan(192);
@@ -10,6 +11,7 @@ template amountCheck() {
     gt0.out === 1;
 }
 
+// TODO: enabled
 // (this_sell/this_buy) * 1000 <= (total_sell/total_buy) * 1001
 // (this_sell * total_buy * 1000) <= (this_buy * total_sell * 1001)
 template priceCheck() {
@@ -24,6 +26,7 @@ template priceCheck() {
     valid.out === 1;
 }
 
+// TODO: enabled
 // TODO: use sell for filled or use buy for filled?
 // for now we have both. but usually for bz we only have one filled, according to types. 
 // (filled_sell + this_sell <= total_sell) || (filled_buy + this_buy <= total_buy)
@@ -48,7 +51,9 @@ template fillLimitCheck() {
     limitCheck.out === 1;
 }
 
+// TODO: enabled
 // TODO: delete order if fullfilled
+// TODO: refactor to cacal & output root
 template updateOrder(orderLevels) {
     signal input orderID;
     signal input tokensell;
@@ -216,85 +221,35 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order2_updater.oldOrderRoot <== old_order2_root;
     order2_updater.newOrderRoot <== new_order2_root;
 
-    signal input order1_AccountID;
-    signal input nonce1;
-    signal input sign1;
-    signal input ay1;
-    signal input ethAddr1;
-    signal input order1_tokensell_balance;
-    signal input order1_tokenbuy_balance;
-    signal input order1_tokensell_balance_path_elements[balanceLevels][1];
-    signal input order1_tokenbuy_balance_path_elements[balanceLevels][1];
-    signal input order1_account_path_elements[accountLevels][1];
-
-    signal input order2_AccountID;
-    signal input nonce2;
-    signal input sign2;
-    signal input ay2;
-    signal input ethAddr2;
-    signal input order2_tokensell_balance;
-    signal input order2_tokenbuy_balance;
-    signal input order2_tokensell_balance_path_elements[balanceLevels][1];
-    signal input order2_tokenbuy_balance_path_elements[balanceLevels][1];
-    signal input order2_account_path_elements[accountLevels][1];
-
-    component transfer_1to2 = tradeTransfer(balanceLevels, accountLevels);
-    transfer_1to2.fromAccountID = order1_AccountID;
-    transfer_1to2.toAccountID = order2_AccountID;
-    transfer_1to2.amount = order2_thisget;
-    transfer_1to2.tokenID = order1_tokensell;
-    transfer_1to2.nonce1 = nonce1;
-    transfer_1to2.sign1 = sign1;
-    transfer_1to2.balance1 = order1_tokensell_balance;
-    transfer_1to2.ay1 = ay1;
-    transfer_1to2.ethAddr1 = ethAddr1;
-    for (var i = 0; i < balanceLevels; i++) {
-        transfer_1to2.sender_balance_path_elements[i][0] <== order1_tokensell_balance_path_elements[i][0];
-    }
-    for (var i = 0; i < accountLevels; i++) {
-        transfer_1to2.sender_account_path_elements[i][0] <== order1_account_path_elements[i][0];
-    }
-    transfer_1to2.nonce2 = nonce2;
-    transfer_1to2.sign2 = sign2;
-    transfer_1to2.balance2 = order2_tokenbuy_balance;
-    transfer_1to2.ay2 = ay2;
-    transfer_1to2.ethAddr2 = ethAddr2;
-    for (var i = 0; i < balanceLevels; i++) {
-        transfer_1to2.receiver_balance_path_elements[i][0] <== order2_tokenbuy_balance_path_elements[i][0];
-    }
-    for (var i = 0; i < accountLevels; i++) {
-        transfer_1to2.receiver_account_path_elements[i][0] <== order2_account_path_elements[i][0];
-    }
-    transfer_1to2.oldOrder1Root;
-    transfer_1to2.oldOrder2Root;
-    transfer_1to2.newOrder1Root;
-    transfer_1to2.newOrder2Root;
-    transfer_1to2.oldAccountRoot;
-    transfer_1to2.newAccountRoot;
+    // component transfer = tradeTransfer(balanceLevels, accountLevels);
 }
 
 template tradeTransfer(balanceLevels, accountLevels) {
     signal input enabled;
 
     // Tx
-    signal input fromAccountID;
-    signal input toAccountID;
-    signal input amount;
-    signal input tokenID;
+    signal input accountID1;
+    signal input accountID2;
+    signal input amount_1to2;
+    signal input amount_2to1;
+    signal input tokenID_1to2;
+    signal input tokenID_2to1;
 
-    // Sender state
+    // order1 account state
     signal input nonce1;
     signal input sign1;
-    signal input balance1;
+    signal input order1_balance_sell;
+    signal input order1_balance_buy;
     signal input ay1;
     signal input ethAddr1;
     signal input sender_balance_path_elements[balanceLevels][1];
     signal input sender_account_path_elements[accountLevels][1];
 
-    // Receiver state
+    // order2 account state
     signal input nonce2;
     signal input sign2;
-    signal input balance2;
+    signal input order2_balance_sell;
+    signal input order2_balance_buy;
     signal input ay2;
     signal input ethAddr2;
     signal input receiver_balance_path_elements[balanceLevels][1];
@@ -306,30 +261,36 @@ template tradeTransfer(balanceLevels, accountLevels) {
     signal input newOrder1Root;
     signal input newOrder2Root;
     signal input oldAccountRoot;
+    // TODO: add more?
     signal input newAccountRoot;
 
-    // Path index
-    signal balance_path_index[balanceLevels];
-    signal sender_account_path_index[accountLevels];
-    signal receiver_account_path_index[accountLevels];
+    signal balance_1to2_path_index[balanceLevels];
+    signal balance_2to1_path_index[balanceLevels];
+    signal account1_path_index[accountLevels];
+    signal account2_path_index[accountLevels];
 
     // decode balance_path_index
-    component bTokenID = Num2Bits(balanceLevels);
-    bTokenID.in <== tokenID;
+    component bTokenID_1to2 = Num2Bits(balanceLevels);
+    bTokenID_1to2.in <== tokenID_1to2;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_path_index[i] <== bTokenID.out[i];
+        balance_1to2_path_index[i] <== bTokenID_1to2.out[i];
+    }
+    component bTokenID_2to1 = Num2Bits(balanceLevels);
+    bTokenID_2to1.in <== tokenID_2to1;
+    for (var i = 0; i < balanceLevels; i++) {
+        balance_2to1_path_index[i] <== bTokenID_2to1.out[i];
     }
 
     // decode account_path_index
-    component bFrom = Num2Bits(accountLevels);
-    bFrom.in <== fromAccountID;
+    component bAccountID1 = Num2Bits(accountLevels);
+    bAccountID1.in <== accountID1;
     for (var i = 0; i < accountLevels; i++) {
-        sender_account_path_index[i] <== bFrom.out[i];
+        account1_path_index[i] <== bAccountID1.out[i];
     }
-    component bTo = Num2Bits(accountLevels);
-    bTo.in <== toAccountID;
+    component bAccountID2 = Num2Bits(accountLevels);
+    bAccountID2.in <== accountID2;
     for (var i = 0; i < accountLevels; i++) {
-        receiver_account_path_index[i] <== bTo.out[i];
+        account2_path_index[i] <== bAccountID2.out[i];
     }
 
     // TODO: underflow check
