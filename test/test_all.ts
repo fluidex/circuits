@@ -11,6 +11,7 @@ import { TestDepositToNew, TestDepositToOld } from './deposit';
 import { TestTransfer } from './transfer';
 import { TestWithdraw } from './withdraw';
 import { TestBlock } from './block';
+import { TestSpotTrade } from './spot_trade';
 
 async function generateMainTestCircom({ src, main }: TestComponent) {
   let srcCode = `include "${src}";
@@ -57,6 +58,7 @@ async function main() {
     await testWithInputOutput(new TestTransfer());
     await testWithInputOutput(new TestWithdraw());
     await testWithInputOutput(new TestBlock());
+    await testWithInputOutput(new TestSpotTrade());
   } catch (e) {
     console.error(e);
   }
