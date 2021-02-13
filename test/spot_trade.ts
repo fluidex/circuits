@@ -46,20 +46,35 @@ function initTestCase() {
   // TODO:
   // let oldAccount2BalanceProof = getBTreeProof(account2BalanceLeaves, tokenID_1to2);
 
-  const order1 = {
+  const order1_id = 1;
+  const oldOrder1 = {
     status: 0, // open
-    tokenbuy: 0,
-    tokensell: 0,
+    tokenbuy: tokenID_2to1,
+    tokensell: tokenID_1to2,
     filled_sell: 0,
     filled_buy: 0,
-    total_sell: 0,
-    total_buy: 0,
+    total_sell: 1000,
+    total_buy: 10000,
   };
+  const oldOrder1Hash = hashOrderState(oldOrder1);
   let account1Orders = [];
   for (let i = 0; i < 2**orderLevels; i++) account1Orders.push(22n + BigInt(i));
+  account1Orders[order1_id] = oldOrder1Hash;
 
+  const order2_id = 1;
+  const oldOrder2 = {
+    status: 0, // open
+    tokenbuy: tokenID_1to2,
+    tokensell: tokenID_2to1,
+    filled_sell: 10,
+    filled_buy: 1,
+    total_sell: 10000,
+    total_buy:1000,
+  };
+  const oldOrder2Hash = hashOrderState(oldOrder2);
   let account2Orders = [];
   for (let i = 0; i < 2**orderLevels; i++) account2Orders.push(33n + BigInt(i));
+  account2Orders[order2_id] = oldOrder2Hash;
 
 
 
