@@ -152,11 +152,11 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     // order1_thisget > 0;
     component order1_thisget_check = amountCheck();
     order1_thisget_check.enabled <== enabled;
-    order1_thisget_check.in <== order1_thisget;
+    order1_thisget_check.amount <== order1_thisget;
     // order2_thisget > 0;
     component order2_thisget_check = amountcheck();
     order2_thisget_check.enabled <== enabled;
-    order2_thisget_check.in <== order2_thisget;
+    order2_thisget_check.amount <== order2_thisget;
 
     /// order1 price check
     component order1_pricecheck = priceCheck();
@@ -401,7 +401,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     component tmp_account1_balance_checker = CheckLeafExists(balanceLevels);
     tmp_account1_balance_checker.enabled <== enabled;
     tmp_account1_balance_checker.leaf <== account1_balance_buy;
-    for (var i = 0; i < levels; i++) {
+    for (var i = 0; i < balanceLevels; i++) {
         tmp_account1_balance_checker.path_index[i] <== balance_2to1_path_index[i];
         tmp_account1_balance_checker.path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
     }
@@ -430,7 +430,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     component tmp_account2_balance_checker = CheckLeafExists(balanceLevels);
     tmp_account2_balance_checker.enabled <== enabled;
     tmp_account2_balance_checker.leaf <== account2_balance_buy;
-    for (var i = 0; i < levels; i++) {
+    for (var i = 0; i < balanceLevels; i++) {
         tmp_account2_balance_checker.path_index[i] <== balance_1to2_path_index[i];
         tmp_account2_balance_checker.path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
     }
@@ -511,3 +511,5 @@ template tradeTransfer(balanceLevels, accountLevels) {
     new_account_checker.oldRoot <== tmpAccountRoot;
     new_account_checker.newRoot <== newAccountRoot;
 }
+
+component main = SpotTrade(2,2,2);
