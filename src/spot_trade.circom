@@ -57,6 +57,8 @@ template updateOrder(orderLevels) {
     signal input filled_buy;
     signal input this_buy;
     signal input total_buy;
+    signal input old_status;
+    signal input new_status;
 
    // decode order_path_index
     component bOrderID = Num2Bits(orderLevels);
@@ -72,6 +74,7 @@ template updateOrder(orderLevels) {
     oldOrderHash.filled_buy <== filled_buy;
     oldOrderHash.total_sell <== total_sell;
     oldOrderHash.total_buy <== total_buy;
+    oldOrderHash.status <== old_status;
 
     // TODO: underflow check
 
@@ -84,6 +87,7 @@ template updateOrder(orderLevels) {
     newOrderHash.filled_buy <== filled_buy + this_buy;
     newOrderHash.total_sell <== total_sell;
     newOrderHash.total_buy <== total_buy;
+    newOrderHash.status <== new_status;
 
     // - check order tree update
     ////////
@@ -182,6 +186,8 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order1_updater.filled_buy <== order1_filledbuy;
     order1_updater.this_buy <== order1_thisget;
     order1_updater.total_buy <== order1_amountbuy;
+    order1_updater.old_status <== 0; // TODO:
+    order1_updater.new_status <== 0; // TODO:
     for (var i = 0; i < orderLevels; i++) {
         order1_updater.path_elements[i][0] <== order1_path_elements[i][0];
     }
@@ -200,6 +206,8 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order2_updater.filled_buy <== order2_filledbuy;
     order2_updater.this_buy <== order2_thisget;
     order2_updater.total_buy <== order2_amountbuy;
+    order2_updater.old_status <== 0; // TODO:
+    order2_updater.new_status <== 0; // TODO:
     for (var i = 0; i < orderLevels; i++) {
         order2_updater.path_elements[i][0] <== order2_path_elements[i][0];
     }
