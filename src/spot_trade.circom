@@ -150,32 +150,31 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     signal input order2_amountbuy;
     order1_tokensell === order2_tokenbuy;
     order1_tokenbuy === order2_tokensell;
-    
-    // TODO: rename
-    signal input order1_thisget;
-    signal input order2_thisget;
-    // order1_thisget > 0;
+
+    signal input amount_2to1;
+    signal input amount_1to2;
+    // amount_2to1 > 0;
     component order1_thisget_check = amountCheck();
     order1_thisget_check.enabled <== enabled;
-    order1_thisget_check.amount <== order1_thisget;
-    // order2_thisget > 0;
+    order1_thisget_check.amount <== amount_2to1;
+    // amount_1to2 > 0;
     component order2_thisget_check = amountCheck();
     order2_thisget_check.enabled <== enabled;
-    order2_thisget_check.amount <== order2_thisget;
+    order2_thisget_check.amount <== amount_1to2;
 
     /// order1 price check
     component order1_pricecheck = priceCheck();
     order1_pricecheck.enabled <== enabled;
-    order1_pricecheck.this_sell <== order2_thisget;
-    order1_pricecheck.this_buy <== order1_thisget;
+    order1_pricecheck.this_sell <== amount_1to2;
+    order1_pricecheck.this_buy <== amount_2to1;
     order1_pricecheck.total_sell <== order1_amountsell;
     order1_pricecheck.total_buy <== order1_amountbuy;
 
     /// order2 price check
     component order2_pricecheck = priceCheck();
     order2_pricecheck.enabled <== enabled;
-    order2_pricecheck.this_sell <== order1_thisget;
-    order2_pricecheck.this_buy <== order2_thisget;
+    order2_pricecheck.this_sell <== amount_2to1;
+    order2_pricecheck.this_buy <== amount_1to2;
     order2_pricecheck.total_sell <== order2_amountsell;
     order2_pricecheck.total_buy <== order1_amountbuy;
 
@@ -185,10 +184,10 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     component order1_filledcheck = fillLimitCheck();
     order1_filledcheck.enabled <== enabled;
     order1_filledcheck.filled_sell <== order1_filledsell;
-    order1_filledcheck.this_sell <== order2_thisget;
+    order1_filledcheck.this_sell <== amount_1to2;
     order1_filledcheck.total_sell <== order1_amountsell;
     order1_filledcheck.filled_buy <== order1_filledbuy;
-    order1_filledcheck.this_buy <== order1_thisget;
+    order1_filledcheck.this_buy <== amount_2to1;
     order1_filledcheck.total_buy <== order1_amountbuy;
 
     /// order2 fill_limit check
@@ -197,10 +196,10 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     component order2_filledcheck = fillLimitCheck();
     order2_filledcheck.enabled <== enabled;
     order2_filledcheck.filled_sell <== order2_filledsell;
-    order2_filledcheck.this_sell <== order1_thisget;
+    order2_filledcheck.this_sell <== amount_2to1;
     order2_filledcheck.total_sell <== order2_amountsell;
     order2_filledcheck.filled_buy <== order2_filledbuy;
-    order2_filledcheck.this_buy <== order2_thisget;
+    order2_filledcheck.this_buy <== amount_1to2;
     order2_filledcheck.total_buy <== order2_amountbuy;
 
 
@@ -218,10 +217,10 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order1_updater.tokensell <== order1_tokensell;
     order1_updater.tokenbuy <== order1_tokenbuy;
     order1_updater.filled_sell <== order1_filledsell;
-    order1_updater.this_sell <== order2_thisget;
+    order1_updater.this_sell <== amount_1to2;
     order1_updater.total_sell <== order1_amountsell;
     order1_updater.filled_buy <== order1_filledbuy;
-    order1_updater.this_buy <== order1_thisget;
+    order1_updater.this_buy <== amount_2to1;
     order1_updater.total_buy <== order1_amountbuy;
     order1_updater.old_status <== 0; // TODO:
     order1_updater.new_status <== 0; // TODO:
@@ -241,10 +240,10 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order2_updater.tokensell <== order2_tokensell;
     order2_updater.tokenbuy <== order2_tokenbuy;
     order2_updater.filled_sell <== order2_filledsell;
-    order2_updater.this_sell <== order1_thisget;
+    order2_updater.this_sell <== amount_2to1;
     order2_updater.total_sell <== order2_amountsell;
     order2_updater.filled_buy <== order2_filledbuy;
-    order2_updater.this_buy <== order2_thisget;
+    order2_updater.this_buy <== amount_1to2;
     order2_updater.total_buy <== order2_amountbuy;
     order2_updater.old_status <== 0; // TODO:
     order2_updater.new_status <== 0; // TODO:
@@ -278,8 +277,8 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     transfer.enabled <== enabled;
     transfer.accountID1 <== order1_accountID;
     transfer.accountID2 <== order2_accountID;
-    transfer.amount_1to2 <== order2_thisget;
-    transfer.amount_2to1 <== order1_thisget;
+    transfer.amount_1to2 <== amount_1to2;
+    transfer.amount_2to1 <== amount_2to1;
     transfer.tokenID_1to2 <== order1_tokensell;
     transfer.tokenID_2to1 <== order2_tokensell;
     transfer.nonce1 <== order1_account_nonce;
