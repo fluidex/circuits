@@ -12,7 +12,11 @@ function accountState2Array(st) {
   data = Scalar.add(data, st.nonce);
   data = Scalar.add(data, Scalar.shl(st.sign, 40));
 
-  return [data, Scalar.e(st.balanceRoot), Scalar.fromString(st.ay, 16), Scalar.fromString(st.ethAddr, 16)];
+  return [data,
+  	Scalar.e(st.balanceRoot),
+  	Scalar.fromString(st.ay, 16),
+  	Scalar.fromString(st.ethAddr, 16),
+  	Scalar.e(st.orderRoot)];
 }
 
 /**
@@ -24,4 +28,9 @@ function hashAccountState(st) {
   return hash(accountState2Array(st));
 }
 
-export { hashAccountState };
+// TODO: calculate from orderLevels
+function getGenesisOrderRoot() {
+	return 0n;
+}
+
+export { hashAccountState, getGenesisOrderRoot };

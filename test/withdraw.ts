@@ -2,13 +2,15 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState } from '../helper.ts/state-utils';
+import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import { TxType, getBTreeProof } from './common';
 
 // circuit-level definitions
 const balanceLevels = 2;
 const accountLevels = 2;
+
+const genesisOrderRoot = getGenesisOrderRoot();
 
 function initTestCase() {
   // input-level assignments and pre-processings
@@ -35,6 +37,7 @@ function initTestCase() {
     balanceRoot: oldBalanceProof.root,
     ay: account.ay,
     ethAddr: ethAddrNoPrefix,
+    orderRoot: genesisOrderRoot,
   };
   const oldAccountHash = hashAccountState(oldAccount);
   const newAccount = {
@@ -43,6 +46,7 @@ function initTestCase() {
     balanceRoot: newBalanceProof.root,
     ay: account.ay,
     ethAddr: ethAddrNoPrefix,
+    orderRoot: genesisOrderRoot,
   };
   const newAccountHash = hashAccountState(newAccount);
 
@@ -74,6 +78,7 @@ function initTestCase() {
     balance: balance,
     ay: Scalar.fromString(account.ay, 16),
     ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
+    orderRoot: oldAccount.orderRoot,
     balance_path_elements: oldBalanceProof.path_elements,
     account_path_elements: oldAccountProof.path_elements,
     oldBalanceRoot: oldBalanceProof.root,
@@ -100,6 +105,7 @@ class TestWithdraw implements SimpleTest {
       balance: test_case.balance,
       ay: test_case.ay,
       ethAddr: test_case.ethAddr,
+      orderRoot: test_case.orderRoot,
       balance_path_elements: test_case.balance_path_elements,
       account_path_elements: test_case.account_path_elements,
       oldAccountRoot: test_case.oldAccountRoot,

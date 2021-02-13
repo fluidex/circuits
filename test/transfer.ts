@@ -2,13 +2,15 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState } from '../helper.ts/state-utils';
+import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import { TxType, getBTreeProof } from './common';
 
 // circuit-level definitions
 const balanceLevels = 5;
 const accountLevels = 5;
+
+const genesisOrderRoot = getGenesisOrderRoot();
 
 function initTestCase() {
     // input-level assignments and pre-processings
@@ -42,6 +44,7 @@ function initTestCase() {
       balanceRoot: oldSenderBalanceProof.root,
       ay: account1.ay,
       ethAddr: ethAddr1NoPrefix,
+      orderRoot: genesisOrderRoot,
     };
     const oldSenderHash = hashAccountState(oldSender);
     const newSender = {
@@ -50,6 +53,7 @@ function initTestCase() {
       balanceRoot: newSenderBalanceProof.root,
       ay: account1.ay,
       ethAddr: ethAddr1NoPrefix,
+      orderRoot: genesisOrderRoot,
     };
     const newSenderHash = hashAccountState(newSender);
 
@@ -67,6 +71,7 @@ function initTestCase() {
       balanceRoot: oldReceiverBalanceProof.root,
       ay: account2.ay,
       ethAddr: ethAddr2NoPrefix,
+      orderRoot: genesisOrderRoot,
     };
     const oldReceiverHash = hashAccountState(oldReceiver);
     const newReceiver = {
@@ -75,6 +80,7 @@ function initTestCase() {
       balanceRoot: newReceiverBalanceProof.root,
       ay: account2.ay,
       ethAddr: ethAddr2NoPrefix,
+      orderRoot: genesisOrderRoot,
     };
     const newReceiverHash = hashAccountState(newReceiver);
 
@@ -112,6 +118,7 @@ function initTestCase() {
       balance1: balance1,
       ay1: Scalar.fromString(account1.ay, 16),
       ethAddr1: Scalar.fromString(ethAddr1NoPrefix, 16),
+      orderRoot1: oldSender.orderRoot,
       sender_balance_path_elements: oldSenderBalanceProof.path_elements,
       sender_account_path_elements: oldAccountProof.path_elements,
       nonce2: nonce2,
@@ -119,6 +126,7 @@ function initTestCase() {
       balance2: balance2,
       ay2: Scalar.fromString(account2.ay, 16),
       ethAddr2: Scalar.fromString(ethAddr2NoPrefix, 16),
+      orderRoot2: oldReceiver.orderRoot,
       receiver_balance_path_elements: oldReceiverBalanceProof.path_elements,
       receiver_account_path_elements: newAccountProof.path_elements,
       oldSenderBalanceRoot: oldSenderBalanceProof.root,
@@ -150,6 +158,7 @@ class TestTransfer implements SimpleTest {
       balance1: test_case.balance1,
       ay1: test_case.ay1,
       ethAddr1: test_case.ethAddr1,
+      orderRoot1: test_case.orderRoot1,
       sender_balance_path_elements: test_case.sender_balance_path_elements,
       sender_account_path_elements: test_case.sender_account_path_elements,
       nonce2: test_case.nonce2,
@@ -157,6 +166,7 @@ class TestTransfer implements SimpleTest {
       balance2: test_case.balance2,
       ay2: test_case.ay2,
       ethAddr2: test_case.ethAddr2,
+      orderRoot2: test_case.orderRoot2,
       receiver_balance_path_elements: test_case.receiver_balance_path_elements,
       receiver_account_path_elements: test_case.receiver_account_path_elements,
       oldAccountRoot: test_case.oldAccountRoot,
