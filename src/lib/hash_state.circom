@@ -68,7 +68,7 @@ template HashOrder() {
     signal output out;
 
     signal e0; // build e0 element
-    e0 <== status + tokenbuy * (1 << 32) + tokensell * (1 << 64);
+    e0 <== tokensell * (1 << 64) + tokenbuy * (1 << 32) + status;
 
     component hash = Rescue(5);
     hash.inputs[0] <== e0;
