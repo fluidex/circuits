@@ -46,6 +46,22 @@ function initTestCase() {
   // TODO:
   // let oldAccount2BalanceProof = getBTreeProof(account2BalanceLeaves, tokenID_1to2);
 
+  const order1 = {
+    status: 0, // open
+    tokenbuy: 0,
+    tokensell: 0,
+    filled_sell: 0,
+    filled_buy: 0,
+    total_sell: 0,
+    total_buy: 0,
+  };
+  let account1Orders = [];
+  for (let i = 0; i < 2**orderLevels; i++) account1Orders.push(22n + BigInt(i));
+
+  let account2Orders = [];
+  for (let i = 0; i < 2**orderLevels; i++) account2Orders.push(33n + BigInt(i));
+
+
 
   return {
     enabled: 1,

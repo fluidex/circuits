@@ -33,4 +33,32 @@ function getGenesisOrderRoot() {
 	return 0n;
 }
 
-export { hashAccountState, getGenesisOrderRoot };
+/**
+ * Encode an order state object into an array
+ * @param {Object} st - Merkle tree order state object
+ * @returns {Array} Resulting array
+ */
+function orderState2Array(st) {
+  let data = Scalar.e(0);
+
+  data = Scalar.add(data, st.status);
+  data = Scalar.add(data, Scalar.shl(st.tokenbuy, 32));
+  data = Scalar.add(data, Scalar.shl(st.tokensell, 64));
+
+  return [data,
+    Scalar.e(st.filled_sell),
+    Scalar.e(st.filled_buy),
+    Scalar.e(st.total_sell),
+    Scalar.e(st.total_buy)];
+}
+
+/**
+ * Return the hash of an order state object
+ * @param {Object} st - Merkle tree ofder state object
+ * @returns {Scalar} Resulting hash
+ */
+function hashOrderState(st) {
+  return hash(orderState2Array(st));
+}
+
+export { hashAccountState, hashOrderState, getGenesisOrderRoot };
