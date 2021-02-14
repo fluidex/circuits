@@ -33,8 +33,11 @@ function initTestCase() {
   for (let i = 0; i < 2**balanceLevels; i++) account1BalanceLeaves.push(11n + BigInt(i));
   account1BalanceLeaves[tokenID_1to2] = account1_balance_sell;
   account1BalanceLeaves[tokenID_2to1] = account1_balance_buy;
-  // TODO:
-  // let oldAccount1BalanceProof = getBTreeProof(account1BalanceLeaves, tokenID_1to2);
+  let oldAccount1BalanceProof = getBTreeProof(account1BalanceLeaves, tokenID_1to2);
+  // account1BalanceLeaves[tokenID_1to2] -= amount_1to2;
+  // let tmpAccount1BalanceProof = getBTreeProof(account1BalanceLeaves, tokenID_2to1);
+  // account1BalanceLeaves[tokenID_2to1] += amount_2to1;
+  // let newAccount1BalanceProof = getBTreeProof(account1BalanceLeaves, tokenID_2to1);
 
   const nonce2 = 22;
   const account2_balance_sell = 1990n;
@@ -43,8 +46,7 @@ function initTestCase() {
   for (let i = 0; i < 2**balanceLevels; i++) account2BalanceLeaves.push(11n + BigInt(i));
   account2BalanceLeaves[tokenID_1to2] = account2_balance_sell;
   account2BalanceLeaves[tokenID_2to1] = account2_balance_buy;
-  // TODO:
-  // let oldAccount2BalanceProof = getBTreeProof(account2BalanceLeaves, tokenID_1to2);
+  let oldAccount2BalanceProof = getBTreeProof(account2BalanceLeaves, tokenID_1to2);
 
   const order1_id = 1;
   const order1_amountsell = 1000;
@@ -133,10 +135,10 @@ function initTestCase() {
     order2_token_sell_balance: account2_balance_sell,
     order2_token_buy_balance: account2_balance_buy,
 
-    // signal input old_account1_balance_path_elements[balanceLevels][1];
+    old_account1_balance_path_elements: oldAccount1BalanceProof.path_elements,
     // signal input tmp_account1_balance_path_elements[balanceLevels][1];
     // signal input old_account1_path_elements[accountLevels][1];
-    // signal input old_account2_balance_path_elements[balanceLevels][1];
+    old_account2_balance_path_elements: oldAccount2BalanceProof.path_elements,
     // signal input tmp_account2_balance_path_elements[balanceLevels][1];
     // signal input tmp_account2_path_elements[accountLevels][1];
   };
