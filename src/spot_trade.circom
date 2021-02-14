@@ -207,51 +207,51 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     // TODO: tx fee & trading fee
 
 
-    // /// update order 1
+    /// update order 1
     signal input order1_path_elements[orderLevels][1];
     signal input old_order1_root;
     signal input new_order1_root;
-    // component order1_updater = updateOrder(orderLevels);
-    // order1_updater.enabled <== enabled;
-    // order1_updater.orderID <== order1_id;
-    // order1_updater.tokensell <== order1_tokensell;
-    // order1_updater.tokenbuy <== order1_tokenbuy;
-    // order1_updater.filled_sell <== order1_filledsell;
-    // order1_updater.this_sell <== amount_1to2;
-    // order1_updater.total_sell <== order1_amountsell;
-    // order1_updater.filled_buy <== order1_filledbuy;
-    // order1_updater.this_buy <== amount_2to1;
-    // order1_updater.total_buy <== order1_amountbuy;
-    // order1_updater.old_status <== 0; // TODO:
-    // order1_updater.new_status <== 0; // TODO:
-    // for (var i = 0; i < orderLevels; i++) {
-    //     order1_updater.order_path_elements[i][0] <== order1_path_elements[i][0];
-    // }
-    // order1_updater.oldOrderRoot <== old_order1_root;
-    // order1_updater.newOrderRoot <== new_order1_root;
+    component order1_updater = updateOrder(orderLevels);
+    order1_updater.enabled <== enabled;
+    order1_updater.orderID <== order1_id;
+    order1_updater.tokensell <== order1_tokensell;
+    order1_updater.tokenbuy <== order1_tokenbuy;
+    order1_updater.filled_sell <== order1_filledsell;
+    order1_updater.this_sell <== amount_1to2;
+    order1_updater.total_sell <== order1_amountsell;
+    order1_updater.filled_buy <== order1_filledbuy;
+    order1_updater.this_buy <== amount_2to1;
+    order1_updater.total_buy <== order1_amountbuy;
+    order1_updater.old_status <== 0; // TODO:
+    order1_updater.new_status <== 0; // TODO:
+    for (var i = 0; i < orderLevels; i++) {
+        order1_updater.order_path_elements[i][0] <== order1_path_elements[i][0];
+    }
+    order1_updater.oldOrderRoot <== old_order1_root;
+    order1_updater.newOrderRoot <== new_order1_root;
 
-    // /// update order 2
+    /// update order 2
     signal input order2_path_elements[orderLevels][1];
     signal input old_order2_root;
     signal input new_order2_root;
-    // component order2_updater = updateOrder(orderLevels);
-    // order2_updater.enabled <== enabled;
-    // order2_updater.orderID <== order2_id;
-    // order2_updater.tokensell <== order2_tokensell;
-    // order2_updater.tokenbuy <== order2_tokenbuy;
-    // order2_updater.filled_sell <== order2_filledsell;
-    // order2_updater.this_sell <== amount_2to1;
-    // order2_updater.total_sell <== order2_amountsell;
-    // order2_updater.filled_buy <== order2_filledbuy;
-    // order2_updater.this_buy <== amount_1to2;
-    // order2_updater.total_buy <== order2_amountbuy;
-    // order2_updater.old_status <== 0; // TODO:
-    // order2_updater.new_status <== 0; // TODO:
-    // for (var i = 0; i < orderLevels; i++) {
-    //     order2_updater.order_path_elements[i][0] <== order2_path_elements[i][0];
-    // }
-    // order2_updater.oldOrderRoot <== old_order2_root;
-    // order2_updater.newOrderRoot <== new_order2_root;
+    component order2_updater = updateOrder(orderLevels);
+    order2_updater.enabled <== enabled;
+    order2_updater.orderID <== order2_id;
+    order2_updater.tokensell <== order2_tokensell;
+    order2_updater.tokenbuy <== order2_tokenbuy;
+    order2_updater.filled_sell <== order2_filledsell;
+    order2_updater.this_sell <== amount_2to1;
+    order2_updater.total_sell <== order2_amountsell;
+    order2_updater.filled_buy <== order2_filledbuy;
+    order2_updater.this_buy <== amount_1to2;
+    order2_updater.total_buy <== order2_amountbuy;
+    order2_updater.old_status <== 0; // TODO:
+    order2_updater.new_status <== 0; // TODO:
+    for (var i = 0; i < orderLevels; i++) {
+        order2_updater.order_path_elements[i][0] <== order2_path_elements[i][0];
+    }
+    order2_updater.oldOrderRoot <== old_order2_root;
+    order2_updater.newOrderRoot <== new_order2_root;
 
     signal input order1_accountID;
     signal input order2_accountID;
