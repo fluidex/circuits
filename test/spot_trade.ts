@@ -62,6 +62,13 @@ function initTestCase() {
   let account1Orders = [];
   for (let i = 0; i < 2**orderLevels; i++) account1Orders.push(22n + BigInt(i));
   account1Orders[order1_id] = oldOrder1Hash;
+  let oldOrder1Proof = getBTreeProof(account1Orders, order1_id);
+  let newOrder1 = oldOrder1;
+  newOrder1.filled_sell += amount_1to2;
+  newOrder1.filled_buy += amount_2to1;
+  const newOrder1Hash = hashOrderState(newOrder1);
+  account1Orders[order1_id] = newOrder1Hash;
+  let newOrder1Proof = getBTreeProof(account1Orders, order1_id);
 
   const order2_id = 1;
   const order2_amountsell = 10000;
@@ -79,6 +86,13 @@ function initTestCase() {
   let account2Orders = [];
   for (let i = 0; i < 2**orderLevels; i++) account2Orders.push(33n + BigInt(i));
   account2Orders[order2_id] = oldOrder2Hash;
+  let oldOrder2Proof = getBTreeProof(account2Orders, order2_id);
+  let newOrder2 = oldOrder2;
+  newOrder2.filled_sell += amount_2to1;
+  newOrder2.filled_buy += amount_1to2;
+  const newOrder2Hash = hashOrderState(newOrder2);
+  account2Orders[order2_id] = newOrder2Hash;
+  let newOrder2Proof = getBTreeProof(account2Orders, order2_id);
 
   return {
     enabled: 1,
@@ -98,14 +112,12 @@ function initTestCase() {
     order1_filledbuy: oldOrder1.filled_buy,
     order2_filledsell: oldOrder2.filled_sell,
     order2_filledbuy: oldOrder2.filled_buy,
-
     // signal input order1_path_elements[orderLevels][1];
-    // signal input old_order1_root;
-    // signal input new_order1_root;
+    old_order1_root: oldOrder1Proof.root,
+    new_order1_root: newOrder1Proof.root,
     // signal input order2_path_elements[orderLevels][1];
-    // signal input old_order2_root;
-    // signal input new_order2_root;
-
+    old_order2_root: oldOrder2Proof.root,
+    new_order2_root: newOrder2Proof.root,
     order1_accountID: accountID1,
     order2_accountID: accountID2,
     order1_account_nonce: nonce1,
