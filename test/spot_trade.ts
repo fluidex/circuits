@@ -2,7 +2,7 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
+import { hashAccountState, hashOrderState, getGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import { TxType, getBTreeProof } from './common';
 
