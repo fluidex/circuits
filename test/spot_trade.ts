@@ -53,8 +53,8 @@ function initTestCase() {
     status: 0, // open
     tokenbuy: tokenID_2to1,
     tokensell: tokenID_1to2,
-    filled_sell: 0,
-    filled_buy: 0,
+    filled_sell: 0n,
+    filled_buy: 0n,
     total_sell: order1_amountsell,
     total_buy: order1_amountbuy,
   };
@@ -71,8 +71,8 @@ function initTestCase() {
     status: 0, // open
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
-    filled_sell: 10,
-    filled_buy: 1,
+    filled_sell: 10n,
+    filled_buy: 1n,
     total_sell: order2_amountsell,
     total_buy:order2_amountbuy,
   };
