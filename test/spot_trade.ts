@@ -143,13 +143,23 @@ function initTestCase() {
   account2Orders[order2_id] = newOrder2Hash;
   let newOrder2Proof = getBTreeProof(account2Orders, order2_id);
 
-  let newAccount1 = oldAccount1;
-  newAccount1.balanceRoot = newAccount1BalanceProof.root;
-  newAccount1.orderRoot = newOrder1Proof.root;
+  let newAccount1 = {
+    nonce: oldAccount1.nonce,
+    sign: oldAccount1.sign,
+    balanceRoot: newAccount1BalanceProof.root,
+    ay: oldAccount1.ay,
+    ethAddr: oldAccount1.ethAddr,
+    orderRoot: newOrder1Proof.root,
+  };
   const newAccount1Hash = hashAccountState(newAccount1);
-  let newAccount2 = oldAccount2;
-  newAccount2.balanceRoot = newAccount2BalanceProof.root;
-  newAccount2.orderRoot = newOrder2Proof.root;
+  let newAccount2 = {
+    nonce: oldAccount2.nonce,
+    sign: oldAccount2.sign,
+    balanceRoot: newAccount2BalanceProof.root,
+    ay: oldAccount2.ay,
+    ethAddr: oldAccount2.ethAddr,
+    orderRoot: newOrder2Proof.root,
+  };
   const newAccount2Hash = hashAccountState(newAccount2);
   accountLeaves[accountID1] = newAccount1Hash;
   let tmpAccount2Proof = getBTreeProof(accountLeaves, accountID2);
