@@ -112,10 +112,10 @@ function initTestCase() {
     order1_filledbuy: oldOrder1.filled_buy,
     order2_filledsell: oldOrder2.filled_sell,
     order2_filledbuy: oldOrder2.filled_buy,
-    // signal input order1_path_elements[orderLevels][1];
+    order1_path_elements: oldOrder1Proof.path_elements,
     old_order1_root: oldOrder1Proof.root,
     new_order1_root: newOrder1Proof.root,
-    // signal input order2_path_elements[orderLevels][1];
+    order2_path_elements: oldOrder2Proof.path_elements,
     old_order2_root: oldOrder2Proof.root,
     new_order2_root: newOrder2Proof.root,
     order1_accountID: accountID1,
