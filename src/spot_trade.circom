@@ -69,10 +69,7 @@ template fillLimitCheck() {
 }
 
 // TODO: delete order if fullfilled
-// TODO: refactor to cacal & output root
-template updateOrder(orderLevels) {
-    signal input enabled;
-
+template orderUpdater(orderLevels) {
     signal input orderID;
     signal input tokensell;
     signal input tokenbuy;
@@ -84,6 +81,11 @@ template updateOrder(orderLevels) {
     signal input total_buy;
     signal input old_status;
     signal input new_status;
+
+    signal input order_path_elements[orderLevels][1];
+
+    signal output oldOrderRoot;
+    signal output newOrderRoot;
 
     signal order_path_index[orderLevels];
 
@@ -116,21 +118,20 @@ template updateOrder(orderLevels) {
     newOrderHash.total_buy <== total_buy;
     newOrderHash.status <== new_status;
 
-    // - check order tree update
+    // - order tree
     ////////
-    component order_update_checker = CheckLeafUpdate(orderLevels);
-    signal input oldOrderRoot;
-    signal input newOrderRoot;
-    signal input order_path_elements[orderLevels][1];
-    order_update_checker.enabled <== enabled;
-    order_update_checker.oldLeaf <== oldOrderHash.out;
-    order_update_checker.newLeaf <== newOrderHash.out;
+    component old_order_tree = CalculateRootFromMerklePath(orderLevels);
+    component new_order_tree = CalculateRootFromMerklePath(orderLevels);
+    old_order_tree.leaf <== oldOrderHash.out;
+    new_order_tree.leaf <== newOrderHash.out;
     for (var i = 0; i < orderLevels; i++) {
-        order_update_checker.path_index[i] <== order_path_index[i];
-        order_update_checker.path_elements[i][0] <== order_path_elements[i][0];
+        old_order_tree.path_index[i] <== order_path_index[i];
+        old_order_tree.path_elements[i][0] <== order_path_elements[i][0];
+        new_order_tree.path_index[i] <== order_path_index[i];
+        new_order_tree.path_elements[i][0] <== order_path_elements[i][0];
     }
-    order_update_checker.oldRoot <== oldOrderRoot;
-    order_update_checker.newRoot <== newOrderRoot;
+    old_order_tree.root ==> oldOrderRoot;
+    new_order_tree.root ==> newOrderRoot;
 }
 
 // TODO: maker taker (related to fee), according to timestamp: order1 maker, order2 taker
@@ -209,10 +210,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
 
     /// update order 1
     signal input order1_path_elements[orderLevels][1];
-    signal input old_order1_root;
-    signal input new_order1_root;
-    component order1_updater = updateOrder(orderLevels);
-    order1_updater.enabled <== enabled;
+    component order1_updater = orderUpdater(orderLevels);
     order1_updater.orderID <== order1_id;
     order1_updater.tokensell <== order1_tokensell;
     order1_updater.tokenbuy <== order1_tokenbuy;
@@ -227,15 +225,10 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     for (var i = 0; i < orderLevels; i++) {
         order1_updater.order_path_elements[i][0] <== order1_path_elements[i][0];
     }
-    order1_updater.oldOrderRoot <== old_order1_root;
-    order1_updater.newOrderRoot <== new_order1_root;
 
     /// update order 2
     signal input order2_path_elements[orderLevels][1];
-    signal input old_order2_root;
-    signal input new_order2_root;
-    component order2_updater = updateOrder(orderLevels);
-    order2_updater.enabled <== enabled;
+    component order2_updater = orderUpdater(orderLevels);
     order2_updater.orderID <== order2_id;
     order2_updater.tokensell <== order2_tokensell;
     order2_updater.tokenbuy <== order2_tokenbuy;
@@ -250,8 +243,6 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     for (var i = 0; i < orderLevels; i++) {
         order2_updater.order_path_elements[i][0] <== order2_path_elements[i][0];
     }
-    order2_updater.oldOrderRoot <== old_order2_root;
-    order2_updater.newOrderRoot <== new_order2_root;
 
     signal input order1_accountID;
     signal input order2_accountID;
@@ -289,8 +280,8 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     transfer.account1_balance_buy <== order1_token_buy_balance;
     transfer.ay1 <== order1_account_ay;
     transfer.ethAddr1 <== order1_account_ethAddr;
-    transfer.oldOrder1Root <== old_order1_root;
-    transfer.newOrder1Root <== new_order1_root;
+    transfer.oldOrder1Root <== order1_updater.oldOrderRoot;
+    transfer.newOrder1Root <== order1_updater.newOrderRoot;
     for (var i = 0; i < balanceLevels; i++) {
         transfer.old_account1_balance_path_elements[i][0] <== old_account1_balance_path_elements[i][0];
         transfer.tmp_account1_balance_path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
@@ -304,8 +295,8 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     transfer.account2_balance_buy <== order2_token_buy_balance;
     transfer.ay2 <== order2_account_ay;
     transfer.ethAddr2 <== order2_account_ethAddr;
-    transfer.oldOrder2Root <== old_order2_root;
-    transfer.newOrder2Root <== new_order2_root;
+    transfer.oldOrder2Root <== order2_updater.oldOrderRoot;
+    transfer.newOrder2Root <== order2_updater.newOrderRoot;
     transfer.oldAccountRoot <== old_account_root;
     transfer.newAccountRoot <== new_account_root;
     for (var i = 0; i < balanceLevels; i++) {
