@@ -267,6 +267,8 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     signal input order1_token_buy_balance;
     signal input order2_token_sell_balance;
     signal input order2_token_buy_balance;
+    signal input old_account_root;
+    signal input new_account_root;
     signal input old_account1_balance_path_elements[balanceLevels][1];
     signal input tmp_account1_balance_path_elements[balanceLevels][1];
     signal input old_account1_path_elements[accountLevels][1];
@@ -304,8 +306,8 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     transfer.ethAddr2 <== order2_account_ethAddr;
     transfer.oldOrder2Root <== old_order2_root;
     transfer.newOrder2Root <== new_order2_root;
-    transfer.oldAccountRoot <== old_order2_root;
-    transfer.newAccountRoot <== new_order2_root;
+    transfer.oldAccountRoot <== old_account_root;
+    transfer.newAccountRoot <== new_account_root;
     for (var i = 0; i < balanceLevels; i++) {
         transfer.old_account2_balance_path_elements[i][0] <== old_account2_balance_path_elements[i][0];
         transfer.tmp_account2_balance_path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
