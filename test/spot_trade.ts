@@ -44,7 +44,7 @@ function initTestCase() {
   for (let i = 0; i < 2**balanceLevels; i++) account2BalanceLeaves.push(11n + BigInt(i));
   account2BalanceLeaves[tokenID_2to1] = account2_balance_sell;
   account2BalanceLeaves[tokenID_1to2] = account2_balance_buy;
-  let oldAccount2BalanceProof = getBTreeProof(account2BalanceLeaves, tokenID_1to2);
+  let oldAccount2BalanceProof = getBTreeProof(account2BalanceLeaves, tokenID_2to1);
 
   const order1_id = 1;
   const order1_amountsell = 1000;
