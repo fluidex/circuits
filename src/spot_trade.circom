@@ -463,14 +463,14 @@ template tradeTransfer(balanceLevels, accountLevels) {
     oldAccount1Hash.ay <== ay1;
     oldAccount1Hash.ethAddr <== ethAddr1;
     oldAccount1Hash.orderRoot <== oldOrder1Root;
-    // // new account 1 state hash
-    // component newAccount1Hash = HashAccount();
-    // newAccount1Hash.nonce <== nonce1;
-    // newAccount1Hash.sign <== sign1;
-    // newAccount1Hash.balanceRoot <== new_account1_balance_tree.root;
-    // newAccount1Hash.ay <== ay1;
-    // newAccount1Hash.ethAddr <== ethAddr1;
-    // newAccount1Hash.orderRoot <== newOrder1Root;
+    // new account 1 state hash
+    component newAccount1Hash = HashAccount();
+    newAccount1Hash.nonce <== nonce1;
+    newAccount1Hash.sign <== sign1;
+    newAccount1Hash.balanceRoot <== new_account1_balance_tree.root;
+    newAccount1Hash.ay <== ay1;
+    newAccount1Hash.ethAddr <== ethAddr1;
+    newAccount1Hash.orderRoot <== newOrder1Root;
     // // old account 2 state hash
     // component oldAccount2Hash = HashAccount();
     // oldAccount2Hash.nonce <== nonce2;
