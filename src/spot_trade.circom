@@ -181,26 +181,26 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     // /// order1 fill_limit check
     signal input order1_filledsell;
     signal input order1_filledbuy;
-    // component order1_filledcheck = fillLimitCheck();
-    // order1_filledcheck.enabled <== enabled;
-    // order1_filledcheck.filled_sell <== order1_filledsell;
-    // order1_filledcheck.this_sell <== amount_1to2;
-    // order1_filledcheck.total_sell <== order1_amountsell;
-    // order1_filledcheck.filled_buy <== order1_filledbuy;
-    // order1_filledcheck.this_buy <== amount_2to1;
-    // order1_filledcheck.total_buy <== order1_amountbuy;
+    component order1_filledcheck = fillLimitCheck();
+    order1_filledcheck.enabled <== enabled;
+    order1_filledcheck.filled_sell <== order1_filledsell;
+    order1_filledcheck.this_sell <== amount_1to2;
+    order1_filledcheck.total_sell <== order1_amountsell;
+    order1_filledcheck.filled_buy <== order1_filledbuy;
+    order1_filledcheck.this_buy <== amount_2to1;
+    order1_filledcheck.total_buy <== order1_amountbuy;
 
     // /// order2 fill_limit check
     signal input order2_filledsell;
     signal input order2_filledbuy;
-    // component order2_filledcheck = fillLimitCheck();
-    // order2_filledcheck.enabled <== enabled;
-    // order2_filledcheck.filled_sell <== order2_filledsell;
-    // order2_filledcheck.this_sell <== amount_2to1;
-    // order2_filledcheck.total_sell <== order2_amountsell;
-    // order2_filledcheck.filled_buy <== order2_filledbuy;
-    // order2_filledcheck.this_buy <== amount_1to2;
-    // order2_filledcheck.total_buy <== order2_amountbuy;
+    component order2_filledcheck = fillLimitCheck();
+    order2_filledcheck.enabled <== enabled;
+    order2_filledcheck.filled_sell <== order2_filledsell;
+    order2_filledcheck.this_sell <== amount_2to1;
+    order2_filledcheck.total_sell <== order2_amountsell;
+    order2_filledcheck.filled_buy <== order2_filledbuy;
+    order2_filledcheck.this_buy <== amount_1to2;
+    order2_filledcheck.total_buy <== order2_amountbuy;
 
 
     // TODO: check timestamp & 2 orders' validUntil
