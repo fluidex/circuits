@@ -424,18 +424,18 @@ template tradeTransfer(balanceLevels, accountLevels) {
         new_account1_balance_tree.path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
     }
 
-    // // account 2 balance
-    // component old_account2_balance_tree = CalculateRootFromMerklePath(balanceLevels);
-    // component tmp_account2_balance_tree = CalculateRootFromMerklePath(balanceLevels);
-    // old_account2_balance_tree.leaf <== account2_balance_sell;
-    // // update token sell
-    // tmp_account2_balance_tree.leaf <== account2_balance_sell - amount_2to1;
-    // for (var i = 0; i < balanceLevels; i++) {
-    //     old_account2_balance_tree.path_index[i] <== balance_2to1_path_index[i];
-    //     old_account2_balance_tree.path_elements[i][0] <== old_account2_balance_path_elements[i][0];
-    //     tmp_account2_balance_tree.path_index[i] <== balance_2to1_path_index[i];
-    //     tmp_account2_balance_tree.path_elements[i][0] <== old_account2_balance_path_elements[i][0];
-    // }
+    // account 2 balance
+    component old_account2_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    component tmp_account2_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    old_account2_balance_tree.leaf <== account2_balance_sell;
+    // update token sell
+    tmp_account2_balance_tree.leaf <== account2_balance_sell - amount_2to1;
+    for (var i = 0; i < balanceLevels; i++) {
+        old_account2_balance_tree.path_index[i] <== balance_2to1_path_index[i];
+        old_account2_balance_tree.path_elements[i][0] <== old_account2_balance_path_elements[i][0];
+        tmp_account2_balance_tree.path_index[i] <== balance_2to1_path_index[i];
+        tmp_account2_balance_tree.path_elements[i][0] <== old_account2_balance_path_elements[i][0];
+    }
     // // check token buy
     // component tmp_account2_balance_checker = CheckLeafExists(balanceLevels);
     // tmp_account2_balance_checker.enabled <== enabled;
