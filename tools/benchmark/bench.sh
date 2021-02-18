@@ -79,12 +79,12 @@ function bench_plonk_plonkit() {
     node profile_circuit.js $CIRCUIT_DIR
 }
 
-# mkdir -p $CIRCUIT_DIR
-# npx ts-node export_circuit.ts $CIRCUIT_DIR
-# prepare_tools
-# prepare_data
-# bench_groth16_zkutil
+mkdir -p $CIRCUIT_DIR
+npx ts-node export_circuit.ts $CIRCUIT_DIR
+prepare_tools
+prepare_data
+bench_groth16_zkutil
 bench_groth16_rapidsnark
-# bench_plonk_plonkit
+bench_plonk_plonkit
 echo -e "\n\n =========== benchmark results: ================= \n"
 head $CIRCUIT_DIR/*time
