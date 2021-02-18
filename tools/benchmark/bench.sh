@@ -50,10 +50,10 @@ function bench_plonk_plonkit() {
     pushd $CIRCUIT_DIR
     rm vk.bin || true # TODO: add overwrite option to $PLONKIT_BIN
     $PLONKIT_BIN analyse
-    $PLONKIT_BIN export-verification-key --srs_monomial_form $KEY --circuit circuit.r1cs.json --vk vk.bin
-    $PLONKIT_BIN dump-lagrange -m $KEY -l $KEY_LAG -c circuit.r1cs.json
-    (time $PLONKIT_BIN prove --srs_monomial_form $KEY --circuit circuit.r1cs.json --witness witness.json --proof proof.bin) 2>plonkit.time
-    (time $PLONKIT_BIN prove -m $KEY -l $KEY_LAG -c circuit.r1cs.json -w witness.json -p proof.bin) 2>plonkit_lagrange.time
+    $PLONKIT_BIN export-verification-key --srs_monomial_form $KEY --circuit circuit.r1cs --vk vk.bin
+    $PLONKIT_BIN dump-lagrange -m $KEY -l $KEY_LAG -c circuit.r1cs
+    (time $PLONKIT_BIN prove --srs_monomial_form $KEY --circuit circuit.r1cs --witness witness.wtns --proof proof.bin) 2>plonkit.time
+    (time $PLONKIT_BIN prove -m $KEY -l $KEY_LAG -c circuit.r1cs -w witness.wtns -p proof.bin) 2>plonkit_lagrange.time
     $PLONKIT_BIN verify --proof proof.bin --verification_key vk.bin
     popd
     node profile_circuit.js $CIRCUIT_DIR
