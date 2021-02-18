@@ -1,10 +1,12 @@
 #!/bin/bash
 set -uex
 
-ZKUTIL_BIN=zkutil
-PLONKIT_BIN=plonkit
+CIRCUIT_POW=20
 CIRCUIT=transfer
 export CIRCUIT_DIR=data/$CIRCUIT
+
+ZKUTIL_BIN=zkutil
+PLONKIT_BIN=plonkit
 export RAPIDSNARK_DIR=../../node_modules/rapidsnark
 RAPIDSNARK_BIN=$RAPIDSNARK_DIR/build/prover
 
@@ -28,9 +30,23 @@ function bench_groth16_snarkjs_wasm() {
     echo benchmark groth16 with snarkjs wasm
 }
 
-function bench_groth16_snarkjs_cpp() {
-    echo benchmark groth16 with snarkjs cpp
-    # https://github.com/iden3/rapidsnark
+function bench_groth16_rapidsnark() {
+    echo benchmark groth16 with rapidsnark
+    pushd $CIRCUIT_DIR
+    ZKEY_FILE=zkey.zkey
+    PTAU_FILE=powersoftau.ptau
+    if [ ! -f $PTAU_FILE ]; then
+        echo generate powersoftau
+        npx snarkjs ptn bn128 ${CIRCUIT_POW} powersoftau_0000.ptau -v
+        npx snarkjs ptc powersoftau_0000.ptau powersoftau_0001.ptau --name="some contribution" -e="some random text" -v
+        npx snarkjs pt2 powersoftau_0001.ptau $PTAU_FILE -v
+    fi
+    npx snarkjs ptv $PTAU_FILE -v
+    if [ ! -f $ZKEY_FILE ]; then
+        echo generate zkey
+        npx snarkjs zkn circuit.r1cs $PTAU_FILE $ZKEY_FILE -v
+    fi
+    popd
     # $RAPIDSNARK_BIN <circuit.zkey> <witness.wtns> <proof.json> <public.json>
 }
 
@@ -45,7 +61,6 @@ function bench_groth16_zkutil() {
 
 function bench_plonk_plonkit() {
     echo benchmark plonkit with plonkit
-    CIRCUIT_POW=20
     KEY=`pwd`/keys/plonk/2pow${CIRCUIT_POW}.key
     KEY_LAG=`pwd`/keys/plonk/2pow${CIRCUIT_POW}_lagrange.key
     if [ ! -f $KEY ]; then
@@ -69,6 +84,7 @@ npx ts-node export_circuit.ts $CIRCUIT_DIR
 prepare_tools
 prepare_data
 bench_groth16_zkutil
+bench_groth16_rapidsnark
 bench_plonk_plonkit
 echo -e "\n\n =========== benchmark results: ================= \n"
 head $CIRCUIT_DIR/*time
