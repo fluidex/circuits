@@ -11,6 +11,7 @@ function prepare_tools() {
     echo install zkutil
     cargo install --git https://github.com/poma/zkutil
     echo install rapidsnark
+    source ./install_rapidsnark.sh
     echo install plonkit
     cargo install --git https://github.com/Fluidex/plonkit
 }
