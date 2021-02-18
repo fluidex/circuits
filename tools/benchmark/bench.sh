@@ -7,7 +7,7 @@ export CIRCUIT_DIR=data/$CIRCUIT
 
 ZKUTIL_BIN=zkutil
 PLONKIT_BIN=plonkit
-export RAPIDSNARK_DIR=../../node_modules/rapidsnark
+export RAPIDSNARK_DIR=`pwd`/../../node_modules/rapidsnark
 RAPIDSNARK_BIN=$RAPIDSNARK_DIR/build/prover
 
 function prepare_tools() {
@@ -41,13 +41,13 @@ function bench_groth16_rapidsnark() {
         npx snarkjs ptc powersoftau_0000.ptau powersoftau_0001.ptau --name="some contribution" -e="some random text" -v
         npx snarkjs pt2 powersoftau_0001.ptau $PTAU_FILE -v
     fi
-    npx snarkjs ptv $PTAU_FILE -v
+    # npx snarkjs ptv $PTAU_FILE -v
     if [ ! -f $ZKEY_FILE ]; then
         echo generate zkey
         npx snarkjs zkn circuit.r1cs $PTAU_FILE $ZKEY_FILE -v
     fi
+    (time $RAPIDSNARK_BIN $ZKEY_FILE witness.wtns proof.json public.json) 2>rapidsnark.time
     popd
-    # $RAPIDSNARK_BIN <circuit.zkey> <witness.wtns> <proof.json> <public.json>
 }
 
 function bench_groth16_zkutil() {
@@ -79,12 +79,12 @@ function bench_plonk_plonkit() {
     node profile_circuit.js $CIRCUIT_DIR
 }
 
-mkdir -p $CIRCUIT_DIR
-npx ts-node export_circuit.ts $CIRCUIT_DIR
-prepare_tools
-prepare_data
-bench_groth16_zkutil
+# mkdir -p $CIRCUIT_DIR
+# npx ts-node export_circuit.ts $CIRCUIT_DIR
+# prepare_tools
+# prepare_data
+# bench_groth16_zkutil
 bench_groth16_rapidsnark
-bench_plonk_plonkit
+# bench_plonk_plonkit
 echo -e "\n\n =========== benchmark results: ================= \n"
 head $CIRCUIT_DIR/*time
