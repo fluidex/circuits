@@ -9,7 +9,8 @@ node --stack-size=65500 $DIR/../../node_modules/circom/cli.js circuit.circom --r
 
 # generate the witness using snarkjs
 npx snarkjs wc circuit.wasm input.json witness.wtns
-# convert the witness to json
-# npx snarkjs wej witness.wtns witness.json
+
+# convert the witness to json, zkutil still needs this
+npx snarkjs wej witness.wtns witness.json
 
 popd
