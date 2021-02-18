@@ -2,16 +2,19 @@
 set -uex
 
 ZKUTIL_BIN=zkutil
-RAPIDSNARK_BIN=rapidsnark
 PLONKIT_BIN=plonkit
 CIRCUIT=transfer
 export CIRCUIT_DIR=data/$CIRCUIT
+export RAPIDSNARK_DIR=../../node_modules/rapidsnark
+RAPIDSNARK_BIN=$RAPIDSNARK_DIR/build/prover
 
 function prepare_tools() {
     echo install zkutil
     cargo install --git https://github.com/poma/zkutil
     echo install rapidsnark
-    source ./install_rapidsnark.sh
+    if [ ! -f $RAPIDSNARK_BIN ]; then
+        source ./install_rapidsnark.sh
+    fi
     echo install plonkit
     cargo install --git https://github.com/Fluidex/plonkit
 }
@@ -28,6 +31,7 @@ function bench_groth16_snarkjs_wasm() {
 function bench_groth16_snarkjs_cpp() {
     echo benchmark groth16 with snarkjs cpp
     # https://github.com/iden3/rapidsnark
+    # $RAPIDSNARK_BIN <circuit.zkey> <witness.wtns> <proof.json> <public.json>
 }
 
 function bench_groth16_zkutil() {
