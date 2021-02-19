@@ -16,8 +16,8 @@ function exportCircuit(testClass, locDir) {
 
 if (circuitPath.includes('transfer')) {
 	console.log("exporting transfer circuit");
-	exportCircuit((new TestTransfer()), 'data/transfer');
+	exportCircuit((new TestTransfer()), circuitPath);
 } else if (circuitPath.includes('block')) {
 	console.log("exporting block circuit");
-	exportCircuit((new TestBlock()), 'data/block');
+	exportCircuit((new TestBlock()), circuitPath);
 }

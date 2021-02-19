@@ -2,8 +2,7 @@
 set -uex
 
 CIRCUIT_POW=20
-CIRCUIT=transfer
-export CIRCUIT_DIR=data/$CIRCUIT
+export CIRCUIT_DIR=data/$HASH/$CIRCUIT
 
 ZKUTIL_BIN=zkutil
 PLONKIT_BIN=plonkit
@@ -86,5 +85,3 @@ prepare_data
 bench_groth16_zkutil
 bench_groth16_rapidsnark
 bench_plonk_plonkit
-echo -e "\n\n =========== benchmark results: ================= \n"
-head $CIRCUIT_DIR/*time
