@@ -85,5 +85,3 @@ prepare_data
 bench_groth16_zkutil
 bench_groth16_rapidsnark
 bench_plonk_plonkit
-echo -e "\n\n =========== benchmark results: ================= \n"
-head $CIRCUIT_DIR/*time
