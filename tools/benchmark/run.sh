@@ -1,10 +1,16 @@
 #!/bin/bash
 set -uex
 
-export HASH=poseidon
-source ../replace_hash.sh
-source ./bench.sh
+export CIRCUIT=transfer
+
+# export HASH=poseidon
+# pushd ..
+# source ./replace_hash.sh
+# popd
+# source ./bench.sh
 
 export HASH=rescue
-source ../replace_hash.sh
+pushd ..
+source ./replace_hash.sh
+popd
 source ./bench.sh

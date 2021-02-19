@@ -2,8 +2,7 @@
 set -uex
 
 CIRCUIT_POW=20
-CIRCUIT=transfer
-export CIRCUIT_DIR=data/$CIRCUIT
+export CIRCUIT_DIR=data/$HASH/$CIRCUIT
 
 ZKUTIL_BIN=zkutil
 PLONKIT_BIN=plonkit
