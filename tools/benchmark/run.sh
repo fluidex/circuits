@@ -1,7 +1,8 @@
 #!/bin/bash
 set -uex
 
-export CIRCUIT=transfer
+# export CIRCUIT=transfer
+export CIRCUIT=block
 
 export HASH=poseidon
 pushd ..
