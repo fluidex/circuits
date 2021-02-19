@@ -12,10 +12,10 @@ function use_rescue() {
     find ../src -type f -name '*.circom' | grep -vi poseidon | xargs $SED_BIN -i 's#poseidon#rescue#g; s#Poseidon#Rescue#g;' 
     $SED_BIN -i 's#poseidon as hash#rescue as hash#g' ../helper.ts/hash.ts
 }
+
 function use_poseidon() {
     find ../src -type f -name '*.circom' | grep -vi rescue | xargs $SED_BIN -i 's#rescue#poseidon#g; s#Rescue#Poseidon#g;' 
     $SED_BIN -i 's#rescue as hash#poseidon as hash#g' ../helper.ts/hash.ts
 }
 
-use_rescue
-#use_poseidon
+use_$HASH
