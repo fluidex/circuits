@@ -42,13 +42,13 @@ class TestHashAccount implements SimpleTest {
 }
 
 const order_state = {
-    tokensell: 1,
-    tokenbuy: 2,
-    filled_sell: 0,
-    filled_buy: 0,
-    total_sell: 100,
-    total_buy: 1000,
-    status: 0,
+  tokensell: 1,
+  tokenbuy: 2,
+  filled_sell: 0,
+  filled_buy: 0,
+  total_sell: 100,
+  total_buy: 1000,
+  status: 0,
 };
 
 class TestHashOrder implements SimpleTest {
@@ -60,7 +60,7 @@ class TestHashOrder implements SimpleTest {
       filled_buy: order_state.filled_buy,
       total_sell: order_state.total_sell,
       total_buy: order_state.total_buy,
-      status: order_state.status, 
+      status: order_state.status,
     };
   }
   getOutput() {
@@ -73,7 +73,7 @@ class TestHashOrder implements SimpleTest {
       src: path.join(__dirname, '..', 'src', 'lib', 'hash_state.circom'),
       main: 'HashOrder()',
     };
-  }  
+  }
 }
 
 export { TestHashAccount, TestHashOrder };

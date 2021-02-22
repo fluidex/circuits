@@ -32,7 +32,7 @@ function initTestCase() {
   const account1_balance_sell = 199n;
   const account1_balance_buy = 111n;
   let account1BalanceLeaves = [];
-  for (let i = 0; i < 2**balanceLevels; i++) account1BalanceLeaves.push(11n + BigInt(i));
+  for (let i = 0; i < 2 ** balanceLevels; i++) account1BalanceLeaves.push(11n + BigInt(i));
   account1BalanceLeaves[tokenID_1to2] = account1_balance_sell;
   account1BalanceLeaves[tokenID_2to1] = account1_balance_buy;
   let oldAccount1BalanceProof = getBTreeProof(account1BalanceLeaves, tokenID_1to2);
@@ -41,7 +41,7 @@ function initTestCase() {
   const account2_balance_sell = 1990n;
   const account2_balance_buy = 1110n;
   let account2BalanceLeaves = [];
-  for (let i = 0; i < 2**balanceLevels; i++) account2BalanceLeaves.push(11n + BigInt(i));
+  for (let i = 0; i < 2 ** balanceLevels; i++) account2BalanceLeaves.push(11n + BigInt(i));
   account2BalanceLeaves[tokenID_2to1] = account2_balance_sell;
   account2BalanceLeaves[tokenID_1to2] = account2_balance_buy;
   let oldAccount2BalanceProof = getBTreeProof(account2BalanceLeaves, tokenID_2to1);
@@ -60,7 +60,7 @@ function initTestCase() {
   };
   const oldOrder1Hash = hashOrderState(oldOrder1);
   let account1Orders = [];
-  for (let i = 0; i < 2**orderLevels; i++) account1Orders.push(22n + BigInt(i));
+  for (let i = 0; i < 2 ** orderLevels; i++) account1Orders.push(22n + BigInt(i));
   account1Orders[order1_id] = oldOrder1Hash;
   let oldOrder1Proof = getBTreeProof(account1Orders, order1_id);
 
@@ -74,11 +74,11 @@ function initTestCase() {
     filled_sell: 10n,
     filled_buy: 1n,
     total_sell: order2_amountsell,
-    total_buy:order2_amountbuy,
+    total_buy: order2_amountbuy,
   };
   const oldOrder2Hash = hashOrderState(oldOrder2);
   let account2Orders = [];
-  for (let i = 0; i < 2**orderLevels; i++) account2Orders.push(33n + BigInt(i));
+  for (let i = 0; i < 2 ** orderLevels; i++) account2Orders.push(33n + BigInt(i));
   account2Orders[order2_id] = oldOrder2Hash;
   let oldOrder2Proof = getBTreeProof(account2Orders, order2_id);
 
@@ -101,7 +101,7 @@ function initTestCase() {
   };
   const oldAccount2Hash = hashAccountState(oldAccount2);
   let accountLeaves = [];
-  for (let i = 0; i < 2**accountLevels; i++) accountLeaves.push(44n + BigInt(i));
+  for (let i = 0; i < 2 ** accountLevels; i++) accountLeaves.push(44n + BigInt(i));
   accountLeaves[accountID1] = oldAccount1Hash;
   accountLeaves[accountID2] = oldAccount2Hash;
   let oldAccount1Proof = getBTreeProof(accountLeaves, accountID1);

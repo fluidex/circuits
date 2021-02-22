@@ -12,11 +12,7 @@ function accountState2Array(st) {
   data = Scalar.add(data, st.nonce);
   data = Scalar.add(data, Scalar.shl(st.sign, 40));
 
-  return [data,
-  	Scalar.e(st.balanceRoot),
-  	Scalar.fromString(st.ay, 16),
-  	Scalar.fromString(st.ethAddr, 16),
-  	Scalar.e(st.orderRoot)];
+  return [data, Scalar.e(st.balanceRoot), Scalar.fromString(st.ay, 16), Scalar.fromString(st.ethAddr, 16), Scalar.e(st.orderRoot)];
 }
 
 /**
@@ -30,7 +26,7 @@ function hashAccountState(st) {
 
 // TODO: calculate from orderLevels
 function getGenesisOrderRoot() {
-	return 0n;
+  return 0n;
 }
 
 /**
@@ -45,11 +41,7 @@ function orderState2Array(st) {
   data = Scalar.add(data, Scalar.shl(st.tokenbuy, 32));
   data = Scalar.add(data, Scalar.shl(st.tokensell, 64));
 
-  return [data,
-    Scalar.e(st.filled_sell),
-    Scalar.e(st.filled_buy),
-    Scalar.e(st.total_sell),
-    Scalar.e(st.total_buy)];
+  return [data, Scalar.e(st.filled_sell), Scalar.e(st.filled_buy), Scalar.e(st.total_sell), Scalar.e(st.total_buy)];
 }
 
 /**
