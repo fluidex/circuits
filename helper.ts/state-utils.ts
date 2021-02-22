@@ -11,8 +11,17 @@ function accountState2Array(st) {
 
   data = Scalar.add(data, st.nonce);
   data = Scalar.add(data, Scalar.shl(st.sign, 40));
-
-  return [data, Scalar.e(st.balanceRoot), Scalar.fromString(st.ay, 16), Scalar.fromString(st.ethAddr, 16), Scalar.e(st.orderRoot)];
+  function toScalarFromHex(x) {
+    // instanceof did not work well
+    if (typeof x == 'bigint') {
+      return x;
+    } else if (typeof x == 'string') {
+      return Scalar.fromString(x, 16);
+    } else {
+      throw new Error('invalid scalar ' + x);
+    }
+  }
+  return [data, Scalar.e(st.balanceRoot), toScalarFromHex(st.ay), toScalarFromHex(st.ethAddr), Scalar.e(st.orderRoot)];
 }
 
 /**

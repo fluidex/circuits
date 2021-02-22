@@ -29,4 +29,4 @@ jobs:
         run: npm install
 
       - name: Run tests
-        run: npx ts-node ./test/test_all.ts
+        run: time npx ts-node ./test/test_all.ts
