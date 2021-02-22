@@ -3,8 +3,7 @@ import * as path from 'path';
 import * as tmp from 'tmp-promise';
 import * as circom from 'circom';
 import { SimpleTest, TestComponent } from './interface';
-import { TestCheckLeafExists, TestCheckLeafExistsDisable,
-          TestCheckLeafUpdate, TestCheckLeafUpdateDisable } from './binary_merkle_tree';
+import { TestCheckLeafExists, TestCheckLeafExistsDisable, TestCheckLeafUpdate, TestCheckLeafUpdateDisable } from './binary_merkle_tree';
 import { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash } from './rescue';
 import { TestHashAccount, TestHashOrder } from './hash_state';
 import { TestDepositToNew, TestDepositToOld } from './deposit';

@@ -25,7 +25,7 @@ function initTestCase() {
 
   // account state
   let balanceLeaves = [];
-  for (let i = 0; i < 2**balanceLevels; i++) balanceLeaves.push(10n + BigInt(i));
+  for (let i = 0; i < 2 ** balanceLevels; i++) balanceLeaves.push(10n + BigInt(i));
   // TODO: check index bounds
   balanceLeaves[tokenID] = balance;
   let oldBalanceProof = getBTreeProof(balanceLeaves, tokenID);
@@ -52,7 +52,7 @@ function initTestCase() {
 
   // account tree
   let accountLeaves = [];
-  for (let i = 0; i < 2**accountLevels; i++) accountLeaves.push(70n + BigInt(i));
+  for (let i = 0; i < 2 ** accountLevels; i++) accountLeaves.push(70n + BigInt(i));
   // TODO: check index bounds
   accountLeaves[accountID] = oldAccountHash;
   let oldAccountProof = getBTreeProof(accountLeaves, accountID);
@@ -109,7 +109,7 @@ class TestWithdraw implements SimpleTest {
       balance_path_elements: test_case.balance_path_elements,
       account_path_elements: test_case.account_path_elements,
       oldAccountRoot: test_case.oldAccountRoot,
-      newAccountRoot: test_case.newAccountRoot,      
+      newAccountRoot: test_case.newAccountRoot,
     };
   }
   getOutput() {

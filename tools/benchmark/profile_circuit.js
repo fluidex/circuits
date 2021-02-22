@@ -112,7 +112,7 @@ function writeJson(fileName, j) {
 function selectSubtree(root, p) {
   let node = root;
   for (const name of p) {
-    node = node.children.find((elem) => elem.name == name);
+    node = node.children.find(elem => elem.name == name);
   }
   return node;
 }
@@ -139,7 +139,7 @@ function constructCompCostTree(compToCost) {
     }
     const pathElem = p[0];
     const isLeaf = p.length == 1;
-    let idx = root.children.findIndex((elem) => elem.name == pathElem);
+    let idx = root.children.findIndex(elem => elem.name == pathElem);
     if (idx == -1) {
       idx = root.children.length;
       root.children.push({
@@ -222,7 +222,7 @@ async function main() {
     }
   }
   let totalCost2 = 0;
-  signalToCost.forEach((v) => (totalCost2 += v));
+  signalToCost.forEach(v => (totalCost2 += v));
   if (Math.abs(totalCost2 - totalCost1) > 0.01) {
     console.log({ totalCost1, totalCost2 });
     throw 'cost sum error';
@@ -234,7 +234,7 @@ async function main() {
     assignCostFromSignalToComp(sym, compToCost, sid, cost);
   }
   let totalCost3 = 0;
-  compToCost.forEach((v) => (totalCost3 += v));
+  compToCost.forEach(v => (totalCost3 += v));
   if (Math.abs(totalCost3 - totalCost2) > 0.01) {
     console.log({ totalCost2, totalCost3 });
     throw 'cost sum error';
@@ -243,7 +243,7 @@ async function main() {
   if (sunburstOutputFile != '') {
     let costTree = constructCompCostTree(compToCost);
     let totalCost4 = 0;
-    costTree.children.forEach((v) => (totalCost4 += v.value));
+    costTree.children.forEach(v => (totalCost4 += v.value));
     if (!almostEq(totalCost3, totalCost4)) {
       console.log('not equal', { totalCost3, totalCost4 });
       throw 'incorrect sum';
@@ -270,4 +270,4 @@ async function main() {
   }
 }
 
-main().catch((err) => console.log(err.stack));
+main().catch(err => console.log(err.stack));

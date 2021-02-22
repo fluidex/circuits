@@ -22,8 +22,8 @@ function initDepositToNew() {
   const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
 
   // balance tree
-  let balanceLeaves: Array<BigInt> = new Array(2**balanceLevels);
-  balanceLeaves.fill(0n, 0, 2**balanceLevels);
+  let balanceLeaves: Array<BigInt> = new Array(2 ** balanceLevels);
+  balanceLeaves.fill(0n, 0, 2 ** balanceLevels);
   let oldBalanceProof = getBTreeProof(balanceLeaves, tokenID);
   // TODO: check index bounds
   balanceLeaves[tokenID] = amount;
@@ -49,7 +49,7 @@ function initDepositToNew() {
   };
   const newAccountHash = hashAccountState(newAccount);
   let accountLeaves = [];
-  for (let i = 0; i < 2**accountLevels; i++) accountLeaves.push(20n + BigInt(i));
+  for (let i = 0; i < 2 ** accountLevels; i++) accountLeaves.push(20n + BigInt(i));
   // TODO: check index bounds
   accountLeaves[accountID] = oldAccountHash;
   let oldAccountProof = getBTreeProof(accountLeaves, accountID);
@@ -86,7 +86,7 @@ function initDepositToOld() {
 
   // balance tree
   let balanceLeaves = [];
-  for (let i = 0; i < 2**balanceLevels; i++) balanceLeaves.push(10n + BigInt(i));
+  for (let i = 0; i < 2 ** balanceLevels; i++) balanceLeaves.push(10n + BigInt(i));
   // TODO: check index bounds
   balanceLeaves[tokenID] = oldBalance;
   let oldBalanceProof = getBTreeProof(balanceLeaves, tokenID);
@@ -113,7 +113,7 @@ function initDepositToOld() {
   };
   const newAccountHash = hashAccountState(newAccount);
   let accountLeaves = [];
-  for (let i = 0; i < 2**accountLevels; i++) accountLeaves.push(20n + BigInt(i));
+  for (let i = 0; i < 2 ** accountLevels; i++) accountLeaves.push(20n + BigInt(i));
   // TODO: check index bounds
   accountLeaves[accountID] = oldAccountHash;
   let oldAccountProof = getBTreeProof(accountLeaves, accountID);
@@ -154,7 +154,7 @@ class TestDepositToNew implements SimpleTest {
       balance_path_elements: deposit_to_new_test_case.balance_path_elements,
       account_path_elements: deposit_to_new_test_case.account_path_elements,
       oldAccountRoot: deposit_to_new_test_case.oldAccountRoot,
-      newAccountRoot: deposit_to_new_test_case.newAccountRoot,      
+      newAccountRoot: deposit_to_new_test_case.newAccountRoot,
     };
   }
   getOutput() {
@@ -185,7 +185,7 @@ class TestDepositToOld implements SimpleTest {
       balance_path_elements: deposit_to_old_test_case.balance_path_elements,
       account_path_elements: deposit_to_old_test_case.account_path_elements,
       oldAccountRoot: deposit_to_old_test_case.oldAccountRoot,
-      newAccountRoot: deposit_to_old_test_case.newAccountRoot,      
+      newAccountRoot: deposit_to_old_test_case.newAccountRoot,
     };
   }
   getOutput() {
