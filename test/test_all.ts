@@ -61,6 +61,7 @@ async function main() {
     await testWithInputOutput(new TestSpotTrade());
   } catch (e) {
     console.error(e);
+    process.exit(1);
   }
 }
 
