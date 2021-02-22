@@ -2,7 +2,6 @@ import { assert } from 'console';
 import { hash } from '../helper.ts/hash';
 import { Account } from '../helper.ts/account';
 import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
-import { RSA_X931_PADDING } from 'constants';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 
@@ -447,8 +446,6 @@ class GlobalState {
   }
   Transfer(tx: TranferTx) {
     let proofFrom = this.stateProof(tx.from, tx.tokenID);
-    let proofTo = this.stateProof(tx.to, tx.tokenID);
-    assert(proofFrom.root == proofTo.root, 'Transfer root neq');
     let fromAccount = this.accounts.get(tx.from);
     let toAccount = this.accounts.get(tx.to);
 
@@ -482,15 +479,19 @@ class GlobalState {
       txType: TxType.Transfer,
       payload: encodedTx,
       balancePath0: proofFrom.balancePath,
-      balancePath1: proofTo.balancePath,
+      balancePath1: null,
       accountPath0: proofFrom.accountPath,
-      accountPath1: proofTo.accountPath,
+      accountPath1: null,
       rootBefore: proofFrom.root,
       rootAfter: 0n,
     };
 
     this.setTokenBalance(tx.from, tx.tokenID, fromOldBalance - tx.amount);
     this.increaseNonce(tx.from);
+
+    let proofTo = this.stateProof(tx.to, tx.tokenID);
+    rawTx.balancePath1 = proofTo.balancePath;
+    rawTx.accountPath1 = proofTo.accountPath;
     this.setTokenBalance(tx.to, tx.tokenID, toOldBalance + tx.amount);
 
     rawTx.rootAfter = this.root();

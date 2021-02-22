@@ -6,6 +6,8 @@ import { Account } from '../helper.ts/account';
 import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
+//import { assert } from 'console';
+const assert = require('assert').strict;
 
 // circuit-level definitions
 const nTxs = 4;
@@ -343,7 +345,7 @@ function initTestCase() {
 let test_case = initTestCaseNew();
 class TestBlock implements SimpleTest {
   getInput() {
-    return {
+    let input = {
       txsType: test_case.txsType,
       encodedTxs: test_case.encodedTxs,
       balance_path_elements: test_case.balance_path_elements,
@@ -352,6 +354,8 @@ class TestBlock implements SimpleTest {
       oldAccountRoots: test_case.oldAccountRoots,
       newAccountRoots: test_case.newAccountRoots,
     };
+    //console.log(JSON.stringify(input, null, 2));
+    return input;
   }
   getOutput() {
     return {};
@@ -371,7 +375,7 @@ if (require.main === module) {
     let d = ffjavascript.utils.stringifyBigInts(data);
     return JSON.stringify(d, null, 2);
   }
-  if (prettyPrint(initTestCaseNew()) != prettyPrint(initTestCaseNew())) {
+  if (prettyPrint(initTestCase()) != prettyPrint(initTestCaseNew())) {
     throw new Error('not same');
   }
 }
