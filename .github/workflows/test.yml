@@ -26,7 +26,6 @@ jobs:
       #   run: sudo apt install nlohmann-json-dev
 
       - name: Instal nlohmann/json
-        uses: actions/checkout@v2
         run: |
           git clone --branch develop git@github.com:nlohmann/json.git
           cd json
