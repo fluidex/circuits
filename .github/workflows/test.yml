@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Instal nlohmann/json
         run: |
-          git clone --branch develop https://github.com/nlohmann/json.git
+          git clone https://github.com/nlohmann/json.git
           cd json
           mkdir build
           cd build
