@@ -28,8 +28,10 @@ async function generateInput(path, input) {
 }
 
 async function testWithInputOutput(t: SimpleTest) {
+  // create temp dir
   const tmpDir = tmp.dirSync({ prefix: 'tmp-circuit-dir' });
   // console.log(tmpDir.name);
+
   const circuitFilePath = path.join(tmpDir.name, "circuit.circom");
   const inputFilePath = path.join(tmpDir.name, "input.json");
 
