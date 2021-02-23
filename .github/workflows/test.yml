@@ -23,7 +23,7 @@ jobs:
         uses: ilammy/setup-nasm@v1
 
       - name: Instal nlohmann/json
-        run: apt install nlohmann-json-dev
+        run: sudo apt install nlohmann-json-dev
 
       - name: Checkout sources
         uses: actions/checkout@v2
