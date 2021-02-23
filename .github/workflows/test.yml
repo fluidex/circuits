@@ -19,6 +19,9 @@ jobs:
       NODE_OPTIONS: "--max_old_space_size=8192"
 
     steps:
+      - name: Instal nasm
+        uses: ilammy/setup-nasm@v1
+
       - name: Checkout sources
         uses: actions/checkout@v2
 
@@ -31,5 +34,4 @@ jobs:
         run: npm install
 
       - name: Run tests
-        uses: ilammy/setup-nasm@v1
         run: time npx ts-node ./test/test_all.ts
