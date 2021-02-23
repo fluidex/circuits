@@ -28,7 +28,7 @@ jobs:
       - name: Instal nlohmann/json
         uses: actions/checkout@v2
         run: |
-          git clone git@github.com:nlohmann/json.git
+          git clone --branch develop git@github.com:nlohmann/json.git
           cd json
           mkdir build
           cd build
