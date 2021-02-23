@@ -166,7 +166,7 @@ class Tree<T> {
     let leaf = this.getLeaf(index);
     let path_elements = [];
     for (let i = 0; i < this.height; i++) {
-      path_elements.push(this.getValue(i, this.siblingIdx(index)));
+      path_elements.push([this.getValue(i, this.siblingIdx(index))]);
       index = this.parentIdx(index);
     }
     return { root: this.getRoot(), path_elements, leaf };
