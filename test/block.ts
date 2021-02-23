@@ -35,18 +35,18 @@ function accountSign(acc, hash) {
     R8y: sig.R8[1],
   };
 }
+
 function initTestCase() {
   let state = new common.GlobalState(balanceLevels, accountLevels);
-  const accountID0 = 0n;
-  const accountID1 = 1n;
+
+  const tokenID = 0n;
   const account0 = new Account(2);
   const account1 = new Account(1);
-  const tokenID = 0n;
-  state.createNewAccount();
-  state.createNewAccount();
-  // the first L2 account has pubkey 0x1
-  // TODO: change DepositToOld to account0, DepositToNew to account1
-  state.setAccountKey(accountID1, 1);
+  let accountID0 = state.createNewAccount();
+  let accountID1 = state.createNewAccount();
+
+  // mock existing account1 data
+  state.setAccountKey(accountID1, account1.publicKey);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID) {
       state.setTokenBalance(accountID1, tokenID, 300n);
@@ -56,6 +56,7 @@ function initTestCase() {
   }
   state.setAccountNonce(accountID1, 99n);
 
+  assert(state.accounts.get(accountID0).ethAddr == 0n, 'account0 should be empty');
   state.DepositToNew({
     accountID: BigInt(accountID0),
     tokenID: BigInt(tokenID),
@@ -64,11 +65,14 @@ function initTestCase() {
     sign: BigInt(account0.sign),
     ay: Scalar.fromString(account0.ay, 16),
   });
+
+  assert(state.accounts.get(accountID1).ethAddr != 0n, 'account0 should not be empty');
   state.DepositToOld({
     accountID: BigInt(accountID1),
     tokenID: BigInt(tokenID),
     amount: 100n,
   });
+
   let transferTx = {
     from: BigInt(accountID1),
     to: BigInt(accountID0),
@@ -81,6 +85,7 @@ function initTestCase() {
   let hash = hashTransfer(fullTransferTx);
   transferTx.signature = accountSign(account1, hash);
   state.Transfer(transferTx);
+
   let withdrawTx = {
     accountID: BigInt(accountID0),
     amount: 150n,
@@ -91,6 +96,7 @@ function initTestCase() {
   hash = hashWithdraw(fullWithdrawTx);
   withdrawTx.signature = accountSign(account0, hash);
   state.Withdraw(withdrawTx);
+
   let block = state.forge();
   return block;
 }
