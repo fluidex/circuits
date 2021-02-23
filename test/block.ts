@@ -11,8 +11,8 @@ const assert = require('assert').strict;
 
 // circuit-level definitions
 const nTxs = 4;
-const balanceLevels = 1;
-const accountLevels = 1;
+const balanceLevels = 2;
+const accountLevels = 2;
 
 function hashTransfer({ from, to, tokenID, amount, fromNonce, toNonce, oldBalanceFrom, oldBalanceTo }) {
   let data = hash([common.TxType.Transfer, tokenID, amount]);

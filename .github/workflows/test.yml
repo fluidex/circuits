@@ -19,6 +19,20 @@ jobs:
       NODE_OPTIONS: "--max_old_space_size=8192"
 
     steps:
+      - name: Instal nasm
+        run:
+          sudo apt install nasm
+
+      - name: Instal nlohmann/json
+        run: |
+          git clone https://github.com/nlohmann/json.git
+          cd json
+          mkdir build
+          cd build
+          cmake ..
+          make
+          sudo make install
+
       - name: Checkout sources
         uses: actions/checkout@v2
 
