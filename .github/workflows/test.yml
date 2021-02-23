@@ -19,11 +19,17 @@ jobs:
       NODE_OPTIONS: "--max_old_space_size=8192"
 
     steps:
-      - name: Instal nasm
-        uses: ilammy/setup-nasm@v1
+      # - name: Instal nasm
+      #   uses: ilammy/setup-nasm@v1
+
+      # - name: Instal nlohmann/json
+      #   run: sudo apt install nlohmann-json-dev
 
       - name: Instal nlohmann/json
-        run: sudo apt install nlohmann-json-dev
+        uses: actions/checkout@v2
+        with:
+          repository: git@github.com:nlohmann/json.git
+          path: nlohmann/json
 
       - name: Checkout sources
         uses: actions/checkout@v2
