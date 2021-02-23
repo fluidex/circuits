@@ -50,7 +50,6 @@ const order_state = {
   total_buy: 1000,
   status: 0,
 };
-
 class TestHashOrder implements SimpleTest {
   getInput() {
     return {

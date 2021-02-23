@@ -64,6 +64,7 @@ class TranferTx {
   amount: bigint;
   signature: TxSignature;
 }
+
 // WithdrawTx can only withdraw to one's own L1 address
 class WithdrawTx {
   accountID: bigint;
@@ -71,6 +72,7 @@ class WithdrawTx {
   amount: bigint;
   signature: TxSignature;
 }
+
 class Tree<T> {
   public height: number;
   // precalculate mid hashes, so we don't have to store the empty nodes
@@ -245,6 +247,7 @@ class AccountState {
     const ethAddr = Scalar.fromString(account.ethAddr.replace('0x', ''), 16);
     this.updateL2Addr(sign, ay, ethAddr);
   }
+  // TODO: remove ethAddr
   updateL2Addr(sign, ay, ethAddr) {
     this.sign = sign;
     this.ay = ay;
@@ -314,10 +317,10 @@ class GlobalState {
     if (this.accounts.has(idx)) {
       return this.accounts.get(idx);
     } else {
-      // TODO
+      throw Error('account_id overflow');
     }
   }
-  addAccount(): bigint {
+  createNewAccount(): bigint {
     const accountID = BigInt(this.balanceTrees.size);
     let accountState = this.emptyAccount();
     this.accounts.set(accountID, accountState);
