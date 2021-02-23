@@ -42,11 +42,11 @@ function initTestCaseNew() {
   const account0 = new Account(2);
   const account1 = new Account(1);
   const tokenID = 0n;
-  state.addAccount();
-  state.addAccount();
+  state.createNewAccount();
+  state.createNewAccount();
   // the first L2 account has pubkey 0x1
   // TODO: change DepositToOld to account0, DepositToNew to account1
-  state.setAccountKey(1n, 1);
+  state.setAccountKey(accountID1, 1);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID) {
       state.setTokenBalance(accountID1, tokenID, 300n);
