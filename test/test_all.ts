@@ -18,7 +18,7 @@ async function generateMainTestCircom({ src, main }: TestComponent) {
   let circuitPath = tmp.tmpNameSync({ prefix: 'test-', postfix: '.circom' });
   //console.log('tmp circom file:', circuitPath);
   fs.writeFileSync(circuitPath, srcCode, 'utf8');
-  let circuit = await circom.tester(circuitPath, { reduceConstraints: false });
+  let circuit = await circom.c_tester(circuitPath, { reduceConstraints: false });
   await circuit.loadConstraints();
   await circuit.loadSymbols();
   return circuit;
