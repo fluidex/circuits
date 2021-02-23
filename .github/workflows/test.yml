@@ -27,9 +27,14 @@ jobs:
 
       - name: Instal nlohmann/json
         uses: actions/checkout@v2
-        with:
-          repository: git@github.com:nlohmann/json.git
-          path: nlohmann/json
+        run: |
+          git clone git@github.com:nlohmann/json.git
+          cd json
+          mkdir build
+          cd build
+          cmake ..
+          make
+          sudo make install
 
       - name: Checkout sources
         uses: actions/checkout@v2
