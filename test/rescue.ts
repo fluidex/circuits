@@ -57,7 +57,7 @@ class TestRescueHash implements SimpleTest {
     return { inputs };
   }
   getOutput() {
-    return { out: 15131965683816686492029126038145678019083347981596432597977339723207837174957n };
+    return { out: 15131965683816686492029126038145678019083347981596432597977339723207837174958n };
   }
   getComponent(): TestComponent {
     const inputLen = this.getInput().inputs.length;
