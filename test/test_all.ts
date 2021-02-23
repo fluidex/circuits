@@ -12,53 +12,48 @@ import { TestWithdraw } from './withdraw';
 import { TestBlock } from './block';
 import { TestSpotTrade } from './spot_trade';
 
-async function generateMainTestCircom({ src, main }: TestComponent) {
+async function generateMainTestCircom(path, { src, main }: TestComponent) {
   let srcCode = `include "${src}";
-    component main = ${main};`;
-  let circuitPath = tmp.tmpNameSync({ prefix: 'test-', postfix: '.circom' });
-  //console.log('tmp circom file:', circuitPath);
-  fs.writeFileSync(circuitPath, srcCode, 'utf8');
-  let circuit = await circom.tester(circuitPath, { reduceConstraints: false });
-  await circuit.loadConstraints();
-  await circuit.loadSymbols();
-  return circuit;
+  component main = ${main};`;
+  fs.writeFileSync(path, srcCode, 'utf8');
+}
+
+async function generateInput(path, input) {
+  let text = JSON.stringify(input, (key, value) =>
+      typeof value === 'bigint'
+          ? value.toString()
+          : value // return everything else unchanged
+  ,2);
+  fs.writeFileSync(path, text, 'utf8');
 }
 
 async function testWithInputOutput(t: SimpleTest) {
-  let circuit = await generateMainTestCircom(t.getComponent());
-  let logFn = console.log;
-  let calculateWitnessOptions = {
-    sanityCheck: true,
-    logTrigger: logFn,
-    logOutput: logFn,
-    logStartComponent: logFn,
-    logFinishComponent: logFn,
-    logSetSignal: logFn,
-    logGetSignal: logFn,
-  };
-  const witness = await circuit.calculateWitness(t.getInput(), calculateWitnessOptions);
-  await circuit.checkConstraints(witness);
-  await circuit.loadSymbols();
-  await circuit.assertOut(witness, t.getOutput());
-  console.log('test ', t.constructor.name, ' done');
-  return true;
+  const tmpDir = tmp.dirSync({ prefix: 'tmp-circuit-dir' });
+  // console.log(tmpDir.name);
+  const circuitFilePath = path.join(tmpDir.name, "circuit.circom");
+  const inputFilePath = path.join(tmpDir.name, "input.json");
+
+  await generateMainTestCircom(circuitFilePath, t.getComponent());
+  await generateInput(inputFilePath, t.getInput());
+
+
 }
 
 async function main() {
   try {
     await testWithInputOutput(new TestRescueHash());
-    await testWithInputOutput(new TestCheckLeafExists());
-    await testWithInputOutput(new TestCheckLeafExistsDisable());
-    await testWithInputOutput(new TestCheckLeafUpdate());
-    await testWithInputOutput(new TestCheckLeafUpdateDisable());
-    await testWithInputOutput(new TestHashAccount());
-    await testWithInputOutput(new TestHashOrder());
-    await testWithInputOutput(new TestDepositToNew());
-    await testWithInputOutput(new TestDepositToOld());
-    await testWithInputOutput(new TestTransfer());
-    await testWithInputOutput(new TestWithdraw());
-    await testWithInputOutput(new TestBlock());
-    await testWithInputOutput(new TestSpotTrade());
+    // await testWithInputOutput(new TestCheckLeafExists());
+    // await testWithInputOutput(new TestCheckLeafExistsDisable());
+    // await testWithInputOutput(new TestCheckLeafUpdate());
+    // await testWithInputOutput(new TestCheckLeafUpdateDisable());
+    // await testWithInputOutput(new TestHashAccount());
+    // await testWithInputOutput(new TestHashOrder());
+    // await testWithInputOutput(new TestDepositToNew());
+    // await testWithInputOutput(new TestDepositToOld());
+    // await testWithInputOutput(new TestTransfer());
+    // await testWithInputOutput(new TestWithdraw());
+    // await testWithInputOutput(new TestBlock());
+    // await testWithInputOutput(new TestSpotTrade());
   } catch (e) {
     console.error(e);
     process.exit(1);
