@@ -4,7 +4,7 @@ set -uex
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 CIRCUIT_POW=20
-export CIRCUIT_DIR=data/$HASH/$CIRCUIT
+export CIRCUIT_DIR=$DIR/data/$HASH/$CIRCUIT
 
 ZKUTIL_BIN=zkutil
 PLONKIT_BIN=plonkit
@@ -16,7 +16,7 @@ function prepare_tools() {
     cargo install --git https://github.com/poma/zkutil
     echo install rapidsnark
     if [ ! -f $RAPIDSNARK_BIN ]; then
-        source ./install_rapidsnark.sh
+        source $DIR/install_rapidsnark.sh
     fi
     echo install plonkit
     cargo install --git https://github.com/Fluidex/plonkit
@@ -24,7 +24,7 @@ function prepare_tools() {
 
 function prepare_data() {
     echo process circuit in $CIRCUIT_DIR
-    source ./process_circom_circuit.sh
+    source $DIR/process_circom_circuit.sh
 }
 
 function bench_groth16_snarkjs_wasm() {
@@ -62,8 +62,8 @@ function bench_groth16_zkutil() {
 
 function bench_plonk_plonkit() {
     echo benchmark plonkit with plonkit
-    KEY=`pwd`/keys/plonk/2pow${CIRCUIT_POW}.key
-    KEY_LAG=`pwd`/keys/plonk/2pow${CIRCUIT_POW}_lagrange.key
+    KEY=$DIR/keys/plonk/2pow${CIRCUIT_POW}.key
+    KEY_LAG=$DIR/keys/plonk/2pow${CIRCUIT_POW}_lagrange.key
     if [ ! -f $KEY ]; then
         mkdir -p keys/plonk
         $PLONKIT_BIN setup --power ${CIRCUIT_POW} --srs_monomial_form $KEY
@@ -77,11 +77,11 @@ function bench_plonk_plonkit() {
     (time $PLONKIT_BIN prove -m $KEY -l $KEY_LAG -c circuit.r1cs -w witness.wtns -p proof.bin) 2>plonkit_lagrange.time
     $PLONKIT_BIN verify --proof proof.bin --verification_key vk.bin
     popd
-    node profile_circuit.js $CIRCUIT_DIR
+    node $DIR/profile_circuit.js $CIRCUIT_DIR
 }
 
 mkdir -p $CIRCUIT_DIR
-npx ts-node export_circuit.ts $CIRCUIT_DIR
+npx ts-node $DIR/export_circuit.ts $CIRCUIT_DIR
 prepare_tools
 prepare_data
 bench_groth16_zkutil
