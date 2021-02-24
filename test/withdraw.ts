@@ -22,7 +22,6 @@ function initTestCase() {
   const nonce = 99n;
 
   const account = new Account(2);
-  const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
   const accountID = state.createNewAccount();
 
   // set up account initial state
@@ -63,7 +62,7 @@ function initTestCase() {
     sign: account.sign,
     balance: balance,
     ay: Scalar.fromString(account.ay, 16),
-    ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
+    ethAddr: Scalar.fromString(account.ethAddr, 16),
     orderRoot: genesisOrderRoot,
     balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],
     account_path_elements: block.account_path_elements[block.account_path_elements.length-1][0],
