@@ -20,8 +20,8 @@ function initTestCase() {
   const tokenID = 0n;
   const account0 = new Account(2);
   const account1 = new Account(1);
-  let accountID0 = state.createNewAccount();
-  let accountID1 = state.createNewAccount();
+  const accountID0 = state.createNewAccount();
+  const accountID1 = state.createNewAccount();
 
   // mock existing account1 data
   state.setAccountKey(accountID1, account1.publicKey);

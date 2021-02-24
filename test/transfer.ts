@@ -96,7 +96,7 @@ function initTestCase() {
     receiver_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
     receiver_account_path_elements: block.account_path_elements[block.account_path_elements.length-1][1],
     oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
-    newAccountRoot: block.newAccountRoots[block.oldAccountRoots.length-1],
+    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length-1],
   };
 }
 
