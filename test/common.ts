@@ -196,40 +196,12 @@ class Tree<T> {
   }
 }
 
-function getBTreeProofNew(leaves, index) {
+function getBTreeProof(leaves, index) {
   let height = Math.round(Math.log2(leaves.length));
   assert(Math.pow(2, height) == leaves.length, 'getBTreeProof');
   let tree = new Tree<bigint>(height, 0n);
   tree.fillWithLeaves(leaves);
   return tree.getProof(index);
-}
-
-function getBTreeProof(leaves, index) {
-  // TODO: assert even length
-  // TODO: check index bounds
-
-  let tmpLeaves = leaves;
-  let path_elements = [];
-
-  while (tmpLeaves.length != 1) {
-    if (index % 2 == 0) {
-      path_elements.push([tmpLeaves[index + 1]]);
-    } else {
-      path_elements.push([tmpLeaves[index - 1]]);
-    }
-
-    let tempMidLeaves = [];
-    for (let i = 0; i + 1 < tmpLeaves.length; i += 2) {
-      tempMidLeaves.push(hash([tmpLeaves[i], tmpLeaves[i + 1]]));
-    }
-    tmpLeaves = tempMidLeaves;
-    index = Math.trunc(index / 2);
-  }
-
-  return {
-    root: tmpLeaves[0],
-    path_elements: path_elements,
-  };
 }
 
 class RawTx {
@@ -593,7 +565,7 @@ class GlobalState {
   }
 }
 
-export { TxType, TxLength, TxDetailIdx, getBTreeProofNew as getBTreeProof, GlobalState, hashTransfer, hashWithdraw, accountSign };
+export { TxType, TxLength, TxDetailIdx, getBTreeProof, GlobalState, hashTransfer, hashWithdraw, accountSign };
 
 if (require.main === module) {
   let t = new Tree<bigint>(2, 0n);
