@@ -20,38 +20,34 @@ import { TestSpotTrade } from './spot_trade';
 const print_info = false;
 const primeStr = "21888242871839275222246405745257275088548364400416034343698204186575808495617";
 
-// loadConstraints
-
 // TOOD: type 
-// async function checkConstraints(constraints, witness) {
-//     if (!constraints) {
-//       throw new Error('empty constraints');
-//     };
-//     for (let i=0; i<constraints.length; i++) {
-//         checkConstraint(constraints[i]);
-//     }
+async function checkConstraints(F, constraints, witness) {
+    if (!constraints) {
+      throw new Error('empty constraints');
+    };
+    for (let i=0; i<constraints.length; i++) {
+        checkConstraint(constraints[i]);
+    }
 
-//     function checkConstraint(constraint) {
-//         const F = self.F;
-//         const a = evalLC(constraint[0]);
-//         const b = evalLC(constraint[1]);
-//         const c = evalLC(constraint[2]);
+    function checkConstraint(constraint) {
+        const a = evalLC(constraint[0]);
+        const b = evalLC(constraint[1]);
+        const c = evalLC(constraint[2]);
 
-//         assert (F.isZero(F.sub(F.mul(a,b), c)), "Constraint doesn't match");
-//     }
+        assert (F.isZero(F.sub(F.mul(a,b), c)), "Constraint doesn't match");
+    }
 
-//     function evalLC(lc) {
-//         const F = self.F;
-//         let v = F.zero;
-//         for (let w in lc) {
-//             v = F.add(
-//                 v,
-//                 F.mul( lc[w], witness[w] )
-//             );
-//         }
-//         return v;
-//     }
-// }
+    function evalLC(lc) {
+        let v = F.zero;
+        for (let w in lc) {
+            v = F.add(
+                v,
+                F.mul( lc[w], BigInt(witness[w]) )
+            );
+        }
+        return v;
+    }
+}
 
 // TOOD: type
 async function assertOut(symbols, actualOut, expectedOut) {
@@ -123,7 +119,7 @@ async function testWithInputOutput(t: SimpleTest) {
 
   // create temp target dir
   const targetDir = tmp.dirSync({ prefix: `tmp-${t.constructor.name}-circuit` });
-  console.log(targetDir.name);
+  // console.log(targetDir.name);
   const circuitFilePath = path.join(targetDir.name, "circuit.circom");
   const r1csFilepath = path.join(targetDir.name, "circuit.r1cs");
   const cFilepath = path.join(targetDir.name, "circuit.c");
@@ -174,10 +170,10 @@ async function testWithInputOutput(t: SimpleTest) {
   // calculate used feild from R1Cs
   const r1cs = await loadR1cs(r1csFilepath, true, false);
   const F = new ZqField(r1cs.prime);
+  // const nVars = r1cs.nVars;
+  const constraints = r1cs.constraints;
 
-  // check constraints
-  // loadConstraints();
-  // checkConstraints();
+  await checkConstraints(F, constraints, witness);
 
   // assert output
   let symbols = await readSymbols(symFilepath);
@@ -190,18 +186,18 @@ async function testWithInputOutput(t: SimpleTest) {
 async function main() {
   try {
     await testWithInputOutput(new TestRescueHash());
-    // await testWithInputOutput(new TestCheckLeafExists());
-    // await testWithInputOutput(new TestCheckLeafExistsDisable());
-    // await testWithInputOutput(new TestCheckLeafUpdate());
-    // await testWithInputOutput(new TestCheckLeafUpdateDisable());
-    // await testWithInputOutput(new TestHashAccount());
-    // await testWithInputOutput(new TestHashOrder());
-    // await testWithInputOutput(new TestDepositToNew());
-    // await testWithInputOutput(new TestDepositToOld());
-    // await testWithInputOutput(new TestTransfer());
-    // await testWithInputOutput(new TestWithdraw());
-    // await testWithInputOutput(new TestBlock());
-    // await testWithInputOutput(new TestSpotTrade());
+    await testWithInputOutput(new TestCheckLeafExists());
+    await testWithInputOutput(new TestCheckLeafExistsDisable());
+    await testWithInputOutput(new TestCheckLeafUpdate());
+    await testWithInputOutput(new TestCheckLeafUpdateDisable());
+    await testWithInputOutput(new TestHashAccount());
+    await testWithInputOutput(new TestHashOrder());
+    await testWithInputOutput(new TestDepositToNew());
+    await testWithInputOutput(new TestDepositToOld());
+    await testWithInputOutput(new TestTransfer());
+    await testWithInputOutput(new TestWithdraw());
+    await testWithInputOutput(new TestBlock());
+    await testWithInputOutput(new TestSpotTrade());
   } catch (e) {
     console.error(e);
     process.exit(1);
