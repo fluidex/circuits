@@ -165,8 +165,8 @@ async function testWithInputOutput(t: SimpleTest) {
   cmd = `${targetDir.name}/circuit ${inputFilePath} ${outputjsonFilePath}`;
   const genWtnsOut = shelljs.exec(cmd);
   if (genWtnsOut.stderr || genWtnsOut.code != 0) {
-      console.error(genWtnsOut.stderr)
-      throw new Error('Could not generate witness')
+      console.error(genWtnsOut.stderr);
+      throw new Error('Could not generate witness');
   }
 
   // load witness
