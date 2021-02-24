@@ -75,13 +75,13 @@ class WithdrawTx {
 
 
 function hashTransfer({ from, to, tokenID, amount, fromNonce, toNonce, oldBalanceFrom, oldBalanceTo }) {
-  let data = hash([common.TxType.Transfer, tokenID, amount]);
+  let data = hash([TxType.Transfer, tokenID, amount]);
   data = hash([data, from, fromNonce, oldBalanceFrom]);
   data = hash([data, to, toNonce, oldBalanceTo]);
   return data;
 }
 function hashWithdraw({ accountID, tokenID, amount, nonce, oldBalance }) {
-  let data = hash([common.TxType.Withdraw, tokenID, amount]);
+  let data = hash([TxType.Withdraw, tokenID, amount]);
   //console.log([data, accountID, nonce, oldBalance]);
   data = hash([data, accountID, nonce, oldBalance]);
   return data;
