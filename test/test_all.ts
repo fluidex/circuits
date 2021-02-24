@@ -1,3 +1,5 @@
+const chai = require("chai");
+const assert = chai.assert;
 import * as fs from 'fs';
 import * as path from 'path';
 import * as shelljs from 'shelljs'
@@ -14,10 +16,11 @@ import { TestBlock } from './block';
 import { TestSpotTrade } from './spot_trade';
 
 const print_info = false;
+const primeStr = "21888242871839275222246405745257275088548364400416034343698204186575808495617";
 
 // loadConstraints
 
-// TOOD: type
+// TOOD: type assertion
 // async function checkConstraints(witness) {
 //     const self = this;
 //     if (!self.constraints) await self.loadConstraints();
@@ -48,36 +51,34 @@ const print_info = false;
 // }
 
 // TOOD: type
-// async function assertOut(symbols, actualOut, expectedOut) {
-//     const self = this;
-//     if (!symbols) {
-//       throw new Error('empty symbols');
-//     }
+async function assertOut(symbols, actualOut, expectedOut) {
+    if (!symbols) {
+      throw new Error('empty symbols');
+    }
 
-//     checkObject("main", expectedOut);
+    checkObject("main", expectedOut);
 
-//     function checkObject(prefix, eOut) {
+    function checkObject(prefix, eOut) {
 
-//         if (Array.isArray(eOut)) {
-//             for (let i=0; i<eOut.length; i++) {
-//                 checkObject(prefix + "["+i+"]", eOut[i]);
-//             }
-//         } else if ((typeof eOut == "object")&&(eOut.constructor.name == "Object")) {
-//             for (let k in eOut) {
-//                 checkObject(prefix + "."+k, eOut[k]);
-//             }
-//         } else {
-//             if (typeof self.symbols[prefix] == "undefined") {
-//                 assert(false, "Output variable not defined: "+ prefix);
-//             }
-//             const ba = actualOut[self.symbols[prefix].varIdx].toString();
-//             const be = eOut.toString();
-//             assert.strictEqual(ba, be, prefix);
-//         }
-//     }
-// }
+        if (Array.isArray(eOut)) {
+            for (let i=0; i<eOut.length; i++) {
+                checkObject(prefix + "["+i+"]", eOut[i]);
+            }
+        } else if ((typeof eOut == "object")&&(eOut.constructor.name == "Object")) {
+            for (let k in eOut) {
+                checkObject(prefix + "."+k, eOut[k]);
+            }
+        } else {
+            if (typeof self.symbols[prefix] == "undefined") {
+                assert(false, "Output variable not defined: "+ prefix);
+            }
+            const ba = actualOut[self.symbols[prefix].varIdx].toString();
+            const be = eOut.toString();
+            assert.strictEqual(ba, be, prefix);
+        }
+    }
+}
 
-// TOOD: type
 async function generateMainTestCircom(path: string, { src, main }: TestComponent) {
   let srcCode = `include "${src}";
   component main = ${main};`;
