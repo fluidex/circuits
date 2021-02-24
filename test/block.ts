@@ -14,28 +14,6 @@ const nTxs = 4;
 const balanceLevels = 2;
 const accountLevels = 2;
 
-function hashTransfer({ from, to, tokenID, amount, fromNonce, toNonce, oldBalanceFrom, oldBalanceTo }) {
-  let data = hash([common.TxType.Transfer, tokenID, amount]);
-  data = hash([data, from, fromNonce, oldBalanceFrom]);
-  data = hash([data, to, toNonce, oldBalanceTo]);
-  return data;
-}
-function hashWithdraw({ accountID, tokenID, amount, nonce, oldBalance }) {
-  let data = hash([common.TxType.Withdraw, tokenID, amount]);
-  //console.log([data, accountID, nonce, oldBalance]);
-  data = hash([data, accountID, nonce, oldBalance]);
-  return data;
-}
-function accountSign(acc, hash) {
-  let sig = acc.signHash(hash);
-  return {
-    hash: hash,
-    S: sig.S,
-    R8x: sig.R8[0],
-    R8y: sig.R8[1],
-  };
-}
-
 function initTestCase() {
   let state = new common.GlobalState(balanceLevels, accountLevels);
 
@@ -82,8 +60,8 @@ function initTestCase() {
   };
   let fullTransferTx = state.fillTransferTx(transferTx);
   // user should check fullTransferTx is consistent with transferTx before signing
-  let hash = hashTransfer(fullTransferTx);
-  transferTx.signature = accountSign(account1, hash);
+  let hash = common.hashTransfer(fullTransferTx);
+  transferTx.signature = common.accountSign(account1, hash);
   state.Transfer(transferTx);
 
   let withdrawTx = {
@@ -93,8 +71,8 @@ function initTestCase() {
     signature: null,
   };
   let fullWithdrawTx = state.fillWithdrawTx(withdrawTx);
-  hash = hashWithdraw(fullWithdrawTx);
-  withdrawTx.signature = accountSign(account0, hash);
+  hash = common.hashWithdraw(fullWithdrawTx);
+  withdrawTx.signature = common.accountSign(account0, hash);
   state.Withdraw(withdrawTx);
 
   let block = state.forge();

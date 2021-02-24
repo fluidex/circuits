@@ -73,6 +73,29 @@ class WithdrawTx {
   signature: TxSignature;
 }
 
+
+function hashTransfer({ from, to, tokenID, amount, fromNonce, toNonce, oldBalanceFrom, oldBalanceTo }) {
+  let data = hash([common.TxType.Transfer, tokenID, amount]);
+  data = hash([data, from, fromNonce, oldBalanceFrom]);
+  data = hash([data, to, toNonce, oldBalanceTo]);
+  return data;
+}
+function hashWithdraw({ accountID, tokenID, amount, nonce, oldBalance }) {
+  let data = hash([common.TxType.Withdraw, tokenID, amount]);
+  //console.log([data, accountID, nonce, oldBalance]);
+  data = hash([data, accountID, nonce, oldBalance]);
+  return data;
+}
+function accountSign(acc, hash) {
+  let sig = acc.signHash(hash);
+  return {
+    hash: hash,
+    S: sig.S,
+    R8x: sig.R8[0],
+    R8y: sig.R8[1],
+  };
+}
+
 class Tree<T> {
   public height: number;
   // precalculate mid hashes, so we don't have to store the empty nodes
@@ -562,7 +585,7 @@ class GlobalState {
   }
 }
 
-export { TxType, TxLength, TxDetailIdx, getBTreeProofNew as getBTreeProof, GlobalState };
+export { TxType, TxLength, TxDetailIdx, getBTreeProofNew as getBTreeProof, GlobalState, hashTransfer, hashWithdraw, accountSign };
 
 if (require.main === module) {
   let t = new Tree<bigint>(2, 0n);
