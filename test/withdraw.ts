@@ -4,7 +4,6 @@ const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
-// import { TxType, getBTreeProof } from './common';
 import * as common from './common';
 
 // circuit-level definitions

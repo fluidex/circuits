@@ -196,9 +196,9 @@ async function main() {
     // await testWithInputOutput(new TestDepositToNew());
     // await testWithInputOutput(new TestDepositToOld());
     // await testWithInputOutput(new TestTransfer());
-    // await testWithInputOutput(new TestWithdraw());
-    await testWithInputOutput(new TestBlock());
-    await testWithInputOutput(new TestSpotTrade());
+    await testWithInputOutput(new TestWithdraw());
+    // await testWithInputOutput(new TestBlock());
+    // await testWithInputOutput(new TestSpotTrade());
   } catch (e) {
     console.error(e);
     process.exit(1);
