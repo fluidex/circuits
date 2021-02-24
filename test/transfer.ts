@@ -4,7 +4,7 @@ const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
-import { TxType, getBTreeProof } from './common';
+import * as common from './common';
 
 // circuit-level definitions
 const balanceLevels = 5;
@@ -13,6 +13,61 @@ const accountLevels = 5;
 const genesisOrderRoot = getGenesisOrderRoot();
 
 function initTestCase() {
+  let state = new common.GlobalState(balanceLevels, accountLevels);
+
+  const tokenID = 2n;
+  const amount = 300n;
+  // set sufficient balance to transfer
+  const balance1 = amount + 1n;
+  const nonce1 = 51n;
+  const balance2 = 200n;
+  const nonce2 = 77n;
+
+  const account1 = new Account(2);
+  const ethAddr1NoPrefix = account1.ethAddr.replace('0x', '');
+  const accountID1 = state.createNewAccount();
+  const account2 = new Account(1);
+  const ethAddr2NoPrefix = account2.ethAddr.replace('0x', '');
+  const accountID2 = state.createNewAccount();
+
+  // set up account1 initial state
+  state.setAccountKey(accountID1, account1.publicKey);
+  for (let i = 0; i < 2 ** balanceLevels; i++) {
+    if (BigInt(i) == tokenID) {
+      state.setTokenBalance(accountID1, tokenID, balance1);
+    } else {
+      state.setTokenBalance(accountID1, BigInt(i), 10n + BigInt(i));
+    }
+  }
+  state.setAccountNonce(accountID1, nonce1);
+  state.setAccountOrderRoot(accountID1, genesisOrderRoot);
+  // set up account2 initial state
+  state.setAccountKey(accountID2, account2.publicKey);
+  for (let i = 0; i < 2 ** balanceLevels; i++) {
+    if (BigInt(i) == tokenID) {
+      state.setTokenBalance(accountID2, tokenID, balance2);
+    } else {
+      state.setTokenBalance(accountID2, BigInt(i), 20n + BigInt(i));
+    }
+  }
+  state.setAccountNonce(accountID2, nonce2);
+  state.setAccountOrderRoot(accountID2, genesisOrderRoot);
+
+  let transferTx = {
+    from: BigInt(accountID1),
+    to: BigInt(accountID2),
+    tokenID: BigInt(tokenID),
+    amount: amount,
+    signature: null,
+  };
+  let fullTransferTx = state.fillTransferTx(transferTx);
+  // user should check fullTransferTx is consistent with transferTx before signing
+  let txhash = common.hashTransfer(fullTransferTx);
+  transferTx.signature = common.accountSign(account1, txhash);
+  state.Transfer(transferTx);
+
+
+/*
   // input-level assignments and pre-processings
   const nonce = 51;
   const tokenID = 2;
@@ -101,41 +156,39 @@ function initTestCase() {
   mockTxHash = hash([mockTxHash, fromAccountID, nonce1, balance1]);
   mockTxHash = hash([mockTxHash, toAccountID, nonce2, balance2]);
   let signature = account1.signHash(mockTxHash);
+*/
 
+  let block = state.forge();
+  // TODO: assert length
   return {
     enabled: 1,
-    fromAccountID: fromAccountID,
-    toAccountID: toAccountID,
+    fromAccountID: accountID1,
+    toAccountID: accountID2,
     amount: amount,
     tokenID: tokenID,
-    nonce: nonce,
-    sigL2Hash: mockTxHash,
-    s: signature.S,
-    r8x: signature.R8[0],
-    r8y: signature.R8[1],
+    nonce: nonce1,
+    sigL2Hash: txhash,
+    s: transferTx.signature.S,
+    r8x: transferTx.signature.R8x,
+    r8y: transferTx.signature.R8y,
     nonce1: nonce1,
     sign1: account1.sign,
     balance1: balance1,
     ay1: Scalar.fromString(account1.ay, 16),
     ethAddr1: Scalar.fromString(ethAddr1NoPrefix, 16),
-    orderRoot1: oldSender.orderRoot,
-    sender_balance_path_elements: oldSenderBalanceProof.path_elements,
-    sender_account_path_elements: oldAccountProof.path_elements,
+    orderRoot1: genesisOrderRoot,
+    sender_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],
+    sender_account_path_elements: block.account_path_elements[block.account_path_elements.length-1][0],
     nonce2: nonce2,
     sign2: account2.sign,
     balance2: balance2,
     ay2: Scalar.fromString(account2.ay, 16),
     ethAddr2: Scalar.fromString(ethAddr2NoPrefix, 16),
-    orderRoot2: oldReceiver.orderRoot,
-    receiver_balance_path_elements: oldReceiverBalanceProof.path_elements,
-    receiver_account_path_elements: newAccountProof.path_elements,
-    oldSenderBalanceRoot: oldSenderBalanceProof.root,
-    newSenderBalanceRoot: newSenderBalanceProof.root,
-    oldReceiverBalanceRoot: oldReceiverBalanceProof.root,
-    newReceiverBalanceRoot: newReceiverBalanceProof.root,
-    oldAccountRoot: oldAccountProof.root,
-    tmpAccountRoot: tmpAccountProof.root,
-    newAccountRoot: newAccountProof.root,
+    orderRoot2: genesisOrderRoot,
+    receiver_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
+    receiver_account_path_elements: block.account_path_elements[block.account_path_elements.length-1][1],
+    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
+    newAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
   };
 }
 
