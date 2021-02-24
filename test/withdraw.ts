@@ -23,7 +23,7 @@ function initTestCase() {
 
   const account = new Account(2);
   const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
-  let accountID = state.createNewAccount();
+  const accountID = state.createNewAccount();
 
   // set up account initial state
   state.setAccountKey(accountID, account.publicKey);

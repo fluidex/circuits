@@ -182,8 +182,7 @@ async function testWithInputOutput(t: SimpleTest) {
   let symbols = await readSymbols(symFilepath);
   await assertOut(symbols, witness, t.getOutput());
 
-  console.log('test ', t.constructor.name, ' done');
-  console.log("");
+  console.log('test ', t.constructor.name, ' done', '\n');
   return true;
 }
 
