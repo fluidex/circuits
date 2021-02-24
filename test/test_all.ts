@@ -23,7 +23,7 @@ async function generateInput(path, input) {
       typeof value === 'bigint'
           ? value.toString()
           : value // return everything else unchanged
-  ,2);
+  , 2);
   fs.writeFileSync(path, text, 'utf8');
 }
 
