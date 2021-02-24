@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as shelljs from 'shelljs'
 import * as tmp from 'tmp-promise';
 import * as circom from 'circom';
+const loadR1cs = require("r1csfile").load;
 const ZqField = require("ffjavascript").ZqField;
 import { SimpleTest, TestComponent } from './interface';
 import { TestCheckLeafExists, TestCheckLeafExistsDisable, TestCheckLeafUpdate, TestCheckLeafUpdateDisable } from './binary_merkle_tree';
@@ -171,7 +172,8 @@ async function testWithInputOutput(t: SimpleTest) {
   const witness = JSON.parse(fs.readFileSync(outputjsonFilePath).toString())
 
   // calculate used feild from R1Cs
-  // const F = new ZqField(r1cs.prime);
+  const r1cs = await loadR1cs(r1csFilepath, true, false);
+  const F = new ZqField(r1cs.prime);
 
   // check constraints
   // loadConstraints();
