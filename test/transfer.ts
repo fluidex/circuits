@@ -24,10 +24,8 @@ function initTestCase() {
   const nonce2 = 77n;
 
   const account1 = new Account(2);
-  const ethAddr1NoPrefix = account1.ethAddr.replace('0x', '');
   const accountID1 = state.createNewAccount();
   const account2 = new Account(1);
-  const ethAddr2NoPrefix = account2.ethAddr.replace('0x', '');
   const accountID2 = state.createNewAccount();
 
   // set up account1 initial state
@@ -83,7 +81,7 @@ function initTestCase() {
     sign1: account1.sign,
     balance1: balance1,
     ay1: Scalar.fromString(account1.ay, 16),
-    ethAddr1: Scalar.fromString(ethAddr1NoPrefix, 16),
+    ethAddr1: Scalar.fromString(account1.ethAddr, 16),
     orderRoot1: genesisOrderRoot,
     sender_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],
     sender_account_path_elements: block.account_path_elements[block.account_path_elements.length-1][0],
@@ -91,12 +89,12 @@ function initTestCase() {
     sign2: account2.sign,
     balance2: balance2,
     ay2: Scalar.fromString(account2.ay, 16),
-    ethAddr2: Scalar.fromString(ethAddr2NoPrefix, 16),
+    ethAddr2: Scalar.fromString(account2.ethAddr, 16),
     orderRoot2: genesisOrderRoot,
     receiver_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
     receiver_account_path_elements: block.account_path_elements[block.account_path_elements.length-1][1],
     oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
-    newAccountRoot: block.newAccountRoots[block.oldAccountRoots.length-1],
+    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length-1],
   };
 }
 
