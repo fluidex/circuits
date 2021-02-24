@@ -69,10 +69,10 @@ async function assertOut(symbols, actualOut, expectedOut) {
                 checkObject(prefix + "."+k, eOut[k]);
             }
         } else {
-            if (typeof self.symbols[prefix] == "undefined") {
+            if (typeof symbols[prefix] == "undefined") {
                 assert(false, "Output variable not defined: "+ prefix);
             }
-            const ba = actualOut[self.symbols[prefix].varIdx].toString();
+            const ba = actualOut[symbols[prefix].varIdx].toString();
             const be = eOut.toString();
             assert.strictEqual(ba, be, prefix);
         }
@@ -92,6 +92,24 @@ async function generateInput(path: string, input: Object) {
           : value // return everything else unchanged
   , 2);
   fs.writeFileSync(path, text, 'utf8');
+}
+
+async function readSymbols(path: string) {
+    let symbols = {};
+
+    const symsStr = await fs.promises.readFile(path, "utf8");
+    const lines = symsStr.split("\n");
+    for (let i=0; i<lines.length; i++) {
+        const arr = lines[i].split(",");
+        if (arr.length!=4) continue;
+        symbols[arr[3]] = {
+            labelIdx: Number(arr[0]),
+            varIdx: Number(arr[1]),
+            componentIdx: Number(arr[2]),
+        };
+    }
+
+    return symbols;
 }
 
 async function testWithInputOutput(t: SimpleTest) {
@@ -120,7 +138,7 @@ async function testWithInputOutput(t: SimpleTest) {
   shelljs.exec(cmd);
   cmd = `cp ${circomRuntimePath}/c/*.hpp ${targetDir.name}`;
   shelljs.exec(cmd);
-  cmd = `node ${ffiasmPath}/src/buildzqfield.js -q 21888242871839275222246405745257275088548364400416034343698204186575808495617 -n Fr`;
+  cmd = `node ${ffiasmPath}/src/buildzqfield.js -q ${primeStr} -n Fr`;
   shelljs.exec(cmd);
   cmd = `mv fr.asm fr.cpp fr.hpp ${targetDir.name}`;
   shelljs.exec(cmd);
@@ -145,10 +163,12 @@ async function testWithInputOutput(t: SimpleTest) {
   const witness = JSON.parse(fs.readFileSync(outputjsonFilePath).toString())
 
   // check constraints
+  // loadConstraints();
+  // checkConstraints();
 
   // assert output
-  // cmd = `ls ${outputjsonFilePath}`;
-  // shelljs.exec(cmd);
+  let symbols = readSymbols(symFilepath);
+  await assertOut(symbols, witness, t.getOutput());
 
   console.log('test ', t.constructor.name, ' done');
   return true;
