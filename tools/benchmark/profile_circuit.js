@@ -54,7 +54,7 @@ async function loadCircuit(circuitPath, circuitType) {
     console.log('compiling', fullPath);
     const cmd = `cd ${dirName} && npx circom ${baseName}.circom --r1cs --wasm --sym -v && npx snarkjs r1cs export json ${baseName}.r1cs ${baseName}.r1cs.json`;
     console.log(`you can run '${cmd}' to avoid compiling every time`);
-    let circuit = await circom.tester(fullPath, { reduceConstraints: false });
+    let circuit = await circom.c_tester(fullPath, { reduceConstraints: false });
     await circuit.loadConstraints();
     await circuit.loadSymbols();
     for (const [name, symbol] of Object.entries(circuit.symbols)) {
