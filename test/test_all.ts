@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as shelljs from 'shelljs'
 import * as tmp from 'tmp-promise';
 import * as circom from 'circom';
+// import { ZqField } as from 'ffjavascript';
 import { SimpleTest, TestComponent } from './interface';
 import { TestCheckLeafExists, TestCheckLeafExistsDisable, TestCheckLeafUpdate, TestCheckLeafUpdateDisable } from './binary_merkle_tree';
 import { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash } from './rescue';
@@ -20,12 +21,13 @@ const primeStr = "21888242871839275222246405745257275088548364400416034343698204
 
 // loadConstraints
 
-// TOOD: type assertion
-// async function checkConstraints(witness) {
-//     const self = this;
-//     if (!self.constraints) await self.loadConstraints();
-//     for (let i=0; i<self.constraints.length; i++) {
-//         checkConstraint(self.constraints[i]);
+// TOOD: type 
+// async function checkConstraints(constraints, witness) {
+//     if (!constraints) {
+//       throw new Error('empty constraints');
+//     };
+//     for (let i=0; i<constraints.length; i++) {
+//         checkConstraint(constraints[i]);
 //     }
 
 //     function checkConstraint(constraint) {
@@ -108,7 +110,6 @@ async function readSymbols(path: string) {
             componentIdx: Number(arr[2]),
         };
     }
-
     return symbols;
 }
 
@@ -142,7 +143,11 @@ async function testWithInputOutput(t: SimpleTest) {
   shelljs.exec(cmd);
   cmd = `mv fr.asm fr.cpp fr.hpp ${targetDir.name}`;
   shelljs.exec(cmd);
-  cmd = `nasm -felf64 ${targetDir.name}/fr.asm`;
+  if (process.platform === "darwin") {
+      cmd = `nasm -fmacho64 --prefix _  ${targetDir.name}/fr.asm`;
+  }  else if (process.platform === "linux") {
+      cmd = `nasm -felf64 ${targetDir.name}/fr.asm`;
+  } else throw("Unsupported platform");
   shelljs.exec(cmd);
   cmd = `NODE_OPTIONS=--max-old-space-size=8192 node --stack-size=65500 ${circomcliPath} ${circuitFilePath} -r ${r1csFilepath} -c ${cFilepath} -s ${symFilepath}`;
   shelljs.exec(cmd);
@@ -152,8 +157,11 @@ async function testWithInputOutput(t: SimpleTest) {
     // cmd = `NODE_OPTIONS=--max-old-space-size=8192 node ${snarkjsPath} r1cs print ${r1csFilepath} ${symFilepath}`;
     // shelljs.exec(cmd);
   };
-  // TODO: check platform
-  cmd = `g++ -pthread ${targetDir.name}/main.cpp ${targetDir.name}/calcwit.cpp ${targetDir.name}/utils.cpp ${targetDir.name}/fr.cpp ${targetDir.name}/fr.o ${cFilepath} -o ${targetDir.name}/circuit -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`;
+  if (process.platform === "darwin") {
+      cmd = `g++ ${targetDir.name}/main.cpp ${targetDir.name}/calcwit.cpp ${targetDir.name}/utils.cpp ${targetDir.name}/fr.cpp ${targetDir.name}/fr.o ${cFilepath} -o ${targetDir.name}/circuit -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`;
+  }  else if (process.platform === "linux") {
+      cmd = `g++ -pthread ${targetDir.name}/main.cpp ${targetDir.name}/calcwit.cpp ${targetDir.name}/utils.cpp ${targetDir.name}/fr.cpp ${targetDir.name}/fr.o ${cFilepath} -o ${targetDir.name}/circuit -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`;
+  } else throw("Unsupported platform");
   shelljs.exec(cmd);
 
   // gen witness
@@ -162,12 +170,15 @@ async function testWithInputOutput(t: SimpleTest) {
   // load witness
   const witness = JSON.parse(fs.readFileSync(outputjsonFilePath).toString())
 
+  // calculate used feild from R1Cs
+  // const F = new ZqField(r1cs.prime);
+
   // check constraints
   // loadConstraints();
   // checkConstraints();
 
   // assert output
-  let symbols = readSymbols(symFilepath);
+  let symbols = await readSymbols(symFilepath);
   await assertOut(symbols, witness, t.getOutput());
 
   console.log('test ', t.constructor.name, ' done');
