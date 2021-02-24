@@ -16,7 +16,7 @@ function prepare_tools() {
     cargo install --git https://github.com/poma/zkutil
     echo install rapidsnark
     if [ ! -f $RAPIDSNARK_BIN ]; then
-        source ./install_rapidsnark.sh
+        source $DIR/install_rapidsnark.sh
     fi
     echo install plonkit
     cargo install --git https://github.com/Fluidex/plonkit
@@ -24,7 +24,7 @@ function prepare_tools() {
 
 function prepare_data() {
     echo process circuit in $CIRCUIT_DIR
-    source ./process_circom_circuit.sh
+    source $DIR/process_circom_circuit.sh
 }
 
 function bench_groth16_snarkjs_wasm() {
@@ -81,7 +81,7 @@ function bench_plonk_plonkit() {
 }
 
 mkdir -p $CIRCUIT_DIR
-npx ts-node export_circuit.ts $CIRCUIT_DIR
+npx ts-node $DIR/export_circuit.ts $CIRCUIT_DIR
 prepare_tools
 prepare_data
 bench_groth16_zkutil
