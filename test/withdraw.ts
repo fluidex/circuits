@@ -65,10 +65,10 @@ function initTestCase() {
     ay: Scalar.fromString(account.ay, 16),
     ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
     orderRoot: genesisOrderRoot,
-    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1],
-    account_path_elements: block.account_path_elements[block.account_path_elements.length - 1],
-    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
-    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
+    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],
+    account_path_elements: block.account_path_elements[block.account_path_elements.length-1][0],
+    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
+    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length-1],
   };
 }
 
