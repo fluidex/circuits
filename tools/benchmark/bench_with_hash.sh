@@ -77,7 +77,7 @@ function bench_plonk_plonkit() {
     (time $PLONKIT_BIN prove -m $KEY -l $KEY_LAG -c circuit.r1cs -w witness.wtns -p proof.bin) 2>plonkit_lagrange.time
     $PLONKIT_BIN verify --proof proof.bin --verification_key vk.bin
     popd
-    node profile_circuit.js $CIRCUIT_DIR
+    node $DIR/profile_circuit.js $CIRCUIT_DIR
 }
 
 mkdir -p $CIRCUIT_DIR
@@ -85,5 +85,5 @@ npx ts-node $DIR/export_circuit.ts $CIRCUIT_DIR
 prepare_tools
 prepare_data
 bench_groth16_zkutil
-bench_groth16_rapidsnark
+# bench_groth16_rapidsnark
 bench_plonk_plonkit
