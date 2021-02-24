@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as shelljs from 'shelljs'
 import * as tmp from 'tmp-promise';
 import * as circom from 'circom';
-// import { ZqField } as from 'ffjavascript';
+const ZqField = require("ffjavascript").ZqField;
 import { SimpleTest, TestComponent } from './interface';
 import { TestCheckLeafExists, TestCheckLeafExistsDisable, TestCheckLeafUpdate, TestCheckLeafUpdateDisable } from './binary_merkle_tree';
 import { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash } from './rescue';
