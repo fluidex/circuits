@@ -28,17 +28,30 @@ async function generateInput(path, input) {
 }
 
 async function testWithInputOutput(t: SimpleTest) {
-  // create temp dir
+  // console.log(__dirname);
+  const circomRuntimePath = path.join(__dirname, "..", "node_modules", "circom_runtime");
+  const snarkjsPath = path.join(__dirname, "..", "node_modules", "snarkjs", "build", "cli.cjs");
+  const ffiasmPath = path.join(__dirname, "..", "node_modules", "ffiasm");
+
+  // create temp target dir
   const tmpDir = tmp.dirSync({ prefix: 'tmp-circuit-dir' });
   // console.log(tmpDir.name);
-
   const circuitFilePath = path.join(tmpDir.name, "circuit.circom");
+  const r1csFilepath = path.join(tmpDir.name, "circuit.r1cs");
+  const cFilepath = path.join(tmpDir.name, "circuit.c");
+  const symFilepath = path.join(tmpDir.name, "circuit.sym");
   const inputFilePath = path.join(tmpDir.name, "input.json");
 
   await generateMainTestCircom(circuitFilePath, t.getComponent());
   await generateInput(inputFilePath, t.getInput());
 
 
+  // gen witness
+
+  // assert input output
+
+  console.log('test ', t.constructor.name, ' done');
+  return true;
 }
 
 async function main() {
