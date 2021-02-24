@@ -10,7 +10,7 @@ function exportCircuit(testClass, locDir) {
   fs.writeFileSync(locDir + '/input.json', JSON.stringify(stringifyBigInts(input), null, 2));
   const { src, main } = testClass.getComponent();
   const circuitSrc = `include "${src}";
-	    component main = ${main};`;
+  component main = ${main};`;
   fs.writeFileSync(locDir + '/circuit.circom', circuitSrc);
 }
 

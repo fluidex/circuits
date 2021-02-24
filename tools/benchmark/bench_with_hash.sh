@@ -1,12 +1,14 @@
 #!/bin/bash
 set -uex
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 CIRCUIT_POW=20
 export CIRCUIT_DIR=data/$HASH/$CIRCUIT
 
 ZKUTIL_BIN=zkutil
 PLONKIT_BIN=plonkit
-export RAPIDSNARK_DIR=`pwd`/../../node_modules/rapidsnark
+export RAPIDSNARK_DIR=$DIR/../../node_modules/rapidsnark
 RAPIDSNARK_BIN=$RAPIDSNARK_DIR/build/prover
 
 function prepare_tools() {
