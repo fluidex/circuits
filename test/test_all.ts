@@ -180,6 +180,7 @@ async function testWithInputOutput(t: SimpleTest) {
   await assertOut(symbols, witness, t.getOutput());
 
   console.log('test ', t.constructor.name, ' done');
+  console.log("");
   return true;
 }
 
