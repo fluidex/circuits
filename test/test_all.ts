@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as shelljs from 'shelljs'
 import * as tmp from 'tmp-promise';
 import * as circom from 'circom';
 import { SimpleTest, TestComponent } from './interface';
@@ -34,8 +35,8 @@ async function testWithInputOutput(t: SimpleTest) {
   const ffiasmPath = path.join(__dirname, "..", "node_modules", "ffiasm");
 
   // create temp target dir
-  const tmpDir = tmp.dirSync({ prefix: 'tmp-circuit-dir' });
-  // console.log(tmpDir.name);
+  const tmpDir = tmp.dirSync({ prefix: `tmp-${t.constructor.name}-circuit` });
+  console.log(tmpDir.name);
   const circuitFilePath = path.join(tmpDir.name, "circuit.circom");
   const r1csFilepath = path.join(tmpDir.name, "circuit.r1cs");
   const cFilepath = path.join(tmpDir.name, "circuit.c");
@@ -44,6 +45,10 @@ async function testWithInputOutput(t: SimpleTest) {
 
   await generateMainTestCircom(circuitFilePath, t.getComponent());
   await generateInput(inputFilePath, t.getInput());
+
+  var cmd String; 
+  // cmd = `rm ${inputJsonFilepath} ${outputJsonFilepath}`
+  // shelljs.exec(cmd)
 
 
   // gen witness
