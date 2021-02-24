@@ -279,6 +279,9 @@ class AccountState {
   updateNonce(nonce) {
     this.nonce = nonce;
   }
+  updateOrderRoot(orderRoot) {
+    this.orderRoot = orderRoot;
+  }
 }
 
 class GlobalState {
@@ -318,6 +321,11 @@ class GlobalState {
   }
   setAccountNonce(accountID, nonce: BigInt) {
     this.accounts.get(accountID).updateNonce(nonce);
+    this.recalculateFromAccountState(accountID);
+  }
+  // this function should only be use in tests for convenience
+  setAccountOrderRoot(accountID, orderRoot: BigInt) {
+    this.accounts.get(accountID).updateOrderRoot(orderRoot);
     this.recalculateFromAccountState(accountID);
   }
   increaseNonce(accountID) {

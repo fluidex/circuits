@@ -164,8 +164,13 @@ async function testWithInputOutput(t: SimpleTest) {
   // gen witness
   cmd = `${targetDir.name}/circuit ${inputFilePath} ${outputjsonFilePath}`;
   shelljs.exec(cmd);
+  console.log(cmd);
+
   // load witness
-  const witness = JSON.parse(fs.readFileSync(outputjsonFilePath).toString())
+  let a = fs.readFileSync(outputjsonFilePath);
+  console.log(a);
+
+  const witness = ""; // JSON.parse(fs.readFileSync(outputjsonFilePath).toString())
 
   // calculate used feild from R1Cs
   const r1cs = await loadR1cs(r1csFilepath, true, false);
