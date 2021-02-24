@@ -4,7 +4,7 @@ set -uex
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 CIRCUIT_POW=20
-export CIRCUIT_DIR=data/$HASH/$CIRCUIT
+export CIRCUIT_DIR=$DIR/data/$HASH/$CIRCUIT
 
 ZKUTIL_BIN=zkutil
 PLONKIT_BIN=plonkit
@@ -62,8 +62,8 @@ function bench_groth16_zkutil() {
 
 function bench_plonk_plonkit() {
     echo benchmark plonkit with plonkit
-    KEY=`pwd`/keys/plonk/2pow${CIRCUIT_POW}.key
-    KEY_LAG=`pwd`/keys/plonk/2pow${CIRCUIT_POW}_lagrange.key
+    KEY=$DIR/keys/plonk/2pow${CIRCUIT_POW}.key
+    KEY_LAG=$DIR/keys/plonk/2pow${CIRCUIT_POW}_lagrange.key
     if [ ! -f $KEY ]; then
         mkdir -p keys/plonk
         $PLONKIT_BIN setup --power ${CIRCUIT_POW} --srs_monomial_form $KEY
@@ -85,5 +85,5 @@ npx ts-node $DIR/export_circuit.ts $CIRCUIT_DIR
 prepare_tools
 prepare_data
 bench_groth16_zkutil
-# bench_groth16_rapidsnark
+bench_groth16_rapidsnark
 bench_plonk_plonkit
