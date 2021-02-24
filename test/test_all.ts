@@ -163,23 +163,21 @@ async function testWithInputOutput(t: SimpleTest) {
 
   // gen witness
   cmd = `${targetDir.name}/circuit ${inputFilePath} ${outputjsonFilePath}`;
-  shelljs.exec(cmd);
-  console.log(cmd);
+  const genWtnsOut = shelljs.exec(cmd);
+  if (genWtnsOut.stderr || genWtnsOut.code != 0) {
+      console.error(genWtnsOut.stderr)
+      throw new Error('Could not generate witness')
+  }
 
   // load witness
-  let a = fs.readFileSync(outputjsonFilePath);
-  console.log(a);
-
-  const witness = ""; // JSON.parse(fs.readFileSync(outputjsonFilePath).toString())
+  const witness = JSON.parse(fs.readFileSync(outputjsonFilePath).toString());
 
   // calculate used feild from R1Cs
   const r1cs = await loadR1cs(r1csFilepath, true, false);
   const F = new ZqField(r1cs.prime);
   // const nVars = r1cs.nVars;
   const constraints = r1cs.constraints;
-
   await checkConstraints(F, constraints, witness);
-
   // assert output
   let symbols = await readSymbols(symFilepath);
   await assertOut(symbols, witness, t.getOutput());
