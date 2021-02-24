@@ -8,7 +8,7 @@ const forceRecompile = false;
 
 const circuitPath = process.argv.slice(2)[0];
 //const absCircuitPath = path.join(__dirname, circuitPath);
-const sunburstOutputFile = path.join('graph', 'data.js');
+const sunburstOutputFile = path.join(__dirname, 'graph', 'data.js');
 
 function almostEq(a, b, eps = 1e-5) {
   return a * (1 - eps) < b && b < a * (1 + eps);
