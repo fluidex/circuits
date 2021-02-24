@@ -1,5 +1,9 @@
 ## Circuits for FluiDex
 
+## Prerequisite
++ nlohmann-json3-dev
++ nasm
+
 ## Test
 
 ```
