@@ -1,4 +1,5 @@
 include "../node_modules/circomlib/circuits/compconstant.circom";
+include "./lib/hash_state.circom";
 include "./decode_tx.circom";
 include "./deposit_to_new.circom";
 include "./deposit_to_old.circom";
@@ -17,7 +18,7 @@ include "./withdraw.circom";
  * @input oldAccountRoots[nTxs] - {Array(Field)} - initial account state root for each transaction 
  * @input newAccountRoots[nTxs] - {Array(Field)} - final account state root for each transaction
  */
-template Block(nTxs, balanceLevels, accountLevels) {
+template Block(nTxs, orderLevels, balanceLevels, accountLevels) {
     // transactions
     signal input txsType[nTxs];
     signal input encodedTxs[nTxs][18];
@@ -45,6 +46,8 @@ template Block(nTxs, balanceLevels, accountLevels) {
             decodedTx[i].in[j] <== encodedTxs[i][j];
         }
     }
+
+    component genesisOrderRoot = CalculateGenesisOrderRoot(orderLevels);
 
     // check transaction type
     component enableDepositToNew[nTxs];
@@ -78,6 +81,7 @@ template Block(nTxs, balanceLevels, accountLevels) {
         // try process deposit_to_new
         processDepositToNew[i] = DepositToNew(balanceLevels, accountLevels);
         processDepositToNew[i].enabled <== enableDepositToNew[i].out;
+        processDepositToNew[i].genesisOrderRoot <== genesisOrderRoot.root;
         processDepositToNew[i].accountID <== decodedTx[i].accountID2;
         processDepositToNew[i].tokenID <== decodedTx[i].tokenID;
         processDepositToNew[i].ethAddr <== decodedTx[i].ethAddr2;

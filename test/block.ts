@@ -11,9 +11,9 @@ const assert = require('assert').strict;
 
 // circuit-level definitions
 const nTxs = 4;
-const orderLevels = 2;
-const balanceLevels = 2;
-const accountLevels = 2;
+const orderLevels = 1;
+const balanceLevels = 1;
+const accountLevels = 1;
 
 function initTestCase() {
   let state = new common.GlobalState(orderLevels, balanceLevels, accountLevels);
@@ -101,7 +101,7 @@ class TestBlock implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'block.circom'),
-      main: `Block(${nTxs}, ${balanceLevels}, ${accountLevels})`,
+      main: `Block(${nTxs}, ${orderLevels}, ${balanceLevels}, ${accountLevels})`,
     };
   }
 }
