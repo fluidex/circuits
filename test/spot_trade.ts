@@ -203,7 +203,7 @@ function initTestCase() {
     order1_token_buy_balance: account1_balance_buy,
     order2_token_sell_balance: account2_balance_sell,
     order2_token_buy_balance: account2_balance_buy,
-    orders_path_elements: [oldOrder1Proof.path_elements, oldOrder2Proof.path_elements],
+    order_path_elements: [oldOrder1Proof.path_elements, oldOrder2Proof.path_elements],
     old_account_root: oldAccount1Proof.root,
     new_account_root: newAccount2Proof.root,
     old_account1_balance_path_elements: oldAccount1BalanceProof.path_elements,
