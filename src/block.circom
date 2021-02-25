@@ -42,7 +42,7 @@ template Block(nTxs, orderLevels, balanceLevels, accountLevels) {
     component decodedTx[nTxs];
     for (var i = 0; i < nTxs; i++) {
         decodedTx[i] = DecodeTx();
-        for (var j = 0; j < 18; j++) {
+        for (var j = 0; j < TxLength(); j++) {
             decodedTx[i].in[j] <== encodedTxs[i][j];
         }
     }
