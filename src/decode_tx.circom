@@ -22,8 +22,10 @@ template DecodeTx() {
     signal output ay2;
     signal output nonce1;
     signal output nonce2;
-    signal output balance1;
-    signal output balance2;
+    signal output balance1; // default token sender balance
+    signal output balance2; // default token receiver balance
+    signal output balance3; // counter token (in spot_trade) sender balance
+    signal output balance4; // counter token (in spot_trade) receiver balance
 
     signal output sigL2Hash;
     signal output s;
@@ -50,9 +52,11 @@ template DecodeTx() {
     
     balance1 <== in[12];
     balance2 <== in[13];
+    balance3 <== in[14];
+    balance4 <== in[15];
     
-    sigL2Hash <== in[14];
-    s <== in[15];
-    r8x <== in[16];
-    r8y <== in[17];
+    sigL2Hash <== in[16];
+    s <== in[17];
+    r8x <== in[18];
+    r8y <== in[19];
 }
