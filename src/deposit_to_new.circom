@@ -20,6 +20,9 @@ include "./lib/binary_merkle_tree.circom";
 template DepositToNew(balanceLevels, accountLevels) {
     signal input enabled;
 
+    // should only be calculated from the main circuit itself
+    signal input genesisOrderRoot;
+
     // Tx
     signal input accountID;
     signal input tokenID;
@@ -84,7 +87,7 @@ template DepositToNew(balanceLevels, accountLevels) {
     oldAccountHash.balanceRoot <== old_balance_tree.root;
     oldAccountHash.ay <== 0;
     oldAccountHash.ethAddr <== 0;
-    oldAccountHash.orderRoot <== getGenesisOrderRoot();
+    oldAccountHash.orderRoot <== genesisOrderRoot;
     // new account state hash
     component newAccountHash = HashAccount();
     newAccountHash.nonce <== 0;
@@ -92,7 +95,7 @@ template DepositToNew(balanceLevels, accountLevels) {
     newAccountHash.balanceRoot <== new_balance_tree.root;
     newAccountHash.ay <== ay;
     newAccountHash.ethAddr <== ethAddr;
-    newAccountHash.orderRoot <== getGenesisOrderRoot();
+    newAccountHash.orderRoot <== genesisOrderRoot;
     // check update
     component account_update_checker = CheckLeafUpdate(accountLevels);
     account_update_checker.enabled <== enabled;

@@ -2,7 +2,7 @@ import { assert } from 'console';
 import { hash } from '../helper.ts/hash';
 import { Account } from '../helper.ts/account';
 import { Tree } from '../helper.ts/binary_merkle_tree';
-import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
+import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 
@@ -150,6 +150,7 @@ class AccountState {
 }
 
 class GlobalState {
+  orderLevels: number;
   balanceLevels: number;
   accountLevels: number;
   accountTree: Tree<bigint>;
@@ -160,10 +161,11 @@ class GlobalState {
   defaultBalanceRoot: bigint;
   defaultAccountLeaf: bigint;
   defaultOrderRoot: bigint;
-  constructor(balanceLevels, accountLevels) {
+  constructor(orderLevels, balanceLevels, accountLevels) {
+    this.orderLevels = orderLevels;
     this.balanceLevels = balanceLevels;
     this.accountLevels = accountLevels;
-    this.defaultOrderRoot = getGenesisOrderRoot();
+    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels);
     this.defaultBalanceRoot = new Tree<bigint>(balanceLevels, 0n).getRoot();
     // defaultAccountLeaf depends on defaultOrderRoot and defaultBalanceRoot
     this.defaultAccountLeaf = this.hashForEmptyAccount();

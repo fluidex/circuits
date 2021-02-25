@@ -2,18 +2,19 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
+import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 
 // circuit-level definitions
+const orderLevels = 2;
 const balanceLevels = 2;
 const accountLevels = 2;
 
-const genesisOrderRoot = getGenesisOrderRoot();
+const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initTestCase() {
-  let state = new common.GlobalState(balanceLevels, accountLevels);
+  let state = new common.GlobalState(orderLevels, balanceLevels, accountLevels);
 
   const tokenID = 2n;
   const amount = 300n;

@@ -3,7 +3,7 @@ import { hash } from '../helper.ts/hash';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
+import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 //import { assert } from 'console';
@@ -11,11 +11,12 @@ const assert = require('assert').strict;
 
 // circuit-level definitions
 const nTxs = 4;
+const orderLevels = 2;
 const balanceLevels = 2;
 const accountLevels = 2;
 
 function initTestCase() {
-  let state = new common.GlobalState(balanceLevels, accountLevels);
+  let state = new common.GlobalState(orderLevels, balanceLevels, accountLevels);
 
   const tokenID = 0n;
   const account0 = new Account(2);

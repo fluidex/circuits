@@ -35,8 +35,7 @@ function hashAccountState(st) {
 }
 
 function calculateGenesisOrderRoot(orderLevels) {
-  let tree = new Tree<bigint>(orderLevels, 0n);
-  return tree.getRoot();
+  return new Tree<bigint>(orderLevels, 0n).getRoot();
 }
 
 /**
