@@ -21,7 +21,7 @@ include "./withdraw.circom";
 template Block(nTxs, orderLevels, balanceLevels, accountLevels) {
     // transactions
     signal input txsType[nTxs];
-    signal input encodedTxs[nTxs][18];
+    signal input encodedTxs[nTxs][TxLength()];
 
     // State
     // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
