@@ -2,9 +2,10 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
+import { getBTreeProof } from '../helper.ts/binary_merkle_tree';
 import { hashAccountState, hashOrderState, getGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
-import { TxType, getBTreeProof } from './common';
+import { TxType } from './common';
 
 // circuit-level definitions
 const orderLevels = 2;
