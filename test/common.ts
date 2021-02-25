@@ -14,7 +14,7 @@ enum TxType {
   Withdraw,
 }
 
-const TxLength = 20;
+const TxLength = 35;
 enum TxDetailIdx {
   TokenID,
   Amount,
