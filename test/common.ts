@@ -102,6 +102,8 @@ class RawTx {
   payload: Array<bigint>;
   balancePath0: Array<bigint>;
   balancePath1: Array<bigint>;
+  balancePath2: Array<bigint>;
+  balancePath3: Array<bigint>;
   orderRoot0: bigint;
   orderRoot1: bigint;
   accountPath0: Array<bigint>;
@@ -276,6 +278,8 @@ class GlobalState {
       payload: encodedTx,
       balancePath0: proof.balancePath,
       balancePath1: proof.balancePath,
+      balancePath2: proof.balancePath,
+      balancePath3: proof.balancePath,
       orderRoot0: genesisOrderRoot,
       orderRoot1: genesisOrderRoot,
       accountPath0: proof.accountPath,
@@ -313,6 +317,8 @@ class GlobalState {
       payload: encodedTx,
       balancePath0: proof.balancePath,
       balancePath1: proof.balancePath,
+      balancePath2: proof.balancePath,
+      balancePath3: proof.balancePath,
       orderRoot0: acc.orderRoot,
       orderRoot1: acc.orderRoot,
       accountPath0: proof.accountPath,
@@ -386,6 +392,8 @@ class GlobalState {
       payload: encodedTx,
       balancePath0: proofFrom.balancePath,
       balancePath1: null,
+      balancePath2: proofFrom.balancePath,
+      balancePath3: null,
       accountPath0: proofFrom.accountPath,
       accountPath1: null,
       orderRoot0: fromAccount.orderRoot,
@@ -399,6 +407,7 @@ class GlobalState {
 
     let proofTo = this.stateProof(tx.to, tx.tokenID);
     rawTx.balancePath1 = proofTo.balancePath;
+    rawTx.balancePath3 = proofTo.balancePath;
     rawTx.accountPath1 = proofTo.accountPath;
     this.setTokenBalance(tx.to, tx.tokenID, toOldBalance + tx.amount);
 
@@ -434,6 +443,8 @@ class GlobalState {
       payload: encodedTx,
       balancePath0: proof.balancePath,
       balancePath1: proof.balancePath,
+      balancePath2: proof.balancePath,
+      balancePath3: proof.balancePath,
       orderRoot0: acc.orderRoot,
       orderRoot1: acc.orderRoot,
       accountPath0: proof.accountPath,
@@ -451,7 +462,7 @@ class GlobalState {
   forge() {
     let txsType = this.bufferedTxs.map(tx => tx.txType);
     let encodedTxs = this.bufferedTxs.map(tx => tx.payload);
-    let balance_path_elements = this.bufferedTxs.map(tx => [tx.balancePath0, tx.balancePath1]);
+    let balance_path_elements = this.bufferedTxs.map(tx => [tx.balancePath0, tx.balancePath1, tx.balancePath2, tx.balancePath3]);
     let orderRoots = this.bufferedTxs.map(tx => [tx.orderRoot0, tx.orderRoot1]);
     let account_path_elements = this.bufferedTxs.map(tx => [tx.accountPath0, tx.accountPath1]);
     let oldAccountRoots = this.bufferedTxs.map(tx => tx.rootBefore);
