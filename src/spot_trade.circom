@@ -208,7 +208,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     // TODO: tx fee & trading fee
 
 
-    signal input orders_path_elements[2][orderLevels][1];
+    signal input order_path_elements[2][orderLevels][1];
     /// update order 1
     component order1_updater = orderUpdater(orderLevels);
     order1_updater.orderID <== order1_id;
@@ -223,7 +223,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order1_updater.old_status <== 0; // TODO:
     order1_updater.new_status <== 0; // TODO:
     for (var i = 0; i < orderLevels; i++) {
-        order1_updater.order_path_elements[i][0] <== orders_path_elements[0][i][0];
+        order1_updater.order_path_elements[i][0] <== order_path_elements[0][i][0];
     }
 
     /// update order 2
@@ -240,7 +240,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order2_updater.old_status <== 0; // TODO:
     order2_updater.new_status <== 0; // TODO:
     for (var i = 0; i < orderLevels; i++) {
-        order2_updater.order_path_elements[i][0] <== orders_path_elements[1][i][0];
+        order2_updater.order_path_elements[i][0] <== order_path_elements[1][i][0];
     }
 
     signal input order1_accountID;
