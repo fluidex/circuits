@@ -2,18 +2,19 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
+import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 
 // circuit-level definitions
+const orderLevels = 2;
 const balanceLevels = 2;
 const accountLevels = 2;
 
-const genesisOrderRoot = getGenesisOrderRoot();
+const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initDepositToNew() {
-  let state = new common.GlobalState(balanceLevels, accountLevels);
+  let state = new common.GlobalState(orderLevels,balanceLevels, accountLevels);
 
   const tokenID = 0n;
   const amount = 200n
@@ -27,12 +28,13 @@ function initDepositToNew() {
     ethAddr: Scalar.fromString(account.ethAddr, 16),
     sign: BigInt(account.sign),
     ay: Scalar.fromString(account.ay, 16),
-  });
+  }, genesisOrderRoot);
 
   let block = state.forge();
   // TODO: assert length
   return {
     enabled: 1,
+    genesisOrderRoot: genesisOrderRoot,
     accountID: accountID,
     tokenID: tokenID,
     ethAddr: Scalar.fromString(account.ethAddr, 16),
@@ -47,7 +49,7 @@ function initDepositToNew() {
 }
 
 function initDepositToOld() {
-  let state = new common.GlobalState(balanceLevels, accountLevels);
+  let state = new common.GlobalState(orderLevels, balanceLevels, accountLevels);
 
   const tokenID = 0n;
   const balance = 300n;
@@ -99,6 +101,7 @@ class TestDepositToNew implements SimpleTest {
   getInput() {
     return {
       enabled: deposit_to_new_test_case.enabled,
+      genesisOrderRoot: deposit_to_new_test_case.genesisOrderRoot,
       accountID: deposit_to_new_test_case.accountID,
       tokenID: deposit_to_new_test_case.tokenID,
       ethAddr: deposit_to_new_test_case.ethAddr,

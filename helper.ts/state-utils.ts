@@ -1,5 +1,6 @@
 const Scalar = require('ffjavascript').Scalar;
 import { hash } from '../helper.ts/hash';
+import { Tree } from '../helper.ts/binary_merkle_tree';
 
 /**
  * Encode an account state object into an array
@@ -33,9 +34,8 @@ function hashAccountState(st) {
   return hash(accountState2Array(st));
 }
 
-// TODO: calculate from orderLevels
-function getGenesisOrderRoot() {
-  return 0n;
+function calculateGenesisOrderRoot(orderLevels) {
+  return new Tree<bigint>(orderLevels, 0n).getRoot();
 }
 
 /**
@@ -62,4 +62,4 @@ function hashOrderState(st) {
   return hash(orderState2Array(st));
 }
 
-export { hashAccountState, hashOrderState, getGenesisOrderRoot };
+export { hashAccountState, hashOrderState, calculateGenesisOrderRoot };

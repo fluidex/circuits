@@ -3,7 +3,7 @@ import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { getBTreeProof } from '../helper.ts/binary_merkle_tree';
-import { hashAccountState, hashOrderState, getGenesisOrderRoot } from '../helper.ts/state-utils';
+import { hashAccountState, hashOrderState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import { TxType } from './common';
 
@@ -12,7 +12,7 @@ const orderLevels = 2;
 const balanceLevels = 2;
 const accountLevels = 2;
 
-const genesisOrderRoot = getGenesisOrderRoot();
+const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initTestCase() {
   const accountID1 = 1;

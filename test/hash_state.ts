@@ -2,8 +2,10 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState, hashOrderState, getGenesisOrderRoot } from '../helper.ts/state-utils';
+import { hashAccountState, hashOrderState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
+
+const orderLevels = 2;
 
 const balanceRoot = hash([1n]);
 const prvkey = 1;
@@ -15,7 +17,7 @@ const account_state = {
   balanceRoot: balanceRoot,
   ay: account.ay,
   ethAddr: ethAddrNoPrefix,
-  orderRoot: getGenesisOrderRoot(),
+  orderRoot: calculateGenesisOrderRoot(orderLevels),
 };
 class TestHashAccount implements SimpleTest {
   getInput() {
@@ -75,4 +77,21 @@ class TestHashOrder implements SimpleTest {
   }
 }
 
-export { TestHashAccount, TestHashOrder };
+class TestGenesisOrderRoot implements SimpleTest {
+  getInput() {
+    return {};
+  }
+  getOutput() {
+    return {
+      root: calculateGenesisOrderRoot(orderLevels),
+    };
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'lib', 'hash_state.circom'),
+      main: `CalculateGenesisOrderRoot(${orderLevels})`,
+    };
+  }
+}
+
+export { TestHashAccount, TestHashOrder, TestGenesisOrderRoot };

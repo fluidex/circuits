@@ -2,6 +2,7 @@
 // https://github.com/hermeznetwork/circuits/blob/master/src/lib/hash-state.circom
 
 include "rescue.circom";
+include "binary_merkle_tree.circom";
 
 /**
  * Computes the hash of an account state
@@ -80,7 +81,14 @@ template HashOrder() {
     hash.out ==> out;
 }
 
-function getGenesisOrderRoot() {
-    // TODO: calculate from orderLevels
-    return 0
+template CalculateGenesisOrderRoot(orderLevels) {
+    signal output root;
+
+    component orderTree = CalculateRootFromLeaves(orderLevels);
+    var totalLeaves = 2 ** orderLevels;
+    for (var i=0; i < totalLeaves; i++) {
+        orderTree.leaves[i] <== 0;
+    }
+
+    root <== orderTree.root;
 }
