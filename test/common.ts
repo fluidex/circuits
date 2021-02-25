@@ -36,6 +36,23 @@ enum TxDetailIdx {
   S,
   R8x,
   R8y,
+
+  // used in spot_trade
+  amount2,
+  order1_id,
+  order1_tokensell,
+  order1_amountsell,
+  order1_tokenbuy,
+  order1_amountbuy,
+  order2_id,
+  order2_tokensell,
+  order2_amountsell,
+  order2_tokenbuy,
+  order2_amountbuy,
+  order1_filledsell,
+  order1_filledbuy,
+  order2_filledsell,
+  order2_filledbuy,
 }
 
 class TxSignature {
