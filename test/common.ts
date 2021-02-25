@@ -102,10 +102,10 @@ class RawTx {
   payload: Array<bigint>;
   balancePath0: Array<bigint>;
   balancePath1: Array<bigint>;
+  orderRoot0: bigint;
+  orderRoot1: bigint;
   accountPath0: Array<bigint>;
   accountPath1: Array<bigint>;
-  //OrderRoot0: bigint;
-  //OrderRoot1: bigint;
   rootBefore: bigint;
   rootAfter: bigint;
 }
@@ -120,6 +120,7 @@ class AccountState {
   hash() {
     return hashAccountState(this);
   }
+  // TODO: combine with emptyAccount
   constructor() {
     this.nonce = 0n;
     this.sign = 0n;
@@ -258,7 +259,7 @@ class GlobalState {
   getL1Addr(accountID) {
     return this.accounts.get(accountID).ethAddr;
   }
-  DepositToNew(tx: DepositToNewTx) {
+  DepositToNew(tx: DepositToNewTx, genesisOrderRoot) {
     assert(this.accounts.get(tx.accountID).ethAddr == 0n, 'DepositToNew');
     let proof = this.stateProof(tx.accountID, tx.tokenID);
     // first, generate the tx
@@ -275,6 +276,8 @@ class GlobalState {
       payload: encodedTx,
       balancePath0: proof.balancePath,
       balancePath1: proof.balancePath,
+      orderRoot0: genesisOrderRoot,
+      orderRoot1: genesisOrderRoot,
       accountPath0: proof.accountPath,
       accountPath1: proof.accountPath,
       rootBefore: proof.root,
@@ -310,6 +313,8 @@ class GlobalState {
       payload: encodedTx,
       balancePath0: proof.balancePath,
       balancePath1: proof.balancePath,
+      orderRoot0: acc.orderRoot,
+      orderRoot1: acc.orderRoot,
       accountPath0: proof.accountPath,
       accountPath1: proof.accountPath,
       rootBefore: proof.root,
@@ -383,6 +388,8 @@ class GlobalState {
       balancePath1: null,
       accountPath0: proofFrom.accountPath,
       accountPath1: null,
+      orderRoot0: fromAccount.orderRoot,
+      orderRoot1: toAccount.orderRoot,
       rootBefore: proofFrom.root,
       rootAfter: 0n,
     };
@@ -427,6 +434,8 @@ class GlobalState {
       payload: encodedTx,
       balancePath0: proof.balancePath,
       balancePath1: proof.balancePath,
+      orderRoot0: acc.orderRoot,
+      orderRoot1: acc.orderRoot,
       accountPath0: proof.accountPath,
       accountPath1: proof.accountPath,
       rootBefore: proof.root,
@@ -443,9 +452,8 @@ class GlobalState {
     let txsType = this.bufferedTxs.map(tx => tx.txType);
     let encodedTxs = this.bufferedTxs.map(tx => tx.payload);
     let balance_path_elements = this.bufferedTxs.map(tx => [tx.balancePath0, tx.balancePath1]);
+    let orderRoots = this.bufferedTxs.map(tx => [tx.orderRoot0, tx.orderRoot1]);
     let account_path_elements = this.bufferedTxs.map(tx => [tx.accountPath0, tx.accountPath1]);
-    // TODO fix orderRoots
-    let orderRoots = Array(this.bufferedTxs.length).fill([this.defaultOrderRoot, this.defaultOrderRoot]);
     let oldAccountRoots = this.bufferedTxs.map(tx => tx.rootBefore);
     let newAccountRoots = this.bufferedTxs.map(tx => tx.rootAfter);
     return {
