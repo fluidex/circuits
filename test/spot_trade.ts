@@ -250,7 +250,7 @@ class TestSpotTrade implements SimpleTest {
       order1_token_buy_balance: test_case.order1_token_buy_balance,
       order2_token_sell_balance: test_case.order2_token_sell_balance,
       order2_token_buy_balance: test_case.order2_token_buy_balance,
-      orders_path_elements: test_case.orders_path_elements,
+      order_path_elements: test_case.order_path_elements,
       old_account_root: test_case.old_account_root,
       new_account_root: test_case.new_account_root,
       old_account1_balance_path_elements: test_case.old_account1_balance_path_elements,
