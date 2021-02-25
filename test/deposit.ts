@@ -4,7 +4,7 @@ const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { hashAccountState, getGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
-import { getBTreeProof } from './common';
+import * as common from './common';
 
 // circuit-level definitions
 const balanceLevels = 2;
@@ -13,113 +13,69 @@ const accountLevels = 2;
 const genesisOrderRoot = getGenesisOrderRoot();
 
 function initDepositToNew() {
-  // input-level assignments and pre-processings
-  const accountID = 2;
-  const tokenID = 2;
-  const amount = 500n;
-  const prvkey = 1;
-  const account = new Account(prvkey);
-  const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
+  let state = new common.GlobalState(balanceLevels, accountLevels);
 
-  // balance tree
-  let balanceLeaves: Array<BigInt> = new Array(2 ** balanceLevels);
-  balanceLeaves.fill(0n, 0, 2 ** balanceLevels);
-  let oldBalanceProof = getBTreeProof(balanceLeaves, tokenID);
-  // TODO: check index bounds
-  balanceLeaves[tokenID] = amount;
-  let newBalanceProof = getBTreeProof(balanceLeaves, tokenID);
+  const tokenID = 0n;
+  const amount = 200n
+  const account = new Account(2);
+  const accountID = state.createNewAccount();
 
-  // account tree
-  const oldAccount = {
-    nonce: 0,
-    sign: 0,
-    balanceRoot: oldBalanceProof.root,
-    ay: '0',
-    ethAddr: '0',
-    orderRoot: genesisOrderRoot,
-  };
-  const oldAccountHash = hashAccountState(oldAccount);
-  const newAccount = {
-    nonce: 0,
-    sign: account.sign,
-    balanceRoot: newBalanceProof.root,
-    ay: account.ay,
-    ethAddr: ethAddrNoPrefix,
-    orderRoot: genesisOrderRoot,
-  };
-  const newAccountHash = hashAccountState(newAccount);
-  let accountLeaves = [];
-  for (let i = 0; i < 2 ** accountLevels; i++) accountLeaves.push(20n + BigInt(i));
-  // TODO: check index bounds
-  accountLeaves[accountID] = oldAccountHash;
-  let oldAccountProof = getBTreeProof(accountLeaves, accountID);
-  accountLeaves[accountID] = newAccountHash;
-  let newAccountProof = getBTreeProof(accountLeaves, accountID);
+  state.DepositToNew({
+    accountID: BigInt(accountID),
+    tokenID: BigInt(tokenID),
+    amount: amount,
+    ethAddr: Scalar.fromString(account.ethAddr, 16),
+    sign: BigInt(account.sign),
+    ay: Scalar.fromString(account.ay, 16),
+  });
 
+  let block = state.forge();
+  // TODO: assert length
   return {
     enabled: 1,
     accountID: accountID,
     tokenID: tokenID,
-    ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
+    ethAddr: Scalar.fromString(account.ethAddr, 16),
     sign: account.sign,
     ay: Scalar.fromString(account.ay, 16),
     amount: amount,
-    balance_path_elements: oldBalanceProof.path_elements,
-    oldBalanceRoot: oldBalanceProof.root,
-    newBalanceRoot: newBalanceProof.root,
-    account_path_elements: oldAccountProof.path_elements,
-    oldAccountRoot: oldAccountProof.root,
-    newAccountRoot: newAccountProof.root,
+    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
+    account_path_elements: block.account_path_elements[block.account_path_elements.length-1][1],
+    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
+    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length-1],
   };
 }
 
 function initDepositToOld() {
-  // input-level assignments and pre-processings
-  const accountID = 2;
-  const nonce = 51;
-  const tokenID = 2;
-  const oldBalance = 500n;
-  const amount = 500n;
-  const prvkey = 1;
-  const account = new Account(prvkey);
-  const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
+  let state = new common.GlobalState(balanceLevels, accountLevels);
 
-  // balance tree
-  let balanceLeaves = [];
-  for (let i = 0; i < 2 ** balanceLevels; i++) balanceLeaves.push(10n + BigInt(i));
-  // TODO: check index bounds
-  balanceLeaves[tokenID] = oldBalance;
-  let oldBalanceProof = getBTreeProof(balanceLeaves, tokenID);
-  balanceLeaves[tokenID] = oldBalance + amount;
-  let newBalanceProof = getBTreeProof(balanceLeaves, tokenID);
+  const tokenID = 0n;
+  const balance = 300n;
+  const amount = 100n;
+  const account = new Account(2);
+  const accountID = state.createNewAccount();
+  const nonce = 99n;
 
-  // account tree
-  const oldAccount = {
-    nonce: nonce,
-    sign: account.sign,
-    balanceRoot: oldBalanceProof.root,
-    ay: account.ay,
-    ethAddr: ethAddrNoPrefix,
-    orderRoot: genesisOrderRoot,
-  };
-  const oldAccountHash = hashAccountState(oldAccount);
-  const newAccount = {
-    nonce: nonce,
-    sign: account.sign,
-    balanceRoot: newBalanceProof.root,
-    ay: account.ay,
-    ethAddr: ethAddrNoPrefix,
-    orderRoot: genesisOrderRoot,
-  };
-  const newAccountHash = hashAccountState(newAccount);
-  let accountLeaves = [];
-  for (let i = 0; i < 2 ** accountLevels; i++) accountLeaves.push(20n + BigInt(i));
-  // TODO: check index bounds
-  accountLeaves[accountID] = oldAccountHash;
-  let oldAccountProof = getBTreeProof(accountLeaves, accountID);
-  accountLeaves[accountID] = newAccountHash;
-  let newAccountProof = getBTreeProof(accountLeaves, accountID);
+  // mock existing account1 data
+  state.setAccountKey(accountID, account.publicKey);
+  for (let i = 0; i < 2 ** balanceLevels; i++) {
+    if (BigInt(i) == tokenID) {
+      state.setTokenBalance(accountID, tokenID, balance);
+    } else {
+      state.setTokenBalance(accountID, BigInt(i), 10n + BigInt(i));
+    }
+  }
+  state.setAccountNonce(accountID, nonce);
+  state.setAccountOrderRoot(accountID, genesisOrderRoot);
 
+  state.DepositToOld({
+    accountID: BigInt(accountID),
+    tokenID: BigInt(tokenID),
+    amount: amount,
+  });
+
+  let block = state.forge();
+  // TODO: assert length
   return {
     enabled: 1,
     accountID: accountID,
@@ -128,15 +84,13 @@ function initDepositToOld() {
     nonce: nonce,
     sign: account.sign,
     ay: Scalar.fromString(account.ay, 16),
-    balance: oldBalance,
-    ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
-    orderRoot: oldAccount.orderRoot,
-    balance_path_elements: oldBalanceProof.path_elements,
-    oldBalanceRoot: oldBalanceProof.root,
-    newBalanceRoot: newBalanceProof.root,
-    account_path_elements: oldAccountProof.path_elements,
-    oldAccountRoot: oldAccountProof.root,
-    newAccountRoot: newAccountProof.root,
+    balance: balance,
+    ethAddr: Scalar.fromString(account.ethAddr, 16),
+    orderRoot: genesisOrderRoot,
+    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
+    account_path_elements: block.account_path_elements[block.account_path_elements.length-1][1],
+    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
+    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length-1],
   };
 }
 
