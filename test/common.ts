@@ -38,21 +38,21 @@ enum TxDetailIdx {
   R8y,
 
   // only used in spot_trade
-  amount2,
-  order1_id,
-  order1_tokensell,
-  order1_amountsell,
-  order1_tokenbuy,
-  order1_amountbuy,
-  order2_id,
-  order2_tokensell,
-  order2_amountsell,
-  order2_tokenbuy,
-  order2_amountbuy,
-  order1_filledsell,
-  order1_filledbuy,
-  order2_filledsell,
-  order2_filledbuy,
+  Amount2,
+  Order1ID,
+  Order1TokenSell,
+  Order1AmountSell,
+  Order1TokenBuy,
+  Order1AmountBuy,
+  Order2ID,
+  Order2TokenSell,
+  Order2AmountSell,
+  Order2TokenBuy,
+  Order2AmountBuy,
+  Order1FilledSell,
+  Order1FilledBuy,
+  Order2FilledSell,
+  Order2FilledBuy,
 }
 
 class TxSignature {
@@ -577,11 +577,6 @@ class GlobalState {
     encodedTx[TxDetailIdx.Ay1] = acc.ay;
     encodedTx[TxDetailIdx.EthAddr1] = acc.ethAddr;
     encodedTx[TxDetailIdx.Balance1] = balanceBefore;
-
-    encodedTx[TxDetailIdx.SigL2Hash] = tx.signature.hash;
-    encodedTx[TxDetailIdx.S] = tx.signature.S;
-    encodedTx[TxDetailIdx.R8x] = tx.signature.R8x;
-    encodedTx[TxDetailIdx.R8y] = tx.signature.R8y;
 
     let rawTx: RawTx = {
       txType: TxType.SpotTrade,
