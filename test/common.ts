@@ -39,18 +39,16 @@ enum TxDetailIdx {
 
   // only used in spot_trade
   Amount2,
+  Token1to2,
+  Token2to1,
   Order1ID,
-  Order1TokenSell,
   Order1AmountSell,
-  Order1TokenBuy,
   Order1AmountBuy,
-  Order2ID,
-  Order2TokenSell,
-  Order2AmountSell,
-  Order2TokenBuy,
-  Order2AmountBuy,
   Order1FilledSell,
   Order1FilledBuy,
+  Order2ID,
+  Order2AmountSell,
+  Order2AmountBuy,
   Order2FilledSell,
   Order2FilledBuy,
 }
@@ -554,13 +552,13 @@ class GlobalState {
 
     let account1 = this.accounts.get(tx.order1_accountID);
     let account2 = this.accounts.get(tx.order2_accountID);
-    let proof_balance0 = this.stateProof(tx.order1_accountID, tx.order1_tokensell);
-    let proof_balance1 = this.stateProof(tx.order2_accountID, tx.order1_tokenbuy);
-    let proof_balance2 = this.stateProof(tx.order2_accountID, tx.order2_tokensell);
-    let proof_balance3 = this.stateProof(tx.order1_accountID, tx.order2_tokenbuy);
-    assert(proof_balance0.root == proof_balance1.root);
-    assert(proof_balance1.root == proof_balance2.root);
-    assert(proof_balance2.root == proof_balance3.root);
+    let proof_order1_seller = this.stateProof(tx.order1_accountID, tx.token_1to2);
+    let proof_order1_buyer = this.stateProof(tx.order2_accountID, tx.token_1to2);
+    let proof_order2_seller = this.stateProof(tx.order2_accountID, tx.token_2to1);
+    let proof_order2_buyer = this.stateProof(tx.order1_accountID, tx.token_2to1);
+    assert(proof_order1_seller.root == proof_order1_buyer.root);
+    assert(proof_order1_buyer.root == proof_order2_seller.root);
+    assert(proof_order2_seller.root == proof_order2_buyer.root);
 
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
@@ -575,26 +573,24 @@ class GlobalState {
     encodedTx[TxDetailIdx.Ay2] = account2.ay;
     encodedTx[TxDetailIdx.Nonce1] = account1.nonce;
     encodedTx[TxDetailIdx.Nonce2] = account1.nonce;
-    let account1_balance_1to2 = this.getTokenBalance(tx.order1_accountID, tx.order1_tokensell);
-    let account2_balance_2to1 = this.getTokenBalance(tx.order2_accountID, tx.order2_tokensell);
-    let account1_balance_2to1 = this.getTokenBalance(tx.order1_accountID, tx.order1_tokenbuy);
-    let account2_balance_1to2 = this.getTokenBalance(tx.order2_accountID, tx.order2_tokenbuy);
-    assert(account1_balance_1to2 > tx.amount1, 'balance_1to2');
-    assert(account2_balance_2to1 > tx.amount2, 'balance_2to1');
-    encodedTx[TxDetailIdx.Balance1] = account1_balance_1to2;
-    encodedTx[TxDetailIdx.Balance2] = account2_balance_1to2;
-    encodedTx[TxDetailIdx.Balance3] = account2_balance_2to1;
-    encodedTx[TxDetailIdx.Balance4] = account1_balance_2to1;
+    let account1_balance_sell = this.getTokenBalance(tx.order1_accountID, tx.token_1to2);
+    let account2_balance_buy = this.getTokenBalance(tx.order2_accountID, tx.token_1to2);
+    let account2_balance_sell = this.getTokenBalance(tx.order2_accountID, tx.token_2to1);
+    let account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.token_2to1);
+    assert(account1_balance_sell > tx.amount1, 'balance_1to2');
+    assert(account2_balance_sell > tx.amount2, 'balance_2to1');
+    encodedTx[TxDetailIdx.Balance1] = account1_balance_sell;
+    encodedTx[TxDetailIdx.Balance2] = account2_balance_buy;
+    encodedTx[TxDetailIdx.Balance3] = account2_balance_sell;
+    encodedTx[TxDetailIdx.Balance4] = account1_balance_buy;
     encodedTx[TxDetailIdx.Amount2] = tx.amount2;
+    encodedTx[TxDetailIdx.Token1to2] = tx.token_1to2;
+    encodedTx[TxDetailIdx.Token2to1] = tx.token_2to1;
     encodedTx[TxDetailIdx.Order1ID] = tx.order1_id;
-    encodedTx[TxDetailIdx.Order1TokenSell] = tx.order1_tokensell;
     encodedTx[TxDetailIdx.Order1AmountSell] = tx.order1_amountsell;
-    encodedTx[TxDetailIdx.Order1TokenBuy] = tx.order1_tokenbuy;
     encodedTx[TxDetailIdx.Order1AmountBuy] = tx.order1_amountbuy;
     encodedTx[TxDetailIdx.Order2ID] = tx.order2_id;
-    encodedTx[TxDetailIdx.Order2TokenSell] = tx.order2_tokensell;
     encodedTx[TxDetailIdx.Order2AmountSell] = tx.order2_amountsell;
-    encodedTx[TxDetailIdx.Order2TokenBuy] = tx.order2_tokenbuy;
     encodedTx[TxDetailIdx.Order2AmountBuy] = tx.order2_amountbuy;
     encodedTx[TxDetailIdx.Order1FilledSell] = tx.order1_filledsell;
     encodedTx[TxDetailIdx.Order1FilledBuy] = tx.order1_filledbuy;
@@ -604,19 +600,22 @@ class GlobalState {
     let rawTx: RawTx = {
       txType: TxType.SpotTrade,
       payload: encodedTx,
-      balancePath0: proof_balance0.balancePath,
-      balancePath1: proof_balance3.balancePath,
-      balancePath2: null,
+      balancePath0: proof_order1_seller.balancePath,
+      balancePath1: null,
+      balancePath2: proof_order2_seller.balancePath,
       balancePath3: null,
-      orderPath0: this.orderTrees.get(order1_accountID).getProof(tx.order1_id),
-      orderPath1: this.orderTrees.get(order2_accountID).getProof(tx.order2_id),
+      orderPath0: this.orderTrees.get(order1_accountID).getProof(tx.order1_id).path_elements,
+      orderPath1: this.orderTrees.get(order2_accountID).getProof(tx.order2_id).path_elements,
       orderRoot0: account1.orderRoot, // not really used in the circuit
       orderRoot1: account2.orderRoot, // not really used in the circuit
-      accountPath0: proof_balance0.accountPath,
+      accountPath0:  proof_order1_seller.accountPath,
       accountPath1: null,
-      rootBefore: proof_balance0.root,
+      rootBefore: proof_order1_seller.root,
       rootAfter: 0n,
     };
+
+    // this.setTokenBalance(tx.accountID, tx.tokenID, account1_balance_sell - tx.amount);
+    // rawTx.balancePath1 = this.stateProof(tx.order1_accountID, tx.order1_tokenbuy);
 
     // update balance
     // update order

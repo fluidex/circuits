@@ -3,7 +3,7 @@ function TxTypeDepositToOld() { return 1; }
 function TxTypeTransfer() { return 2; }
 function TxTypeWithdraw() { return 3; }
 
-function TxLength() { return 35; }
+function TxLength() { return 32; }
 
 /**
  * @input in - {Array(Field)} - encoded transaction
@@ -36,18 +36,16 @@ template DecodeTx() {
 
     /// only used in spot_trade
     signal output amount2; // "amount2" is "amount_2to1" in spot_trade. "amount" is "amount_1to2" in spot_trade.
+    signal output token_1to2;
+    signal output token_2to1;
     signal output order1_id;
-    signal output order1_tokensell;
     signal output order1_amountsell;
-    signal output order1_tokenbuy;
     signal output order1_amountbuy;
-    signal output order2_id;
-    signal output order2_tokensell;
-    signal output order2_amountsell;
-    signal output order2_tokenbuy;
-    signal output order2_amountbuy;
     signal output order1_filledsell;
     signal output order1_filledbuy;
+    signal output order2_id;
+    signal output order2_amountsell;
+    signal output order2_amountbuy;
     signal output order2_filledsell;
     signal output order2_filledbuy;
 
@@ -81,18 +79,16 @@ template DecodeTx() {
 
     /// only used in spot_trade
     amount2 <== in[20];
-    order1_id <== in[21];
-    order1_tokensell <== in[22];
-    order1_amountsell <== in[23];
-    order1_tokenbuy <== in[24];
+    token_1to2 <== in[21];
+    token_2to1 <== in[22];
+    order1_id <== in[23];
+    order1_amountsell <== in[24];
     order1_amountbuy <== in[25];
-    order2_id <== in[26];
-    order2_tokensell <== in[27];
-    order2_amountsell <== in[28];
-    order2_tokenbuy <== in[29];
+    order1_filledsell <== in[26];
+    order1_filledbuy <== in[27];
+    order2_id <== in[28];
+    order2_amountsell <== in[29];
     order2_amountbuy <== in[30];
-    order1_filledsell <== in[31];
-    order1_filledbuy <== in[32];
-    order2_filledsell <== in[33];
-    order2_filledbuy <== in[34];
+    order2_filledsell <== in[31];
+    order2_filledbuy <== in[32];
 }
