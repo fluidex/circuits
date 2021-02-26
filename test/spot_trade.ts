@@ -17,35 +17,50 @@ const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 function initTestCase() {
   let state = new common.GlobalState(orderLevels, balanceLevels, accountLevels);
 
-  const account0 = new Account(222);
   const account1 = new Account(111);
-  const accountID0 = state.createNewAccount();
+  const account2 = new Account(222);
   const accountID1 = state.createNewAccount();
+  const accountID2 = state.createNewAccount();
 
-  // const tokenID_1to2 = 1;
-  // const tokenID_2to1 = 2;
-  // const amount_1to2 = 120n;
-  // const amount_2to1 = 1200n;
+  // trade token
+  const tokenID_1to2 = 1;
+  const tokenID_2to1 = 2;
+  // trade amount
+  const amount_1to2 = 120n;
+  const amount_2to1 = 1200n;
 
-  // /// old
-
-  // const nonce1 = 11;
-  // const account1_balance_sell = 199n;
-  // const account1_balance_buy = 111n;
-  // let account1BalanceLeaves = [];
-  // for (let i = 0; i < 2 ** balanceLevels; i++) account1BalanceLeaves.push(11n + BigInt(i));
-  // account1BalanceLeaves[tokenID_1to2] = account1_balance_sell;
-  // account1BalanceLeaves[tokenID_2to1] = account1_balance_buy;
-  // let oldAccount1BalanceProof = getBTreeProof(account1BalanceLeaves, tokenID_1to2);
-
-  // const nonce2 = 22;
-  // const account2_balance_sell = 1990n;
-  // const account2_balance_buy = 1110n;
-  // let account2BalanceLeaves = [];
-  // for (let i = 0; i < 2 ** balanceLevels; i++) account2BalanceLeaves.push(11n + BigInt(i));
-  // account2BalanceLeaves[tokenID_2to1] = account2_balance_sell;
-  // account2BalanceLeaves[tokenID_1to2] = account2_balance_buy;
-  // let oldAccount2BalanceProof = getBTreeProof(account2BalanceLeaves, tokenID_2to1);
+  /// set up initial accounts
+  // account 1
+  const nonce1 = 11;
+  const account1_balance_sell = 199n;
+  const account1_balance_buy = 111n;
+  // set up account
+  state.setAccountKey(accountID1, account1.publicKey);
+  for (let i = 0; i < 2 ** balanceLevels; i++) {
+    if (BigInt(i) == tokenID_1to2) {
+      state.setTokenBalance(accountID1, tokenID_1to2, account1_balance_sell);
+    } else if (BigInt(i) == tokenID_2to1) {
+      state.setTokenBalance(accountID1, tokenID_2to1, account1_balance_buy);
+    } else {
+      state.setTokenBalance(accountID1, BigInt(i), 10n + BigInt(i));
+    }
+  }
+  state.setAccountNonce(accountID1, nonce1);
+  // account 2
+  const nonce2 = 22;
+  const account2_balance_sell = 1990n;
+  const account2_balance_buy = 1110n;
+  state.setAccountKey(accountID2, account1.publicKey);
+  for (let i = 0; i < 2 ** balanceLevels; i++) {
+    if (BigInt(i) == tokenID_2to1) {
+      state.setTokenBalance(accountID2, tokenID_2to1, account2_balance_sell);
+    } else if (BigInt(i) == tokenID_1to2) {
+      state.setTokenBalance(accountID2, tokenID_1to2, account2_balance_buy);
+    } else {
+      state.setTokenBalance(accountID2, BigInt(i), 20n + BigInt(i));
+    }
+  }
+  state.setAccountNonce(accountID2, nonce2);
 
   // const order1_id = 1;
   // const order1_amountsell = 1000;
