@@ -14,7 +14,7 @@ const accountLevels = 2;
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initDepositToNew() {
-  let state = new common.GlobalState(orderLevels,balanceLevels, accountLevels);
+  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
 
   const tokenID = 0n;
   const amount = 200n
@@ -49,7 +49,7 @@ function initDepositToNew() {
 }
 
 function initDepositToOld() {
-  let state = new common.GlobalState(orderLevels, balanceLevels, accountLevels);
+  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
 
   const tokenID = 0n;
   const balance = 300n;

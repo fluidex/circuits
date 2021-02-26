@@ -213,29 +213,29 @@ class AccountState {
 }
 
 class GlobalState {
-  orderLevels: number;
   balanceLevels: number;
+  orderLevels: number;
   accountLevels: number;
   accountTree: Tree<bigint>;
-  orderTrees: Map<bigint, Tree<bigint>>;
   // idx to balanceTree
   balanceTrees: Map<bigint, Tree<bigint>>;
+  orderTrees: Map<bigint, Tree<bigint>>;
   accounts: Map<bigint, AccountState>;
   bufferedTxs: Array<RawTx>;
-  defaultOrderRoot: bigint;
   defaultBalanceRoot: bigint;
+  defaultOrderRoot: bigint;
   defaultAccountLeaf: bigint;
-  constructor(orderLevels, balanceLevels, accountLevels) {
-    this.orderLevels = orderLevels;
+  constructor(balanceLevels, orderLevels, accountLevels) {
     this.balanceLevels = balanceLevels;
+    this.orderLevels = orderLevels;
     this.accountLevels = accountLevels;
-    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels); // equivalent to `new Tree<bigint>(orderLevels, 0n).getRoot();`
     this.defaultBalanceRoot = new Tree<bigint>(balanceLevels, 0n).getRoot();
+    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels); // equivalent to `new Tree<bigint>(orderLevels, 0n).getRoot();`
     // defaultAccountLeaf depends on defaultOrderRoot and defaultBalanceRoot
     this.defaultAccountLeaf = this.hashForEmptyAccount();
     this.accountTree = new Tree<bigint>(accountLevels, this.defaultAccountLeaf); // Tree<account_hash>
-    this.orderTrees = new Map(); // map[account_id]order_tree
     this.balanceTrees = new Map(); // map[account_id]balance_tree
+    this.orderTrees = new Map(); // map[account_id]order_tree
     this.accounts = new Map(); // map[account_id]acount_state
     this.bufferedTxs = new Array();
   }
@@ -287,7 +287,6 @@ class GlobalState {
     const accountID = BigInt(this.balanceTrees.size);
     let accountState = this.emptyAccount();
     this.accounts.set(accountID, accountState);
-    this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, 0n));
     this.balanceTrees.set(accountID, new Tree<bigint>(this.balanceLevels, 0n));
     this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, 0n));
     this.accountTree.setValue(accountID, this.defaultAccountLeaf);
@@ -325,15 +324,15 @@ class GlobalState {
   }
 
   stateProof(accountID, tokenID) {
-    let orderRoot = this.orderTrees.get(accountID).getRoot();
     let { path_elements: balancePath, leaf, root: balanceRoot } = this.balanceTrees.get(accountID).getProof(tokenID);
+    let orderRoot = this.orderTrees.get(accountID).getRoot();
     let { path_elements: accountPath, leaf: accountLeaf, root } = this.accountTree.getProof(accountID);
     //assert(accountLeaf == balanceRoot, 'stateProof');
     return {
       leaf,
       root,
-      orderRoot,
       balanceRoot,
+      orderRoot,
       balancePath,
       accountPath,
     };
