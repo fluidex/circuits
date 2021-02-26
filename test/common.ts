@@ -226,6 +226,7 @@ class GlobalState {
     let accountState = this.emptyAccount();
     this.accounts.set(accountID, accountState);
     this.balanceTrees.set(accountID, new Tree<bigint>(this.balanceLevels, 0n));
+    this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, 0n));
     this.accountTree.setValue(accountID, this.defaultAccountLeaf);
     //console.log("add account", accountID);
     return accountID;
