@@ -155,24 +155,26 @@ class GlobalState {
   balanceLevels: number;
   accountLevels: number;
   accountTree: Tree<bigint>;
+  orderTrees: Map<bigint, Tree<bigint>>;
   // idx to balanceTree
   balanceTrees: Map<bigint, Tree<bigint>>;
   accounts: Map<bigint, AccountState>;
   bufferedTxs: Array<RawTx>;
+  defaultOrderRoot: bigint;
   defaultBalanceRoot: bigint;
   defaultAccountLeaf: bigint;
-  defaultOrderRoot: bigint;
   constructor(orderLevels, balanceLevels, accountLevels) {
     this.orderLevels = orderLevels;
     this.balanceLevels = balanceLevels;
     this.accountLevels = accountLevels;
-    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels);
+    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels); // equivalent to `new Tree<bigint>(orderLevels, 0n).getRoot();`
     this.defaultBalanceRoot = new Tree<bigint>(balanceLevels, 0n).getRoot();
     // defaultAccountLeaf depends on defaultOrderRoot and defaultBalanceRoot
     this.defaultAccountLeaf = this.hashForEmptyAccount();
-    this.accountTree = new Tree<bigint>(accountLevels, this.defaultAccountLeaf);
-    this.balanceTrees = new Map();
-    this.accounts = new Map();
+    this.accountTree = new Tree<bigint>(accountLevels, this.defaultAccountLeaf); // Tree<account_hash>
+    this.orderTrees = new Map(); // map[account_id]order_tree
+    this.balanceTrees = new Map(); // map[account_id]balance_tree
+    this.accounts = new Map(); // map[account_id]acount_state
     this.bufferedTxs = new Array();
   }
   root(): bigint {
