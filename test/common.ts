@@ -117,18 +117,6 @@ class SpotTradeTx {
 
   order1_accountID: bigint;
   order2_accountID: bigint;
-  // order1_account_nonce; // X
-  // order2_account_nonce; // X
-  // order1_account_sign; // X
-  // order2_account_sign; // X
-  // order1_account_ay; // X
-  // order2_account_ay; // X
-  // order1_account_ethAddr; // X
-  // order2_account_ethAddr; // X
-  // order1_token_sell_balance: bigint;
-  // order1_token_buy_balance: bigint;
-  // order2_token_sell_balance: bigint;
-  // order2_token_buy_balance: bigint;
 }
 
 
@@ -561,18 +549,25 @@ class GlobalState {
     this.bufferedTxs.push(rawTx);
   }
   SpotTrade(tx: SpotTradeTx) {
-    assert(this.accounts.get(tx.accountID1).ethAddr != 0n, 'SpotTrade account1');
-    assert(this.accounts.get(tx.accountID2).ethAddr != 0n, 'SpotTrade account2');
+    assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
+    assert(this.accounts.get(tx.order2_accountID).ethAddr != 0n, 'SpotTrade account2');
 
-    // let proof1 = this.stateProof(tx.accountID1, tx.tokenID);
-
-    let account1 = this.accounts.get(tx.accountID1);
-    let account2 = this.accounts.get(tx.accountID2);
+    let account1 = this.accounts.get(tx.order1_accountID);
+    let account2 = this.accounts.get(tx.order2_accountID);
 
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
-
+    encodedTx[TxDetailIdx.AccountID1] = tx.accountID1;
+    encodedTx[TxDetailIdx.AccountID2] = tx.accountID2;
+    encodedTx[TxDetailIdx.EthAddr1] = account1.ethAddr;
+    encodedTx[TxDetailIdx.EthAddr2] = account2.ethAddr;
+    encodedTx[TxDetailIdx.Sign1] = account1.sign;
+    encodedTx[TxDetailIdx.Sign2] = account2.sign;
+    encodedTx[TxDetailIdx.Ay1] = account1.ay;
+    encodedTx[TxDetailIdx.Ay2] = account2.ay;
+    encodedTx[TxDetailIdx.Nonce1] = account1.nonce;
+    encodedTx[TxDetailIdx.Nonce2] = account1.nonce;
     let account1_balance_1to2 = this.getTokenBalance(tx.accountID1, tx.order1_tokensell);
     let account2_balance_2to1 = this.getTokenBalance(tx.accountID2, tx.order2_tokensell);
     let account1_balance_2to1 = this.getTokenBalance(tx.accountID1, tx.order1_tokenbuy);
@@ -612,7 +607,7 @@ class GlobalState {
       // orderRoot1: acc.orderRoot,
       // accountPath0: proof.accountPath,
       // accountPath1: proof.accountPath,
-      rootBefore: proof1.root,
+      // rootBefore: proof.root,
       rootAfter: 0n,
     };
 
