@@ -34,7 +34,6 @@ function initTestCase() {
   const nonce1 = 11;
   const account1_balance_sell = 199n;
   const account1_balance_buy = 111n;
-  // set up account
   state.setAccountKey(accountID1, account1.publicKey);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID_1to2) {
@@ -62,36 +61,43 @@ function initTestCase() {
   }
   state.setAccountNonce(accountID2, nonce2);
 
-  // const order1_id = 1;
-  // const order1_amountsell = 1000;
-  // const order1_amountbuy = 10000;
-  // const oldOrder1 = {
-  //   status: 0, // open
-  //   tokenbuy: tokenID_2to1,
-  //   tokensell: tokenID_1to2,
-  //   filled_sell: 0n,
-  //   filled_buy: 0n,
-  //   total_sell: order1_amountsell,
-  //   total_buy: order1_amountbuy,
-  // };
+  /// set up orders
+  // order1
+  const order1_id = 1;
+  const order1_amountsell = 1000;
+  const order1_amountbuy = 10000;
+  const oldOrder1 = {
+    status: 0, // open
+    tokenbuy: tokenID_2to1,
+    tokensell: tokenID_1to2,
+    filled_sell: 0n,
+    filled_buy: 0n,
+    total_sell: order1_amountsell,
+    total_buy: order1_amountbuy,
+  };
+  let structuredOrder1 = new common.Order(oldOrder1.status, oldOrder1.tokenbuy, oldOrder1.tokensell, oldOrder1.filled_sell, oldOrder1.filled_buy, oldOrder1.total_sell, oldOrder1.total_buy);
+  state.setAccountOrder(accountID1, order1_id, structuredOrder1);
   // const oldOrder1Hash = hashOrderState(oldOrder1);
   // let account1Orders = [];
   // for (let i = 0; i < 2 ** orderLevels; i++) account1Orders.push(22n + BigInt(i));
   // account1Orders[order1_id] = oldOrder1Hash;
   // let oldOrder1Proof = getBTreeProof(account1Orders, order1_id);
 
-  // const order2_id = 1;
-  // const order2_amountsell = 10000;
-  // const order2_amountbuy = 1000;
-  // const oldOrder2 = {
-  //   status: 0, // open
-  //   tokenbuy: tokenID_1to2,
-  //   tokensell: tokenID_2to1,
-  //   filled_sell: 10n,
-  //   filled_buy: 1n,
-  //   total_sell: order2_amountsell,
-  //   total_buy: order2_amountbuy,
-  // };
+  // order2
+  const order2_id = 1;
+  const order2_amountsell = 10000;
+  const order2_amountbuy = 1000;
+  const oldOrder2 = {
+    status: 0, // open
+    tokenbuy: tokenID_1to2,
+    tokensell: tokenID_2to1,
+    filled_sell: 10n,
+    filled_buy: 1n,
+    total_sell: order2_amountsell,
+    total_buy: order2_amountbuy,
+  };
+  let structuredOrder2 = new common.Order(oldOrder2.status, oldOrder2.tokenbuy, oldOrder2.tokensell, oldOrder2.filled_sell, oldOrder2.filled_buy, oldOrder2.total_sell, oldOrder2.total_buy);
+  state.setAccountOrder(accountID2, order2_id, structuredOrder2);
   // const oldOrder2Hash = hashOrderState(oldOrder2);
   // let account2Orders = [];
   // for (let i = 0; i < 2 ** orderLevels; i++) account2Orders.push(33n + BigInt(i));

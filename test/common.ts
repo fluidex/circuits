@@ -2,7 +2,7 @@ import { assert } from 'console';
 import { hash } from '../helper.ts/hash';
 import { Account } from '../helper.ts/account';
 import { Tree } from '../helper.ts/binary_merkle_tree';
-import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { hashAccountState, hashOrderState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 
@@ -133,6 +133,28 @@ class RawTx {
   rootAfter: bigint;
 }
 
+class Order {
+  status: number,
+  tokenbuy: bigint,
+  tokensell: bigint,
+  filled_sell: bigint,
+  filled_buy: bigint,
+  total_sell: bigint,
+  total_buy: bigint,
+  constructor(status, tokenbuy, tokensell, filled_sell, filled_buy, total_sell, total_buy) {
+    this.status = status;
+    this.tokenbuy = tokenbuy;
+    this.tokensell = tokensell;
+    this.filled_sell = filled_sell;
+    this.filled_buy = filled_buy;
+    this.total_sell = total_sell;
+    this.total_buy = total_buy;
+  }
+  hash() {
+    return hashOrderState(this);
+  }
+}
+
 class AccountState {
   nonce: bigint;
   sign: bigint;
@@ -216,7 +238,8 @@ class GlobalState {
     this.accounts.get(accountID).updateNonce(nonce);
     this.recalculateFromAccountState(accountID);
   }
-  // this function should only be use in tests for convenience
+  // this function should only be used in tests for convenience
+  // TODO: maybe we can remove this now?
   setAccountOrderRoot(accountID, orderRoot: BigInt) {
     this.accounts.get(accountID).updateOrderRoot(orderRoot);
     this.recalculateFromAccountState(accountID);
@@ -262,6 +285,10 @@ class GlobalState {
     this.accounts.get(accountID).balanceRoot = this.balanceTrees.get(accountID).getRoot();
     this.recalculateFromAccountState(accountID);
   }
+  recalculateFromOrderTree(accountID) {
+    this.accounts.get(accountID).orderRoot = this.orderTrees.get(accountID).getRoot();
+    this.recalculateFromAccountState(accountID);
+  }
   getTokenBalance(accountID: bigint, tokenID: bigint): bigint {
     return this.balanceTrees.get(accountID).getLeaf(tokenID);
   }
@@ -269,6 +296,11 @@ class GlobalState {
     assert(this.balanceTrees.has(accountID), 'setTokenBalance');
     this.balanceTrees.get(accountID).setValue(tokenID, balance);
     this.recalculateFromBalanceTree(accountID);
+  }
+  setAccountOrder(accountID: bigint, orderID: bigint, order: Order) {
+    assert(this.orderTrees.has(accountID), 'setAccountOrder');
+    this.orderTrees.get(accountID).setValue(orderID, order.hash());
+    this.recalculateFromOrderTree(accountID);
   }
 
   trivialOrderPathElements() {
