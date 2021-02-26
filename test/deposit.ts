@@ -34,7 +34,7 @@ function initDepositToNew() {
   // TODO: assert length
   return {
     enabled: 1,
-    genesisOrderRoot: genesisOrderRoot,
+    genesisOrderRoot: state.defaultOrderRoot,
     accountID: accountID,
     tokenID: tokenID,
     ethAddr: Scalar.fromString(account.ethAddr, 16),
