@@ -28,13 +28,13 @@ function initDepositToNew() {
     ethAddr: Scalar.fromString(account.ethAddr, 16),
     sign: BigInt(account.sign),
     ay: Scalar.fromString(account.ay, 16),
-  }, genesisOrderRoot);
+  });
 
   let block = state.forge();
   // TODO: assert length
   return {
     enabled: 1,
-    genesisOrderRoot: genesisOrderRoot,
+    genesisOrderRoot: state.defaultOrderRoot,
     accountID: accountID,
     tokenID: tokenID,
     ethAddr: Scalar.fromString(account.ethAddr, 16),
