@@ -18,7 +18,7 @@ include "./withdraw.circom";
  * @input oldAccountRoots[nTxs] - {Array(Field)} - initial account state root for each transaction 
  * @input newAccountRoots[nTxs] - {Array(Field)} - final account state root for each transaction
  */
-template Block(nTxs, orderLevels, balanceLevels, accountLevels) {
+template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     // transactions
     signal input txsType[nTxs];
     signal input encodedTxs[nTxs][TxLength()];

@@ -18,7 +18,7 @@ const accountLevels = 2;
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initTestCase() {
-  let state = new common.GlobalState(orderLevels, balanceLevels, accountLevels);
+  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
 
   const tokenID = 0n;
   const account0 = new Account(2);
@@ -103,7 +103,7 @@ class TestBlock implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'block.circom'),
-      main: `Block(${nTxs}, ${orderLevels}, ${balanceLevels}, ${accountLevels})`,
+      main: `Block(${nTxs}, ${balanceLevels}, ${orderLevels}, ${accountLevels})`,
     };
   }
 }
