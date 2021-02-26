@@ -34,7 +34,7 @@ template DecodeTx() {
     signal output r8x;
     signal output r8y;
 
-    /// used in spot_trade
+    /// only used in spot_trade
     signal output amount2; // "amount2" is "amount_2to1" in spot_trade. "amount" is "amount_1to2" in spot_trade.
     signal output order1_id;
     signal output order1_tokensell;
@@ -79,7 +79,7 @@ template DecodeTx() {
     r8x <== in[18];
     r8y <== in[19];
 
-    /// for spot_trade
+    /// only used in spot_trade
     amount2 <== in[20];
     order1_id <== in[21];
     order1_tokensell <== in[22];

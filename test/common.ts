@@ -554,6 +554,13 @@ class GlobalState {
 
     let account1 = this.accounts.get(tx.order1_accountID);
     let account2 = this.accounts.get(tx.order2_accountID);
+    let proof_balance0 = this.stateProof(tx.order1_accountID, tx.order1_tokensell);
+    let proof_balance1 = this.stateProof(tx.order2_accountID, tx.order1_tokenbuy);
+    let proof_balance2 = this.stateProof(tx.order2_accountID, tx.order2_tokensell);
+    let proof_balance3 = this.stateProof(tx.order1_accountID, tx.order2_tokenbuy);
+    assert(proof_balance0.root == proof_balance1.root);
+    assert(proof_balance1.root == proof_balance2.root);
+    assert(proof_balance2.root == proof_balance3.root);
 
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
@@ -597,17 +604,17 @@ class GlobalState {
     let rawTx: RawTx = {
       txType: TxType.SpotTrade,
       payload: encodedTx,
-      // balancePath0: proof.balancePath,
-      // balancePath1: proof.balancePath,
-      // balancePath2: proof.balancePath,
-      // balancePath3: proof.balancePath,
+      balancePath0: proof_balance0.balancePath,
+      balancePath1: proof_balance1.balancePath,
+      balancePath2: proof_balance2.balancePath,
+      balancePath3: proof_balance3.balancePath,
       // orderPath0: this.trivialOrderPathElements(),
       // orderPath1: this.trivialOrderPathElements(),
       // orderRoot0: acc.orderRoot,
       // orderRoot1: acc.orderRoot,
       // accountPath0: proof.accountPath,
       // accountPath1: proof.accountPath,
-      // rootBefore: proof.root,
+      rootBefore: proof_balance0.root,
       rootAfter: 0n,
     };
 
