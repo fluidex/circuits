@@ -287,6 +287,7 @@ class GlobalState {
     const accountID = BigInt(this.balanceTrees.size);
     let accountState = this.emptyAccount();
     this.accounts.set(accountID, accountState);
+    this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, 0n));
     this.balanceTrees.set(accountID, new Tree<bigint>(this.balanceLevels, 0n));
     this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, 0n));
     this.accountTree.setValue(accountID, this.defaultAccountLeaf);
@@ -440,8 +441,8 @@ class GlobalState {
     return fullTx;
   }
   Transfer(tx: TranferTx) {
-    assert(this.accounts.get(tx.from).ethAddr != 0n, 'Transfer');
-    assert(this.accounts.get(tx.to).ethAddr != 0n, 'Transfer');
+    assert(this.accounts.get(tx.from).ethAddr != 0n, 'TransferTx: empty fromAccount');
+    assert(this.accounts.get(tx.to).ethAddr != 0n, 'Transfer: empty toAccount');
     let proofFrom = this.stateProof(tx.from, tx.tokenID);
     let fromAccount = this.accounts.get(tx.from);
     let toAccount = this.accounts.get(tx.to);
