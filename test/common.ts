@@ -230,7 +230,6 @@ class GlobalState {
     this.recalculateFromAccountState(accountID);
   }
   // this function should only be used in tests for convenience
-  // TODO: maybe we can remove this now?
   setAccountOrderRoot(accountID, orderRoot: BigInt) {
     this.accounts.get(accountID).updateOrderRoot(orderRoot);
     this.recalculateFromAccountState(accountID);
@@ -517,6 +516,54 @@ class GlobalState {
 
     this.setTokenBalance(tx.accountID, tx.tokenID, balanceBefore - tx.amount);
     this.increaseNonce(tx.accountID);
+
+    rawTx.rootAfter = this.root();
+    this.bufferedTxs.push(rawTx);
+  }
+  SpotTrade(tx: SpotTradeTx) {
+    assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'SpotTrade');
+    // let proof = this.stateProof(tx.accountID, tx.tokenID);
+
+    // first, generate the tx
+    let encodedTx: Array<bigint> = new Array(TxLength);
+    encodedTx.fill(0n, 0, TxLength);
+
+    // let acc = this.accounts.get(tx.accountID);
+    // let balanceBefore = this.getTokenBalance(tx.accountID, tx.tokenID);
+    // assert(balanceBefore > tx.amount, 'Withdraw balance');
+    encodedTx[TxDetailIdx.AccountID1] = tx.accountID;
+    encodedTx[TxDetailIdx.TokenID] = tx.tokenID;
+    encodedTx[TxDetailIdx.Amount] = tx.amount;
+    encodedTx[TxDetailIdx.Nonce1] = acc.nonce;
+    encodedTx[TxDetailIdx.Sign1] = acc.sign;
+    encodedTx[TxDetailIdx.Ay1] = acc.ay;
+    encodedTx[TxDetailIdx.EthAddr1] = acc.ethAddr;
+    encodedTx[TxDetailIdx.Balance1] = balanceBefore;
+
+    encodedTx[TxDetailIdx.SigL2Hash] = tx.signature.hash;
+    encodedTx[TxDetailIdx.S] = tx.signature.S;
+    encodedTx[TxDetailIdx.R8x] = tx.signature.R8x;
+    encodedTx[TxDetailIdx.R8y] = tx.signature.R8y;
+
+    let rawTx: RawTx = {
+      txType: TxType.SpotTrade,
+      payload: encodedTx,
+      // balancePath0: proof.balancePath,
+      // balancePath1: proof.balancePath,
+      // balancePath2: proof.balancePath,
+      // balancePath3: proof.balancePath,
+      // orderPath0: this.trivialOrderPathElements(),
+      // orderPath1: this.trivialOrderPathElements(),
+      // orderRoot0: acc.orderRoot,
+      // orderRoot1: acc.orderRoot,
+      // accountPath0: proof.accountPath,
+      // accountPath1: proof.accountPath,
+      // rootBefore: proof.root,
+      rootAfter: 0n,
+    };
+
+    // this.setTokenBalance(tx.accountID, tx.tokenID, balanceBefore - tx.amount);
+    // this.increaseNonce(tx.accountID);
 
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);

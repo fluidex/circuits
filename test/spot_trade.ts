@@ -92,6 +92,11 @@ function initTestCase() {
   };
   state.setAccountOrder(accountID2, order2_id, oldOrder2);
 
+  let spotTradeTx = {
+  };
+  state.fillSpotTradeTx(spotTradeTx);
+  state.SpotTrade(spotTradeTx);
+
   // const oldAccount1 = {
   //   nonce: nonce1,
   //   sign: account1.sign,
