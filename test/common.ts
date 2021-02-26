@@ -324,15 +324,15 @@ class GlobalState {
   }
 
   stateProof(accountID, tokenID) {
-    let { path_elements: balancePath, leaf, root: balanceRoot } = this.balanceTrees.get(accountID).getProof(tokenID);
     let orderRoot = this.orderTrees.get(accountID).getRoot();
+    let { path_elements: balancePath, leaf, root: balanceRoot } = this.balanceTrees.get(accountID).getProof(tokenID);
     let { path_elements: accountPath, leaf: accountLeaf, root } = this.accountTree.getProof(accountID);
     //assert(accountLeaf == balanceRoot, 'stateProof');
     return {
       leaf,
       root,
-      balanceRoot,
       orderRoot,
+      balanceRoot,
       balancePath,
       accountPath,
     };
