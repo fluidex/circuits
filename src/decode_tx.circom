@@ -3,7 +3,7 @@ function TxTypeDepositToOld() { return 1; }
 function TxTypeTransfer() { return 2; }
 function TxTypeWithdraw() { return 3; }
 
-function TxLength() { return 32; }
+function TxLength() { return 31; }
 
 /**
  * @input in - {Array(Field)} - encoded transaction
@@ -11,8 +11,8 @@ function TxLength() { return 32; }
 template DecodeTx() {
     signal input in[TxLength()];
 
-    signal output tokenID;
-    signal output amount;
+    signal output tokenID; // "tokenID" is "token_1to2" in spot_trade
+    signal output amount; // "amount" is "amount_1to2" in spot_trade
 
     signal output accountID1;
     signal output accountID2;
@@ -35,9 +35,8 @@ template DecodeTx() {
     signal output r8y;
 
     /// only used in spot_trade
-    signal output amount2; // "amount2" is "amount_2to1" in spot_trade. "amount" is "amount_1to2" in spot_trade.
-    signal output token_1to2;
-    signal output token_2to1;
+    signal output tokenID2; // "tokenID2" is "token_2to1" in spot_trade
+    signal output amount2; // "amount2" is "amount_2to1" in spot_trade.
     signal output order1_id;
     signal output order1_amountsell;
     signal output order1_amountbuy;
@@ -78,17 +77,16 @@ template DecodeTx() {
     r8y <== in[19];
 
     /// only used in spot_trade
-    amount2 <== in[20];
-    token_1to2 <== in[21];
-    token_2to1 <== in[22];
-    order1_id <== in[23];
-    order1_amountsell <== in[24];
-    order1_amountbuy <== in[25];
-    order1_filledsell <== in[26];
-    order1_filledbuy <== in[27];
-    order2_id <== in[28];
-    order2_amountsell <== in[29];
-    order2_amountbuy <== in[30];
-    order2_filledsell <== in[31];
-    order2_filledbuy <== in[32];
+    tokenID2 <== in[20];
+    amount2 <== in[21];
+    order1_id <== in[22];
+    order1_amountsell <== in[23];
+    order1_amountbuy <== in[24];
+    order1_filledsell <== in[25];
+    order1_filledbuy <== in[26];
+    order2_id <== in[27];
+    order2_amountsell <== in[28];
+    order2_amountbuy <== in[29];
+    order2_filledsell <== in[30];
+    order2_filledbuy <== in[31];
 }

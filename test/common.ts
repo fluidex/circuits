@@ -38,9 +38,8 @@ enum TxDetailIdx {
   R8y,
 
   // only used in spot_trade
+  TokenID2,
   Amount2,
-  Token1to2,
-  Token2to1,
   Order1ID,
   Order1AmountSell,
   Order1AmountBuy,
@@ -93,28 +92,22 @@ class WithdrawTx {
 
 // TODO: matain many of these in state
 class SpotTradeTx {
-  order1_id: bigint;
-  order1_tokensell: bigint;
-  order1_amountsell: bigint;
-  order1_tokenbuy: bigint;
-  order1_amountbuy: bigint;
-  order2_id: bigint;
-  order2_tokensell: bigint;
-  order2_amountsell: bigint;
-  order2_tokenbuy: bigint;
-  order2_amountbuy: bigint;
-
-  amount_2to1: bigint;
-  amount_1to2: bigint;
-
-  order1_filledsell: bigint;
-  order1_filledbuy: bigint;
-
-  order2_filledsell: bigint;
-  order2_filledbuy: bigint;
-
   order1_accountID: bigint;
   order2_accountID: bigint;
+  token_1to2: bigint;
+  token_2to1: bigint;
+  amount_1to2: bigint;
+  amount_2to1: bigint;
+  order1_id: bigint;
+  order1_amountsell: bigint;
+  order1_amountbuy: bigint;
+  order1_filledsell: bigint;
+  order1_filledbuy: bigint;
+  order2_id: bigint;
+  order2_amountsell: bigint;
+  order2_amountbuy: bigint;
+  order2_filledsell: bigint;
+  order2_filledbuy: bigint;
 }
 
 
@@ -577,15 +570,16 @@ class GlobalState {
     let account2_balance_buy = this.getTokenBalance(tx.order2_accountID, tx.token_1to2);
     let account2_balance_sell = this.getTokenBalance(tx.order2_accountID, tx.token_2to1);
     let account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.token_2to1);
-    assert(account1_balance_sell > tx.amount1, 'balance_1to2');
-    assert(account2_balance_sell > tx.amount2, 'balance_2to1');
+    assert(account1_balance_sell > tx.amount_1to2, 'balance_1to2');
+    assert(account2_balance_sell > tx.amount_2to1, 'balance_2to1');
+    encodedTx[TxDetailIdx.TokenID] = tx.token_1to2;
+    encodedTx[TxDetailIdx.Amount] = tx.amount_1to2;
     encodedTx[TxDetailIdx.Balance1] = account1_balance_sell;
     encodedTx[TxDetailIdx.Balance2] = account2_balance_buy;
     encodedTx[TxDetailIdx.Balance3] = account2_balance_sell;
     encodedTx[TxDetailIdx.Balance4] = account1_balance_buy;
-    encodedTx[TxDetailIdx.Amount2] = tx.amount2;
-    encodedTx[TxDetailIdx.Token1to2] = tx.token_1to2;
-    encodedTx[TxDetailIdx.Token2to1] = tx.token_2to1;
+    encodedTx[TxDetailIdx.TokenID2] = tx.token_2to1;
+    encodedTx[TxDetailIdx.Amount2] = tx.amount_2to1;
     encodedTx[TxDetailIdx.Order1ID] = tx.order1_id;
     encodedTx[TxDetailIdx.Order1AmountSell] = tx.order1_amountsell;
     encodedTx[TxDetailIdx.Order1AmountBuy] = tx.order1_amountbuy;
