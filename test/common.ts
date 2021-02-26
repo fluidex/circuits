@@ -610,8 +610,8 @@ class GlobalState {
       balancePath3: proof_balance3.balancePath,
       // orderPath0: this.trivialOrderPathElements(),
       // orderPath1: this.trivialOrderPathElements(),
-      // orderRoot0: acc.orderRoot,
-      // orderRoot1: acc.orderRoot,
+      orderRoot0: account1.orderRoot, // not really used in the circuit
+      orderRoot1: account2.orderRoot, // not really used in the circuit
       // accountPath0: proof.accountPath,
       // accountPath1: proof.accountPath,
       rootBefore: proof_balance0.root,
