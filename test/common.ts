@@ -614,10 +614,11 @@ class GlobalState {
       rootAfter: 0n,
     };
 
-    // this.setTokenBalance(tx.accountID, tx.tokenID, account1_balance_sell - tx.amount);
-    // rawTx.balancePath1 = this.stateProof(tx.order1_accountID, tx.order1_tokenbuy);
+    this.setTokenBalance(tx.order2_accountID, tx.token_2to1, account2_balance_sell - tx.amount2);
+    rawTx.balancePath1 = this.stateProof(tx.order2_accountID, tx.token_1to2).balancePath;
+    this.setTokenBalance(tx.order1_accountID, tx.token_1to2, account1_balance_sell - tx.amount);
+    rawTx.balancePath3 = this.stateProof(tx.order1_accountID, tx.token_2to1).balancePath;
 
-    // update balance
     // update order
     // recalculate
 

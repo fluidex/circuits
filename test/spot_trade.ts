@@ -217,10 +217,10 @@ function initTestCase() {
     order_path_elements: block.order_path_elements,
     old_account_root: block.oldAccountRoots[block.oldAccountRoots.length-1],
     new_account_root: block.newAccountRoots[block.newAccountRoots.length-1],
-    old_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0], // oldAccount1BalanceProof.path_elements, order1 sender
-    tmp_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1], // tmpAccount1BalanceProof.path_elements, ???
-    old_account1_path_elements: block.account_path_elements[block.account_path_elements.length-1][0], // oldAccount1Proof.path_elements,
-    old_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][2], // oldAccount2BalanceProof.path_elements, order2 sender
+    old_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],
+    tmp_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
+    old_account1_path_elements: block.account_path_elements[block.account_path_elements.length-1][0],
+    old_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][2],
     tmp_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][3], // tmpAccount2BalanceProof.path_elements, ???
     tmp_account2_path_elements: block.account_path_elements[block.account_path_elements.length-1][1], // tmpAccount2Proof.path_elements,
   };
