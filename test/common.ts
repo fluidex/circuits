@@ -511,6 +511,7 @@ class GlobalState {
       txsType,
       encodedTxs,
       balance_path_elements,
+      order_path_elements,
       account_path_elements,
       orderRoots,
       oldAccountRoots,
