@@ -605,15 +605,15 @@ class GlobalState {
       txType: TxType.SpotTrade,
       payload: encodedTx,
       balancePath0: proof_balance0.balancePath,
-      balancePath1: proof_balance1.balancePath,
-      balancePath2: proof_balance2.balancePath,
-      balancePath3: proof_balance3.balancePath,
+      balancePath1: proof_balance3.balancePath,
+      balancePath2: null,
+      balancePath3: null,
       orderPath0: this.orderTrees.get(order1_accountID).getProof(tx.order1_id),
       orderPath1: this.orderTrees.get(order2_accountID).getProof(tx.order2_id),
       orderRoot0: account1.orderRoot, // not really used in the circuit
       orderRoot1: account2.orderRoot, // not really used in the circuit
-      // accountPath0: proof.accountPath,
-      // accountPath1: proof.accountPath,
+      accountPath0: proof_balance0.accountPath,
+      accountPath1: null,
       rootBefore: proof_balance0.root,
       rootAfter: 0n,
     };
