@@ -17,12 +17,10 @@ const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 function initTestCase() {
   let state = new common.GlobalState(orderLevels, balanceLevels, accountLevels);
 
-  // const accountID1 = 1;
-  // const account1 = new Account(111);
-  // const ethAddr1NoPrefix = account1.ethAddr.replace('0x', '');
-  // const accountID2 = 0;
-  // const account2 = new Account(222);
-  // const ethAddr2NoPrefix = account2.ethAddr.replace('0x', '');
+  const account0 = new Account(222);
+  const account1 = new Account(111);
+  const accountID0 = state.createNewAccount();
+  const accountID1 = state.createNewAccount();
 
   // const tokenID_1to2 = 1;
   // const tokenID_2to1 = 2;
