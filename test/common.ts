@@ -186,15 +186,16 @@ class GlobalState {
   defaultAccountLeaf: bigint;
   defaultOrderRoot: bigint;
   constructor(orderLevels, balanceLevels, accountLevels) {
-    this.orderLevels = orderLevels;
     this.balanceLevels = balanceLevels;
+    this.orderLevels = orderLevels;
     this.accountLevels = accountLevels;
-    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels);
     this.defaultBalanceRoot = new Tree<bigint>(balanceLevels, 0n).getRoot();
+    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels); // equivalent to `new Tree<bigint>(orderLevels, 0n).getRoot();`
     // defaultAccountLeaf depends on defaultOrderRoot and defaultBalanceRoot
     this.defaultAccountLeaf = this.hashForEmptyAccount();
     this.accountTree = new Tree<bigint>(accountLevels, this.defaultAccountLeaf); // Tree<account_hash>
     this.balanceTrees = new Map(); // map[account_id]balance_tree
+    this.orderTrees = new Map(); // map[account_id]order_tree
     this.accounts = new Map(); // map[account_id]acount_state
     this.bufferedTxs = new Array();
   }
@@ -269,12 +270,14 @@ class GlobalState {
   }
   stateProof(accountID, tokenID) {
     let { path_elements: balancePath, leaf, root: balanceRoot } = this.balanceTrees.get(accountID).getProof(tokenID);
+    let balanceRoot = this.orderTrees.get(accountID).getRoot();
     let { path_elements: accountPath, leaf: accountLeaf, root } = this.accountTree.getProof(accountID);
     //assert(accountLeaf == balanceRoot, 'stateProof');
     return {
       leaf,
       root,
       balanceRoot,
+      orderRoot,
       balancePath,
       accountPath,
     };
