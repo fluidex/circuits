@@ -155,24 +155,26 @@ class GlobalState {
   balanceLevels: number;
   accountLevels: number;
   accountTree: Tree<bigint>;
+  orderTrees: Map<bigint, Tree<bigint>>;
   // idx to balanceTree
   balanceTrees: Map<bigint, Tree<bigint>>;
   accounts: Map<bigint, AccountState>;
   bufferedTxs: Array<RawTx>;
+  defaultOrderRoot: bigint;
   defaultBalanceRoot: bigint;
   defaultAccountLeaf: bigint;
-  defaultOrderRoot: bigint;
   constructor(orderLevels, balanceLevels, accountLevels) {
     this.orderLevels = orderLevels;
     this.balanceLevels = balanceLevels;
     this.accountLevels = accountLevels;
-    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels);
+    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels); // equivalent to `new Tree<bigint>(orderLevels, 0n).getRoot();`
     this.defaultBalanceRoot = new Tree<bigint>(balanceLevels, 0n).getRoot();
     // defaultAccountLeaf depends on defaultOrderRoot and defaultBalanceRoot
     this.defaultAccountLeaf = this.hashForEmptyAccount();
-    this.accountTree = new Tree<bigint>(accountLevels, this.defaultAccountLeaf);
-    this.balanceTrees = new Map();
-    this.accounts = new Map();
+    this.accountTree = new Tree<bigint>(accountLevels, this.defaultAccountLeaf); // Tree<account_hash>
+    this.orderTrees = new Map(); // map[account_id]order_tree
+    this.balanceTrees = new Map(); // map[account_id]balance_tree
+    this.accounts = new Map(); // map[account_id]acount_state
     this.bufferedTxs = new Array();
   }
   root(): bigint {
@@ -191,7 +193,7 @@ class GlobalState {
     this.accounts.get(accountID).updateNonce(nonce);
     this.recalculateFromAccountState(accountID);
   }
-  // this function should only be use in tests for convenience
+  // this function should only be used in tests for convenience
   setAccountOrderRoot(accountID, orderRoot: BigInt) {
     this.accounts.get(accountID).updateOrderRoot(orderRoot);
     this.recalculateFromAccountState(accountID);
@@ -223,6 +225,7 @@ class GlobalState {
     const accountID = BigInt(this.balanceTrees.size);
     let accountState = this.emptyAccount();
     this.accounts.set(accountID, accountState);
+    this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, 0n));
     this.balanceTrees.set(accountID, new Tree<bigint>(this.balanceLevels, 0n));
     this.accountTree.setValue(accountID, this.defaultAccountLeaf);
     //console.log("add account", accountID);
@@ -244,13 +247,20 @@ class GlobalState {
     this.balanceTrees.get(accountID).setValue(tokenID, balance);
     this.recalculateFromBalanceTree(accountID);
   }
+
+  trivialOrderPathElements() {
+    return new Tree<bigint>(this.orderLevels, 0n).getProof(0n).path_elements;
+  }
+
   stateProof(accountID, tokenID) {
+    let orderRoot = this.orderTrees.get(accountID).getRoot();
     let { path_elements: balancePath, leaf, root: balanceRoot } = this.balanceTrees.get(accountID).getProof(tokenID);
     let { path_elements: accountPath, leaf: accountLeaf, root } = this.accountTree.getProof(accountID);
     //assert(accountLeaf == balanceRoot, 'stateProof');
     return {
       leaf,
       root,
+      orderRoot,
       balanceRoot,
       balancePath,
       accountPath,
@@ -259,7 +269,7 @@ class GlobalState {
   getL1Addr(accountID) {
     return this.accounts.get(accountID).ethAddr;
   }
-  DepositToNew(tx: DepositToNewTx, genesisOrderRoot) {
+  DepositToNew(tx: DepositToNewTx) {
     assert(this.accounts.get(tx.accountID).ethAddr == 0n, 'DepositToNew');
     let proof = this.stateProof(tx.accountID, tx.tokenID);
     // first, generate the tx
@@ -276,8 +286,8 @@ class GlobalState {
       payload: encodedTx,
       balancePath0: proof.balancePath,
       balancePath1: proof.balancePath,
-      orderRoot0: genesisOrderRoot,
-      orderRoot1: genesisOrderRoot,
+      orderRoot0: this.defaultOrderRoot,
+      orderRoot1: this.defaultOrderRoot,
       accountPath0: proof.accountPath,
       accountPath1: proof.accountPath,
       rootBefore: proof.root,
@@ -351,6 +361,8 @@ class GlobalState {
     return fullTx;
   }
   Transfer(tx: TranferTx) {
+    assert(this.accounts.get(tx.from).ethAddr != 0n, 'TransferTx: empty fromAccount');
+    assert(this.accounts.get(tx.to).ethAddr != 0n, 'Transfer: empty toAccount');
     let proofFrom = this.stateProof(tx.from, tx.tokenID);
     let fromAccount = this.accounts.get(tx.from);
     let toAccount = this.accounts.get(tx.to);

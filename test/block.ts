@@ -45,7 +45,7 @@ function initTestCase() {
     ethAddr: Scalar.fromString(account0.ethAddr, 16),
     sign: BigInt(account0.sign),
     ay: Scalar.fromString(account0.ay, 16),
-  }, genesisOrderRoot);
+  });
 
   assert(state.accounts.get(accountID1).ethAddr != 0n, 'account0 should not be empty');
   state.DepositToOld({
