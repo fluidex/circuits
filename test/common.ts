@@ -93,6 +93,43 @@ class WithdrawTx {
   signature: TxSignature;
 }
 
+class SpotTradeTx {
+  order1_id; // X
+  order1_tokensell; // X
+  order1_amountsell; // X
+  order1_tokenbuy; // X
+  order1_amountbuy; // X
+  order2_id; // X
+  order2_tokensell; // X
+  order2_amountsell; // X
+  order2_tokenbuy; // X
+  order2_amountbuy; // X
+
+  amount_2to1; // X
+  amount_1to2; // X
+
+  order1_filledsell; // X
+  order1_filledbuy; // X
+
+  order2_filledsell; // X
+  order2_filledbuy; // X
+
+  order1_accountID; // X
+  order2_accountID; // X
+  order1_account_nonce; // X
+  order2_account_nonce; // X
+  order1_account_sign; // X
+  order2_account_sign; // X
+  order1_account_ay; // X
+  order2_account_ay; // X
+  order1_account_ethAddr; // X
+  order2_account_ethAddr; // X
+  order1_token_sell_balance; // X
+  order1_token_buy_balance; // X
+  order2_token_sell_balance; // X
+  order2_token_buy_balance; // X
+}
+
 
 function hashTransfer({ from, to, tokenID, amount, fromNonce, toNonce, oldBalanceFrom, oldBalanceTo }) {
   let data = hash([TxType.Transfer, tokenID, amount]);
