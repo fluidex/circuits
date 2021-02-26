@@ -361,8 +361,8 @@ class GlobalState {
     return fullTx;
   }
   Transfer(tx: TranferTx) {
-    assert(this.accounts.get(tx.from).ethAddr != 0n, 'Transfer');
-    assert(this.accounts.get(tx.to).ethAddr != 0n, 'Transfer');
+    assert(this.accounts.get(tx.from).ethAddr != 0n, 'TransferTx: empty fromAccount');
+    assert(this.accounts.get(tx.to).ethAddr != 0n, 'Transfer: empty toAccount');
     let proofFrom = this.stateProof(tx.from, tx.tokenID);
     let fromAccount = this.accounts.get(tx.from);
     let toAccount = this.accounts.get(tx.to);
