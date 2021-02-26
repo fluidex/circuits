@@ -569,14 +569,23 @@ class GlobalState {
     // let acc = this.accounts.get(tx.accountID);
     // let balanceBefore = this.getTokenBalance(tx.accountID, tx.tokenID);
     // assert(balanceBefore > tx.amount, 'Withdraw balance');
-    encodedTx[TxDetailIdx.AccountID1] = tx.accountID;
-    encodedTx[TxDetailIdx.TokenID] = tx.tokenID;
-    encodedTx[TxDetailIdx.Amount] = tx.amount;
-    encodedTx[TxDetailIdx.Nonce1] = acc.nonce;
-    encodedTx[TxDetailIdx.Sign1] = acc.sign;
-    encodedTx[TxDetailIdx.Ay1] = acc.ay;
-    encodedTx[TxDetailIdx.EthAddr1] = acc.ethAddr;
-    encodedTx[TxDetailIdx.Balance1] = balanceBefore;
+
+    
+    encodedTx[TxDetailIdx.Amount2] = tx.amount2;
+    encodedTx[TxDetailIdx.Order1ID] = tx.order1_id;
+    encodedTx[TxDetailIdx.Order1TokenSell] = tx.order1_tokensell;
+    encodedTx[TxDetailIdx.Order1AmountSell] = tx.order1_amountsell;
+    encodedTx[TxDetailIdx.Order1TokenBuy] = tx.order1_tokenbuy;
+    encodedTx[TxDetailIdx.Order1AmountBuy] = tx.order1_amountbuy;
+    encodedTx[TxDetailIdx.Order2ID] = tx.order2_id;
+    encodedTx[TxDetailIdx.Order2TokenSell] = tx.order2_tokensell;
+    encodedTx[TxDetailIdx.Order2AmountSell] = tx.order2_amountsell;
+    encodedTx[TxDetailIdx.Order2TokenBuy] = tx.order2_tokenbuy;
+    encodedTx[TxDetailIdx.Order2AmountBuy] = tx.order2_amountbuy;
+    encodedTx[TxDetailIdx.Order1FilledSell] = tx.order1_filledsell;
+    encodedTx[TxDetailIdx.Order1FilledBuy] = tx.order1_filledbuy;
+    encodedTx[TxDetailIdx.Order2FilledSell] = tx.order2_filledsell;
+    encodedTx[TxDetailIdx.Order2FilledBuy] = tx.order2_filledbuy;
 
     let rawTx: RawTx = {
       txType: TxType.SpotTrade,
