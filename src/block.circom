@@ -21,7 +21,7 @@ include "./withdraw.circom";
 template Block(nTxs, orderLevels, balanceLevels, accountLevels) {
     // transactions
     signal input txsType[nTxs];
-    signal input encodedTxs[nTxs][18];
+    signal input encodedTxs[nTxs][TxLength()];
 
     // State
     // index meanings: [tx idx][sender or receiver][levels][siblings]
@@ -42,7 +42,7 @@ template Block(nTxs, orderLevels, balanceLevels, accountLevels) {
     component decodedTx[nTxs];
     for (var i = 0; i < nTxs; i++) {
         decodedTx[i] = DecodeTx();
-        for (var j = 0; j < 18; j++) {
+        for (var j = 0; j < TxLength(); j++) {
             decodedTx[i].in[j] <== encodedTxs[i][j];
         }
     }

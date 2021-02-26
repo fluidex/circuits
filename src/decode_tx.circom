@@ -3,11 +3,13 @@ function TxTypeDepositToOld() { return 1; }
 function TxTypeTransfer() { return 2; }
 function TxTypeWithdraw() { return 3; }
 
+function TxLength() { return 18; }
+
 /**
  * @input in - {Array(Field)} - encoded transaction
  */
 template DecodeTx() {
-    signal input in[18];
+    signal input in[TxLength()];
 
     signal output tokenID;
     signal output amount;
