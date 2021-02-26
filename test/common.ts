@@ -565,8 +565,8 @@ class GlobalState {
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
-    encodedTx[TxDetailIdx.AccountID1] = tx.accountID1;
-    encodedTx[TxDetailIdx.AccountID2] = tx.accountID2;
+    encodedTx[TxDetailIdx.AccountID1] = tx.order1_accountID;
+    encodedTx[TxDetailIdx.AccountID2] = tx.order2_accountID;
     encodedTx[TxDetailIdx.EthAddr1] = account1.ethAddr;
     encodedTx[TxDetailIdx.EthAddr2] = account2.ethAddr;
     encodedTx[TxDetailIdx.Sign1] = account1.sign;
@@ -575,10 +575,10 @@ class GlobalState {
     encodedTx[TxDetailIdx.Ay2] = account2.ay;
     encodedTx[TxDetailIdx.Nonce1] = account1.nonce;
     encodedTx[TxDetailIdx.Nonce2] = account1.nonce;
-    let account1_balance_1to2 = this.getTokenBalance(tx.accountID1, tx.order1_tokensell);
-    let account2_balance_2to1 = this.getTokenBalance(tx.accountID2, tx.order2_tokensell);
-    let account1_balance_2to1 = this.getTokenBalance(tx.accountID1, tx.order1_tokenbuy);
-    let account2_balance_1to2 = this.getTokenBalance(tx.accountID2, tx.order2_tokenbuy);
+    let account1_balance_1to2 = this.getTokenBalance(tx.order1_accountID, tx.order1_tokensell);
+    let account2_balance_2to1 = this.getTokenBalance(tx.order2_accountID, tx.order2_tokensell);
+    let account1_balance_2to1 = this.getTokenBalance(tx.order1_accountID, tx.order1_tokenbuy);
+    let account2_balance_1to2 = this.getTokenBalance(tx.order2_accountID, tx.order2_tokenbuy);
     assert(account1_balance_1to2 > tx.amount1, 'balance_1to2');
     assert(account2_balance_2to1 > tx.amount2, 'balance_2to1');
     encodedTx[TxDetailIdx.Balance1] = account1_balance_1to2;
@@ -608,8 +608,8 @@ class GlobalState {
       balancePath1: proof_balance1.balancePath,
       balancePath2: proof_balance2.balancePath,
       balancePath3: proof_balance3.balancePath,
-      // orderPath0: this.trivialOrderPathElements(),
-      // orderPath1: this.trivialOrderPathElements(),
+      orderPath0: this.orderTrees.get(order1_accountID).getProof(tx.order1_id),
+      orderPath1: this.orderTrees.get(order2_accountID).getProof(tx.order2_id),
       orderRoot0: account1.orderRoot, // not really used in the circuit
       orderRoot1: account2.orderRoot, // not really used in the circuit
       // accountPath0: proof.accountPath,
