@@ -589,11 +589,11 @@ class GlobalState {
     encodedTx[TxDetailIdx.Order1ID] = tx.order1_id;
     encodedTx[TxDetailIdx.Order1AmountSell] = tx.order1_amountsell;
     encodedTx[TxDetailIdx.Order1AmountBuy] = tx.order1_amountbuy;
+    encodedTx[TxDetailIdx.Order1FilledSell] = tx.order1_filledsell;
+    encodedTx[TxDetailIdx.Order1FilledBuy] = tx.order1_filledbuy;
     encodedTx[TxDetailIdx.Order2ID] = tx.order2_id;
     encodedTx[TxDetailIdx.Order2AmountSell] = tx.order2_amountsell;
     encodedTx[TxDetailIdx.Order2AmountBuy] = tx.order2_amountbuy;
-    encodedTx[TxDetailIdx.Order1FilledSell] = tx.order1_filledsell;
-    encodedTx[TxDetailIdx.Order1FilledBuy] = tx.order1_filledbuy;
     encodedTx[TxDetailIdx.Order2FilledSell] = tx.order2_filledsell;
     encodedTx[TxDetailIdx.Order2FilledBuy] = tx.order2_filledbuy;
 
