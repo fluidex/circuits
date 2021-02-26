@@ -269,7 +269,7 @@ class TestSpotTrade implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'spot_trade.circom'),
-      main: `SpotTrade(${orderLevels}, ${balanceLevels}, ${accountLevels})`,
+      main: `SpotTrade(${balanceLevels}, ${orderLevels}, ${accountLevels})`,
     };
   }
 }
