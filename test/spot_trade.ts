@@ -94,7 +94,6 @@ function initTestCase() {
 
   let spotTradeTx = {
   };
-  state.fillSpotTradeTx(spotTradeTx);
   state.SpotTrade(spotTradeTx);
 
   // const oldAccount1 = {
