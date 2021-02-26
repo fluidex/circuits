@@ -141,15 +141,6 @@ class Order {
   filled_buy: bigint,
   total_sell: bigint,
   total_buy: bigint,
-  constructor(status, tokenbuy, tokensell, filled_sell, filled_buy, total_sell, total_buy) {
-    this.status = status;
-    this.tokenbuy = tokenbuy;
-    this.tokensell = tokensell;
-    this.filled_sell = filled_sell;
-    this.filled_buy = filled_buy;
-    this.total_sell = total_sell;
-    this.total_buy = total_buy;
-  }
   hash() {
     return hashOrderState(this);
   }
@@ -324,7 +315,7 @@ class GlobalState {
   getL1Addr(accountID) {
     return this.accounts.get(accountID).ethAddr;
   }
-  DepositToNew(tx: DepositToNewTx, genesisOrderRoot) {
+  DepositToNew(tx: DepositToNewTx) {
     assert(this.accounts.get(tx.accountID).ethAddr == 0n, 'DepositToNew');
     let proof = this.stateProof(tx.accountID, tx.tokenID);
     // first, generate the tx
@@ -345,8 +336,8 @@ class GlobalState {
       balancePath3: proof.balancePath,
       orderPath0: this.trivialOrderPathElements(),
       orderPath1: this.trivialOrderPathElements(),
-      orderRoot0: genesisOrderRoot,
-      orderRoot1: genesisOrderRoot,
+      orderRoot0: this.defaultOrderRoot,
+      orderRoot1: this.defaultOrderRoot,
       accountPath0: proof.accountPath,
       accountPath1: proof.accountPath,
       rootBefore: proof.root,
