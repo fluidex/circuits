@@ -268,6 +268,11 @@ class GlobalState {
     this.balanceTrees.get(accountID).setValue(tokenID, balance);
     this.recalculateFromBalanceTree(accountID);
   }
+
+  trivialOrderPathElements() {
+    return new Tree<bigint>(this.orderLevels, 0n).getProof(0n).path_elements;
+  }
+
   stateProof(accountID, tokenID) {
     let { path_elements: balancePath, leaf, root: balanceRoot } = this.balanceTrees.get(accountID).getProof(tokenID);
     let balanceRoot = this.orderTrees.get(accountID).getRoot();
@@ -304,8 +309,8 @@ class GlobalState {
       balancePath1: proof.balancePath,
       balancePath2: proof.balancePath,
       balancePath3: proof.balancePath,
-      orderPath0: new Tree<bigint>(this.orderLevels, 0n).getProof(0).path_elements,
-      orderPath1: new Tree<bigint>(this.orderLevels, 0n).getProof(0).path_elements,
+      orderPath0: this.trivialOrderPathElements,
+      orderPath1: this.trivialOrderPathElements,
       orderRoot0: genesisOrderRoot,
       orderRoot1: genesisOrderRoot,
       accountPath0: proof.accountPath,
@@ -345,8 +350,8 @@ class GlobalState {
       balancePath1: proof.balancePath,
       balancePath2: proof.balancePath,
       balancePath3: proof.balancePath,
-      orderPath0: proof.orderPath, 
-      orderPath1: proof.orderPath, // TODO: need to update acc.orderRoot
+      orderPath0: this.trivialOrderPathElements,
+      orderPath1: this.trivialOrderPathElements,
       orderRoot0: acc.orderRoot,
       orderRoot1: acc.orderRoot,
       accountPath0: proof.accountPath,
@@ -422,8 +427,8 @@ class GlobalState {
       balancePath1: null,
       balancePath2: proofFrom.balancePath,
       balancePath3: null,
-      orderPath0: proofFrom.orderPath, 
-      orderPath1: null,
+      orderPath0: this.trivialOrderPathElements,
+      orderPath1: this.trivialOrderPathElements,
       orderRoot0: fromAccount.orderRoot,
       orderRoot1: toAccount.orderRoot,
       accountPath0: proofFrom.accountPath,
@@ -438,7 +443,6 @@ class GlobalState {
     let proofTo = this.stateProof(tx.to, tx.tokenID);
     rawTx.balancePath1 = proofTo.balancePath;
     rawTx.balancePath3 = proofTo.balancePath;
-    rawTx.orderPath1 = proofto.orderPath;
     rawTx.accountPath1 = proofTo.accountPath;
     this.setTokenBalance(tx.to, tx.tokenID, toOldBalance + tx.amount);
 
@@ -476,8 +480,8 @@ class GlobalState {
       balancePath1: proof.balancePath,
       balancePath2: proof.balancePath,
       balancePath3: proof.balancePath,
-      orderPath0: proof.orderPath, 
-      orderPath1: proof.orderPath, // TODO: need to update acc.orderRoot
+      orderPath0: this.trivialOrderPathElements,
+      orderPath1: this.trivialOrderPathElements,
       orderRoot0: acc.orderRoot,
       orderRoot1: acc.orderRoot,
       accountPath0: proof.accountPath,
