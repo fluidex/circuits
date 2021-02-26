@@ -168,8 +168,9 @@ function initTestCase() {
   // let tmpAccount2Proof = getBTreeProof(accountLeaves, accountID2);
   // accountLeaves[accountID2] = newAccount2Hash;
   // let newAccount2Proof = getBTreeProof(accountLeaves, accountID2);
-  let block = state.forge();
 
+  let block = state.forge();
+  // TODO: assert length
   return {
     enabled: 1,
     order1_id: order1_id,
@@ -205,14 +206,12 @@ function initTestCase() {
     order_path_elements: block.order_path_elements,
     old_account_root: block.oldAccountRoots[block.oldAccountRoots.length-1],
     new_account_root: block.newAccountRoots[block.newAccountRoots.length-1],
-
-    //
-    old_account1_balance_path_elements: oldAccount1BalanceProof.path_elements,
-    tmp_account1_balance_path_elements: tmpAccount1BalanceProof.path_elements,
-    old_account1_path_elements: oldAccount1Proof.path_elements,
-    old_account2_balance_path_elements: oldAccount2BalanceProof.path_elements,
-    tmp_account2_balance_path_elements: tmpAccount2BalanceProof.path_elements,
-    tmp_account2_path_elements: tmpAccount2Proof.path_elements,
+    old_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0], // oldAccount1BalanceProof.path_elements, order1 sender
+    tmp_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][3], // tmpAccount1BalanceProof.path_elements, order2 receiver
+    old_account1_path_elements: block.account_path_elements[block.account_path_elements.length-1][0], // oldAccount1Proof.path_elements,
+    old_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1], // oldAccount2BalanceProof.path_elements, order1 receiver
+    tmp_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][2], // tmpAccount2BalanceProof.path_elements, order2 sender
+    tmp_account2_path_elements: block.account_path_elements[block.account_path_elements.length-1][1], // tmpAccount2Proof.path_elements,
   };
 }
 
