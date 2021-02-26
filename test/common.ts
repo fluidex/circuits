@@ -570,6 +570,10 @@ class GlobalState {
     // let balanceBefore = this.getTokenBalance(tx.accountID, tx.tokenID);
     // assert(balanceBefore > tx.amount, 'Withdraw balance');
 
+    encodedTx[TxDetailIdx.Balance1] = ;
+    encodedTx[TxDetailIdx.Balance2] = ;
+    encodedTx[TxDetailIdx.Balance3] = ;
+    encodedTx[TxDetailIdx.Balance4] = ;
     
     encodedTx[TxDetailIdx.Amount2] = tx.amount2;
     encodedTx[TxDetailIdx.Order1ID] = tx.order1_id;
