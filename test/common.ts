@@ -546,12 +546,9 @@ class GlobalState {
     let account1 = this.accounts.get(tx.order1_accountID);
     let account2 = this.accounts.get(tx.order2_accountID);
     let proof_order1_seller = this.stateProof(tx.order1_accountID, tx.token_1to2);
-    let proof_order1_buyer = this.stateProof(tx.order2_accountID, tx.token_1to2);
+    // let proof_order1_buyer = this.stateProof(tx.order2_accountID, tx.token_1to2);
     let proof_order2_seller = this.stateProof(tx.order2_accountID, tx.token_2to1);
-    let proof_order2_buyer = this.stateProof(tx.order1_accountID, tx.token_2to1);
-    assert(proof_order1_seller.root == proof_order1_buyer.root);
-    assert(proof_order1_buyer.root == proof_order2_seller.root);
-    assert(proof_order2_seller.root == proof_order2_buyer.root);
+    // let proof_order2_buyer = this.stateProof(tx.order1_accountID, tx.token_2to1);
 
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
@@ -604,17 +601,17 @@ class GlobalState {
       orderRoot1: account2.orderRoot, // not really used in the circuit
       accountPath0:  proof_order1_seller.accountPath,
       accountPath1: null,
-      rootBefore: proof_order1_seller.root,
+      rootBefore: this.root(),
       rootAfter: 0n,
     };
 
     this.setTokenBalance(tx.order2_accountID, tx.token_2to1, account2_balance_sell - tx.amount2);
-    rawTx.balancePath1 = this.stateProof(tx.order2_accountID, tx.token_1to2).balancePath;
+    rawTx.balancePath1 = this.stateProof(tx.order2_accountID, tx.token_1to2).balancePath; // account2 after sending, before receiving
     this.setTokenBalance(tx.order1_accountID, tx.token_1to2, account1_balance_sell - tx.amount);
-    rawTx.balancePath3 = this.stateProof(tx.order1_accountID, tx.token_2to1).balancePath;
+    rawTx.balancePath3 = this.stateProof(tx.order1_accountID, tx.token_2to1).balancePath; // account1 after sending, before receiving
 
-    // update order
-    // recalculate
+    
+    // rawTx.accountPath1 = this.accountTree.getProof(order2_accountID).path_elements;
 
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
