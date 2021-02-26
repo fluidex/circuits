@@ -89,6 +89,7 @@ class TestBlock implements SimpleTest {
       txsType: test_case.txsType,
       encodedTxs: test_case.encodedTxs,
       balance_path_elements: test_case.balance_path_elements,
+      balance_path_elements: test_case.order_path_elements,
       account_path_elements: test_case.account_path_elements,
       orderRoots: test_case.orderRoots,
       oldAccountRoots: test_case.oldAccountRoots,

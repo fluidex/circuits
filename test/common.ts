@@ -37,7 +37,7 @@ enum TxDetailIdx {
   R8x,
   R8y,
 
-  // used in spot_trade
+  // only used in spot_trade
   amount2,
   order1_id,
   order1_tokensell,
@@ -123,6 +123,8 @@ class RawTx {
   balancePath1: Array<bigint>;
   balancePath2: Array<bigint>;
   balancePath3: Array<bigint>;
+  orderPath0: Array<bigint>;
+  orderPath1: Array<bigint>;
   orderRoot0: bigint;
   orderRoot1: bigint;
   accountPath0: Array<bigint>;
@@ -191,9 +193,9 @@ class GlobalState {
     this.defaultBalanceRoot = new Tree<bigint>(balanceLevels, 0n).getRoot();
     // defaultAccountLeaf depends on defaultOrderRoot and defaultBalanceRoot
     this.defaultAccountLeaf = this.hashForEmptyAccount();
-    this.accountTree = new Tree<bigint>(accountLevels, this.defaultAccountLeaf);
-    this.balanceTrees = new Map();
-    this.accounts = new Map();
+    this.accountTree = new Tree<bigint>(accountLevels, this.defaultAccountLeaf); // Tree<account_hash>
+    this.balanceTrees = new Map(); // map[account_id]balance_tree
+    this.accounts = new Map(); // map[account_id]acount_state
     this.bufferedTxs = new Array();
   }
   root(): bigint {
@@ -299,6 +301,8 @@ class GlobalState {
       balancePath1: proof.balancePath,
       balancePath2: proof.balancePath,
       balancePath3: proof.balancePath,
+      orderPath0: new Tree<bigint>(this.orderLevels, 0n).getProof(0).path_elements,
+      orderPath1: new Tree<bigint>(this.orderLevels, 0n).getProof(0).path_elements,
       orderRoot0: genesisOrderRoot,
       orderRoot1: genesisOrderRoot,
       accountPath0: proof.accountPath,
@@ -338,6 +342,8 @@ class GlobalState {
       balancePath1: proof.balancePath,
       balancePath2: proof.balancePath,
       balancePath3: proof.balancePath,
+      orderPath0: proof.orderPath, 
+      orderPath1: proof.orderPath, // TODO: need to update acc.orderRoot
       orderRoot0: acc.orderRoot,
       orderRoot1: acc.orderRoot,
       accountPath0: proof.accountPath,
@@ -415,6 +421,8 @@ class GlobalState {
       balancePath3: null,
       accountPath0: proofFrom.accountPath,
       accountPath1: null,
+      orderPath0: proofFrom.orderPath, 
+      orderPath1: null,
       orderRoot0: fromAccount.orderRoot,
       orderRoot1: toAccount.orderRoot,
       rootBefore: proofFrom.root,
@@ -427,6 +435,7 @@ class GlobalState {
     let proofTo = this.stateProof(tx.to, tx.tokenID);
     rawTx.balancePath1 = proofTo.balancePath;
     rawTx.balancePath3 = proofTo.balancePath;
+    rawTx.orderPath1 = proofto.orderPath;
     rawTx.accountPath1 = proofTo.accountPath;
     this.setTokenBalance(tx.to, tx.tokenID, toOldBalance + tx.amount);
 
@@ -464,6 +473,8 @@ class GlobalState {
       balancePath1: proof.balancePath,
       balancePath2: proof.balancePath,
       balancePath3: proof.balancePath,
+      orderPath0: proof.orderPath, 
+      orderPath1: proof.orderPath, // TODO: need to update acc.orderRoot
       orderRoot0: acc.orderRoot,
       orderRoot1: acc.orderRoot,
       accountPath0: proof.accountPath,
@@ -482,6 +493,7 @@ class GlobalState {
     let txsType = this.bufferedTxs.map(tx => tx.txType);
     let encodedTxs = this.bufferedTxs.map(tx => tx.payload);
     let balance_path_elements = this.bufferedTxs.map(tx => [tx.balancePath0, tx.balancePath1, tx.balancePath2, tx.balancePath3]);
+    let order_path_elements = this.bufferedTxs.map(tx => [tx.orderPath0, tx.orderPath1]);
     let orderRoots = this.bufferedTxs.map(tx => [tx.orderRoot0, tx.orderRoot1]);
     let account_path_elements = this.bufferedTxs.map(tx => [tx.accountPath0, tx.accountPath1]);
     let oldAccountRoots = this.bufferedTxs.map(tx => tx.rootBefore);
