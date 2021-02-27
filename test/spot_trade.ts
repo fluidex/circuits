@@ -95,8 +95,8 @@ function initTestCase() {
   let spotTradeTx = {
     order1_accountID: accountID1,
     order2_accountID: accountID2,
-    tokenID_1to2: BigInt(tokenID_1to2),
-    tokenID_2to1: BigInt(tokenID_2to1),
+    tokenID_1to2: tokenID_1to2,
+    tokenID_2to1: tokenID_2to1,
     amount_1to2: amount_1to2,
     amount_2to1: amount_2to1,
     order1_id: order1_id,
