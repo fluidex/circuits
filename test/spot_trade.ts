@@ -16,7 +16,7 @@ const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 // TODO: also clean up other type convension
 function initTestCase() {
-  let state = new common.GlobalState(orderLevels, balanceLevels, accountLevels);
+  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
 
   const account1 = new Account(111);
   const account2 = new Account(222);

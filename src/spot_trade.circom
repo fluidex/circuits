@@ -136,7 +136,7 @@ template orderUpdater(orderLevels) {
 
 // TODO: maker taker (related to fee), according to timestamp: order1 maker, order2 taker
 // TODO: is tradeHistory_storage_leaf necessary?
-template SpotTrade(orderLevels, balanceLevels, accountLevels) {
+template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
 
     signal input order1_id;

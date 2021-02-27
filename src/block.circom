@@ -186,7 +186,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processWithdraw[i].newAccountRoot <== newAccountRoots[i];
 
         // try spot_trade
-        processSpotTrade[i] = SpotTrade(balanceLevels, accountLevels);
+        processSpotTrade[i] = SpotTrade(balanceLevels, orderLevels, accountLevels);
         processSpotTrade[i].enabled <== enableSpotTrade[i].out;
         processSpotTrade[i].order1_id <== decodedTx[i].order1_id;
         processSpotTrade[i].order1_tokensell <== decodedTx[i].tokenID;
