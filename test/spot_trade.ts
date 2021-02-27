@@ -50,7 +50,7 @@ function initTestCase() {
   const nonce2 = 22n;
   const account2_balance_sell = 1990n;
   const account2_balance_buy = 1110n;
-  state.setAccountKey(accountID2, account1.publicKey);
+  state.setAccountKey(accountID2, account2.publicKey);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID_2to1) {
       state.setTokenBalance(accountID2, tokenID_2to1, account2_balance_sell);

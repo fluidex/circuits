@@ -600,14 +600,6 @@ class GlobalState {
       rootAfter: 0n,
     };
 
-    console.log(this.balanceTrees.get(tx.order1_accountID).getRoot());
-    console.log(this.orderTrees.get(tx.order1_accountID).getRoot());
-    console.log(this.accounts.get(tx.order1_accountID).hash());
-
-    console.log(this.balanceTrees.get(tx.order2_accountID).getRoot());
-    console.log(this.orderTrees.get(tx.order2_accountID).getRoot());
-    console.log(this.accounts.get(tx.order2_accountID).hash());
-
     /// do not update state root
     // account1 after sending, before receiving
     this.balanceTrees.get(tx.order1_accountID).setValue(tx.tokenID_1to2, account1_balance_sell - tx.amount_1to2);

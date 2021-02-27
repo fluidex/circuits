@@ -435,13 +435,13 @@ template tradeTransfer(balanceLevels, accountLevels) {
         tmp_account2_balance_checker.path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
     }
     tmp_account2_balance_checker.root <== tmp_account2_balance_tree.root;
-    // // update token buy
-    // component new_account2_balance_tree = CalculateRootFromMerklePath(balanceLevels);
-    // new_account2_balance_tree.leaf <== account2_balance_buy + amount_1to2;
-    // for (var i = 0; i < balanceLevels; i++) {
-    //     new_account2_balance_tree.path_index[i] <== balance_1to2_path_index[i];
-    //     new_account2_balance_tree.path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
-    // }
+    // update token buy
+    component new_account2_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    new_account2_balance_tree.leaf <== account2_balance_buy + amount_1to2;
+    for (var i = 0; i < balanceLevels; i++) {
+        new_account2_balance_tree.path_index[i] <== balance_1to2_path_index[i];
+        new_account2_balance_tree.path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
+    }
 
     // - compute account state
     ///////
@@ -453,17 +453,14 @@ template tradeTransfer(balanceLevels, accountLevels) {
     oldAccount1Hash.ay <== ay1;
     oldAccount1Hash.ethAddr <== ethAddr1;
     oldAccount1Hash.orderRoot <== oldOrder1Root;
-    log(old_account1_balance_tree.root);
-    log(oldOrder1Root);
-    log(oldAccount1Hash.out);
-    // // new account 1 state hash
-    // component newAccount1Hash = HashAccount();
-    // newAccount1Hash.nonce <== nonce1;
-    // newAccount1Hash.sign <== sign1;
-    // newAccount1Hash.balanceRoot <== new_account1_balance_tree.root;
-    // newAccount1Hash.ay <== ay1;
-    // newAccount1Hash.ethAddr <== ethAddr1;
-    // newAccount1Hash.orderRoot <== newOrder1Root;
+    // new account 1 state hash
+    component newAccount1Hash = HashAccount();
+    newAccount1Hash.nonce <== nonce1;
+    newAccount1Hash.sign <== sign1;
+    newAccount1Hash.balanceRoot <== new_account1_balance_tree.root;
+    newAccount1Hash.ay <== ay1;
+    newAccount1Hash.ethAddr <== ethAddr1;
+    newAccount1Hash.orderRoot <== newOrder1Root;
     // old account 2 state hash
     component oldAccount2Hash = HashAccount();
     oldAccount2Hash.nonce <== nonce2;
@@ -472,17 +469,14 @@ template tradeTransfer(balanceLevels, accountLevels) {
     oldAccount2Hash.ay <== ay2;
     oldAccount2Hash.ethAddr <== ethAddr2;
     oldAccount2Hash.orderRoot <== oldOrder2Root;
-    log(old_account2_balance_tree.root);
-    log(oldOrder2Root);
-    log(oldAccount2Hash.out);
-    // // new account 2 state hash
-    // component newAccount2Hash = HashAccount();
-    // newAccount2Hash.nonce <== nonce2;
-    // newAccount2Hash.sign <== sign2;
-    // newAccount2Hash.balanceRoot <== new_account2_balance_tree.root;
-    // newAccount2Hash.ay <== ay2;
-    // newAccount2Hash.ethAddr <== ethAddr2;
-    // newAccount2Hash.orderRoot <== newOrder2Root;
+    // new account 2 state hash
+    component newAccount2Hash = HashAccount();
+    newAccount2Hash.nonce <== nonce2;
+    newAccount2Hash.sign <== sign2;
+    newAccount2Hash.balanceRoot <== new_account2_balance_tree.root;
+    newAccount2Hash.ay <== ay2;
+    newAccount2Hash.ethAddr <== ethAddr2;
+    newAccount2Hash.orderRoot <== newOrder2Root;
 
     // - account tree
     ///////
@@ -496,24 +490,24 @@ template tradeTransfer(balanceLevels, accountLevels) {
     old_account_checker.leaf <== oldAccount1Hash.out;
     old_account_checker.root <== oldAccountRoot;
 
-    // component tmp_account_updater = CalculateRootFromMerklePath(accountLevels);
-    // tmp_account_updater.leaf <== newAccount1Hash.out;
-    // for (var i = 0; i < accountLevels; i++) {
-    //     tmp_account_updater.path_index[i] <== account1_path_index[i];
-    //     tmp_account_updater.path_elements[i][0] <== old_account1_path_elements[i][0];
-    // }
-    // signal tmpAccountRoot;
-    // tmp_account_updater.root ==> tmpAccountRoot;
+    component tmp_account_updater = CalculateRootFromMerklePath(accountLevels);
+    tmp_account_updater.leaf <== newAccount1Hash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        tmp_account_updater.path_index[i] <== account1_path_index[i];
+        tmp_account_updater.path_elements[i][0] <== old_account1_path_elements[i][0];
+    }
+    signal tmpAccountRoot;
+    tmp_account_updater.root ==> tmpAccountRoot;
 
-    // // account 2
-    // component new_account_checker = CheckLeafUpdate(accountLevels);
-    // new_account_checker.enabled <== enabled;
-    // new_account_checker.oldLeaf <== oldAccount2Hash.out;
-    // new_account_checker.newLeaf <== newAccount2Hash.out;
-    // for (var i = 0; i < accountLevels; i++) {
-    //     new_account_checker.path_index[i] <== account2_path_index[i];
-    //     new_account_checker.path_elements[i][0] <== tmp_account2_path_elements[i][0];
-    // }
-    // new_account_checker.oldRoot <== tmpAccountRoot;
-    // new_account_checker.newRoot <== newAccountRoot;
+    // account 2
+    component new_account_checker = CheckLeafUpdate(accountLevels);
+    new_account_checker.enabled <== enabled;
+    new_account_checker.oldLeaf <== oldAccount2Hash.out;
+    new_account_checker.newLeaf <== newAccount2Hash.out;
+    for (var i = 0; i < accountLevels; i++) {
+        new_account_checker.path_index[i] <== account2_path_index[i];
+        new_account_checker.path_elements[i][0] <== tmp_account2_path_elements[i][0];
+    }
+    new_account_checker.oldRoot <== tmpAccountRoot;
+    new_account_checker.newRoot <== newAccountRoot;
 }
