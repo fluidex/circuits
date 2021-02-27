@@ -71,8 +71,8 @@ function initDepositToOld() {
   state.setAccountOrderRoot(accountID, genesisOrderRoot);
 
   state.DepositToOld({
-    accountID: BigInt(accountID),
-    tokenID: BigInt(tokenID),
+    accountID: accountID,
+    tokenID: tokenID,
     amount: amount,
   });
 
