@@ -15,7 +15,7 @@ enum TxType {
   SpotTrade,
 }
 
-const TxLength = 35;
+const TxLength = 32;
 enum TxDetailIdx {
   TokenID,
   Amount,

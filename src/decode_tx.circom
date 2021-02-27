@@ -4,7 +4,7 @@ function TxTypeTransfer() { return 2; }
 function TxTypeWithdraw() { return 3; }
 function TxTypeSpotTrade() { return 4; }
 
-function TxLength() { return 31; }
+function TxLength() { return 32; }
 
 /**
  * @input in - {Array(Field)} - encoded transaction
