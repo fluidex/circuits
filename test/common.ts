@@ -605,14 +605,23 @@ class GlobalState {
       rootAfter: 0n,
     };
 
-    this.setTokenBalance(tx.order2_accountID, tx.token_2to1, account2_balance_sell - tx.amount2);
-    rawTx.balancePath1 = this.stateProof(tx.order2_accountID, tx.token_1to2).balancePath; // account2 after sending, before receiving
-    this.setTokenBalance(tx.order1_accountID, tx.token_1to2, account1_balance_sell - tx.amount);
-    rawTx.balancePath3 = this.stateProof(tx.order1_accountID, tx.token_2to1).balancePath; // account1 after sending, before receiving
 
-    
+    // this.orderTrees.get(accountID).setValue(orderID, order.hash());
+    // this.balanceTrees.get(accountID).setValue(tokenID, balance);
+
+    this.balanceTrees.get(tx.order1_accountID).setValue(tx.token_1to2, account1_balance_sell - tx.amount);
+    // rawTx.balancePath3 = this.stateProof(tx.order1_accountID, tx.token_2to1).balancePath; // account1 after sending, before receiving
+    this.balanceTrees.get(tx.order2_accountID).setValue(tx.token_2to1, account2_balance_sell - tx.amount2);
+    // rawTx.balancePath1 = this.stateProof(tx.order2_accountID, tx.token_1to2).balancePath; // account2 after sending, before receiving
+
+    this.setTokenBalance(tx.order1_accountID, tx.token_2to1, account1_balance_buy + tx.amount2);
+
     // rawTx.accountPath1 = this.accountTree.getProof(order2_accountID).path_elements;
 
+    this.recalculateFromBalanceTree(tx.order1_accountID);
+    this.recalculateFromOrderTree(tx.order1_accountID);
+    this.recalculateFromBalanceTree(tx.order2_accountID);
+    this.recalculateFromOrderTree(tx.order2_accountID);
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
   }
