@@ -54,6 +54,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     component enableDepositToOld[nTxs];
     component enableTransfer[nTxs];
     component enableWithdraw[nTxs];
+    component enableSpotTrade[nTxs];
     for (var i = 0; i < nTxs; i++) {
         enableDepositToNew[i] = IsEqual();
         enableDepositToNew[i].in[0] <== txsType[i];
@@ -70,6 +71,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         enableWithdraw[i] = IsEqual();
         enableWithdraw[i].in[0] <== txsType[i];
         enableWithdraw[i].in[1] <== TxTypeWithdraw();
+
+        enableSpotTrade[i] = IsEqual();
+        enableSpotTrade[i].in[0] <== txsType[i];
+        enableSpotTrade[i].in[1] <== TxTypeSpotTrade();
     }
 
     // process each transaction
@@ -77,6 +82,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     component processDepositToOld[nTxs];
     component processTransfer[nTxs];
     component processWithdraw[nTxs];
+    component processSpotTrade[nTxs];
     for (var i = 0; i < nTxs; i++) {
         // try process deposit_to_new
         processDepositToNew[i] = DepositToNew(balanceLevels, accountLevels);
@@ -177,5 +183,9 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         }
         processWithdraw[i].oldAccountRoot <== oldAccountRoots[i];
         processWithdraw[i].newAccountRoot <== newAccountRoots[i];
+
+        // try spot_trade
+        processSpotTrade[i] = SpotTrade(balanceLevels, accountLevels);
+        processSpotTrade[i].enabled <== enableSp[i].out;
     }
 }
