@@ -12,7 +12,7 @@ function TxLength() { return 32; }
 template DecodeTx() {
     signal input in[TxLength()];
 
-    signal output tokenID; // "tokenID" is "token_1to2" in spot_trade
+    signal output tokenID; // "tokenID" is "tokenID_1to2" in spot_trade
     signal output amount; // "amount" is "amount_1to2" in spot_trade
 
     signal output accountID1;
@@ -36,7 +36,7 @@ template DecodeTx() {
     signal output r8y;
 
     /// only used in spot_trade
-    signal output tokenID2; // "tokenID2" is "token_2to1" in spot_trade
+    signal output tokenID2; // "tokenID2" is "tokenID_2to1" in spot_trade
     signal output amount2; // "amount2" is "amount_2to1" in spot_trade.
     signal output order1_id;
     signal output order1_amountsell;
