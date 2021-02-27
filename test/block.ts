@@ -34,13 +34,9 @@ function initTestCase() {
   /// mock existing account1 data
   state.setAccountKey(accountID1, account1.publicKey);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
-    if (BigInt(i) == tokenID) {
-      state.setTokenBalance(accountID1, tokenID, 300n);
-    } else {
       state.setTokenBalance(accountID1, BigInt(i), 10n + BigInt(i));
-    }
   }
-  state.setAccountNonce(accountID1, 99n);
+  state.setAccountNonce(accountID1, 19n);
   // order1
   const order1_id = 1n;
   const order1 = {
@@ -57,13 +53,9 @@ function initTestCase() {
   /// mock existing account2 data
   state.setAccountKey(accountID2, account2.publicKey);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
-    if (BigInt(i) == tokenID) {
-      state.setTokenBalance(accountID2, tokenID, 300n);
-    } else {
-      state.setTokenBalance(accountID2, BigInt(i), 10n + BigInt(i));
-    }
+      state.setTokenBalance(accountID2, BigInt(i), 20n + BigInt(i));
   }
-  state.setAccountNonce(accountID2, 99n);
+  state.setAccountNonce(accountID2, 29n);
   // order2
   const order2_id = 1n;
   const order2 = {
@@ -89,7 +81,7 @@ function initTestCase() {
     ay: Scalar.fromString(account0.ay, 16),
   });
 
-  assert(state.accounts.get(accountID1).ethAddr != 0n, 'account0 should not be empty');
+  assert(state.accounts.get(accountID1).ethAddr != 0n, 'account1 should not be empty');
   state.DepositToOld({
     accountID: accountID1,
     tokenID: tokenID,
