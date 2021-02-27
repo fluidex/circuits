@@ -104,10 +104,10 @@ async function readSymbols(path: string) {
 
 async function testWithInputOutput(t: SimpleTest) {
   // console.log(__dirname);
-  const circomRuntimePath = path.join(__dirname, "..", "node_modules", "circom_runtime");
-  const snarkjsPath = path.join(__dirname, "..", "node_modules", "snarkjs", "build", "cli.cjs");
-  const ffiasmPath = path.join(__dirname, "..", "node_modules", "ffiasm");
-  const circomcliPath = path.join(__dirname, "..", "node_modules", "circom", "cli.js");
+  const circomRuntimePath = path.join(__dirname, "..", "..", "node_modules", "circom_runtime");
+  const snarkjsPath = path.join(__dirname, "..", "..", "node_modules", "snarkjs", "build", "cli.cjs");
+  const ffiasmPath = path.join(__dirname, "..", "..", "node_modules", "ffiasm");
+  const circomcliPath = path.join(__dirname, "..", "..", "node_modules", "circom", "cli.js");
 
   // create temp target dir
   const targetDir = tmp.dirSync({ prefix: `tmp-${t.constructor.name}-circuit` });
