@@ -4,7 +4,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export NODE_OPTIONS="--max_old_space_size=8192"
 
 # export CIRCUIT=transfer
-export CIRCUIT=block
+# export CIRCUIT=block
+export CIRCUIT=massive
 
 export HASH=poseidon
 pushd $DIR/..
