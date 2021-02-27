@@ -21,12 +21,17 @@ function initTestCase() {
   let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
 
   const tokenID = 0n;
+  const tokenID_1to2 = 0n;
+  const tokenID_2to1 = 1n;
+
   const account0 = new Account(2);
   const account1 = new Account(1);
+  const account2 = new Account(0);
   const accountID0 = state.createNewAccount();
   const accountID1 = state.createNewAccount();
+  const accountID2 = state.createNewAccount();
 
-  // mock existing account1 data
+  /// mock existing account1 data
   state.setAccountKey(accountID1, account1.publicKey);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID) {
@@ -36,6 +41,43 @@ function initTestCase() {
     }
   }
   state.setAccountNonce(accountID1, 99n);
+  // order1
+  const order1_id = 1n;
+  const order1 = {
+    status: 0, // open
+    tokenbuy: tokenID_2to1,
+    tokensell: tokenID_1to2,
+    filled_sell: 0n,
+    filled_buy: 0n,
+    total_sell: 1000n,
+    total_buy: 10000n,
+  };
+  state.setAccountOrder(accountID1, order1_id, order1);
+
+  /// mock existing account2 data
+  state.setAccountKey(accountID2, account2.publicKey);
+  for (let i = 0; i < 2 ** balanceLevels; i++) {
+    if (BigInt(i) == tokenID) {
+      state.setTokenBalance(accountID2, tokenID, 300n);
+    } else {
+      state.setTokenBalance(accountID2, BigInt(i), 10n + BigInt(i));
+    }
+  }
+  state.setAccountNonce(accountID2, 99n);
+  // order2
+  const order2_id = 1n;
+  const order2 = {
+    status: 0, // open
+    tokenbuy: tokenID_1to2,
+    tokensell: tokenID_2to1,
+    filled_sell: 10n,
+    filled_buy: 1n,
+    total_sell: 10000n,
+    total_buy: 1000n,
+  };
+  state.setAccountOrder(accountID2, order2_id, order2);
+
+  /// start txs
 
   assert(state.accounts.get(accountID0).ethAddr == 0n, 'account0 should be empty');
   state.DepositToNew({
@@ -78,51 +120,23 @@ function initTestCase() {
   withdrawTx.signature = common.accountSign(account0, hash);
   state.Withdraw(withdrawTx);
 
-  // trade token
-  const tokenID_1to2 = 0n;
-  const tokenID_2to1 = 1n;
   // trade amount
   const amount_1to2 = 120n;
   const amount_2to1 = 1200n;
   // ensure balance to trade
   state.DepositToOld({
-    accountID: accountID0,
+    accountID: accountID1,
     tokenID: tokenID_1to2,
     amount: 199n,
   });
   state.DepositToOld({
-    accountID: accountID1,
+    accountID: accountID2,
     tokenID: tokenID_2to1,
     amount: 1990n,
   });
-  /// set up orders
-  // order1
-  const order1_id = 1n;
-  const order1 = {
-    status: 0, // open
-    tokenbuy: tokenID_2to1,
-    tokensell: tokenID_1to2,
-    filled_sell: 0n,
-    filled_buy: 0n,
-    total_sell: 1000n,
-    total_buy: 10000n,
-  };
-  state.setAccountOrder(accountID0, order1_id, order1);
-  // order2
-  const order2_id = 1n;
-  const order2 = {
-    status: 0, // open
-    tokenbuy: tokenID_1to2,
-    tokensell: tokenID_2to1,
-    filled_sell: 10n,
-    filled_buy: 1n,
-    total_sell: 10000n,
-    total_buy: 1000n,
-  };
-  state.setAccountOrder(accountID1, order2_id, order2);
   let spotTradeTx = {
-    order1_accountID: accountID0,
-    order2_accountID: accountID1,
+    order1_accountID: accountID1,
+    order2_accountID: accountID2,
     tokenID_1to2: tokenID_1to2,
     tokenID_2to1: tokenID_2to1,
     amount_1to2: amount_1to2,
