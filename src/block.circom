@@ -5,6 +5,7 @@ include "./deposit_to_new.circom";
 include "./deposit_to_old.circom";
 include "./transfer.circom";
 include "./withdraw.circom";
+include "./spot_trade.circom";
 
 /**
  * Process a rollup block and transactions inside
