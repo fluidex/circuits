@@ -147,7 +147,7 @@ function initTestCase() {
     order1_token_buy_balance: account1_balance_buy,
     order2_token_sell_balance: account2_balance_sell,
     order2_token_buy_balance: account2_balance_buy,
-    order_path_elements: block.order_path_elements,
+    order_path_elements: block.order_path_elements[block.order_path_elements.length-1],
     old_account_root: block.oldAccountRoots[block.oldAccountRoots.length-1],
     new_account_root: block.newAccountRoots[block.newAccountRoots.length-1],
     old_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],
