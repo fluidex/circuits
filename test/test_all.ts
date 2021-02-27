@@ -12,20 +12,19 @@ import { TestSpotTrade } from './spot_trade';
 
 async function main() {
   try {
-    // await testWithInputOutput(new TestRescueHash());
-    // await testWithInputOutput(new TestCheckLeafExists());
-    // await testWithInputOutput(new TestCheckLeafExistsDisable());
-    // await testWithInputOutput(new TestCheckLeafUpdate());
-    // await testWithInputOutput(new TestCheckLeafUpdateDisable());
-    // await testWithInputOutput(new TestHashAccount());
-    // await testWithInputOutput(new TestHashOrder());
-    // await testWithInputOutput(new TestGenesisOrderRoot());
-    // await testWithInputOutput(new TestDepositToNew());
-    // await testWithInputOutput(new TestDepositToOld());
-    // await testWithInputOutput(new TestTransfer());
-    // await testWithInputOutput(new TestWithdraw());
-
-    // await testWithInputOutput(new TestBlock());
+    await testWithInputOutput(new TestRescueHash());
+    await testWithInputOutput(new TestCheckLeafExists());
+    await testWithInputOutput(new TestCheckLeafExistsDisable());
+    await testWithInputOutput(new TestCheckLeafUpdate());
+    await testWithInputOutput(new TestCheckLeafUpdateDisable());
+    await testWithInputOutput(new TestHashAccount());
+    await testWithInputOutput(new TestHashOrder());
+    await testWithInputOutput(new TestGenesisOrderRoot());
+    await testWithInputOutput(new TestDepositToNew());
+    await testWithInputOutput(new TestDepositToOld());
+    await testWithInputOutput(new TestTransfer());
+    await testWithInputOutput(new TestWithdraw());
+    await testWithInputOutput(new TestBlock());
     await testWithInputOutput(new TestSpotTrade());
   } catch (e) {
     console.error(e);
