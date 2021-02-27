@@ -186,6 +186,45 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
         // try spot_trade
         processSpotTrade[i] = SpotTrade(balanceLevels, accountLevels);
-        processSpotTrade[i].enabled <== enableSp[i].out;
+        processSpotTrade[i].enabled <== enableSpotTrade[i].out;
+        // processSpotTrade[i].order1_id;
+        // processSpotTrade[i].order1_tokensell;
+        // processSpotTrade[i].order1_amountsell;
+        // processSpotTrade[i].order1_tokenbuy;
+        // processSpotTrade[i].order1_amountbuy;
+        // processSpotTrade[i].order2_id;
+        // processSpotTrade[i].order2_tokensell;
+        // processSpotTrade[i].order2_amountsell;
+        // processSpotTrade[i].order2_tokenbuy;
+        // processSpotTrade[i].order2_amountbuy;
+        // processSpotTrade[i].amount_2to1;
+        // processSpotTrade[i].amount_1to2;
+        // processSpotTrade[i].order1_filledsell;
+        // processSpotTrade[i].order1_filledbuy;
+        // processSpotTrade[i].order2_filledsell;
+        // processSpotTrade[i].order2_filledbuy;
+        // processSpotTrade[i].order_path_elements[2][orderLevels][1];
+        // processSpotTrade[i].order1_accountID;
+        // processSpotTrade[i].order2_accountID;
+        // processSpotTrade[i].order1_account_nonce;
+        // processSpotTrade[i].order2_account_nonce;
+        // processSpotTrade[i].order1_account_sign;
+        // processSpotTrade[i].order2_account_sign;
+        // processSpotTrade[i].order1_account_ay;
+        // processSpotTrade[i].order2_account_ay;
+        // processSpotTrade[i].order1_account_ethAddr;
+        // processSpotTrade[i].order2_account_ethAddr;
+        // processSpotTrade[i].order1_token_sell_balance;
+        // processSpotTrade[i].order1_token_buy_balance;
+        // processSpotTrade[i].order2_token_sell_balance;
+        // processSpotTrade[i].order2_token_buy_balance;
+        // processSpotTrade[i].old_account1_balance_path_elements[balanceLevels][1];
+        // processSpotTrade[i].tmp_account1_balance_path_elements[balanceLevels][1];
+        // processSpotTrade[i].old_account1_path_elements[accountLevels][1];
+        // processSpotTrade[i].old_account2_balance_path_elements[balanceLevels][1];
+        // processSpotTrade[i].tmp_account2_balance_path_elements[balanceLevels][1];
+        // processSpotTrade[i].tmp_account2_path_elements[accountLevels][1];
+        processSpotTrade[i].old_account_root <== oldAccountRoots[i];
+        processSpotTrade[i].new_account_root <== newAccountRoots[i];
     }
 }
