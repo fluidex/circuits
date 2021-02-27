@@ -53,9 +53,9 @@ function initTestCase() {
   state.setAccountOrderRoot(accountID2, genesisOrderRoot);
 
   let transferTx = {
-    from: BigInt(accountID1),
-    to: BigInt(accountID2),
-    tokenID: BigInt(tokenID),
+    from: accountID1,
+    to: accountID2,
+    tokenID: tokenID,
     amount: amount,
     signature: null,
   };

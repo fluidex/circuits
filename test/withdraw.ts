@@ -38,9 +38,9 @@ function initTestCase() {
   state.setAccountOrderRoot(accountID, genesisOrderRoot);
 
   let withdrawTx = {
-    accountID: BigInt(accountID),
+    accountID: accountID,
     amount: amount,
-    tokenID: BigInt(tokenID),
+    tokenID: tokenID,
     signature: null,
   };
   let fullWithdrawTx = state.fillWithdrawTx(withdrawTx);
@@ -52,7 +52,7 @@ function initTestCase() {
   // TODO: assert length
   return {
     enabled: 1,
-    accountID: BigInt(accountID),
+    accountID: accountID,
     amount: amount,
     tokenID: tokenID,
     nonce: nonce,
