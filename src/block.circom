@@ -228,8 +228,8 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
             processSpotTrade[i].tmp_account2_balance_path_elements[j][0] <== balance_path_elements[i][1][j];
         }
         for (var j = 0; j < accountLevels; j++) {
-            processSpotTrade[i].old_account1_path_elements[j][0] <== account_path_elements[i][0][j][0];;
-            processSpotTrade[i].tmp_account2_path_elements[j][0] <== account_path_elements[i][1][j][0];;
+            processSpotTrade[i].old_account1_path_elements[j][0] <== account_path_elements[i][0][j][0];
+            processSpotTrade[i].tmp_account2_path_elements[j][0] <== account_path_elements[i][1][j][0];
         }
         processSpotTrade[i].old_account_root <== oldAccountRoots[i];
         processSpotTrade[i].new_account_root <== newAccountRoots[i];
