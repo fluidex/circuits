@@ -609,19 +609,39 @@ class GlobalState {
     // this.orderTrees.get(accountID).setValue(orderID, order.hash());
     // this.balanceTrees.get(accountID).setValue(tokenID, balance);
 
+    /// do not update state root
+    // account1 after sending, before receiving
     this.balanceTrees.get(tx.order1_accountID).setValue(tx.token_1to2, account1_balance_sell - tx.amount);
-    // rawTx.balancePath3 = this.stateProof(tx.order1_accountID, tx.token_2to1).balancePath; // account1 after sending, before receiving
+    rawTx.balancePath3 = this.balanceTrees.get(tx.order1_accountID).getProof(tx.token_2to1).path_elements;
+    // account2 after sending, before receiving
     this.balanceTrees.get(tx.order2_accountID).setValue(tx.token_2to1, account2_balance_sell - tx.amount2);
-    // rawTx.balancePath1 = this.stateProof(tx.order2_accountID, tx.token_1to2).balancePath; // account2 after sending, before receiving
+    rawTx.balancePath1 = this.balanceTrees.get(tx.order2_accountID).getProof(tx.token_1to2).path_elements;
 
-    this.setTokenBalance(tx.order1_accountID, tx.token_2to1, account1_balance_buy + tx.amount2);
+    let newOrder1 = {
+      // status: oldOrder1.status, // open
+      // tokenbuy: oldOrder1.tokenbuy,
+      // tokensell: oldOrder1.tokensell,
+      // filled_sell: oldOrder1.filled_sell + amount_1to2,
+      // filled_buy: oldOrder1.filled_buy + amount_2to1,
+      // total_sell: oldOrder1.total_sell,
+      // total_buy: oldOrder1.total_buy,
+    };
+    this.setAccountOrder(tx.order1_accountID, tx.order1_id, newOrder1);
+    this.setAccountBalance(tx.order1_accountID, tx.token_2to1, account1_balance_buy + tx.amount2);
+    rawTx.accountPath1 = this.accountTree.getProof(order2_accountID).path_elements;
 
-    // rawTx.accountPath1 = this.accountTree.getProof(order2_accountID).path_elements;
+    let newOrder2 = {
+      // status: oldOrder1.status, // open
+      // tokenbuy: oldOrder1.tokenbuy,
+      // tokensell: oldOrder1.tokensell,
+      // filled_sell: oldOrder1.filled_sell + amount_1to2,
+      // filled_buy: oldOrder1.filled_buy + amount_2to1,
+      // total_sell: oldOrder1.total_sell,
+      // total_buy: oldOrder1.total_buy,
+    };
+    this.setAccountOrder(tx.order2_accountID, tx.order2_id, newOrder2);
+    this.setAccountBalance(tx.order2_accountID, tx.token_1to2, account2_balance_buy + tx.amount);
 
-    this.recalculateFromBalanceTree(tx.order1_accountID);
-    this.recalculateFromOrderTree(tx.order1_accountID);
-    this.recalculateFromBalanceTree(tx.order2_accountID);
-    this.recalculateFromOrderTree(tx.order2_accountID);
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
   }
