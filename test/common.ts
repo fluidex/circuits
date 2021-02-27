@@ -12,6 +12,7 @@ enum TxType {
   DepositToOld,
   Transfer,
   Withdraw,
+  SpotTrade,
 }
 
 const TxLength = 35;
@@ -150,13 +151,13 @@ class RawTx {
 }
 
 class Order {
-  status: number,
-  tokenbuy: bigint,
-  tokensell: bigint,
-  filled_sell: bigint,
-  filled_buy: bigint,
-  total_sell: bigint,
-  total_buy: bigint,
+  status: number;
+  tokenbuy: bigint;
+  tokensell: bigint;
+  filled_sell: bigint;
+  filled_buy: bigint;
+  total_sell: bigint;
+  total_buy: bigint;
 }
 
 class AccountState {
@@ -618,7 +619,7 @@ class GlobalState {
     };
     this.setAccountOrder(tx.order1_accountID, tx.order1_id, newOrder1);
     this.setAccountBalance(tx.order1_accountID, tx.tokenID_2to1, account1_balance_buy + tx.amount_2to1);
-    rawTx.accountPath1 = this.accountTree.getProof(order2_accountID).path_elements;
+    rawTx.accountPath1 = this.accountTree.getProof(tx.order2_accountID).path_elements;
 
     let newOrder2 = {
       status: 0, // open

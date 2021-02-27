@@ -2,6 +2,7 @@ function TxTypeDepositToNew() { return 0; }
 function TxTypeDepositToOld() { return 1; }
 function TxTypeTransfer() { return 2; }
 function TxTypeWithdraw() { return 3; }
+function TxTypeSpotTrade() { return 4; }
 
 function TxLength() { return 31; }
 
