@@ -618,7 +618,7 @@ class GlobalState {
       total_buy: tx.order1_amountbuy,
     };
     this.setAccountOrder(tx.order1_accountID, tx.order1_id, newOrder1);
-    this.setAccountBalance(tx.order1_accountID, tx.tokenID_2to1, account1_balance_buy + tx.amount_2to1);
+    this.setTokenBalance(tx.order1_accountID, tx.tokenID_2to1, account1_balance_buy + tx.amount_2to1);
     rawTx.accountPath1 = this.accountTree.getProof(tx.order2_accountID).path_elements;
 
     let newOrder2 = {
@@ -631,7 +631,7 @@ class GlobalState {
       total_buy: tx.order2_amountbuy,
     };
     this.setAccountOrder(tx.order2_accountID, tx.order2_id, newOrder2);
-    this.setAccountBalance(tx.order2_accountID, tx.tokenID_1to2, account2_balance_buy + tx.amount_1to2);
+    this.setTokenBalance(tx.order2_accountID, tx.tokenID_1to2, account2_balance_buy + tx.amount_1to2);
 
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
