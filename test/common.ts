@@ -557,7 +557,7 @@ class GlobalState {
     encodedTx[TxDetailIdx.Ay1] = account1.ay;
     encodedTx[TxDetailIdx.Ay2] = account2.ay;
     encodedTx[TxDetailIdx.Nonce1] = account1.nonce;
-    encodedTx[TxDetailIdx.Nonce2] = account1.nonce;
+    encodedTx[TxDetailIdx.Nonce2] = account2.nonce;
     let account1_balance_sell = this.getTokenBalance(tx.order1_accountID, tx.tokenID_1to2);
     let account2_balance_buy = this.getTokenBalance(tx.order2_accountID, tx.tokenID_1to2);
     let account2_balance_sell = this.getTokenBalance(tx.order2_accountID, tx.tokenID_2to1);
