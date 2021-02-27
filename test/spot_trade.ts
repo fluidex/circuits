@@ -23,8 +23,8 @@ function initTestCase() {
   const accountID2 = state.createNewAccount();
 
   // trade token
-  const tokenID_1to2 = 1;
-  const tokenID_2to1 = 2;
+  const tokenID_1to2 = 1n;
+  const tokenID_2to1 = 2n;
   // trade amount
   const amount_1to2 = 120n;
   const amount_2to1 = 1200n;
