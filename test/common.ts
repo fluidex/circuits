@@ -94,8 +94,8 @@ class WithdrawTx {
 class SpotTradeTx {
   order1_accountID: bigint;
   order2_accountID: bigint;
-  token_1to2: bigint;
-  token_2to1: bigint;
+  tokenID_1to2: bigint;
+  tokenID_2to1: bigint;
   amount_1to2: bigint;
   amount_2to1: bigint;
   order1_id: bigint;
@@ -109,7 +109,6 @@ class SpotTradeTx {
   order2_filledsell: bigint;
   order2_filledbuy: bigint;
 }
-
 
 function hashTransfer({ from, to, tokenID, amount, fromNonce, toNonce, oldBalanceFrom, oldBalanceTo }) {
   let data = hash([TxType.Transfer, tokenID, amount]);

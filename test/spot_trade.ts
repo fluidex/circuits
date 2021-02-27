@@ -5,7 +5,7 @@ import { Account } from '../helper.ts/account';
 import { getBTreeProof } from '../helper.ts/binary_merkle_tree';
 import { hashAccountState, hashOrderState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
-import { TxType } from './common';
+import * as common from './common';
 
 // circuit-level definitions
 const orderLevels = 2;
@@ -31,7 +31,7 @@ function initTestCase() {
 
   /// set up initial accounts
   // account 1
-  const nonce1 = 11;
+  const nonce1 = 11n;
   const account1_balance_sell = 199n;
   const account1_balance_buy = 111n;
   state.setAccountKey(accountID1, account1.publicKey);
@@ -46,7 +46,7 @@ function initTestCase() {
   }
   state.setAccountNonce(accountID1, nonce1);
   // account 2
-  const nonce2 = 22;
+  const nonce2 = 22n;
   const account2_balance_sell = 1990n;
   const account2_balance_buy = 1110n;
   state.setAccountKey(accountID2, account1.publicKey);
@@ -63,9 +63,9 @@ function initTestCase() {
 
   /// set up orders
   // order1
-  const order1_id = 1;
-  const order1_amountsell = 1000;
-  const order1_amountbuy = 10000;
+  const order1_id = 1n;
+  const order1_amountsell = 1000n;
+  const order1_amountbuy = 10000n;
   const order1 = {
     status: 0, // open
     tokenbuy: tokenID_2to1,
@@ -78,9 +78,9 @@ function initTestCase() {
   state.setAccountOrder(accountID1, order1_id, order1);
 
   // order2
-  const order2_id = 1;
-  const order2_amountsell = 10000;
-  const order2_amountbuy = 1000;
+  const order2_id = 1n;
+  const order2_amountsell = 10000n;
+  const order2_amountbuy = 1000n;
   const order2 = {
     status: 0, // open
     tokenbuy: tokenID_1to2,
@@ -95,8 +95,8 @@ function initTestCase() {
   let spotTradeTx = {
     order1_accountID: accountID1,
     order2_accountID: accountID2,
-    tokenID_1to2: tokenID_1to2,
-    tokenID_2to1: tokenID_2to1,
+    tokenID_1to2: BigInt(tokenID_1to2),
+    tokenID_2to1: BigInt(tokenID_2to1),
     amount_1to2: amount_1to2,
     amount_2to1: amount_2to1,
     order1_id: order1_id,
@@ -128,10 +128,10 @@ function initTestCase() {
     order2_amountbuy: order2_amountbuy,
     amount_2to1: amount_2to1,
     amount_1to2: amount_1to2,
-    order1_filledsell: oldOrder1.filled_sell,
-    order1_filledbuy: oldOrder1.filled_buy,
-    order2_filledsell: oldOrder2.filled_sell,
-    order2_filledbuy: oldOrder2.filled_buy,
+    order1_filledsell: order1.filled_sell,
+    order1_filledbuy: order1.filled_buy,
+    order2_filledsell: order2.filled_sell,
+    order2_filledbuy: order2.filled_buy,
     order1_accountID: accountID1,
     order2_accountID: accountID2,
     order1_account_nonce: nonce1,
