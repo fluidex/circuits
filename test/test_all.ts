@@ -1,5 +1,5 @@
-// import { testWithInputOutput } from './test_all_c';
-import { testWithInputOutput } from './test_all_wasm';
+// import { testWithInputOutput } from './c_tester';
+import { testWithInputOutput } from './wasm_tester';
 
 import { TestCheckLeafExists, TestCheckLeafExistsDisable, TestCheckLeafUpdate, TestCheckLeafUpdateDisable } from './binary_merkle_tree';
 import { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash } from './rescue';
