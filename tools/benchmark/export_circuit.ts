@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { TestTransfer } from '../../test/transfer';
 import { TestBlock } from '../../test/block';
+import { TestMassive } from '../../test/massive';
 const { unstringifyBigInt, stringifyBigInts } = require('ffjavascript').utils;
 
 const circuitPath = process.argv.slice(2)[0];
@@ -20,4 +21,7 @@ if (circuitPath.includes('transfer')) {
 } else if (circuitPath.includes('block')) {
   console.log('exporting block circuit');
   exportCircuit(new TestBlock(), circuitPath);
+} else if (circuitPath.includes('massive')) {
+  console.log('exporting massive circuit');
+  exportCircuit(new TestMassive(), circuitPath);
 }
