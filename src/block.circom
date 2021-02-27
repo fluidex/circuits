@@ -96,7 +96,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDepositToNew[i].ay <== decodedTx[i].ay2;
         processDepositToNew[i].amount <== decodedTx[i].amount;
         for (var j = 0; j < balanceLevels; j++) {
-            processDepositToNew[i].balance_path_elements[j] <== balance_path_elements[i][1][j];
+            processDepositToNew[i].balance_path_elements[j][0] <== balance_path_elements[i][1][j][0];
         }
         for (var j = 0; j < accountLevels; j++) {
             processDepositToNew[i].account_path_elements[j][0] <== account_path_elements[i][1][j][0];
@@ -117,7 +117,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDepositToOld[i].nonce <== decodedTx[i].nonce2;
         processDepositToOld[i].balance <== decodedTx[i].balance2;
         for (var j = 0; j < balanceLevels; j++) {
-            processDepositToOld[i].balance_path_elements[j] <== balance_path_elements[i][1][j];
+            processDepositToOld[i].balance_path_elements[j][0] <== balance_path_elements[i][1][j][0];
         }
         for (var j = 0; j < accountLevels; j++) {
             processDepositToOld[i].account_path_elements[j][0] <== account_path_elements[i][1][j][0];
@@ -150,8 +150,8 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processTransfer[i].r8x <== decodedTx[i].r8x;
         processTransfer[i].r8y <== decodedTx[i].r8y;
         for (var j = 0; j < balanceLevels; j++) {
-            processTransfer[i].sender_balance_path_elements[j] <== balance_path_elements[i][0][j];
-            processTransfer[i].receiver_balance_path_elements[j] <== balance_path_elements[i][1][j];
+            processTransfer[i].sender_balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
+            processTransfer[i].receiver_balance_path_elements[j][0] <== balance_path_elements[i][1][j][0];
         }
         for (var j = 0; j < accountLevels; j++) {
             processTransfer[i].sender_account_path_elements[j][0] <== account_path_elements[i][0][j][0];
@@ -177,7 +177,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processWithdraw[i].r8x <== decodedTx[i].r8x;
         processWithdraw[i].r8y <== decodedTx[i].r8y;
         for (var j = 0; j < balanceLevels; j++) {
-            processWithdraw[i].balance_path_elements[j] <== balance_path_elements[i][0][j];
+            processWithdraw[i].balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
         }
         for (var j = 0; j < accountLevels; j++) {
             processWithdraw[i].account_path_elements[j][0] <== account_path_elements[i][0][j][0];
@@ -223,10 +223,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
             processSpotTrade[i].order_path_elements[1][j][0] <== order_path_elements[i][1][j][0];
         }
         for (var j = 0; j < balanceLevels; j++) {
-            processSpotTrade[i].old_account1_balance_path_elements[j][0] <== balance_path_elements[i][0][j];
-            processSpotTrade[i].tmp_account1_balance_path_elements[j][0] <== balance_path_elements[i][3][j];
-            processSpotTrade[i].old_account2_balance_path_elements[j][0] <== balance_path_elements[i][2][j];
-            processSpotTrade[i].tmp_account2_balance_path_elements[j][0] <== balance_path_elements[i][1][j];
+            processSpotTrade[i].old_account1_balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
+            processSpotTrade[i].tmp_account1_balance_path_elements[j][0] <== balance_path_elements[i][3][j][0];
+            processSpotTrade[i].old_account2_balance_path_elements[j][0] <== balance_path_elements[i][2][j][0];
+            processSpotTrade[i].tmp_account2_balance_path_elements[j][0] <== balance_path_elements[i][1][j][0];
         }
         for (var j = 0; j < accountLevels; j++) {
             processSpotTrade[i].old_account1_path_elements[j][0] <== account_path_elements[i][0][j][0];
