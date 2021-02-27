@@ -66,7 +66,7 @@ function initTestCase() {
   const order1_id = 1;
   const order1_amountsell = 1000;
   const order1_amountbuy = 10000;
-  const oldOrder1 = {
+  const order1 = {
     status: 0, // open
     tokenbuy: tokenID_2to1,
     tokensell: tokenID_1to2,
@@ -75,13 +75,13 @@ function initTestCase() {
     total_sell: order1_amountsell,
     total_buy: order1_amountbuy,
   };
-  state.setAccountOrder(accountID1, order1_id, oldOrder1);
+  state.setAccountOrder(accountID1, order1_id, order1);
 
   // order2
   const order2_id = 1;
   const order2_amountsell = 10000;
   const order2_amountbuy = 1000;
-  const oldOrder2 = {
+  const order2 = {
     status: 0, // open
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
@@ -90,9 +90,25 @@ function initTestCase() {
     total_sell: order2_amountsell,
     total_buy: order2_amountbuy,
   };
-  state.setAccountOrder(accountID2, order2_id, oldOrder2);
+  state.setAccountOrder(accountID2, order2_id, order2);
 
   let spotTradeTx = {
+    order1_accountID: accountID1,
+    order2_accountID: accountID2,
+    tokenID_1to2: tokenID_1to2,
+    tokenID_2to1: tokenID_2to1,
+    amount_1to2: amount_1to2,
+    amount_2to1: amount_2to1,
+    order1_id: order1_id,
+    order1_amountsell: order1.total_sell,
+    order1_amountbuy: order1.total_buy,
+    order1_filledsell: order1.filled_sell,
+    order1_filledbuy: order1.filled_buy,
+    order2_id: order2_id,
+    order2_amountsell: order2.total_sell,
+    order2_amountbuy: order2.total_buy,
+    order2_filledsell: order2.filled_sell,
+    order2_filledbuy: order2.filled_buy,
   };
   state.SpotTrade(spotTradeTx);
 

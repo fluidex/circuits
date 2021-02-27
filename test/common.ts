@@ -545,10 +545,8 @@ class GlobalState {
 
     let account1 = this.accounts.get(tx.order1_accountID);
     let account2 = this.accounts.get(tx.order2_accountID);
-    let proof_order1_seller = this.stateProof(tx.order1_accountID, tx.token_1to2);
-    // let proof_order1_buyer = this.stateProof(tx.order2_accountID, tx.token_1to2);
-    let proof_order2_seller = this.stateProof(tx.order2_accountID, tx.token_2to1);
-    // let proof_order2_buyer = this.stateProof(tx.order1_accountID, tx.token_2to1);
+    let proof_order1_seller = this.stateProof(tx.order1_accountID, tx.tokenID_1to2);
+    let proof_order2_seller = this.stateProof(tx.order2_accountID, tx.tokenID_2to1);
 
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
@@ -563,19 +561,19 @@ class GlobalState {
     encodedTx[TxDetailIdx.Ay2] = account2.ay;
     encodedTx[TxDetailIdx.Nonce1] = account1.nonce;
     encodedTx[TxDetailIdx.Nonce2] = account1.nonce;
-    let account1_balance_sell = this.getTokenBalance(tx.order1_accountID, tx.token_1to2);
-    let account2_balance_buy = this.getTokenBalance(tx.order2_accountID, tx.token_1to2);
-    let account2_balance_sell = this.getTokenBalance(tx.order2_accountID, tx.token_2to1);
-    let account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.token_2to1);
+    let account1_balance_sell = this.getTokenBalance(tx.order1_accountID, tx.tokenID_1to2);
+    let account2_balance_buy = this.getTokenBalance(tx.order2_accountID, tx.tokenID_1to2);
+    let account2_balance_sell = this.getTokenBalance(tx.order2_accountID, tx.tokenID_2to1);
+    let account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.tokenID_2to1);
     assert(account1_balance_sell > tx.amount_1to2, 'balance_1to2');
     assert(account2_balance_sell > tx.amount_2to1, 'balance_2to1');
-    encodedTx[TxDetailIdx.TokenID] = tx.token_1to2;
+    encodedTx[TxDetailIdx.TokenID] = tx.tokenID_1to2;
     encodedTx[TxDetailIdx.Amount] = tx.amount_1to2;
     encodedTx[TxDetailIdx.Balance1] = account1_balance_sell;
     encodedTx[TxDetailIdx.Balance2] = account2_balance_buy;
     encodedTx[TxDetailIdx.Balance3] = account2_balance_sell;
     encodedTx[TxDetailIdx.Balance4] = account1_balance_buy;
-    encodedTx[TxDetailIdx.TokenID2] = tx.token_2to1;
+    encodedTx[TxDetailIdx.TokenID2] = tx.tokenID_2to1;
     encodedTx[TxDetailIdx.Amount2] = tx.amount_2to1;
     encodedTx[TxDetailIdx.Order1ID] = tx.order1_id;
     encodedTx[TxDetailIdx.Order1AmountSell] = tx.order1_amountsell;
@@ -595,8 +593,8 @@ class GlobalState {
       balancePath1: null,
       balancePath2: proof_order2_seller.balancePath,
       balancePath3: null,
-      orderPath0: this.orderTrees.get(order1_accountID).getProof(tx.order1_id).path_elements,
-      orderPath1: this.orderTrees.get(order2_accountID).getProof(tx.order2_id).path_elements,
+      orderPath0: this.orderTrees.get(tx.order1_accountID).getProof(tx.order1_id).path_elements,
+      orderPath1: this.orderTrees.get(tx.order2_accountID).getProof(tx.order2_id).path_elements,
       orderRoot0: account1.orderRoot, // not really used in the circuit
       orderRoot1: account2.orderRoot, // not really used in the circuit
       accountPath0:  proof_order1_seller.accountPath,
@@ -605,42 +603,38 @@ class GlobalState {
       rootAfter: 0n,
     };
 
-
-    // this.orderTrees.get(accountID).setValue(orderID, order.hash());
-    // this.balanceTrees.get(accountID).setValue(tokenID, balance);
-
     /// do not update state root
     // account1 after sending, before receiving
-    this.balanceTrees.get(tx.order1_accountID).setValue(tx.token_1to2, account1_balance_sell - tx.amount);
-    rawTx.balancePath3 = this.balanceTrees.get(tx.order1_accountID).getProof(tx.token_2to1).path_elements;
+    this.balanceTrees.get(tx.order1_accountID).setValue(tx.tokenID_1to2, account1_balance_sell - tx.amount_1to2);
+    rawTx.balancePath3 = this.balanceTrees.get(tx.order1_accountID).getProof(tx.tokenID_2to1).path_elements;
     // account2 after sending, before receiving
-    this.balanceTrees.get(tx.order2_accountID).setValue(tx.token_2to1, account2_balance_sell - tx.amount2);
-    rawTx.balancePath1 = this.balanceTrees.get(tx.order2_accountID).getProof(tx.token_1to2).path_elements;
+    this.balanceTrees.get(tx.order2_accountID).setValue(tx.tokenID_2to1, account2_balance_sell - tx.amount_2to1);
+    rawTx.balancePath1 = this.balanceTrees.get(tx.order2_accountID).getProof(tx.tokenID_1to2).path_elements;
 
     let newOrder1 = {
-      // status: oldOrder1.status, // open
-      // tokenbuy: oldOrder1.tokenbuy,
-      // tokensell: oldOrder1.tokensell,
-      // filled_sell: oldOrder1.filled_sell + amount_1to2,
-      // filled_buy: oldOrder1.filled_buy + amount_2to1,
-      // total_sell: oldOrder1.total_sell,
-      // total_buy: oldOrder1.total_buy,
+      status: 0, // open
+      tokenbuy: tx.tokenID_2to1,
+      tokensell: tx.tokenID_1to2,
+      filled_sell: tx.order1_filledsell + tx.amount_1to2,
+      filled_buy: tx.order1_filledbuy + tx.amount_2to1,
+      total_sell: tx.order1_amountsell,
+      total_buy: tx.order1_amountbuy,
     };
     this.setAccountOrder(tx.order1_accountID, tx.order1_id, newOrder1);
-    this.setAccountBalance(tx.order1_accountID, tx.token_2to1, account1_balance_buy + tx.amount2);
+    this.setAccountBalance(tx.order1_accountID, tx.tokenID_2to1, account1_balance_buy + tx.amount_2to1);
     rawTx.accountPath1 = this.accountTree.getProof(order2_accountID).path_elements;
 
     let newOrder2 = {
-      // status: oldOrder1.status, // open
-      // tokenbuy: oldOrder1.tokenbuy,
-      // tokensell: oldOrder1.tokensell,
-      // filled_sell: oldOrder1.filled_sell + amount_1to2,
-      // filled_buy: oldOrder1.filled_buy + amount_2to1,
-      // total_sell: oldOrder1.total_sell,
-      // total_buy: oldOrder1.total_buy,
+      status: 0, // open
+      tokenbuy: tx.tokenID_1to2,
+      tokensell: tx.tokenID_2to1,
+      filled_sell: tx.order2_filledsell + tx.amount_2to1,
+      filled_buy: tx.order2_filledbuy + tx.amount_1to2,
+      total_sell: tx.order2_amountsell,
+      total_buy: tx.order2_amountbuy,
     };
     this.setAccountOrder(tx.order2_accountID, tx.order2_id, newOrder2);
-    this.setAccountBalance(tx.order2_accountID, tx.token_1to2, account2_balance_buy + tx.amount);
+    this.setAccountBalance(tx.order2_accountID, tx.tokenID_1to2, account2_balance_buy + tx.amount_1to2);
 
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
