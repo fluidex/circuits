@@ -1,4 +1,4 @@
-import { testWithInputOutput } from 'tester/c';
+import { testWithInputOutput } from './tester/c';
 // import { testWithInputOutput } from './tester/wasm';
 
 import { TestCheckLeafExists, TestCheckLeafExistsDisable, TestCheckLeafUpdate, TestCheckLeafUpdateDisable } from './binary_merkle_tree';
