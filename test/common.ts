@@ -157,9 +157,6 @@ class Order {
   filled_buy: bigint,
   total_sell: bigint,
   total_buy: bigint,
-  hash() {
-    return hashOrderState(this);
-  }
 }
 
 class AccountState {
@@ -305,7 +302,7 @@ class GlobalState {
   }
   setAccountOrder(accountID: bigint, orderID: bigint, order: Order) {
     assert(this.orderTrees.has(accountID), 'setAccountOrder');
-    this.orderTrees.get(accountID).setValue(orderID, order.hash());
+    this.orderTrees.get(accountID).setValue(orderID, hashOrderState(order));
     this.recalculateFromOrderTree(accountID);
   }
 
