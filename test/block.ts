@@ -10,7 +10,7 @@ import * as common from './common';
 const assert = require('assert').strict;
 
 // circuit-level definitions
-const nTxs = 4;
+const nTxs = 7;
 const orderLevels = 1;
 const balanceLevels = 2;
 const accountLevels = 2;
@@ -77,6 +77,68 @@ function initTestCase() {
   hash = common.hashWithdraw(fullWithdrawTx);
   withdrawTx.signature = common.accountSign(account0, hash);
   state.Withdraw(withdrawTx);
+
+  // trade token
+  const tokenID_1to2 = 0n;
+  const tokenID_2to1 = 1n;
+  // trade amount
+  const amount_1to2 = 120n;
+  const amount_2to1 = 1200n;
+  // ensure balance to trade
+  state.DepositToOld({
+    accountID: accountID0,
+    tokenID: tokenID_1to2,
+    amount: 199n,
+  });
+  state.DepositToOld({
+    accountID: accountID1,
+    tokenID: tokenID_2to1,
+    amount: 1990n,
+  });
+  /// set up orders
+  // order1
+  const order1_id = 1n;
+  const order1 = {
+    status: 0, // open
+    tokenbuy: tokenID_2to1,
+    tokensell: tokenID_1to2,
+    filled_sell: 0n,
+    filled_buy: 0n,
+    total_sell: 1000n,
+    total_buy: 10000n,
+  };
+  state.setAccountOrder(accountID0, order1_id, order1);
+  // order2
+  const order2_id = 1n;
+  const order2 = {
+    status: 0, // open
+    tokenbuy: tokenID_1to2,
+    tokensell: tokenID_2to1,
+    filled_sell: 10n,
+    filled_buy: 1n,
+    total_sell: 10000n,
+    total_buy: 1000n,
+  };
+  state.setAccountOrder(accountID1, order2_id, order2);
+  let spotTradeTx = {
+    order1_accountID: accountID0,
+    order2_accountID: accountID1,
+    tokenID_1to2: tokenID_1to2,
+    tokenID_2to1: tokenID_2to1,
+    amount_1to2: amount_1to2,
+    amount_2to1: amount_2to1,
+    order1_id: order1_id,
+    order1_amountsell: order1.total_sell,
+    order1_amountbuy: order1.total_buy,
+    order1_filledsell: order1.filled_sell,
+    order1_filledbuy: order1.filled_buy,
+    order2_id: order2_id,
+    order2_amountsell: order2.total_sell,
+    order2_amountbuy: order2.total_buy,
+    order2_filledsell: order2.filled_sell,
+    order2_filledbuy: order2.filled_buy,
+  };
+  state.SpotTrade(spotTradeTx);
 
   let block = state.forge();
   return block;
