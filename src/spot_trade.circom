@@ -407,12 +407,12 @@ template tradeTransfer(balanceLevels, accountLevels) {
     }
     tmp_account1_balance_checker.root <== tmp_account1_balance_tree.root;
     // update token buy
-    // component new_account1_balance_tree = CalculateRootFromMerklePath(balanceLevels);
-    // new_account1_balance_tree.leaf <== account1_balance_buy + amount_2to1;
-    // for (var i = 0; i < balanceLevels; i++) {
-    //     new_account1_balance_tree.path_index[i] <== balance_2to1_path_index[i];
-    //     new_account1_balance_tree.path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
-    // }
+    component new_account1_balance_tree = CalculateRootFromMerklePath(balanceLevels);
+    new_account1_balance_tree.leaf <== account1_balance_buy + amount_2to1;
+    for (var i = 0; i < balanceLevels; i++) {
+        new_account1_balance_tree.path_index[i] <== balance_2to1_path_index[i];
+        new_account1_balance_tree.path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
+    }
 
     // account 2 balance
     component old_account2_balance_tree = CalculateRootFromMerklePath(balanceLevels);
@@ -453,6 +453,9 @@ template tradeTransfer(balanceLevels, accountLevels) {
     oldAccount1Hash.ay <== ay1;
     oldAccount1Hash.ethAddr <== ethAddr1;
     oldAccount1Hash.orderRoot <== oldOrder1Root;
+    log(old_account1_balance_tree.root);
+    log(oldOrder1Root);
+    log(oldAccount1Hash.out);
     // // new account 1 state hash
     // component newAccount1Hash = HashAccount();
     // newAccount1Hash.nonce <== nonce1;
@@ -461,14 +464,17 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // newAccount1Hash.ay <== ay1;
     // newAccount1Hash.ethAddr <== ethAddr1;
     // newAccount1Hash.orderRoot <== newOrder1Root;
-    // // old account 2 state hash
-    // component oldAccount2Hash = HashAccount();
-    // oldAccount2Hash.nonce <== nonce2;
-    // oldAccount2Hash.sign <== sign2;
-    // oldAccount2Hash.balanceRoot <== old_account2_balance_tree.root;
-    // oldAccount2Hash.ay <== ay2;
-    // oldAccount2Hash.ethAddr <== ethAddr2;
-    // oldAccount2Hash.orderRoot <== oldOrder2Root;
+    // old account 2 state hash
+    component oldAccount2Hash = HashAccount();
+    oldAccount2Hash.nonce <== nonce2;
+    oldAccount2Hash.sign <== sign2;
+    oldAccount2Hash.balanceRoot <== old_account2_balance_tree.root;
+    oldAccount2Hash.ay <== ay2;
+    oldAccount2Hash.ethAddr <== ethAddr2;
+    oldAccount2Hash.orderRoot <== oldOrder2Root;
+    log(old_account2_balance_tree.root);
+    log(oldOrder2Root);
+    log(oldAccount2Hash.out);
     // // new account 2 state hash
     // component newAccount2Hash = HashAccount();
     // newAccount2Hash.nonce <== nonce2;
