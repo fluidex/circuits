@@ -22,8 +22,8 @@ function initDepositToNew() {
   const accountID = state.createNewAccount();
 
   state.DepositToNew({
-    accountID: BigInt(accountID),
-    tokenID: BigInt(tokenID),
+    accountID: accountID,
+    tokenID: tokenID,
     amount: amount,
     ethAddr: Scalar.fromString(account.ethAddr, 16),
     sign: BigInt(account.sign),
