@@ -136,7 +136,7 @@ template orderUpdater(orderLevels) {
 
 // TODO: maker taker (related to fee), according to timestamp: order1 maker, order2 taker
 // TODO: is tradeHistory_storage_leaf necessary?
-template SpotTrade(orderLevels, balanceLevels, accountLevels) {
+template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
 
     signal input order1_id;
@@ -208,8 +208,8 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     // TODO: tx fee & trading fee
 
 
+    signal input order_path_elements[2][orderLevels][1];
     /// update order 1
-    signal input order1_path_elements[orderLevels][1];
     component order1_updater = orderUpdater(orderLevels);
     order1_updater.orderID <== order1_id;
     order1_updater.tokensell <== order1_tokensell;
@@ -223,11 +223,10 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order1_updater.old_status <== 0; // TODO:
     order1_updater.new_status <== 0; // TODO:
     for (var i = 0; i < orderLevels; i++) {
-        order1_updater.order_path_elements[i][0] <== order1_path_elements[i][0];
+        order1_updater.order_path_elements[i][0] <== order_path_elements[0][i][0];
     }
 
     /// update order 2
-    signal input order2_path_elements[orderLevels][1];
     component order2_updater = orderUpdater(orderLevels);
     order2_updater.orderID <== order2_id;
     order2_updater.tokensell <== order2_tokensell;
@@ -241,7 +240,7 @@ template SpotTrade(orderLevels, balanceLevels, accountLevels) {
     order2_updater.old_status <== 0; // TODO:
     order2_updater.new_status <== 0; // TODO:
     for (var i = 0; i < orderLevels; i++) {
-        order2_updater.order_path_elements[i][0] <== order2_path_elements[i][0];
+        order2_updater.order_path_elements[i][0] <== order_path_elements[1][i][0];
     }
 
     signal input order1_accountID;

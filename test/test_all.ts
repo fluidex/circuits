@@ -10,7 +10,6 @@ import { TestWithdraw } from './withdraw';
 import { TestBlock } from './block';
 import { TestSpotTrade } from './spot_trade';
 
-
 async function main() {
   try {
     await testWithInputOutput(new TestRescueHash());
