@@ -39,8 +39,8 @@ function initTestCase() {
 
   assert(state.accounts.get(accountID0).ethAddr == 0n, 'account0 should be empty');
   state.DepositToNew({
-    accountID: BigInt(accountID0),
-    tokenID: BigInt(tokenID),
+    accountID: accountID0,
+    tokenID: tokenID,
     amount: 200n,
     ethAddr: Scalar.fromString(account0.ethAddr, 16),
     sign: BigInt(account0.sign),
@@ -49,15 +49,15 @@ function initTestCase() {
 
   assert(state.accounts.get(accountID1).ethAddr != 0n, 'account0 should not be empty');
   state.DepositToOld({
-    accountID: BigInt(accountID1),
-    tokenID: BigInt(tokenID),
+    accountID: accountID1,
+    tokenID: tokenID,
     amount: 100n,
   });
 
   let transferTx = {
-    from: BigInt(accountID1),
-    to: BigInt(accountID0),
-    tokenID: BigInt(tokenID),
+    from: accountID1,
+    to: accountID0,
+    tokenID: tokenID,
     amount: 50n,
     signature: null,
   };
@@ -68,9 +68,9 @@ function initTestCase() {
   state.Transfer(transferTx);
 
   let withdrawTx = {
-    accountID: BigInt(accountID0),
+    accountID: accountID0,
     amount: 150n,
-    tokenID: BigInt(tokenID),
+    tokenID: tokenID,
     signature: null,
   };
   let fullWithdrawTx = state.fillWithdrawTx(withdrawTx);
