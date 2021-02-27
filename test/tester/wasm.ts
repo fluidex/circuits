@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as tmp from 'tmp-promise';
 import * as circom from 'circom';
-import { SimpleTest, TestComponent } from './interface';
+import { SimpleTest, TestComponent } from '../interface';
 
 async function generateMainTestCircom({ src, main }: TestComponent) {
   let srcCode = `include "${src}";

@@ -7,7 +7,7 @@ import * as tmp from 'tmp-promise';
 import * as circom from 'circom';
 const loadR1cs = require("r1csfile").load;
 const ZqField = require("ffjavascript").ZqField;
-import { SimpleTest, TestComponent } from './interface';
+import { SimpleTest, TestComponent } from '../interface';
 
 const print_info = false;
 const primeStr = "21888242871839275222246405745257275088548364400416034343698204186575808495617";
