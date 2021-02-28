@@ -77,7 +77,7 @@ function bench_plonk_plonkit() {
     (time $PLONKIT_BIN prove -m $KEY -l $KEY_LAG -c circuit.r1cs -w witness.wtns -p proof.bin) 2>plonkit_lagrange.time
     $PLONKIT_BIN verify --proof proof.bin --verification_key vk.bin
     popd
-    node $DIR/profile_circuit.js $CIRCUIT_DIR
+    # node $DIR/profile_circuit.js $CIRCUIT_DIR
 }
 
 mkdir -p $CIRCUIT_DIR
