@@ -10,6 +10,7 @@ node --max_old_space_size=28672 --stack-size=65500 $DIR/../../node_modules/circo
 # npx snarkjs r1cs export json circuit.r1cs circuit.r1cs.json
 
 # generate the witness using snarkjs
+# TODO: change to c_tester someday
 node --max_old_space_size=28672 --stack-size=65500 $DIR/../../node_modules/snarkjs/build/cli.cjs wc circuit.wasm input.json witness.wtns
 
 # convert the witness to json, zkutil still needs this
