@@ -12,7 +12,7 @@ pushd $CIRCUIT_DIR
 cp $DIR/../../node_modules/circom_runtime/c/*.cpp $CIRCUIT_DIR/
 cp $DIR/../../node_modules/circom_runtime/c/*.hpp $CIRCUIT_DIR/
 node $NODE_ARGS $DIR/../../node_modules/ffiasm/src/buildzqfield.js -q 21888242871839275222246405745257275088548364400416034343698204186575808495617 -n Fr
-mv -f fr.asm fr.cpp fr.hpp $CIRCUIT_DIR/
+# mv -f fr.asm fr.cpp fr.hpp $CIRCUIT_DIR/
 # if linux
 nasm -felf64 $CIRCUIT_DIR/fr.asm
 
