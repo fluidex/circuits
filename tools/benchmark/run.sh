@@ -1,7 +1,7 @@
 #!/bin/bash
 set -uex
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-export NODE_OPTIONS="--max_old_space_size=8192"
+# export NODE_OPTIONS="--max_old_space_size=8192" # not working, need to specify in commands
 
 # export CIRCUIT=transfer
 # export CIRCUIT=block
