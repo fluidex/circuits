@@ -9,9 +9,8 @@ node --version
 sudo apt-get update
 sudo apt-get install python3 g++ make
 
-# TODO: put where?
-git clone https://github.com/nodejs/node.git
-cd node
+git clone https://github.com/nodejs/node.git ~/node
+pushd ~/node
 git checkout 8beef5eeb82425b13d447b50beafb04ece7f91b1
 patch -p1 <<EOL
 index 0097683120..d35fd6e68d 100644
@@ -42,3 +41,4 @@ index bd9f39b7d3..c7d7e58ef3 100644
 EOL
 ./configure
 make -j16
+popd
