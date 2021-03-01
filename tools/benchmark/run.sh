@@ -7,6 +7,9 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # export CIRCUIT=block
 export CIRCUIT=massive
 
+# source $DIR/prepare_swap.sh
+# source $DIR/compile_batched_node.sh
+
 export HASH=poseidon
 pushd $DIR/..
 source replace_hash.sh
