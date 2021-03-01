@@ -2,7 +2,8 @@
 set -ex
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-NODE_ARGS="--max_old_space_size=32768 --stack-size=65500"
+# NODE_ARGS="--max_old_space_size=32768 --stack-size=65500"
+NODE_ARGS="--trace-gc --trace-gc-ignore-scavenger --max-old-space-size=2048000 --initial-old-space-size=2048000 --no-global-gc-scheduling --no-incremental-marking --max-semi-space-size=1024 --initial-heap-size=2048000"
 
 # 28672 = 28*1024
 # 32768 = 32*1024
@@ -19,7 +20,7 @@ else
 	nasm -felf64 $CIRCUIT_DIR/fr.asm
 fi
 
-node $NODE_ARGS $DIR/../../node_modules/circom/cli.js $CIRCUIT_DIR/circuit.circom -r $CIRCUIT_DIR/circuit.r1cs -c $CIRCUIT_DIR/circuit.c -s $CIRCUIT_DIR/circuit.sym -v
+node $NODE_ARGS $DIR/../../node_modules/circom/cli.js $CIRCUIT_DIR/circuit.circom -f -r $CIRCUIT_DIR/circuit.r1cs -c $CIRCUIT_DIR/circuit.c -s $CIRCUIT_DIR/circuit.sym -v -n "^DecodeTx$|^DepositToNew$|^DepositToOld$|^Transfer$|^Withdraw$|^SpotTrade$"
 # npx snarkjs r1cs export json circuit.r1cs circuit.r1cs.json
 
 # generate the witness using snarkjs
