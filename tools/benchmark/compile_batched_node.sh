@@ -8,7 +8,9 @@ node --version
 
 sudo apt-get update
 sudo apt-get install python3 g++ make
-git clone git clone https://github.com/nodejs/node.git
+
+# TODO: put where?
+git clone https://github.com/nodejs/node.git
 cd node
 git checkout 8beef5eeb82425b13d447b50beafb04ece7f91b1
 patch -p1 <<EOL

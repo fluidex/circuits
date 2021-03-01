@@ -1,12 +1,17 @@
 #!/bin/bash
 set -ex
 
+# 28672 = 28*1024
+# 32768 = 32*1024
+
+
+# TODO: replace these nodes?
+
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # NODE_ARGS="--max_old_space_size=32768 --stack-size=65500"
 NODE_ARGS="--trace-gc --trace-gc-ignore-scavenger --max-old-space-size=2048000 --initial-old-space-size=2048000 --no-global-gc-scheduling --no-incremental-marking --max-semi-space-size=1024 --initial-heap-size=2048000"
 
-# 28672 = 28*1024
-# 32768 = 32*1024
 
 pushd $CIRCUIT_DIR
 
@@ -20,8 +25,17 @@ else
 	nasm -felf64 $CIRCUIT_DIR/fr.asm
 fi
 
+# "-f" means no optimization
 node $NODE_ARGS $DIR/../../node_modules/circom/cli.js $CIRCUIT_DIR/circuit.circom -f -r $CIRCUIT_DIR/circuit.r1cs -c $CIRCUIT_DIR/circuit.c -s $CIRCUIT_DIR/circuit.sym -v -n "^DecodeTx$|^DepositToNew$|^DepositToOld$|^Transfer$|^Withdraw$|^SpotTrade$"
 # npx snarkjs r1cs export json circuit.r1cs circuit.r1cs.json
+
+# optimize the circuits
+git clone https://github.com/iden3/r1csoptimize
+cd r1csoptimize
+git checkout 8bc528b06c0f98818d1b5224e2078397f0bb7faf
+npm install
+# ~/node/out/Release/node $NODE_ARGS --expose-gc src/cli_optimize.js ../circuits/tools/rollup-1960-32-256-64/circuit-1960-32-256-64_no.r1cs ../circuits/tools/rollup-2960-32-256-64/circuit-1960-32-256-64.r1cs
+
 
 # generate the witness using snarkjs
 # node $NODE_ARGS $DIR/../../node_modules/snarkjs/build/cli.cjs wc circuit.wasm input.json witness.wtns
