@@ -1,10 +1,10 @@
 #!/bin/bash
 set -uex
 
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
-source ~/.bashrc
-nvm install v14.8.0
-node --version
+# curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+# source ~/.bashrc
+# nvm install v14.8.0
+# node --version
 
 sudo apt-get update
 sudo apt-get install python3 g++ make
