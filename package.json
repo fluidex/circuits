@@ -5,7 +5,7 @@
   },
   "devDependencies": {
     "@types/node": "^14.14.11",
-    "circom": "^0.5.35",
+    "circom": "^0.5.38",
     "circomlib": "^0.3.0",
     "ffjavascript": "^0.2.34",
     "snarkjs": "^0.3.55",

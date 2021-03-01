@@ -11,9 +11,9 @@ const assert = require('assert').strict;
 
 // circuit-level definitions
 const nTxs = 1000n;
-const orderLevels = 10;
-const balanceLevels = 10;
-const accountLevels = 10;
+const orderLevels = 20;
+const balanceLevels = 20;
+const accountLevels = 20;
 
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
