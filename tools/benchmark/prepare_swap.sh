@@ -1,8 +1,8 @@
 #!/bin/bash
 set -uex
 
-sudo mkswap -f /dev/xvdb
-sudo swapon /dev/xvdb
+# sudo mkswap -f /dev/xvdb
+# sudo swapon /dev/xvdb
 
 sudo fallocate -l 400G /swapfile
 sudo chmod 600 /swapfile
