@@ -37,6 +37,7 @@ function bench_groth16_rapidsnark() {
     ZKEY_FILE=zkey.zkey
     PTAU_FILE=powersoftau.ptau
     if [ ! -f $PTAU_FILE ]; then
+        # wget https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final.ptau $PTAU_FILE
         echo generate powersoftau
         npx snarkjs ptn bn128 ${CIRCUIT_POW} powersoftau_0000.ptau -v
         npx snarkjs ptc powersoftau_0000.ptau powersoftau_0001.ptau --name="some contribution" -e="some random text" -v
