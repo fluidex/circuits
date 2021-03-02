@@ -35,7 +35,7 @@ function bench_groth16_rapidsnark() {
     echo benchmark groth16 with rapidsnark
     pushd $CIRCUIT_DIR
     ZKEY_FILE=zkey.zkey
-    PTAU_FILE=powersoftau.ptau
+    PTAU_FILE=$DIR/keys/powersoftau.ptau
     if [ ! -f $PTAU_FILE ]; then
         # wget https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final.ptau $PTAU_FILE
         echo generate powersoftau
