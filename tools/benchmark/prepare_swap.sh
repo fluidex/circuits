@@ -4,10 +4,10 @@ set -uex
 # sudo mkswap -f /dev/xvdb
 # sudo swapon /dev/xvdb
 
-# sudo fallocate -l 19G /swapfile
-# sudo chmod 600 /swapfile
-# sudo mkswap /swapfile
-# sudo swapon /swapfile
+# sudo fallocate -l 1200G /data/swapfile
+# sudo chmod 600 /data/swapfile
+# sudo mkswap /data/swapfile
+# sudo swapon /data/swapfile
 
 # TODO: maybe increase 122880 by 94G?
 
