@@ -7,7 +7,7 @@ set -ex
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # NODE_ARGS="--max_old_space_size=32768 --stack-size=65500"
 # NODE_ARGS="--trace-gc --trace-gc-ignore-scavenger --max-old-space-size=2048000 --initial-old-space-size=2048000 --no-global-gc-scheduling --no-incremental-marking --max-semi-space-size=1024 --initial-heap-size=2048000"
-NODE_ARGS="--trace-gc --trace-gc-ignore-scavenger --max-old-space-size=142336 --initial-old-space-size=142336 --no-global-gc-scheduling --no-incremental-marking --max-semi-space-size=1024 --initial-heap-size=142336"
+NODE_ARGS="--trace-gc --trace-gc-ignore-scavenger --max-old-space-size=192512 --initial-old-space-size=192512 --no-global-gc-scheduling --no-incremental-marking --max-semi-space-size=1024 --initial-heap-size=192512"
 
 pushd $CIRCUIT_DIR
 
