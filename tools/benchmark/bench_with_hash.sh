@@ -35,7 +35,7 @@ function bench_groth16_rapidsnark() {
     echo benchmark groth16 with rapidsnark
     pushd $CIRCUIT_DIR
     ZKEY_FILE=zkey.zkey
-    PTAU_FILE=powersoftau.ptau
+    PTAU_FILE=$DIR/keys/powersoftau.ptau
     if [ ! -f $PTAU_FILE ]; then
         echo generate powersoftau
         npx snarkjs ptn bn128 ${CIRCUIT_POW} powersoftau_0000.ptau -v
