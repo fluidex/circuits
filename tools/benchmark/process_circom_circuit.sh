@@ -45,6 +45,6 @@ fi
 ./circuit $CIRCUIT_DIR/input.json $CIRCUIT_DIR/witness.wtns
 
 # convert the witness to json, zkutil still needs this
-node $NODE_ARGS $DIR/../../node_modules/snarkjs/build/cli.cjs wej $CIRCUIT_DIR/witness.wtns $CIRCUIT_DIR/witness.json
+~/node/out/Release/node $NODE_ARGS $DIR/../../node_modules/snarkjs/build/cli.cjs wej $CIRCUIT_DIR/witness.wtns $CIRCUIT_DIR/witness.json
 
 popd
