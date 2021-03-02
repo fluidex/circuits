@@ -26,7 +26,7 @@ fi
 # npx snarkjs r1cs export json circuit.r1cs circuit.r1cs.json
 
 # optimize the circuits
-git clone https://github.com/iden3/r1csoptimize ~/r1csoptimize
+git clone https://github.com/iden3/r1csoptimize ~/r1csoptimize || true
 pushd ~/r1csoptimize
 git checkout 8bc528b06c0f98818d1b5224e2078397f0bb7faf
 npm install
