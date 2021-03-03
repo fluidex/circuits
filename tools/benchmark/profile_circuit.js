@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const circom = require('circom');
+const snarkjs = require('snarkjs');
 
 const printLargeConstaints = false;
 const circuitLoadType = 'auto';
@@ -35,15 +36,14 @@ async function loadCircuit(circuitPath, circuitType) {
   const baseName = path.basename(fullPath, '.circom');
   const fullBaseName = path.join(dirName, baseName);
   console.log('circuit:', baseName);
-  // TODO: use bin file to speed up
-  const r1csFile = fullBaseName + '.r1cs.json';
+  const r1csFile = fullBaseName + '.r1cs';
   const symFile = fullBaseName + '.sym';
   let constraints;
   let sym = new Map();
   sym.set(0, 'one');
   if (fs.existsSync(r1csFile) && fs.existsSync(symFile) && !forceRecompile) {
     console.log('loading', r1csFile);
-    constraints = require(r1csFile).constraints;
+    constraints = (await snarkjs.r1cs.exportJson(r1csFile, {info: console.log})).constraints;
     const loadSym = (await import('../../node_modules/snarkjs/src/loadsyms.js')).default;
     console.log('loading', symFile);
     const symMap = await loadSym(symFile);
