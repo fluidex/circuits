@@ -7,7 +7,7 @@ import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './hash_sta
 import { TestDepositToNew, TestDepositToOld } from './deposit';
 import { TestTransfer } from './transfer';
 import { TestWithdraw } from './withdraw';
-import { TestBlock } from './block';
+import { TestBlock, TestEmptyBlock } from './block';
 import { TestSpotTrade } from './spot_trade';
 
 async function main() {
@@ -25,6 +25,7 @@ async function main() {
     await testWithInputOutput(new TestTransfer());
     await testWithInputOutput(new TestWithdraw());
     await testWithInputOutput(new TestBlock());
+    await testWithInputOutput(new TestEmptyBlock());
     await testWithInputOutput(new TestSpotTrade());
   } catch (e) {
     console.error(e);
