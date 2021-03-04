@@ -13,6 +13,7 @@ enum TxType {
   Transfer,
   Withdraw,
   SpotTrade,
+  Nop,
 }
 
 const TxLength = 32;
@@ -594,7 +595,7 @@ class GlobalState {
       orderPath1: this.orderTrees.get(tx.order2_accountID).getProof(tx.order2_id).path_elements,
       orderRoot0: account1.orderRoot, // not really used in the circuit
       orderRoot1: account2.orderRoot, // not really used in the circuit
-      accountPath0:  proof_order1_seller.accountPath,
+      accountPath0: proof_order1_seller.accountPath,
       accountPath1: null,
       rootBefore: this.root(),
       rootAfter: 0n,
@@ -636,7 +637,37 @@ class GlobalState {
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
   }
+  padWithNop() {
+    const maxlength = 2**this.orderLevels;
+    assert(this.bufferedTxs.length <= maxlength);
+    let trivialProof = this.accountTree.stateProof(0, 0);
+    let encodedTx: Array<bigint> = new Array(TxLength);
+    encodedTx.fill(0n, 0, TxLength);
+    let rawTx: RawTx = {
+      txType: TxType.Nop,
+      // payload: encodedTx,
+      balancePath0: trivialProof.balancePath,
+      balancePath1: trivialProof.balancePath,
+      balancePath2: trivialProof.balancePath,
+      balancePath3: trivialProof.balancePath,
+      orderPath0: this.trivialOrderPathElements(),
+      orderPath1: this.trivialOrderPathElements(),
+      orderRoot0: trivialProof.orderRoot,
+      orderRoot1: trivialProof.orderRoot,
+      accountPath0: trivialProof.accountPath,
+      accountPath1: trivialProof.accountPath,
+      rootBefore: this.root(),
+      rootAfter: this.root(),
+    };
+    for (var i = 0; i < (maxlength-this.bufferedTxs.length); i++) {
+      this.bufferedTxs.push(rawTx);
+    }
+  }
   forge() {
+    if this.bufferedTxs.length > (2**this.orderLevels) {
+      throw new Error("tx length overflow");
+    }
+    this.padWithNop();
     let txsType = this.bufferedTxs.map(tx => tx.txType);
     let encodedTxs = this.bufferedTxs.map(tx => tx.payload);
     let balance_path_elements = this.bufferedTxs.map(tx => [tx.balancePath0, tx.balancePath1, tx.balancePath2, tx.balancePath3]);
