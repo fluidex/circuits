@@ -1,3 +1,5 @@
+include "./lib/binary_merkle_tree.circom";
+include "./lib/hash_state.circom";
 
 template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
 	// order info
