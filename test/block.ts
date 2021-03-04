@@ -183,6 +183,8 @@ class TestBlock implements SimpleTest {
 
 function initEmptyBlockTestCase() {
   let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+  // we need to have at least 1 account
+  state.createNewAccount();
   for (var i = state.bufferedTxs.length; i < nTxs; i++) {
     state.Nop();
   }
