@@ -638,6 +638,7 @@ class GlobalState {
     this.bufferedTxs.push(rawTx);
   }
   Nop() {
+    // assume we already have initialized the account tree and the balance tree
     let trivialProof = this.stateProof(0, 0);
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
