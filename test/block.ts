@@ -146,6 +146,10 @@ function initTestCase() {
   };
   state.SpotTrade(spotTradeTx);
 
+  for (var i = state.bufferedTxs.length; i < nTxs; i++) {
+    state.Nop();
+  }
+
   let block = state.forge();
   return block;
 }
