@@ -637,15 +637,13 @@ class GlobalState {
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
   }
-  padWithNop() {
-    const maxlength = 2**this.orderLevels;
-    assert(this.bufferedTxs.length <= maxlength);
-    let trivialProof = this.accountTree.stateProof(0, 0);
+  Nop() {
+    let trivialProof = this.stateProof(0, 0);
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
     let rawTx: RawTx = {
       txType: TxType.Nop,
-      // payload: encodedTx,
+      payload: encodedTx,
       balancePath0: trivialProof.balancePath,
       balancePath1: trivialProof.balancePath,
       balancePath2: trivialProof.balancePath,
@@ -659,15 +657,9 @@ class GlobalState {
       rootBefore: this.root(),
       rootAfter: this.root(),
     };
-    for (var i = 0; i < (maxlength-this.bufferedTxs.length); i++) {
-      this.bufferedTxs.push(rawTx);
-    }
+    this.bufferedTxs.push(rawTx);
   }
   forge() {
-    if this.bufferedTxs.length > (2**this.orderLevels) {
-      throw new Error("tx length overflow");
-    }
-    this.padWithNop();
     let txsType = this.bufferedTxs.map(tx => tx.txType);
     let encodedTxs = this.bufferedTxs.map(tx => tx.payload);
     let balance_path_elements = this.bufferedTxs.map(tx => [tx.balancePath0, tx.balancePath1, tx.balancePath2, tx.balancePath3]);
