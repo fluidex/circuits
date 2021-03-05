@@ -306,7 +306,7 @@ class GlobalState {
       total_buy: tx.amount_buy,
     };
     this.setAccountOrder(tx.accountID, orderID, order);
-    this.next_order_ids.set(tx.accountID, 0n);
+    this.next_order_ids.set(tx.accountID, orderID+1n);
     return orderID;
   }
 
