@@ -291,6 +291,11 @@ class GlobalState {
     //console.log("add account", accountID);
     return accountID;
   }
+  createNewOrder(order): bigint {
+    const orderID = BigInt(this.orderTrees.get(tx.accountID).size);
+    this.setAccountOrder(order.accountID, orderID, order);
+    return orderID;
+  }
 
   recalculateFromAccountState(accountID: bigint) {
     this.accountTree.setValue(accountID, this.accounts.get(accountID).hash());
@@ -550,23 +555,36 @@ class GlobalState {
     assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'PlaceOrder account');
 
     let account = this.accounts.get(tx.accountID);
+    let proof = this.stateProof(tx.accountID, tx.tokenID_sell);
 
     let rawTx: RawTx = {
       txType: TxType.PlaceOrder,
-      // payload: encodedTx,
-      // balancePath0: proof_order1_seller.balancePath,
-      // balancePath1: null,
-      // balancePath2: proof_order2_seller.balancePath,
-      // balancePath3: null,
-      // orderPath0: this.orderTrees.get(tx.order1_accountID).getProof(tx.order1_id).path_elements,
+      payload: null,
+      balancePath0: proof.balancePath,
+      balancePath1: proof.balancePath,
+      balancePath2: proof.balancePath,
+      balancePath3: proof.balancePath,
+      orderPath0: null,
       orderPath1: this.trivialOrderPathElements(),
-      // orderRoot0: account1.orderRoot,
-      // orderRoot1: account2.orderRoot,
-      // accountPath0: proof_order1_seller.accountPath,
-      // accountPath1: null,
+      orderRoot0: account.orderRoot,
+      orderRoot1: account.orderRoot,
+      accountPath0: proof.accountPath,
+      accountPath1: proof.accountPath,
       rootBefore: this.root(),
-      // rootAfter: 0n,
+      rootAfter: 0n,
     };
+
+    // TODO:
+    let order_id = this.createNewOrder(tx);
+
+    // fill in the tx
+    let encodedTx: Array<bigint> = new Array(TxLength);
+    encodedTx.fill(0n, 0, TxLength);
+    encodedTx[TxDetailIdx.Order1ID] = order_id;
+    rawTx.payload = encodedTx;
+    rawTx.orderPath0 = this.orderTrees.get(tx.accountID).getProof(order_id).path_elements;
+
+    rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
   }
   SpotTrade(tx: SpotTradeTx) {

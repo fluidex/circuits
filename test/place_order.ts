@@ -60,7 +60,7 @@ function initTestCase() {
     sign: account.sign,
     ay: Scalar.fromString(account.ay, 16),
     ethAddr: Scalar.fromString(account.ethAddr, 16),
-    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],,
+    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],
     order_path_elements: block.order_path_elements[block.order_path_elements.length-1][0],
     account_path_elements: block.account_path_elements[block.account_path_elements.length-1][0],
     oldOrderRoot: block.orderRoots[block.orderRoots.length-1][0],
@@ -76,7 +76,7 @@ class TestPlaceOrder implements SimpleTest {
     let input = {
       enabled: test_case.enabled,
       order_id: test_case.order_id,
-      order_tokensell: test_case.tokenID_sell,
+      order_tokensell: test_case.order_tokensell,
       order_amountsell: test_case.order_amountsell,
       order_tokenbuy: test_case.order_tokenbuy,
       order_amountbuy: test_case.order_amountbuy,
