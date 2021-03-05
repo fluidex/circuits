@@ -12,6 +12,7 @@ enum TxType {
   DepositToOld,
   Transfer,
   Withdraw,
+  PlaceOrder,
   SpotTrade,
   Nop,
 }
@@ -546,7 +547,27 @@ class GlobalState {
     this.bufferedTxs.push(rawTx);
   }
   PlaceOrder(tx: PlaceOrderTx) {
+    assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'PlaceOrder account');
 
+    let account = this.accounts.get(tx.accountID);
+
+    let rawTx: RawTx = {
+      txType: TxType.PlaceOrder,
+      // payload: encodedTx,
+      // balancePath0: proof_order1_seller.balancePath,
+      // balancePath1: null,
+      // balancePath2: proof_order2_seller.balancePath,
+      // balancePath3: null,
+      // orderPath0: this.orderTrees.get(tx.order1_accountID).getProof(tx.order1_id).path_elements,
+      orderPath1: this.trivialOrderPathElements(),
+      // orderRoot0: account1.orderRoot,
+      // orderRoot1: account2.orderRoot,
+      // accountPath0: proof_order1_seller.accountPath,
+      // accountPath1: null,
+      rootBefore: this.root(),
+      // rootAfter: 0n,
+    };
+    this.bufferedTxs.push(rawTx);
   }
   SpotTrade(tx: SpotTradeTx) {
     assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
