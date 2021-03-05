@@ -12,6 +12,7 @@ enum TxType {
   DepositToOld,
   Transfer,
   Withdraw,
+  PlaceOrder,
   SpotTrade,
   Nop,
 }
@@ -90,6 +91,14 @@ class WithdrawTx {
   tokenID: bigint;
   amount: bigint;
   signature: TxSignature;
+}
+
+class PlaceOrderTx {
+  accountID: bigint;
+  tokenID_sell: bigint;
+  tokenID_buy: bigint;
+  amount_sell: bigint;
+  amount_buy: bigint;
 }
 
 // TODO: matain many of these in state
@@ -214,6 +223,7 @@ class GlobalState {
   defaultBalanceRoot: bigint;
   defaultOrderRoot: bigint;
   defaultAccountLeaf: bigint;
+  next_order_ids: Map<bigint, bigint>;
   constructor(balanceLevels, orderLevels, accountLevels) {
     this.balanceLevels = balanceLevels;
     this.orderLevels = orderLevels;
@@ -227,6 +237,7 @@ class GlobalState {
     this.orderTrees = new Map(); // map[account_id]order_tree
     this.accounts = new Map(); // map[account_id]acount_state
     this.bufferedTxs = new Array();
+    this.next_order_ids = new Map();
   }
   root(): bigint {
     return this.accountTree.getRoot();
@@ -279,8 +290,24 @@ class GlobalState {
     this.balanceTrees.set(accountID, new Tree<bigint>(this.balanceLevels, 0n));
     this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, 0n));
     this.accountTree.setValue(accountID, this.defaultAccountLeaf);
+    this.next_order_ids.set(accountID, 0n);
     //console.log("add account", accountID);
     return accountID;
+  }
+  createNewOrder(tx): bigint {
+    const orderID = this.next_order_ids.get(tx.accountID);
+    let order = {
+      status: 0, //open
+      tokenbuy: tx.tokenID_buy,
+      tokensell: tx.tokenID_sell,
+      filled_sell: 0n,
+      filled_buy: 0n,
+      total_sell: tx.amount_sell,
+      total_buy: tx.amount_buy,
+    };
+    this.setAccountOrder(tx.accountID, orderID, order);
+    this.next_order_ids.set(tx.accountID, orderID+1n);
+    return orderID;
   }
 
   recalculateFromAccountState(accountID: bigint) {
@@ -533,6 +560,42 @@ class GlobalState {
 
     this.setTokenBalance(tx.accountID, tx.tokenID, balanceBefore - tx.amount);
     this.increaseNonce(tx.accountID);
+
+    rawTx.rootAfter = this.root();
+    this.bufferedTxs.push(rawTx);
+  }
+  PlaceOrder(tx: PlaceOrderTx) {
+    assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'PlaceOrder account');
+
+    let account = this.accounts.get(tx.accountID);
+    let proof = this.stateProof(tx.accountID, tx.tokenID_sell);
+
+    let rawTx: RawTx = {
+      txType: TxType.PlaceOrder,
+      payload: null,
+      balancePath0: proof.balancePath,
+      balancePath1: proof.balancePath,
+      balancePath2: proof.balancePath,
+      balancePath3: proof.balancePath,
+      orderPath0: null,
+      orderPath1: this.trivialOrderPathElements(),
+      orderRoot0: account.orderRoot,
+      orderRoot1: null,
+      accountPath0: proof.accountPath,
+      accountPath1: proof.accountPath,
+      rootBefore: this.root(),
+      rootAfter: 0n,
+    };
+
+    let order_id = this.createNewOrder(tx);
+
+    // fill in the tx
+    let encodedTx: Array<bigint> = new Array(TxLength);
+    encodedTx.fill(0n, 0, TxLength);
+    encodedTx[TxDetailIdx.Order1ID] = order_id;
+    rawTx.payload = encodedTx;
+    rawTx.orderPath0 = this.orderTrees.get(tx.accountID).getProof(order_id).path_elements;
+    rawTx.orderRoot1 = this.orderTrees.get(tx.accountID).getProof(order_id).root;
 
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
