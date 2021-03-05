@@ -76,29 +76,20 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
         balance_tree.path_elements[i][0] <== balance_path_elements[i][0];
     }
 
-    component emptyOrderHash = HashOrder();
-    emptyOrderHash.tokensell <== 0;
-    emptyOrderHash.tokenbuy <== 0;
-    emptyOrderHash.filled_sell <== 0;
-    emptyOrderHash.filled_buy <== 0;
-    emptyOrderHash.total_sell <== 0;
-    emptyOrderHash.total_buy <== 0;
-    emptyOrderHash.status <== 0;
-
-    component newOrderHash = HashOrder();
-    newOrderHash.tokensell <== order_tokensell;
-    newOrderHash.tokenbuy <== order_tokenbuy;
-    newOrderHash.filled_sell <== 0;
-    newOrderHash.filled_buy <== 0;
-    newOrderHash.total_sell <== order_amountsell;
-    newOrderHash.total_buy <== order_amountbuy;
-    newOrderHash.status <== 0;
+    component orderHash = HashOrder();
+    orderHash.tokensell <== order_tokensell;
+    orderHash.tokenbuy <== order_tokenbuy;
+    orderHash.filled_sell <== 0;
+    orderHash.filled_buy <== 0;
+    orderHash.total_sell <== order_amountsell;
+    orderHash.total_buy <== order_amountbuy;
+    orderHash.status <== 0;
 
     // - check order tree update
     component order_update_checker = CheckLeafUpdate(orderLevels);
     order_update_checker.enabled <== enabled;
-    order_update_checker.oldLeaf <== emptyOrderHash.out;
-    order_update_checker.newLeaf <== newOrderHash.out;
+    order_update_checker.oldLeaf <== 0;
+    order_update_checker.newLeaf <== orderHash.out;
     for (var i = 0; i < accountLevels; i++) {
         order_update_checker.path_index[i] <== order_path_index[i];
         order_update_checker.path_elements[i][0] <== order_path_elements[i][0];

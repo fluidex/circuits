@@ -223,7 +223,7 @@ class GlobalState {
   defaultBalanceRoot: bigint;
   defaultOrderRoot: bigint;
   defaultAccountLeaf: bigint;
-  next_order_id: bigint;
+  next_order_ids: Map<bigint, bigint>;
   constructor(balanceLevels, orderLevels, accountLevels) {
     this.balanceLevels = balanceLevels;
     this.orderLevels = orderLevels;
@@ -237,7 +237,7 @@ class GlobalState {
     this.orderTrees = new Map(); // map[account_id]order_tree
     this.accounts = new Map(); // map[account_id]acount_state
     this.bufferedTxs = new Array();
-    this.next_order_id = 0n;
+    this.next_order_ids = new Map();
   }
   root(): bigint {
     return this.accountTree.getRoot();
@@ -290,11 +290,12 @@ class GlobalState {
     this.balanceTrees.set(accountID, new Tree<bigint>(this.balanceLevels, 0n));
     this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, 0n));
     this.accountTree.setValue(accountID, this.defaultAccountLeaf);
+    this.next_order_ids.set(accountID, 0n);
     //console.log("add account", accountID);
     return accountID;
   }
   createNewOrder(tx): bigint {
-    const orderID = this.next_order_id;
+    const orderID = this.next_order_ids.get(tx.accountID);
     let order = {
       status: 0, //open
       tokenbuy: tx.tokenID_buy,
@@ -305,7 +306,7 @@ class GlobalState {
       total_buy: tx.amount_buy,
     };
     this.setAccountOrder(tx.accountID, orderID, order);
-    this.next_order_id++;
+    this.next_order_ids.set(tx.accountID, 0n);
     return orderID;
   }
 

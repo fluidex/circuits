@@ -5,9 +5,9 @@ import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 
 // circuit-level definitions
-const orderLevels = 2;
-const balanceLevels = 2;
-const accountLevels = 2;
+const orderLevels = 1;
+const balanceLevels = 1;
+const accountLevels = 1;
 
 function initTestCase() {
   let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
