@@ -92,6 +92,14 @@ class WithdrawTx {
   signature: TxSignature;
 }
 
+class PlaceOrderTx {
+  accountID: bigint;
+  tokenID_sell: bigint;
+  tokenID_buy: bigint;
+  amount_sell: bigint;
+  amount_buy: bigint;
+}
+
 // TODO: matain many of these in state
 class SpotTradeTx {
   order1_accountID: bigint;
@@ -536,6 +544,9 @@ class GlobalState {
 
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
+  }
+  PlaceOrder(tx: PlaceOrderTx) {
+
   }
   SpotTrade(tx: SpotTradeTx) {
     assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');

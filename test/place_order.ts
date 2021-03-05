@@ -1,5 +1,13 @@
 import * as path from 'path';
+const Scalar = require('ffjavascript').Scalar;
+import { Account } from '../helper.ts/account';
 import { SimpleTest, TestComponent } from './interface';
+import * as common from './common';
+
+// circuit-level definitions
+const orderLevels = 2;
+const balanceLevels = 2;
+const accountLevels = 2;
 
 function initTestCase() {
   let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
@@ -27,25 +35,26 @@ function initTestCase() {
   }
   state.setAccountNonce(accountID, nonce);
 
-  const order = {
+  const placeOrderTx = {
+    accountID: accountID,
     tokenID_sell: tokenID_sell,
     tokenID_buy: tokenID_buy,
     amount_sell: amount_sell,
     amount_buy: amount_buy,
   };
-  let order_id = state.PlaceOrder(accountID, order);
+  let order_id = state.PlaceOrder(placeOrderTx);
 
   let block = state.forge();
   // TODO: assert length
   return {
     enabled: 1,
     order_id: order_id,
-    order_tokensell: tokenID_sell, // TODO: ???
+    order_tokensell: tokenID_sell,
     order_amountsell: amount_sell,
     order_tokenbuy: tokenID_buy,
     order_amountbuy: amount_buy,
     accountID: accountID,
-    tokenID: tokenID_sell, // TODO: ???
+    tokenID: tokenID_sell,
     balance: account_balance_sell,
     nonce: nonce,
     sign: account.sign,
@@ -54,8 +63,8 @@ function initTestCase() {
     balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],,
     order_path_elements: block.order_path_elements[block.order_path_elements.length-1][0],
     account_path_elements: block.account_path_elements[block.account_path_elements.length-1][0],
-    oldOrderRoot: orderRoots[block.orderRoots.length-1][0],
-    newOrderRoot: orderRoots[block.orderRoots.length-1][1],
+    oldOrderRoot: block.orderRoots[block.orderRoots.length-1][0],
+    newOrderRoot: block.orderRoots[block.orderRoots.length-1][1],
     oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
     newAccountRoot: block.newAccountRoots[block.newAccountRoots.length-1],
   } 
@@ -78,9 +87,9 @@ class TestPlaceOrder implements SimpleTest {
       sign: test_case.sign,
       ay: test_case.ay,
       ethAddr: test_case.ethAddr,
-      // balance_path_elements[balanceLevels][1],
-      // order_path_elements[orderLevels][1],
-      // account_path_elements[accountLevels][1],
+      balance_path_elements: test_case.balance_path_elements,
+      order_path_elements: test_case.order_path_elements,
+      account_path_elements: test_case.account_path_elements,
       oldOrderRoot: test_case.oldOrderRoot,
       newOrderRoot: test_case.newOrderRoot,
       oldAccountRoot: test_case.oldAccountRoot,
