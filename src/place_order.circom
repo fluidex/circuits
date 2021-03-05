@@ -5,7 +5,7 @@ include "./lib/hash_state.circom";
 template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
 
-	// order info
+    // order info
     signal input order_id;
     signal input order_tokensell;
     signal input order_amountsell;
