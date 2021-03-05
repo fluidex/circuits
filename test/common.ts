@@ -231,12 +231,12 @@ class GlobalState {
   root(): bigint {
     return this.accountTree.getRoot();
   }
-  setAccountKey(accountID, publicKey) {
+  setAccountKey(accountID: bigint, publicKey) {
     //console.log('setAccountKey', accountID);
     this.accounts.get(accountID).updatePublicKey(publicKey);
     this.recalculateFromAccountState(accountID);
   }
-  setAccountL2Addr(accountID, sign, ay, ethAddr) {
+  setAccountL2Addr(accountID: bigint, sign, ay, ethAddr) {
     this.accounts.get(accountID).updateL2Addr(sign, ay, ethAddr);
     this.recalculateFromAccountState(accountID);
   }
@@ -249,7 +249,7 @@ class GlobalState {
     this.accounts.get(accountID).updateOrderRoot(orderRoot);
     this.recalculateFromAccountState(accountID);
   }
-  increaseNonce(accountID) {
+  increaseNonce(accountID: bigint) {
     let oldNonce = this.accounts.get(accountID).nonce;
     //console.log('oldNonce', oldNonce);
     this.setAccountNonce(accountID, oldNonce + 1n);
@@ -283,14 +283,14 @@ class GlobalState {
     return accountID;
   }
 
-  recalculateFromAccountState(accountID) {
+  recalculateFromAccountState(accountID: bigint) {
     this.accountTree.setValue(accountID, this.accounts.get(accountID).hash());
   }
-  recalculateFromBalanceTree(accountID) {
+  recalculateFromBalanceTree(accountID: bigint) {
     this.accounts.get(accountID).balanceRoot = this.balanceTrees.get(accountID).getRoot();
     this.recalculateFromAccountState(accountID);
   }
-  recalculateFromOrderTree(accountID) {
+  recalculateFromOrderTree(accountID: bigint) {
     this.accounts.get(accountID).orderRoot = this.orderTrees.get(accountID).getRoot();
     this.recalculateFromAccountState(accountID);
   }
@@ -312,7 +312,7 @@ class GlobalState {
     return new Tree<bigint>(this.orderLevels, 0n).getProof(0n).path_elements;
   }
 
-  stateProof(accountID, tokenID) {
+  stateProof(accountID: bigint, tokenID: bigint) {
     let { path_elements: balancePath, leaf, root: balanceRoot } = this.balanceTrees.get(accountID).getProof(tokenID);
     let orderRoot = this.orderTrees.get(accountID).getRoot();
     let { path_elements: accountPath, leaf: accountLeaf, root } = this.accountTree.getProof(accountID);
@@ -639,7 +639,7 @@ class GlobalState {
   }
   Nop() {
     // assume we already have initialized the account tree and the balance tree
-    let trivialProof = this.stateProof(0, 0);
+    let trivialProof = this.stateProof(0n, 0n);
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
     let rawTx: RawTx = {

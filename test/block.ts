@@ -17,7 +17,7 @@ const accountLevels = 2;
 
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
-function initTestCase() {
+function initBlockTestCase() {
   let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
 
   const tokenID = 0n;
@@ -154,18 +154,18 @@ function initTestCase() {
   return block;
 }
 
-let test_case = initTestCase();
+let block_test_case = initBlockTestCase();
 class TestBlock implements SimpleTest {
   getInput() {
     let input = {
-      txsType: test_case.txsType,
-      encodedTxs: test_case.encodedTxs,
-      balance_path_elements: test_case.balance_path_elements,
-      order_path_elements: test_case.order_path_elements,
-      account_path_elements: test_case.account_path_elements,
-      orderRoots: test_case.orderRoots,
-      oldAccountRoots: test_case.oldAccountRoots,
-      newAccountRoots: test_case.newAccountRoots,
+      txsType: block_test_case.txsType,
+      encodedTxs: block_test_case.encodedTxs,
+      balance_path_elements: block_test_case.balance_path_elements,
+      order_path_elements: block_test_case.order_path_elements,
+      account_path_elements: block_test_case.account_path_elements,
+      orderRoots: block_test_case.orderRoots,
+      oldAccountRoots: block_test_case.oldAccountRoots,
+      newAccountRoots: block_test_case.newAccountRoots,
     };
     //console.log(JSON.stringify(input, null, 2));
     return input;
@@ -181,4 +181,42 @@ class TestBlock implements SimpleTest {
   }
 }
 
-export { TestBlock };
+function initEmptyBlockTestCase() {
+  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+  // we need to have at least 1 account
+  state.createNewAccount();
+  for (var i = state.bufferedTxs.length; i < nTxs; i++) {
+    state.Nop();
+  }
+  let block = state.forge();
+  return block;
+}
+
+let empty_block_test_case = initEmptyBlockTestCase();
+class TestEmptyBlock implements SimpleTest {
+  getInput() {
+    let input = {
+      txsType: empty_block_test_case.txsType,
+      encodedTxs: empty_block_test_case.encodedTxs,
+      balance_path_elements: empty_block_test_case.balance_path_elements,
+      order_path_elements: empty_block_test_case.order_path_elements,
+      account_path_elements: empty_block_test_case.account_path_elements,
+      orderRoots: empty_block_test_case.orderRoots,
+      oldAccountRoots: empty_block_test_case.oldAccountRoots,
+      newAccountRoots: empty_block_test_case.newAccountRoots,
+    };
+    //console.log(JSON.stringify(input, null, 2));
+    return input;
+  }
+  getOutput() {
+    return {};
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'block.circom'),
+      main: `Block(${nTxs}, ${balanceLevels}, ${orderLevels}, ${accountLevels})`,
+    };
+  }
+}
+
+export { TestBlock, TestEmptyBlock };
