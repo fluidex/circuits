@@ -42,13 +42,13 @@ function initTestCase() {
     amount_sell: amount_sell,
     amount_buy: amount_buy,
   };
-  let order_id = state.PlaceOrder(placeOrderTx);
+  state.PlaceOrder(placeOrderTx);
 
   let block = state.forge();
   // TODO: assert length
   return {
     enabled: 1,
-    order_id: order_id,
+    order_id: block.encodedTxs[block.encodedTxs.length-1][common.TxDetailIdx.Order1ID],
     order_tokensell: tokenID_sell,
     order_amountsell: amount_sell,
     order_tokenbuy: tokenID_buy,
