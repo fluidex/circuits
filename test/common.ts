@@ -580,14 +580,13 @@ class GlobalState {
       orderPath0: null,
       orderPath1: this.trivialOrderPathElements(),
       orderRoot0: account.orderRoot,
-      orderRoot1: account.orderRoot,
+      orderRoot1: null,
       accountPath0: proof.accountPath,
       accountPath1: proof.accountPath,
       rootBefore: this.root(),
       rootAfter: 0n,
     };
 
-    // TODO:
     let order_id = this.createNewOrder(tx);
 
     // fill in the tx
@@ -596,6 +595,7 @@ class GlobalState {
     encodedTx[TxDetailIdx.Order1ID] = order_id;
     rawTx.payload = encodedTx;
     rawTx.orderPath0 = this.orderTrees.get(tx.accountID).getProof(order_id).path_elements;
+    rawTx.orderRoot1 = this.orderTrees.get(tx.accountID).getProof(order_id).root;
 
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
