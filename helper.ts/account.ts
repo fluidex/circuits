@@ -38,6 +38,7 @@ class Account {
   constructor(signature) {
     // secp256k1 signature is 64-byte
     if (signature) {
+      // TODO: check whether it is hexstring 
       if (typeof signature != 'string') {
         signature = Scalar.e(signature).toString(16);
       } else if signature.length > 128 {
