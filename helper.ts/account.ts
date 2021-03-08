@@ -10,8 +10,18 @@ import { hash } from '../helper.ts/hash';
 
 const utils = require('./utils');
 
-// TODO:
-const CREATE_L2_ACCOUNT_MSG = "";
+// TODO: get chainID from provider
+function get_create_l2_account_msg(chainID) {
+  if (!chainID) {
+    chainID = 1;
+  }
+
+  if (typeof chainID != 'number') {
+    throw new Error('invalid chainID ' + chainID);
+  }
+
+  return "FLUIDEX_L2_ACCOUNT"+`\nChain ID: ${chainID}.`;
+}
 
 class Account {
   public publicKey: string;
@@ -22,19 +32,15 @@ class Account {
   public sign: number;
   public bjjCompressed: string;
 
-
-  // input signature
-    // to seed
-  // recover public key
-    // add tests
   constructor(signature) {
     if (!signature) {
       // TODO: 32 bytes?
       signature = crypto.randomBytes(32).toString('hex');
+    } else if (typeof publicKey != 'string') {
+      signature = Scalar.e(signature).toString(16);
     }
 
-    // TODO: check type for signature
-    let this.publicKey = recoverFromECSignature(signature, CREATE_L2_ACCOUNT_MSG);
+    let this.publicKey = recoverFromECSignature(signature, get_create_l2_account_msg());
 
     // Use Keccak-256 hash function to get public key hash
     const hashOfPublicKey = keccak256(Buffer.from(this.publicKey, 'hex'));
