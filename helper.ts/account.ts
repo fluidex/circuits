@@ -7,6 +7,7 @@ const babyJub = require('circomlib').babyJub;
 const Scalar = require('ffjavascript').Scalar;
 const utilsScalar = require('ffjavascript').utils;
 import * as ethers from 'ethers';
+export * as zksync from 'zksync';
 import { hash } from '../helper.ts/hash';
 
 const ec = require('./ec');
@@ -60,7 +61,8 @@ class Account {
 
     // Derive a private key from seed
     const seed = ethers.utils.arrayify(signature);
-    this.rollupPrvKey = await privateKeyFromSeed(seed);
+    // TODO: type
+    this.rollupPrvKey = await zksync.crypto.privateKeyFromSeed(seed);
 
     const bjPubKey = eddsa.prv2pub(this.rollupPrvKey);
 
