@@ -110,15 +110,7 @@ class SpotTradeTx {
   amount_1to2: bigint;
   amount_2to1: bigint;
   order1_id: bigint;
-  order1_amountsell: bigint;
-  order1_amountbuy: bigint;
-  order1_filledsell: bigint;
-  order1_filledbuy: bigint;
   order2_id: bigint;
-  order2_amountsell: bigint;
-  order2_amountbuy: bigint;
-  order2_filledsell: bigint;
-  order2_filledbuy: bigint;
 }
 
 function hashTransfer({ from, to, tokenID, amount, fromNonce, toNonce, oldBalanceFrom, oldBalanceTo }) {
@@ -218,6 +210,7 @@ class GlobalState {
   // idx to balanceTree
   balanceTrees: Map<bigint, Tree<bigint>>;
   orderTrees: Map<bigint, Tree<bigint>>;
+  orderMap: Map<bigint, Map<bigint, Order>>;
   accounts: Map<bigint, AccountState>;
   bufferedTxs: Array<RawTx>;
   defaultBalanceRoot: bigint;
@@ -235,6 +228,7 @@ class GlobalState {
     this.accountTree = new Tree<bigint>(accountLevels, this.defaultAccountLeaf); // Tree<account_hash>
     this.balanceTrees = new Map(); // map[account_id]balance_tree
     this.orderTrees = new Map(); // map[account_id]order_tree
+    this.orderMap = new Map();
     this.accounts = new Map(); // map[account_id]acount_state
     this.bufferedTxs = new Array();
     this.next_order_ids = new Map();
@@ -283,19 +277,23 @@ class GlobalState {
       throw Error('account_id overflow');
     }
   }
-  createNewAccount(): bigint {
+  getNextOrderIdForUser(accountID): bigint {
+    return this.next_order_ids.get(accountID);
+  }
+  createNewAccount({ next_order_id = 0n } = {}): bigint {
     const accountID = BigInt(this.balanceTrees.size);
     let accountState = this.emptyAccount();
     this.accounts.set(accountID, accountState);
     this.balanceTrees.set(accountID, new Tree<bigint>(this.balanceLevels, 0n));
     this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, 0n));
+    this.orderMap.set(accountID, new Map<bigint, Order>());
     this.accountTree.setValue(accountID, this.defaultAccountLeaf);
-    this.next_order_ids.set(accountID, 0n);
+    this.next_order_ids.set(accountID, next_order_id);
     //console.log("add account", accountID);
     return accountID;
   }
   createNewOrder(tx): bigint {
-    const orderID = this.next_order_ids.get(tx.accountID);
+    const orderID = this.getNextOrderIdForUser(tx.accountID);
     let order = {
       status: 0, //open
       tokenbuy: tx.tokenID_buy,
@@ -306,7 +304,7 @@ class GlobalState {
       total_buy: tx.amount_buy,
     };
     this.setAccountOrder(tx.accountID, orderID, order);
-    this.next_order_ids.set(tx.accountID, orderID+1n);
+    this.next_order_ids.set(tx.accountID, orderID + 1n);
     return orderID;
   }
 
@@ -332,7 +330,11 @@ class GlobalState {
   setAccountOrder(accountID: bigint, orderID: bigint, order: Order) {
     assert(this.orderTrees.has(accountID), 'setAccountOrder');
     this.orderTrees.get(accountID).setValue(orderID, hashOrderState(order));
+    this.orderMap.get(accountID).set(orderID, order);
     this.recalculateFromOrderTree(accountID);
+  }
+  getAccountOrder(accountID: bigint, orderID: bigint): Order {
+    return this.orderMap.get(accountID).get(orderID);
   }
 
   trivialOrderPathElements() {
@@ -564,8 +566,8 @@ class GlobalState {
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
   }
-  PlaceOrder(tx: PlaceOrderTx) {
-    assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'PlaceOrder account');
+  PlaceOrder(tx: PlaceOrderTx): bigint {
+    assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'PlaceOrder account: accountID' + tx.accountID);
 
     let account = this.accounts.get(tx.accountID);
     let proof = this.stateProof(tx.accountID, tx.tokenID_sell);
@@ -599,6 +601,7 @@ class GlobalState {
 
     rawTx.rootAfter = this.root();
     this.bufferedTxs.push(rawTx);
+    return order_id;
   }
   SpotTrade(tx: SpotTradeTx) {
     assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
@@ -608,6 +611,20 @@ class GlobalState {
     let account2 = this.accounts.get(tx.order2_accountID);
     let proof_order1_seller = this.stateProof(tx.order1_accountID, tx.tokenID_1to2);
     let proof_order2_seller = this.stateProof(tx.order2_accountID, tx.tokenID_2to1);
+
+    const order1 = this.orderMap.get(tx.order1_accountID).get(tx.order1_id);
+    const order2 = this.orderMap.get(tx.order2_accountID).get(tx.order2_id);
+    let old_order_state = {
+      order1_amountsell: order1.total_sell,
+      order1_amountbuy: order1.total_buy,
+      order1_filledsell: order1.filled_sell,
+      order1_filledbuy: order1.filled_buy,
+
+      order2_amountsell: order2.total_sell,
+      order2_amountbuy: order2.total_buy,
+      order2_filledsell: order2.filled_sell,
+      order2_filledbuy: order2.filled_buy,
+    };
 
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
@@ -637,15 +654,15 @@ class GlobalState {
     encodedTx[TxDetailIdx.TokenID2] = tx.tokenID_2to1;
     encodedTx[TxDetailIdx.Amount2] = tx.amount_2to1;
     encodedTx[TxDetailIdx.Order1ID] = tx.order1_id;
-    encodedTx[TxDetailIdx.Order1AmountSell] = tx.order1_amountsell;
-    encodedTx[TxDetailIdx.Order1AmountBuy] = tx.order1_amountbuy;
-    encodedTx[TxDetailIdx.Order1FilledSell] = tx.order1_filledsell;
-    encodedTx[TxDetailIdx.Order1FilledBuy] = tx.order1_filledbuy;
+    encodedTx[TxDetailIdx.Order1AmountSell] = old_order_state.order1_amountsell;
+    encodedTx[TxDetailIdx.Order1AmountBuy] = old_order_state.order1_amountbuy;
+    encodedTx[TxDetailIdx.Order1FilledSell] = old_order_state.order1_filledsell;
+    encodedTx[TxDetailIdx.Order1FilledBuy] = old_order_state.order1_filledbuy;
     encodedTx[TxDetailIdx.Order2ID] = tx.order2_id;
-    encodedTx[TxDetailIdx.Order2AmountSell] = tx.order2_amountsell;
-    encodedTx[TxDetailIdx.Order2AmountBuy] = tx.order2_amountbuy;
-    encodedTx[TxDetailIdx.Order2FilledSell] = tx.order2_filledsell;
-    encodedTx[TxDetailIdx.Order2FilledBuy] = tx.order2_filledbuy;
+    encodedTx[TxDetailIdx.Order2AmountSell] = old_order_state.order2_amountsell;
+    encodedTx[TxDetailIdx.Order2AmountBuy] = old_order_state.order2_amountbuy;
+    encodedTx[TxDetailIdx.Order2FilledSell] = old_order_state.order2_filledsell;
+    encodedTx[TxDetailIdx.Order2FilledBuy] = old_order_state.order2_filledbuy;
 
     let rawTx: RawTx = {
       txType: TxType.SpotTrade,
@@ -676,12 +693,14 @@ class GlobalState {
       status: 0, // open
       tokenbuy: tx.tokenID_2to1,
       tokensell: tx.tokenID_1to2,
-      filled_sell: tx.order1_filledsell + tx.amount_1to2,
-      filled_buy: tx.order1_filledbuy + tx.amount_2to1,
-      total_sell: tx.order1_amountsell,
-      total_buy: tx.order1_amountbuy,
+      filled_sell: old_order_state.order1_filledsell + tx.amount_1to2,
+      filled_buy: old_order_state.order1_filledbuy + tx.amount_2to1,
+      total_sell: old_order_state.order1_amountsell,
+      total_buy: old_order_state.order1_amountbuy,
     };
     this.setAccountOrder(tx.order1_accountID, tx.order1_id, newOrder1);
+    // TODO: self trade is enabled here now. recheck it later
+    // account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.tokenID_2to1);
     this.setTokenBalance(tx.order1_accountID, tx.tokenID_2to1, account1_balance_buy + tx.amount_2to1);
     rawTx.accountPath1 = this.accountTree.getProof(tx.order2_accountID).path_elements;
 
@@ -689,12 +708,13 @@ class GlobalState {
       status: 0, // open
       tokenbuy: tx.tokenID_1to2,
       tokensell: tx.tokenID_2to1,
-      filled_sell: tx.order2_filledsell + tx.amount_2to1,
-      filled_buy: tx.order2_filledbuy + tx.amount_1to2,
-      total_sell: tx.order2_amountsell,
-      total_buy: tx.order2_amountbuy,
+      filled_sell: old_order_state.order2_filledsell + tx.amount_2to1,
+      filled_buy: old_order_state.order2_filledbuy + tx.amount_1to2,
+      total_sell: old_order_state.order2_amountsell,
+      total_buy: old_order_state.order2_amountbuy,
     };
     this.setAccountOrder(tx.order2_accountID, tx.order2_id, newOrder2);
+    // account2_balance_buy = this.getTokenBalance(tx.order2_accountID, tx.tokenID_1to2);
     this.setTokenBalance(tx.order2_accountID, tx.tokenID_1to2, account2_balance_buy + tx.amount_1to2);
 
     rawTx.rootAfter = this.root();
