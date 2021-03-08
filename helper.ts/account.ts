@@ -33,6 +33,7 @@ class Account {
       signature = crypto.randomBytes(32).toString('hex');
     }
 
+    // TODO: check type for signature
     let this.publicKey = recoverFromECSignature(signature, CREATE_L2_ACCOUNT_MSG);
 
     // Use Keccak-256 hash function to get public key hash
@@ -46,11 +47,9 @@ class Account {
     const ethAddress = ethAddressBuffer.slice(-20).toString('hex');
     this.ethAddr = `0x${ethAddress}`;
 
-    // Derive a private key wit a hash
-    // TODO: privateKey or seed directly?
-    let seed = randomize(signature)
-    this.rollupPrvKey = Buffer.from(keccak256('FLUIDEX_ACCOUNT' + this.publicKey), 'hex');
-    // this.rollupPrvKey = Buffer.from(keccak256('FLUIDEX_ACCOUNT' + this.publicKey), 'hex');
+    // Derive a private key from seed
+    const seed = ethers.utils.arrayify(signature);
+    this.rollupPrvKey = await privateKeyFromSeed(seed);
 
     const bjPubKey = eddsa.prv2pub(this.rollupPrvKey);
 
