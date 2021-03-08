@@ -17,7 +17,7 @@ function initDepositToNew() {
   let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
 
   const tokenID = 0n;
-  const amount = 200n
+  const amount = 200n;
   const account = new Account(2);
   const accountID = state.createNewAccount();
 
@@ -41,10 +41,10 @@ function initDepositToNew() {
     sign: account.sign,
     ay: Scalar.fromString(account.ay, 16),
     amount: amount,
-    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
-    account_path_elements: block.account_path_elements[block.account_path_elements.length-1][1],
-    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
-    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length-1],
+    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][1],
+    account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][1],
+    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
+    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
   };
 }
 
@@ -89,10 +89,10 @@ function initDepositToOld() {
     balance: balance,
     ethAddr: Scalar.fromString(account.ethAddr, 16),
     orderRoot: genesisOrderRoot,
-    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
-    account_path_elements: block.account_path_elements[block.account_path_elements.length-1][1],
-    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
-    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length-1],
+    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][1],
+    account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][1],
+    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
+    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
   };
 }
 

@@ -48,7 +48,7 @@ function initTestCase() {
   // TODO: assert length
   return {
     enabled: 1,
-    order_id: block.encodedTxs[block.encodedTxs.length-1][common.TxDetailIdx.Order1ID],
+    order_id: block.encodedTxs[block.encodedTxs.length - 1][common.TxDetailIdx.Order1ID],
     order_tokensell: tokenID_sell,
     order_amountsell: amount_sell,
     order_tokenbuy: tokenID_buy,
@@ -60,14 +60,14 @@ function initTestCase() {
     sign: account.sign,
     ay: Scalar.fromString(account.ay, 16),
     ethAddr: Scalar.fromString(account.ethAddr, 16),
-    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],
-    order_path_elements: block.order_path_elements[block.order_path_elements.length-1][0],
-    account_path_elements: block.account_path_elements[block.account_path_elements.length-1][0],
-    oldOrderRoot: block.orderRoots[block.orderRoots.length-1][0],
-    newOrderRoot: block.orderRoots[block.orderRoots.length-1][1],
-    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
-    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length-1],
-  } 
+    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][0],
+    order_path_elements: block.order_path_elements[block.order_path_elements.length - 1][0],
+    account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][0],
+    oldOrderRoot: block.orderRoots[block.orderRoots.length - 1][0],
+    newOrderRoot: block.orderRoots[block.orderRoots.length - 1][1],
+    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
+    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
+  };
 }
 
 let test_case = initTestCase();
