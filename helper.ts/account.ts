@@ -7,7 +7,7 @@ const babyJub = require('circomlib').babyJub;
 const Scalar = require('ffjavascript').Scalar;
 const utilsScalar = require('ffjavascript').utils;
 import * as ethers from 'ethers';
-export * as zksync from 'zksync';
+import * as zksync from 'zksync';
 import { hash } from '../helper.ts/hash';
 
 const utils = require('./utils');
