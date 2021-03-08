@@ -19,6 +19,11 @@ class Account {
   public sign: number;
   public bjjCompressed: string;
 
+
+  // input signature
+    // to seed
+  // recover public key
+    // add tests
   constructor(publicKey) {
     if (publicKey) {
       if (typeof publicKey != 'string') {
