@@ -43,7 +43,7 @@ async function loadCircuit(circuitPath, circuitType) {
   sym.set(0, 'one');
   if (fs.existsSync(r1csFile) && fs.existsSync(symFile) && !forceRecompile) {
     console.log('loading', r1csFile);
-    constraints = (await snarkjs.r1cs.exportJson(r1csFile, {info: console.log})).constraints;
+    constraints = (await snarkjs.r1cs.exportJson(r1csFile, { info: console.log })).constraints;
     const loadSym = (await import('../../node_modules/snarkjs/src/loadsyms.js')).default;
     console.log('loading', symFile);
     const symMap = await loadSym(symFile);

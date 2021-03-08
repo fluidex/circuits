@@ -217,7 +217,8 @@ class GlobalState {
   defaultOrderRoot: bigint;
   defaultAccountLeaf: bigint;
   next_order_ids: Map<bigint, bigint>;
-  constructor(balanceLevels, orderLevels, accountLevels) {
+  options: any;
+  constructor(balanceLevels, orderLevels, accountLevels, options = {enable_self_trade: false}) {
     this.balanceLevels = balanceLevels;
     this.orderLevels = orderLevels;
     this.accountLevels = accountLevels;
@@ -232,6 +233,7 @@ class GlobalState {
     this.accounts = new Map(); // map[account_id]acount_state
     this.bufferedTxs = new Array();
     this.next_order_ids = new Map();
+    this.options = options;
   }
   root(): bigint {
     return this.accountTree.getRoot();
@@ -567,7 +569,8 @@ class GlobalState {
     this.bufferedTxs.push(rawTx);
   }
   PlaceOrder(tx: PlaceOrderTx): bigint {
-    assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'PlaceOrder account: accountID' + tx.accountID);
+    // TODO: check order signature
+    //assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'PlaceOrder account: accountID' + tx.accountID);
 
     let account = this.accounts.get(tx.accountID);
     let proof = this.stateProof(tx.accountID, tx.tokenID_sell);
@@ -604,8 +607,8 @@ class GlobalState {
     return order_id;
   }
   SpotTrade(tx: SpotTradeTx) {
-    assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
-    assert(this.accounts.get(tx.order2_accountID).ethAddr != 0n, 'SpotTrade account2');
+    //assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
+    //assert(this.accounts.get(tx.order2_accountID).ethAddr != 0n, 'SpotTrade account2');
 
     let account1 = this.accounts.get(tx.order1_accountID);
     let account2 = this.accounts.get(tx.order2_accountID);
@@ -700,7 +703,9 @@ class GlobalState {
     };
     this.setAccountOrder(tx.order1_accountID, tx.order1_id, newOrder1);
     // TODO: self trade is enabled here now. recheck it later
-    // account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.tokenID_2to1);
+    if (this.options.enable_self_trade) {
+      account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.tokenID_2to1);
+    }
     this.setTokenBalance(tx.order1_accountID, tx.tokenID_2to1, account1_balance_buy + tx.amount_2to1);
     rawTx.accountPath1 = this.accountTree.getProof(tx.order2_accountID).path_elements;
 
@@ -714,7 +719,9 @@ class GlobalState {
       total_buy: old_order_state.order2_amountbuy,
     };
     this.setAccountOrder(tx.order2_accountID, tx.order2_id, newOrder2);
-    // account2_balance_buy = this.getTokenBalance(tx.order2_accountID, tx.tokenID_1to2);
+    if (this.options.enable_self_trade) {
+      account2_balance_buy = this.getTokenBalance(tx.order2_accountID, tx.tokenID_1to2);
+    }
     this.setTokenBalance(tx.order2_accountID, tx.tokenID_1to2, account2_balance_buy + tx.amount_1to2);
 
     rawTx.rootAfter = this.root();
