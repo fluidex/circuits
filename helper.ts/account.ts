@@ -10,6 +10,9 @@ import { hash } from '../helper.ts/hash';
 
 const utils = require('./utils');
 
+// TODO:
+const CREATE_L2_ACCOUNT_MSG = "";
+
 class Account {
   public publicKey: string;
   public ethAddr: string;
@@ -24,17 +27,13 @@ class Account {
     // to seed
   // recover public key
     // add tests
-  constructor(publicKey) {
-    if (publicKey) {
-      if (typeof publicKey != 'string') {
-        this.publicKey = Scalar.e(publicKey).toString(16);
-      } else {
-        this.publicKey = publicKey;
-      }
-      while (this.publicKey.length < 64) this.publicKey = '0' + this.publicKey;
-    } else {
-      this.publicKey = crypto.randomBytes(32).toString('hex');
+  constructor(signature) {
+    if (!signature) {
+      // TODO: 32 bytes?
+      signature = crypto.randomBytes(32).toString('hex');
     }
+
+    let this.publicKey = recoverFromECSignature(signature, CREATE_L2_ACCOUNT_MSG);
 
     // Use Keccak-256 hash function to get public key hash
     const hashOfPublicKey = keccak256(Buffer.from(this.publicKey, 'hex'));
@@ -48,7 +47,10 @@ class Account {
     this.ethAddr = `0x${ethAddress}`;
 
     // Derive a private key wit a hash
+    // TODO: privateKey or seed directly?
+    let seed = randomize(signature)
     this.rollupPrvKey = Buffer.from(keccak256('FLUIDEX_ACCOUNT' + this.publicKey), 'hex');
+    // this.rollupPrvKey = Buffer.from(keccak256('FLUIDEX_ACCOUNT' + this.publicKey), 'hex');
 
     const bjPubKey = eddsa.prv2pub(this.rollupPrvKey);
 
