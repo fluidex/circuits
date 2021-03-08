@@ -28,7 +28,7 @@ function get_create_l2_account_msg(chainID) {
 // https://gist.github.com/nakov/1dcbe26988e18f7a4d013b65d8803ffc
 // https://github.com/ethers-io/ethers.js/issues/447
 // TODO: test
-function recoverPublicKeyFromSignature(signature: string, msg: string) string {
+function recoverPublicKeyFromSignature(signature: string, msg: string): string {
   return "";
 }
 
@@ -47,7 +47,7 @@ class Account {
       // TODO: check whether it is hexstring 
       if (typeof signature != 'string') {
         signature = Scalar.e(signature).toString(16);
-      } else if signature.length > 128 {
+      } else if (signature.length > 128) {
         throw new Error('get_create_l2_account signature length error');
       }
       while (signature.length < 128) signature = '0' + signature;
@@ -55,7 +55,7 @@ class Account {
         signature = crypto.randomBytes(64).toString('hex');
     }
 
-    this.publicKey = recoverPublicKeyFromSignature(signature, get_create_l2_account_msg());
+    this.publicKey = recoverPublicKeyFromSignature(signature, get_create_l2_account_msg(null));
 
     // Use Keccak-256 hash function to get public key hash
     const hashOfPublicKey = keccak256(Buffer.from(this.publicKey, 'hex'));
@@ -71,7 +71,7 @@ class Account {
     // Derive a private key from seed
     const seed = ethers.utils.arrayify(signature);
     // TODO: type
-    this.rollupPrvKey = await zksync.crypto.privateKeyFromSeed(seed);
+    this.rollupPrvKey = zksync.crypto.privateKeyFromSeed(seed);
 
     const bjPubKey = eddsa.prv2pub(this.rollupPrvKey);
 
