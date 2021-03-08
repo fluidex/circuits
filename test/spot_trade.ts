@@ -100,15 +100,7 @@ function initTestCase() {
     amount_1to2: amount_1to2,
     amount_2to1: amount_2to1,
     order1_id: order1_id,
-    order1_amountsell: order1.total_sell,
-    order1_amountbuy: order1.total_buy,
-    order1_filledsell: order1.filled_sell,
-    order1_filledbuy: order1.filled_buy,
     order2_id: order2_id,
-    order2_amountsell: order2.total_sell,
-    order2_amountbuy: order2.total_buy,
-    order2_filledsell: order2.filled_sell,
-    order2_filledbuy: order2.filled_buy,
   };
   state.SpotTrade(spotTradeTx);
 
@@ -146,15 +138,15 @@ function initTestCase() {
     order1_token_buy_balance: account1_balance_buy,
     order2_token_sell_balance: account2_balance_sell,
     order2_token_buy_balance: account2_balance_buy,
-    order_path_elements: block.order_path_elements[block.order_path_elements.length-1],
-    old_account_root: block.oldAccountRoots[block.oldAccountRoots.length-1],
-    new_account_root: block.newAccountRoots[block.newAccountRoots.length-1],
-    old_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],
-    tmp_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][3],
-    old_account1_path_elements: block.account_path_elements[block.account_path_elements.length-1][0],
-    old_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][2],
-    tmp_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
-    tmp_account2_path_elements: block.account_path_elements[block.account_path_elements.length-1][1],
+    order_path_elements: block.order_path_elements[block.order_path_elements.length - 1],
+    old_account_root: block.oldAccountRoots[block.oldAccountRoots.length - 1],
+    new_account_root: block.newAccountRoots[block.newAccountRoots.length - 1],
+    old_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][0],
+    tmp_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][3],
+    old_account1_path_elements: block.account_path_elements[block.account_path_elements.length - 1][0],
+    old_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][2],
+    tmp_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][1],
+    tmp_account2_path_elements: block.account_path_elements[block.account_path_elements.length - 1][1],
   };
 }
 
