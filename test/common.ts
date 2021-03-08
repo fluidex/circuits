@@ -218,7 +218,7 @@ class GlobalState {
   defaultAccountLeaf: bigint;
   next_order_ids: Map<bigint, bigint>;
   options: any;
-  constructor(balanceLevels, orderLevels, accountLevels, options = {enable_self_trade: false}) {
+  constructor(balanceLevels, orderLevels, accountLevels, options = { enable_self_trade: false }) {
     this.balanceLevels = balanceLevels;
     this.orderLevels = orderLevels;
     this.accountLevels = accountLevels;
