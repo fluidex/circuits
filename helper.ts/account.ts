@@ -6,8 +6,10 @@ const eddsa = require('./eddsa');
 const babyJub = require('circomlib').babyJub;
 const Scalar = require('ffjavascript').Scalar;
 const utilsScalar = require('ffjavascript').utils;
+import * as ethers from 'ethers';
 import { hash } from '../helper.ts/hash';
 
+const ec = require('./ec');
 const utils = require('./utils');
 
 // TODO: get chainID from provider
@@ -34,13 +36,16 @@ class Account {
 
   constructor(signature) {
     if (!signature) {
-      // TODO: 32 bytes?
-      signature = crypto.randomBytes(32).toString('hex');
-    } else if (typeof publicKey != 'string') {
+      // secp256k1 signature is 64-byte
+      signature = crypto.randomBytes(64).toString('hex');
+    } else if (typeof signature != 'string') {
       signature = Scalar.e(signature).toString(16);
+    } else if signature.length > 128 {
+      throw new Error('get_create_l2_account signature length error');
     }
+    while (signature.length < 128) signature = '0' + signature;
 
-    let this.publicKey = recoverFromECSignature(signature, get_create_l2_account_msg());
+    let this.publicKey = ec.recoverPublicKeyFromSignature(signature, get_create_l2_account_msg());
 
     // Use Keccak-256 hash function to get public key hash
     const hashOfPublicKey = keccak256(Buffer.from(this.publicKey, 'hex'));
