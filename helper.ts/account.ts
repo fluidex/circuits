@@ -20,7 +20,7 @@ function get_create_l2_account_msg(chainID) {
   }
 
   if (typeof chainID != 'number') {
-    throw new Error('invalid chainID ' + chainID);
+    throw new Error(`invalid chainID: ${chainID}`);
   }
 
   return "FLUIDEX_L2_ACCOUNT"+`\nChain ID: ${chainID}.`;
@@ -36,15 +36,17 @@ class Account {
   public bjjCompressed: string;
 
   constructor(signature) {
-    if (!signature) {
-      // secp256k1 signature is 64-byte
-      signature = crypto.randomBytes(64).toString('hex');
-    } else if (typeof signature != 'string') {
-      signature = Scalar.e(signature).toString(16);
-    } else if signature.length > 128 {
-      throw new Error('get_create_l2_account signature length error');
+    // secp256k1 signature is 64-byte
+    if (signature) {
+      if (typeof signature != 'string') {
+        signature = Scalar.e(signature).toString(16);
+      } else if signature.length > 128 {
+        throw new Error('get_create_l2_account signature length error');
+      }
+      while (signature.length < 128) signature = '0' + signature;
+    } else {
+        signature = crypto.randomBytes(64).toString('hex');
     }
-    while (signature.length < 128) signature = '0' + signature;
 
     let this.publicKey = ec.recoverPublicKeyFromSignature(signature, get_create_l2_account_msg());
 
