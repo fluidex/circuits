@@ -10,7 +10,6 @@ import * as ethers from 'ethers';
 export * as zksync from 'zksync';
 import { hash } from '../helper.ts/hash';
 
-const ec = require('./ec');
 const utils = require('./utils');
 
 // TODO: get chainID from provider
@@ -24,6 +23,13 @@ function get_create_l2_account_msg(chainID) {
   }
 
   return "FLUIDEX_L2_ACCOUNT"+`\nChain ID: ${chainID}.`;
+}
+
+// https://gist.github.com/nakov/1dcbe26988e18f7a4d013b65d8803ffc
+// https://github.com/ethers-io/ethers.js/issues/447
+// TODO: test
+function recoverPublicKeyFromSignature(signature: string, msg: string) string {
+  return "";
 }
 
 class Account {
@@ -49,7 +55,7 @@ class Account {
         signature = crypto.randomBytes(64).toString('hex');
     }
 
-    let this.publicKey = ec.recoverPublicKeyFromSignature(signature, get_create_l2_account_msg());
+    this.publicKey = recoverPublicKeyFromSignature(signature, get_create_l2_account_msg());
 
     // Use Keccak-256 hash function to get public key hash
     const hashOfPublicKey = keccak256(Buffer.from(this.publicKey, 'hex'));
