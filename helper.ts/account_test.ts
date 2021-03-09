@@ -12,9 +12,9 @@ async function TestRecoverPublicKey() {
 	const expectedPublicKey = wallet._signingKey().publicKey;
 	const signature = await wallet.signMessage(message);
 
-	// console.log("ADDR:    ", expectedAddress);
-	console.log("PUB K:   ", expectedPublicKey);
-	console.log("SIG      ", signature);
+	// console.log("ADDR:\t", expectedAddress);
+	console.log("PublicKey:\t", expectedPublicKey);
+	console.log("signature:\t", signature);
 	console.log();
 }
 
