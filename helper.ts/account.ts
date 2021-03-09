@@ -47,8 +47,7 @@ class Account {
     } else {
       const wallet = ethers.Wallet.createRandom();
       const msgHash = ethers.utils.hashMessage(get_create_l2_account_msg(null));
-      const msgHashBytes = ethers.utils.arrayify(msgHash);
-      signature = wallet._signingKey().signDigest(msgHashBytes);
+      signature = ethers.utils.joinSignature(wallet._signingKey().signDigest(msgHash));
     }
 
     this.publicKey = recoverPublicKeyFromSignature(get_create_l2_account_msg(null), signature);
