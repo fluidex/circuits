@@ -1,8 +1,10 @@
 import * as ethers from 'ethers';
 
-// let a = [0x01, 0x02];
-// console.log(a);
-// console.log(Buffer.from(a));
+async function TestArrayBuffer() {
+	let a = [0x01, 0x02];
+	console.log(a);
+	console.log(Buffer.from(a));
+}
 
 async function TestRecoverPublicKey() {
 	const MNEMONIC = "radar blur cabbage chef fix engine embark joy scheme fiction master release";
