@@ -58,7 +58,7 @@ class Account {
       while (signature.length < 128) signature = '0' + signature;
       signature = '0x'+signature;
     } else {
-        signature = crypto.randomBytes(64).toString('hex');
+      signature = crypto.randomBytes(64).toString('hex');
       signature = '0x'+signature;
     }
 
