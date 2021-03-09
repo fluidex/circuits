@@ -12,7 +12,7 @@ import { hash } from '../helper.ts/hash';
 const utils = require('./utils');
 
 // TODO: get chainID from provider
-function get_create_l2_account_msg(chainID): string {
+function get_CREATE_L2_ACCOUNT_MSG(chainID): string {
   chainID = chainID?chainID:1;
   if (typeof chainID != 'number') {
     throw new Error(`invalid chainID: ${chainID}`);
@@ -46,11 +46,11 @@ class Account {
       // TODO: check signature format
     } else {
       const wallet = ethers.Wallet.createRandom();
-      const msgHash = ethers.utils.hashMessage(get_create_l2_account_msg(null));
+      const msgHash = ethers.utils.hashMessage(get_CREATE_L2_ACCOUNT_MSG(null));
       signature = ethers.utils.joinSignature(wallet._signingKey().signDigest(msgHash));
     }
 
-    this.publicKey = recoverPublicKeyFromSignature(get_create_l2_account_msg(null), signature);
+    this.publicKey = recoverPublicKeyFromSignature(get_CREATE_L2_ACCOUNT_MSG(null), signature);
     this.ethAddr = ethers.utils.computeAddress(this.publicKey);
 
     // Derive a private key from seed
@@ -81,4 +81,4 @@ class Account {
   }
 }
 
-export { Account, get_create_l2_account_msg, recoverPublicKeyFromSignature };
+export { Account, get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature };
