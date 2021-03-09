@@ -1,6 +1,7 @@
 import * as ethers from 'ethers';
 import * as assert from 'assert';
-import { get_create_l2_account_msg, recoverPublicKeyFromSignature } from './account';
+const keccak256 = require('js-sha3').keccak256;
+import { get_create_l2_account_msg, recoverPublicKeyFromSignature, recoverAddressFromSignature } from './account';
 
 async function TestArrayBuffer() {
 	let a = [0x01, 0x02];
@@ -8,7 +9,7 @@ async function TestArrayBuffer() {
 	console.log(Buffer.from(a));
 }
 
-async function TestRecoverPublicKey() {
+async function TestRecoverPublicKeyAndAddress() {
 	const MNEMONIC = "radar blur cabbage chef fix engine embark joy scheme fiction master release";
 	const wallet = ethers.Wallet.fromMnemonic(MNEMONIC, null);
 	const message = get_create_l2_account_msg(null);
@@ -16,18 +17,20 @@ async function TestRecoverPublicKey() {
 	const expectedPublicKey = wallet._signingKey().publicKey;
 	const signature = await wallet.signMessage(message);
 
-	console.log("Address:", expectedAddress);
-	console.log("PublicKey:", expectedPublicKey);
-	console.log("Message:", message);
-	console.log("Signature:", signature);
-	console.log();
+	// console.log("Address:", expectedAddress);
+	// console.log("PublicKey:", expectedPublicKey);
+	// console.log("Message:", message);
+	// console.log("Signature:", signature);
 
-	let pk = recoverPublicKeyFromSignature(signature, message);
-	assert(pk == expectedPublicKey);
+	const pk = recoverPublicKeyFromSignature(signature, message);
+	assert(pk == expectedPublicKey, "PublicKey mismatch");
+
+	const recoveredAddress = recoverAddressFromSignature(signature, message);
+    assert(recoveredAddress == expectedAddress, "Address mismatch");
 }
 
 async function main() {
-	await TestRecoverPublicKey();
+	await TestRecoverPublicKeyAndAddress();
 }
 
 main();

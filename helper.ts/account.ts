@@ -11,7 +11,6 @@ import * as zksync_crypto from './zksync-crypto/dist/zksync-crypto-node.js';
 import { hash } from '../helper.ts/hash';
 const utils = require('./utils');
 
-
 // TODO: get chainID from provider
 function get_create_l2_account_msg(chainID): string {
   chainID = chainID?chainID:1;
@@ -22,16 +21,16 @@ function get_create_l2_account_msg(chainID): string {
   return 'FLUIDEX_L2_ACCOUNT'+`\nChain ID: ${chainID}.`;
 }
 
-// https://gist.github.com/nakov/1dcbe26988e18f7a4d013b65d8803ffc
 // https://github.com/ethers-io/ethers.js/issues/447#issuecomment-519163178
 function recoverPublicKeyFromSignature(signature: string, message: string): string {
-  const signedBytes = ethers.utils.toUtf8Bytes(message);
-
-  // return ethers.utils.recoverPublicKey(
-  //   ethers.utils.arrayify(ethers.utils.hashMessage(signedBytes)),
-  //   signature
-  // )
-  return "";
+  const msgHash = ethers.utils.hashMessage(message);
+  const msgHashBytes = ethers.utils.arrayify(msgHash);
+  return ethers.utils.recoverPublicKey(msgHashBytes, signature);
+}
+function recoverAddressFromSignature(signature: string, message: string): string {
+  const msgHash = ethers.utils.hashMessage(message);
+  const msgHashBytes = ethers.utils.arrayify(msgHash);
+  return ethers.utils.recoverAddress(msgHashBytes, signature);  
 }
 
 class Account {
@@ -63,17 +62,7 @@ class Account {
     }
 
     this.publicKey = recoverPublicKeyFromSignature(signature, get_create_l2_account_msg(null));
-
-    // Use Keccak-256 hash function to get public key hash
-    const hashOfPublicKey = keccak256(Buffer.from(this.publicKey, 'hex'));
-
-    // Convert hash to buffer
-    const ethAddressBuffer = Buffer.from(hashOfPublicKey, 'hex');
-
-    // Ethereum Address is '0x' concatenated with last 20 bytes
-    // of the public key hash
-    const ethAddress = ethAddressBuffer.slice(-20).toString('hex');
-    this.ethAddr = `0x${ethAddress}`;
+    this.ethAddr = recoverPublicKeyFromSignature(signature, get_create_l2_account_msg(null));
 
     // Derive a private key from seed
     const seed = ethers.utils.arrayify(signature);
@@ -103,4 +92,4 @@ class Account {
   }
 }
 
-export { Account, get_create_l2_account_msg, recoverPublicKeyFromSignature };
+export { Account, get_create_l2_account_msg, recoverPublicKeyFromSignature, recoverAddressFromSignature };
