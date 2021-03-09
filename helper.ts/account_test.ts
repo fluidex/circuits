@@ -1,5 +1,6 @@
 import * as ethers from 'ethers';
-import { get_create_l2_account_msg } from './account';
+import * as assert from 'assert';
+import { get_create_l2_account_msg, recoverPublicKeyFromSignature } from './account';
 
 async function TestArrayBuffer() {
 	let a = [0x01, 0x02];
@@ -21,7 +22,8 @@ async function TestRecoverPublicKey() {
 	console.log("Signature:", signature);
 	console.log();
 
-
+	let pk = recoverPublicKeyFromSignature(signature, message);
+	assert(pk == expectedPublicKey);
 }
 
 async function main() {
