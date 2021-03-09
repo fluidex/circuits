@@ -1,7 +1,7 @@
 import * as ethers from 'ethers';
 import * as assert from 'assert';
 const keccak256 = require('js-sha3').keccak256;
-import { get_create_l2_account_msg, recoverPublicKeyFromSignature, recoverAddressFromSignature } from './account';
+import { get_create_l2_account_msg, recoverPublicKeyFromSignature } from './account';
 
 async function TestArrayBuffer() {
 	let a = [0x01, 0x02];
@@ -24,9 +24,8 @@ async function TestRecoverPublicKeyAndAddress() {
 
 	const pk = recoverPublicKeyFromSignature(signature, message);
 	assert(pk == expectedPublicKey, "PublicKey mismatch");
-
-	const recoveredAddress = recoverAddressFromSignature(signature, message);
-    assert(recoveredAddress == expectedAddress, "Address mismatch");
+	const addr = ethers.utils.computeAddress(pk);
+	assert(addr == expectedAddress, "Address mismatch");
 }
 
 async function main() {

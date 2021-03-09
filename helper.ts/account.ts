@@ -27,11 +27,6 @@ function recoverPublicKeyFromSignature(signature: string, message: string): stri
   const msgHashBytes = ethers.utils.arrayify(msgHash);
   return ethers.utils.recoverPublicKey(msgHashBytes, signature);
 }
-function recoverAddressFromSignature(signature: string, message: string): string {
-  const msgHash = ethers.utils.hashMessage(message);
-  const msgHashBytes = ethers.utils.arrayify(msgHash);
-  return ethers.utils.recoverAddress(msgHashBytes, signature);  
-}
 
 class Account {
   public publicKey: string;
@@ -46,23 +41,16 @@ class Account {
     // TODO: skip multiple init
     zksync_crypto.zksync_crypto_init();
 
-    // secp256k1 signature is 64-byte
+    // ethers signature is 65-byte
     if (signature) {
-      // TODO: check whether it is hexstring 
-      if (typeof signature != 'string') {
-        signature = Scalar.e(signature).toString(16);
-      } else if (signature.length > 128) {
-        throw new Error('get_create_l2_account signature length error');
-      }
-      while (signature.length < 128) signature = '0' + signature;
-      signature = '0x'+signature;
+      // TODO: check signature format
     } else {
-      signature = crypto.randomBytes(64).toString('hex');
+      signature = crypto.randomBytes(65).toString('hex');
       signature = '0x'+signature;
     }
 
     this.publicKey = recoverPublicKeyFromSignature(signature, get_create_l2_account_msg(null));
-    this.ethAddr = recoverPublicKeyFromSignature(signature, get_create_l2_account_msg(null));
+    this.ethAddr = ethers.utils.computeAddress(this.publicKey);
 
     // Derive a private key from seed
     const seed = ethers.utils.arrayify(signature);
@@ -92,4 +80,4 @@ class Account {
   }
 }
 
-export { Account, get_create_l2_account_msg, recoverPublicKeyFromSignature, recoverAddressFromSignature };
+export { Account, get_create_l2_account_msg, recoverPublicKeyFromSignature };
