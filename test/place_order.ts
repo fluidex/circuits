@@ -19,7 +19,7 @@ function initTestCase() {
   const amount_buy = 1200n;
 
   /// set up account
-  const account = new Account(111);
+  const account = new Account();
   const accountID = state.createNewAccount();
   /// set up account balance
   const nonce = 11n;

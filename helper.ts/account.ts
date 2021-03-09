@@ -45,8 +45,8 @@ class Account {
     if (signature) {
       // TODO: check signature format
     } else {
-      signature = crypto.randomBytes(65).toString('hex');
-      signature = '0x'+signature;
+      const wallet = ethers.Wallet.createRandom();
+      signature = wallet.signMessage(get_create_l2_account_msg(null));
     }
 
     this.publicKey = recoverPublicKeyFromSignature(get_create_l2_account_msg(null), signature);

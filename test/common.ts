@@ -181,8 +181,9 @@ class AccountState {
     this.ethAddr = 0n;
     this.orderRoot = 0n;
   }
+  // TODO:
   updatePublicKey(publicKey) {
-    const account = new Account(publicKey);
+    const account = new Account();
     const sign = BigInt(account.sign);
     const ay = Scalar.fromString(account.ay, 16);
     const ethAddr = Scalar.fromString(account.ethAddr.replace('0x', ''), 16);

@@ -24,9 +24,9 @@ function initTestCase() {
   const balance2 = 200n;
   const nonce2 = 77n;
 
-  const account1 = new Account(2);
+  const account1 = new Account();
   const accountID1 = state.createNewAccount();
-  const account2 = new Account(1);
+  const account2 = new Account();
   const accountID2 = state.createNewAccount();
 
   // set up account1 initial state

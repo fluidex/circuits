@@ -17,8 +17,8 @@ const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 function initTestCase() {
   let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
 
-  const account1 = new Account(111);
-  const account2 = new Account(222);
+  const account1 = new Account();
+  const account2 = new Account();
   const accountID1 = state.createNewAccount();
   const accountID2 = state.createNewAccount();
 
