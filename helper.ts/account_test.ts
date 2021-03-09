@@ -22,7 +22,7 @@ async function TestRecoverPublicKeyAndAddress() {
 	// console.log("Message:", message);
 	// console.log("Signature:", signature);
 
-	const pk = recoverPublicKeyFromSignature(signature, message);
+	const pk = recoverPublicKeyFromSignature(message, signature);
 	assert(pk == expectedPublicKey, "PublicKey mismatch");
 	const addr = ethers.utils.computeAddress(pk);
 	assert(addr == expectedAddress, "Address mismatch");

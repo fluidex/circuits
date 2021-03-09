@@ -22,7 +22,7 @@ function get_create_l2_account_msg(chainID): string {
 }
 
 // https://github.com/ethers-io/ethers.js/issues/447#issuecomment-519163178
-function recoverPublicKeyFromSignature(signature: string, message: string): string {
+function recoverPublicKeyFromSignature(message: string, signature: string): string {
   const msgHash = ethers.utils.hashMessage(message);
   const msgHashBytes = ethers.utils.arrayify(msgHash);
   return ethers.utils.recoverPublicKey(msgHashBytes, signature);
@@ -49,7 +49,7 @@ class Account {
       signature = '0x'+signature;
     }
 
-    this.publicKey = recoverPublicKeyFromSignature(signature, get_create_l2_account_msg(null));
+    this.publicKey = recoverPublicKeyFromSignature(get_create_l2_account_msg(null), signature);
     this.ethAddr = ethers.utils.computeAddress(this.publicKey);
 
     // Derive a private key from seed
