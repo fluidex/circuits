@@ -7,7 +7,7 @@ const babyJub = require('circomlib').babyJub;
 const Scalar = require('ffjavascript').Scalar;
 const utilsScalar = require('ffjavascript').utils;
 import * as ethers from 'ethers';
-import * as zksync_crypto from './zksync-crypto/dist/zksync-crypto-bundler.js';
+import * as zksync_crypto from './zksync-crypto/dist/zksync-crypto-node.js';
 import { hash } from '../helper.ts/hash';
 
 const utils = require('./utils');
@@ -42,6 +42,9 @@ class Account {
   public bjjCompressed: string;
 
   constructor(signature) {
+    // TODO: skip multiple init
+    zksync_crypto.zksync_crypto_init();
+
     // secp256k1 signature is 64-byte
     if (signature) {
       // TODO: check whether it is hexstring 
@@ -69,9 +72,10 @@ class Account {
     this.ethAddr = `0x${ethAddress}`;
 
     // Derive a private key from seed
-    const seed = ethers.utils.arrayify(signature);
+    // const seed = ethers.utils.arrayify(signature);
+    const seed = signature;
     // TODO: type
-    this.rollupPrvKey = zksync_crypto.privateKeyFromSeed(seed);
+    this.rollupPrvKey = Buffer.from(zksync_crypto.privateKeyFromSeed(seed));
 
     const bjPubKey = eddsa.prv2pub(this.rollupPrvKey);
 
