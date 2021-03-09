@@ -14,6 +14,7 @@ const utils = require('./utils');
 
 // TODO: get chainID from provider
 function get_create_l2_account_msg(chainID) {
+  // TODO: refactor this
   if (!chainID) {
     chainID = 1;
   }
@@ -72,9 +73,7 @@ class Account {
     this.ethAddr = `0x${ethAddress}`;
 
     // Derive a private key from seed
-    // const seed = ethers.utils.arrayify(signature);
-    const seed = signature;
-    // TODO: type
+    const seed = ethers.utils.arrayify(`0x${signature}`);
     this.rollupPrvKey = Buffer.from(zksync_crypto.privateKeyFromSeed(seed));
 
     const bjPubKey = eddsa.prv2pub(this.rollupPrvKey);
