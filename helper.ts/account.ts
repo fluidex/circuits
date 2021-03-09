@@ -12,6 +12,9 @@ import { hash } from '../helper.ts/hash';
 
 const utils = require('./utils');
 
+
+// TODO: hermez 和 (zksync+ethers) 那一套不太一样，全部整成后者。
+
 // TODO: get chainID from provider
 function get_create_l2_account_msg(chainID) {
   // TODO: refactor this
@@ -30,7 +33,10 @@ function get_create_l2_account_msg(chainID) {
 // https://github.com/ethers-io/ethers.js/issues/447
 // TODO: test
 function recoverPublicKeyFromSignature(signature: string, msg: string): string {
-  return "";
+  return ethers.utils.recoverPublicKey(
+    ethers.utils.arrayify(ethers.utils.hashMessage(ethers.utils.arrayify(hash))),
+    signature
+  )
 }
 
 class Account {
