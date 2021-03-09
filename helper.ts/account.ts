@@ -30,7 +30,7 @@ function get_create_l2_account_msg(chainID) {
 }
 
 // https://gist.github.com/nakov/1dcbe26988e18f7a4d013b65d8803ffc
-// https://github.com/ethers-io/ethers.js/issues/447
+// https://github.com/ethers-io/ethers.js/issues/447#issuecomment-519163178
 // TODO: test
 function recoverPublicKeyFromSignature(signature: string, msg: string): string {
   return ethers.utils.recoverPublicKey(
