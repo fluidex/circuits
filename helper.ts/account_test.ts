@@ -4,19 +4,22 @@ import * as ethers from 'ethers';
 // console.log(a);
 // console.log(Buffer.from(a));
 
-async function main() {
+async function TestRecoverPublicKey() {
 	const MNEMONIC = "radar blur cabbage chef fix engine embark joy scheme fiction master release";
 	const wallet = ethers.Wallet.fromMnemonic(MNEMONIC, null);
 	const message = "Hello dapp";
-	const signature = await wallet.signMessage(message);
-	const expectedAddress = await wallet.getAddress();
+	// const expectedAddress = await wallet.getAddress();
 	const expectedPublicKey = wallet._signingKey().publicKey;
+	const signature = await wallet.signMessage(message);
 
-	console.log("ISSUING SIGNATURE");
-	console.log("ADDR:    ", expectedAddress);
+	// console.log("ADDR:    ", expectedAddress);
 	console.log("PUB K:   ", expectedPublicKey);
 	console.log("SIG      ", signature);
 	console.log();
+}
+
+async function main() {
+	await TestRecoverPublicKey();
 }
 
 main();
