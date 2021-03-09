@@ -22,7 +22,7 @@ function initTestCase() {
   const balance = amount + 1n;
   const nonce = 99n;
 
-  const account = new Account();
+  const account = new Account(null);
   const accountID = state.createNewAccount();
 
   // set up account initial state

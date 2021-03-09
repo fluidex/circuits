@@ -183,7 +183,7 @@ class AccountState {
   }
   // TODO:
   updatePublicKey(publicKey) {
-    const account = new Account();
+    const account = new Account(null);
     const sign = BigInt(account.sign);
     const ay = Scalar.fromString(account.ay, 16);
     const ethAddr = Scalar.fromString(account.ethAddr.replace('0x', ''), 16);
