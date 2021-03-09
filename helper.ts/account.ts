@@ -15,13 +15,13 @@ const utils = require('./utils');
 // TODO: hermez 和 (zksync+ethers) 那一套不太一样，全部整成后者。
 
 // TODO: get chainID from provider
-function get_create_l2_account_SignedBytes(chainID): Uint8Array {
+function get_create_l2_account_msg(chainID): string {
   chainID = chainID?chainID:1;
   if (typeof chainID != 'number') {
     throw new Error(`invalid chainID: ${chainID}`);
   }
 
-  return ethers.utils.toUtf8Bytes('FLUIDEX_L2_ACCOUNT'+`\nChain ID: ${chainID}.`);
+  return 'FLUIDEX_L2_ACCOUNT'+`\nChain ID: ${chainID}.`;
 }
 
 // https://gist.github.com/nakov/1dcbe26988e18f7a4d013b65d8803ffc
@@ -60,7 +60,7 @@ class Account {
         signature = crypto.randomBytes(64).toString('hex');
     }
     signature = '0x'+signature;
-    this.publicKey = recoverPublicKeyFromSignature(signature, get_create_l2_account_SignedBytes(null));
+    this.publicKey = recoverPublicKeyFromSignature(signature, ethers.utils.toUtf8Bytes(get_create_l2_account_msg(null)));
 
     // Use Keccak-256 hash function to get public key hash
     const hashOfPublicKey = keccak256(Buffer.from(this.publicKey, 'hex'));
@@ -102,4 +102,4 @@ class Account {
   }
 }
 
-export { Account };
+export { Account, get_create_l2_account_msg };
