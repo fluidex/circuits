@@ -13,22 +13,22 @@ import { TestBlock, TestEmptyBlock } from './block';
 
 async function main() {
   try {
-    // await testWithInputOutput(new TestRescueHash());
-    // await testWithInputOutput(new TestCheckLeafExists());
-    // await testWithInputOutput(new TestCheckLeafExistsDisable());
-    // await testWithInputOutput(new TestCheckLeafUpdate());
-    // await testWithInputOutput(new TestCheckLeafUpdateDisable());
+    await testWithInputOutput(new TestRescueHash());
+    await testWithInputOutput(new TestCheckLeafExists());
+    await testWithInputOutput(new TestCheckLeafExistsDisable());
+    await testWithInputOutput(new TestCheckLeafUpdate());
+    await testWithInputOutput(new TestCheckLeafUpdateDisable());
     await testWithInputOutput(new TestHashAccount());
-    // await testWithInputOutput(new TestHashOrder());
-    // await testWithInputOutput(new TestGenesisOrderRoot());
-    // await testWithInputOutput(new TestDepositToNew());
-    // await testWithInputOutput(new TestDepositToOld());
-    // await testWithInputOutput(new TestTransfer());
-    // await testWithInputOutput(new TestWithdraw());
-    // await testWithInputOutput(new TestPlaceOrder());
-    // await testWithInputOutput(new TestSpotTrade());
-    // await testWithInputOutput(new TestBlock());
-    // await testWithInputOutput(new TestEmptyBlock());
+    await testWithInputOutput(new TestHashOrder());
+    await testWithInputOutput(new TestGenesisOrderRoot());
+    await testWithInputOutput(new TestDepositToNew());
+    await testWithInputOutput(new TestDepositToOld());
+    await testWithInputOutput(new TestTransfer());
+    await testWithInputOutput(new TestWithdraw());
+    await testWithInputOutput(new TestPlaceOrder());
+    await testWithInputOutput(new TestSpotTrade());
+    await testWithInputOutput(new TestBlock());
+    await testWithInputOutput(new TestEmptyBlock());
   } catch (e) {
     console.error(e);
     process.exit(1);

@@ -32,7 +32,7 @@ function initBlockTestCase() {
   const accountID2 = state.createNewAccount();
 
   /// mock existing account1 data
-  state.setAccountKey(accountID1, account1.publicKey);
+  state.setAccountKey(accountID1, account1);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     state.setTokenBalance(accountID1, BigInt(i), 10n + BigInt(i));
   }
@@ -51,7 +51,7 @@ function initBlockTestCase() {
   state.setAccountOrder(accountID1, order1_id, order1);
 
   /// mock existing account2 data
-  state.setAccountKey(accountID2, account2.publicKey);
+  state.setAccountKey(accountID2, account2);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     state.setTokenBalance(accountID2, BigInt(i), 20n + BigInt(i));
   }
