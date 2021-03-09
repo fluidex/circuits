@@ -12,31 +12,26 @@ import { hash } from '../helper.ts/hash';
 
 const utils = require('./utils');
 
-
 // TODO: hermez 和 (zksync+ethers) 那一套不太一样，全部整成后者。
 
 // TODO: get chainID from provider
-function get_create_l2_account_msg(chainID) {
-  // TODO: refactor this
-  if (!chainID) {
-    chainID = 1;
-  }
-
+function get_create_l2_account_SignedBytes(chainID): Uint8Array {
+  chainID = chainID?chainID:1;
   if (typeof chainID != 'number') {
     throw new Error(`invalid chainID: ${chainID}`);
   }
 
-  return "FLUIDEX_L2_ACCOUNT"+`\nChain ID: ${chainID}.`;
+  return ethers.utils.toUtf8Bytes('FLUIDEX_L2_ACCOUNT'+`\nChain ID: ${chainID}.`);
 }
 
 // https://gist.github.com/nakov/1dcbe26988e18f7a4d013b65d8803ffc
 // https://github.com/ethers-io/ethers.js/issues/447#issuecomment-519163178
-// TODO: test
-function recoverPublicKeyFromSignature(signature: string, msg: string): string {
-  return ethers.utils.recoverPublicKey(
-    ethers.utils.arrayify(ethers.utils.hashMessage(ethers.utils.arrayify(hash))),
-    signature
-  )
+function recoverPublicKeyFromSignature(signature: string, signedBytes: Uint8Array): string {
+  // return ethers.utils.recoverPublicKey(
+  //   ethers.utils.arrayify(ethers.utils.hashMessage(signedBytes)),
+  //   signature
+  // )
+  return "";
 }
 
 class Account {
@@ -64,8 +59,8 @@ class Account {
     } else {
         signature = crypto.randomBytes(64).toString('hex');
     }
-
-    this.publicKey = recoverPublicKeyFromSignature(signature, get_create_l2_account_msg(null));
+    signature = '0x'+signature;
+    this.publicKey = recoverPublicKeyFromSignature(signature, get_create_l2_account_SignedBytes(null));
 
     // Use Keccak-256 hash function to get public key hash
     const hashOfPublicKey = keccak256(Buffer.from(this.publicKey, 'hex'));
@@ -79,7 +74,8 @@ class Account {
     this.ethAddr = `0x${ethAddress}`;
 
     // Derive a private key from seed
-    const seed = ethers.utils.arrayify(`0x${signature}`);
+    const seed = ethers.utils.arrayify(signature);
+    // zksync_crypto.privateKeyFromSeed(seed) returns Uint8Array
     this.rollupPrvKey = Buffer.from(zksync_crypto.privateKeyFromSeed(seed));
 
     const bjPubKey = eddsa.prv2pub(this.rollupPrvKey);
