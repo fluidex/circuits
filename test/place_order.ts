@@ -19,13 +19,13 @@ function initTestCase() {
   const amount_buy = 1200n;
 
   /// set up account
-  const account = new Account(111);
+  const account = new Account(null);
   const accountID = state.createNewAccount();
   /// set up account balance
   const nonce = 11n;
   // set up sufficient balance to sell
   const account_balance_sell = amount_sell + 1n;
-  state.setAccountKey(accountID, account.publicKey);
+  state.setAccountKey(accountID, account);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID_sell) {
       state.setTokenBalance(accountID, tokenID_sell, account_balance_sell);

@@ -8,8 +8,7 @@ import { SimpleTest, TestComponent } from './interface';
 const orderLevels = 2;
 
 const balanceRoot = hash([1n]);
-const prvkey = 1;
-const account = new Account(prvkey);
+const account = new Account(null);
 const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
 const account_state = {
   nonce: 49,

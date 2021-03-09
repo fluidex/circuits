@@ -22,11 +22,11 @@ function initTestCase() {
   const balance = amount + 1n;
   const nonce = 99n;
 
-  const account = new Account(2);
+  const account = new Account(null);
   const accountID = state.createNewAccount();
 
   // set up account initial state
-  state.setAccountKey(accountID, account.publicKey);
+  state.setAccountKey(accountID, account);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID) {
       state.setTokenBalance(accountID, tokenID, balance);

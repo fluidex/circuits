@@ -17,8 +17,8 @@ const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 function initTestCase() {
   let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
 
-  const account1 = new Account(111);
-  const account2 = new Account(222);
+  const account1 = new Account(null);
+  const account2 = new Account(null);
   const accountID1 = state.createNewAccount();
   const accountID2 = state.createNewAccount();
 
@@ -34,7 +34,7 @@ function initTestCase() {
   const nonce1 = 11n;
   const account1_balance_sell = 199n;
   const account1_balance_buy = 111n;
-  state.setAccountKey(accountID1, account1.publicKey);
+  state.setAccountKey(accountID1, account1);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID_1to2) {
       state.setTokenBalance(accountID1, tokenID_1to2, account1_balance_sell);
@@ -49,7 +49,7 @@ function initTestCase() {
   const nonce2 = 22n;
   const account2_balance_sell = 1990n;
   const account2_balance_buy = 1110n;
-  state.setAccountKey(accountID2, account2.publicKey);
+  state.setAccountKey(accountID2, account2);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID_2to1) {
       state.setTokenBalance(accountID2, tokenID_2to1, account2_balance_sell);

@@ -24,13 +24,13 @@ function initTestCase() {
   const balance2 = 200n;
   const nonce2 = 77n;
 
-  const account1 = new Account(2);
+  const account1 = new Account(null);
   const accountID1 = state.createNewAccount();
-  const account2 = new Account(1);
+  const account2 = new Account(null);
   const accountID2 = state.createNewAccount();
 
   // set up account1 initial state
-  state.setAccountKey(accountID1, account1.publicKey);
+  state.setAccountKey(accountID1, account1);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID) {
       state.setTokenBalance(accountID1, tokenID, balance1);
@@ -41,7 +41,7 @@ function initTestCase() {
   state.setAccountNonce(accountID1, nonce1);
   state.setAccountOrderRoot(accountID1, genesisOrderRoot);
   // set up account2 initial state
-  state.setAccountKey(accountID2, account2.publicKey);
+  state.setAccountKey(accountID2, account2);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID) {
       state.setTokenBalance(accountID2, tokenID, balance2);

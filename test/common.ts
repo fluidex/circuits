@@ -181,8 +181,7 @@ class AccountState {
     this.ethAddr = 0n;
     this.orderRoot = 0n;
   }
-  updatePublicKey(publicKey) {
-    const account = new Account(publicKey);
+  updateAccountKey(account) {
     const sign = BigInt(account.sign);
     const ay = Scalar.fromString(account.ay, 16);
     const ethAddr = Scalar.fromString(account.ethAddr.replace('0x', ''), 16);
@@ -238,9 +237,9 @@ class GlobalState {
   root(): bigint {
     return this.accountTree.getRoot();
   }
-  setAccountKey(accountID: bigint, publicKey) {
+  setAccountKey(accountID: bigint, account: Account) {
     //console.log('setAccountKey', accountID);
-    this.accounts.get(accountID).updatePublicKey(publicKey);
+    this.accounts.get(accountID).updateAccountKey(account);
     this.recalculateFromAccountState(accountID);
   }
   setAccountL2Addr(accountID: bigint, sign, ay, ethAddr) {
