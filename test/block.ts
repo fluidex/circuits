@@ -18,7 +18,7 @@ const accountLevels = 2;
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initBlockTestCase() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels, nTxs);
 
   const tokenID = 0n;
   const tokenID_1to2 = 0n;
@@ -182,7 +182,7 @@ class TestBlock implements SimpleTest {
 }
 
 function initEmptyBlockTestCase() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels, nTxs);
   // we need to have at least 1 account
   state.createNewAccount();
   for (var i = state.bufferedTxs.length; i < nTxs; i++) {

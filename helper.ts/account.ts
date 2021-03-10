@@ -13,12 +13,12 @@ const utils = require('./utils');
 
 // TODO: get chainID from provider
 function get_CREATE_L2_ACCOUNT_MSG(chainID): string {
-  chainID = chainID?chainID:1;
+  chainID = chainID ? chainID : 1;
   if (typeof chainID != 'number') {
     throw new Error(`invalid chainID: ${chainID}`);
   }
 
-  return 'FLUIDEX_L2_ACCOUNT'+`\nChain ID: ${chainID}.`;
+  return 'FLUIDEX_L2_ACCOUNT' + `\nChain ID: ${chainID}.`;
 }
 
 // https://github.com/ethers-io/ethers.js/issues/447#issuecomment-519163178

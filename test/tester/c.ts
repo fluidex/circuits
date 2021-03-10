@@ -98,26 +98,12 @@ async function readSymbols(path: string) {
   return symbols;
 }
 
-async function testWithInputOutput(t: SimpleTest) {
-  // console.log(__dirname);
+function compileNativeBinary({ targetDir, r1csFilepath, circuitFilePath, symFilepath }) {
   const circomRuntimePath = path.join(__dirname, '..', '..', 'node_modules', 'circom_runtime');
   const snarkjsPath = path.join(__dirname, '..', '..', 'node_modules', 'snarkjs', 'build', 'cli.cjs');
   const ffiasmPath = path.join(__dirname, '..', '..', 'node_modules', 'ffiasm');
   const circomcliPath = path.join(__dirname, '..', '..', 'node_modules', 'circom', 'cli.js');
-
-  // create temp target dir
-  const targetDir = tmp.dirSync({ prefix: `tmp-${t.constructor.name}-circuit` });
-  // console.log(targetDir.name);
-  const circuitFilePath = path.join(targetDir.name, 'circuit.circom');
-  const r1csFilepath = path.join(targetDir.name, 'circuit.r1cs');
   const cFilepath = path.join(targetDir.name, 'circuit.c');
-  const symFilepath = path.join(targetDir.name, 'circuit.sym');
-  const inputFilePath = path.join(targetDir.name, 'input.json');
-  const outputjsonFilePath = path.join(targetDir.name, 'output.json');
-  const outputwtnsFilePath = path.join(targetDir.name, 'output.wtns');
-
-  await generateMainTestCircom(circuitFilePath, t.getComponent());
-  await generateInput(inputFilePath, t.getInput());
 
   var cmd: string;
   cmd = `cp ${circomRuntimePath}/c/*.cpp ${targetDir.name}`;
@@ -143,35 +129,87 @@ async function testWithInputOutput(t: SimpleTest) {
     // shelljs.exec(cmd);
   }
   if (process.platform === 'darwin') {
-    cmd = `g++ ${targetDir.name}/main.cpp ${targetDir.name}/calcwit.cpp ${targetDir.name}/utils.cpp ${targetDir.name}/fr.cpp ${targetDir.name}/fr.o ${cFilepath} -o ${targetDir.name}/circuit -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`;
+    cmd = `g++ ${targetDir.name}/main.cpp ${targetDir.name}/calcwit.cpp ${targetDir.name}/utils.cpp ${targetDir.name}/fr.cpp ${targetDir.name}/fr.o ${cFilepath} -o ${targetDir.name}/circuit -lgmp -std=c++11 -O3 -DSANITY_CHECK`;
+    if (process.arch === 'arm64') {
+      cmd = 'arch -x86_64 ' + cmd;
+    } else {
+      cmd = cmd + ' -fopenmp';
+    }
   } else if (process.platform === 'linux') {
     cmd = `g++ -pthread ${targetDir.name}/main.cpp ${targetDir.name}/calcwit.cpp ${targetDir.name}/utils.cpp ${targetDir.name}/fr.cpp ${targetDir.name}/fr.o ${cFilepath} -o ${targetDir.name}/circuit -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`;
   } else throw 'Unsupported platform';
   shelljs.exec(cmd);
-
-  // gen witness
-  cmd = `${targetDir.name}/circuit ${inputFilePath} ${outputjsonFilePath}`;
-  const genWtnsOut = shelljs.exec(cmd);
-  if (genWtnsOut.stderr || genWtnsOut.code != 0) {
-    console.error(genWtnsOut.stderr);
-    throw new Error('Could not generate witness');
-  }
-
-  // load witness
-  const witness = JSON.parse(fs.readFileSync(outputjsonFilePath).toString());
-
-  // calculate used feild from R1Cs
-  const r1cs = await loadR1cs(r1csFilepath, true, false);
-  const F = new ZqField(r1cs.prime);
-  // const nVars = r1cs.nVars;
-  const constraints = r1cs.constraints;
-  await checkConstraints(F, constraints, witness);
-  // assert output
-  let symbols = await readSymbols(symFilepath);
-  await assertOut(symbols, witness, t.getOutput());
-
-  console.log('test ', t.constructor.name, ' done', '\n');
-  return true;
 }
 
-export { testWithInputOutput };
+class CircuitTester {
+  circuit: any;
+  component: any;
+  name: string;
+  dirName: string;
+  r1csFilepath: string;
+  symFilepath: string;
+  r1cs: any;
+  symbols: any;
+  constructor(component, name) {
+    this.component = component;
+    this.name = name;
+  }
+
+  async load() {
+    // console.log(__dirname);
+    // create temp target dir
+    const targetDir = tmp.dirSync({ prefix: `tmp-${this.name}-circuit` });
+    this.dirName = targetDir.name;
+    // console.log(targetDir.name);
+    const circuitFilePath = path.join(this.dirName, 'circuit.circom');
+    const r1csFilepath = path.join(this.dirName, 'circuit.r1cs');
+    this.r1csFilepath = r1csFilepath;
+    const symFilepath = path.join(this.dirName, 'circuit.sym');
+    this.symFilepath = symFilepath;
+    await generateMainTestCircom(circuitFilePath, this.component);
+    compileNativeBinary({ targetDir, r1csFilepath, circuitFilePath, symFilepath });
+    this.r1cs = await loadR1cs(this.r1csFilepath, true, false);
+    this.symbols = await readSymbols(symFilepath);
+  }
+
+  async checkInputOutput(input, output) {
+    const inputFilePath = path.join(this.dirName, 'input.json');
+    const outputjsonFilePath = path.join(this.dirName, 'output.json');
+    const outputwtnsFilePath = path.join(this.dirName, 'output.wtns');
+
+    await generateInput(inputFilePath, input);
+
+    var cmd: string;
+    // gen witness
+    cmd = `${this.dirName}/circuit ${inputFilePath} ${outputjsonFilePath}`;
+    const genWtnsOut = shelljs.exec(cmd);
+    if (genWtnsOut.stderr || genWtnsOut.code != 0) {
+      console.error(genWtnsOut.stderr);
+      throw new Error('Could not generate witness');
+    }
+
+    // load witness
+    const witness = JSON.parse(fs.readFileSync(outputjsonFilePath).toString());
+
+    // calculate used field from R1Cs
+    const F = new ZqField(this.r1cs.prime);
+    // const nVars = r1cs.nVars;
+    const constraints = this.r1cs.constraints;
+    await checkConstraints(F, constraints, witness);
+    // assert output
+    await assertOut(this.symbols, witness, output);
+
+    console.log('test ', this.component.main, ' done', '\n');
+    return true;
+  }
+}
+
+async function testWithInputOutput(input, output, component, name) {
+  let tester = new CircuitTester(component, name);
+  await tester.load();
+  let result = await tester.checkInputOutput(input, output);
+  console.log('test ', name, ' done');
+  return result;
+}
+
+export { testWithInputOutput, CircuitTester };
