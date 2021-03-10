@@ -10,7 +10,7 @@ import * as common from './common';
 const assert = require('assert').strict;
 
 // circuit-level definitions
-const nTxs = 1000n;
+const nTxs = 100n;
 const orderLevels = 20;
 const balanceLevels = 20;
 const accountLevels = 20;
