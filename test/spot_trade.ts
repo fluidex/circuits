@@ -15,7 +15,7 @@ const accountLevels = 2;
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initTestCase() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels, 1);
 
   const account1 = new Account(null);
   const account2 = new Account(null);

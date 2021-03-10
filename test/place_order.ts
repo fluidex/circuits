@@ -10,7 +10,7 @@ const balanceLevels = 2;
 const accountLevels = 2;
 
 function initTestCase() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels, 1);
 
   // order info
   const tokenID_sell = 1n;

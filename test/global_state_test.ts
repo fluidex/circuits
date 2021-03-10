@@ -1,4 +1,5 @@
 import { GlobalState } from './common';
+import { CircuitTester } from './tester/c';
 import { assert } from 'console';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -16,6 +17,7 @@ function getBaseAndQuoteOfTrade(trade): [string, string] {
 function checkEqByKeys(obj1, obj2, keys = null) {
   for (let k of keys || Object.keys(obj1)) {
     if (obj1[k] != obj2[k]) {
+      console.log('not equal', obj1, obj2);
       throw new Error('check equal failed');
     }
   }
@@ -60,15 +62,18 @@ function parseOrder(originalOrder, [baseTokenID, quoteTokenID], side) {
   return obj;
 }
 
-function mainTest() {
+function replayTrades() {
+  const maxTradesNumToTest = 5;
   let lines = fs
     .readFileSync(path.join(__dirname, 'testdata/trades.jsonl'), 'utf-8')
     .split('\n')
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, maxTradesNumToTest);
   let trades = lines.map(function(line) {
     return JSON.parse(line);
   });
 
+  const nTxs = 1;
   const balanceLevels = 2;
   const orderLevels = 3;
   const accountLevels = 2;
@@ -76,7 +81,7 @@ function mainTest() {
   const maxAccountNum = Math.pow(2, accountLevels);
   const maxTokenNum = Math.pow(2, balanceLevels);
   // `enable_self_trade` test purpose only
-  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, { enable_self_trade: true });
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs, { enable_self_trade: true });
   // external id to <user_id, order_id_of_user>
   let placedOrder = new Map<bigint, [bigint, bigint]>();
   const maxUserID = Math.max(...trades.map(trade => [trade.ask_user_id, trade.bid_user_id]).flat());
@@ -177,6 +182,27 @@ function mainTest() {
     // finally we check the state after this trade
     checkState(parseBalance(trade.state_after.balance), askOrderStateAfter, bidOrderStateAfter);
     console.log('trade', trade.id, 'test done');
+  }
+
+  state.flushWithNop();
+
+  return {
+    blocks: state.bufferedBlocks,
+    component: {
+      src: path.join(__dirname, '..', 'src', 'block.circom'),
+      main: `Block(${nTxs}, ${balanceLevels}, ${orderLevels}, ${accountLevels})`,
+    },
+  };
+}
+
+async function mainTest() {
+  const { blocks, component } = replayTrades();
+  // finally, we check all the blocks forged are valid for the circuis
+  // So we can ensure logic of matchengine VS GlobalState VS circuits are same!
+  let tester = new CircuitTester(component, 'block');
+  await tester.load();
+  for (const block of blocks) {
+    assert(await tester.checkInputOutput(block, {}));
   }
 }
 

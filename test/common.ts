@@ -3,6 +3,7 @@ import { hash } from '../helper.ts/hash';
 import { Account } from '../helper.ts/account';
 import { Tree } from '../helper.ts/binary_merkle_tree';
 import { hashAccountState, hashOrderState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { TestCheckLeafUpdateDisable } from './binary_merkle_tree';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 
@@ -202,6 +203,7 @@ class AccountState {
 }
 
 class GlobalState {
+  nTx: number;
   balanceLevels: number;
   orderLevels: number;
   accountLevels: number;
@@ -212,12 +214,19 @@ class GlobalState {
   orderMap: Map<bigint, Map<bigint, Order>>;
   accounts: Map<bigint, AccountState>;
   bufferedTxs: Array<RawTx>;
+  bufferedBlocks: Array<any>;
   defaultBalanceRoot: bigint;
   defaultOrderRoot: bigint;
   defaultAccountLeaf: bigint;
-  next_order_ids: Map<bigint, bigint>;
+  nextOrderIds: Map<bigint, bigint>;
   options: any;
-  constructor(balanceLevels, orderLevels, accountLevels, options = { enable_self_trade: false }) {
+  constructor(
+    balanceLevels: number,
+    orderLevels: number,
+    accountLevels: number,
+    nTx: number,
+    options: object = { enable_self_trade: false },
+  ) {
     this.balanceLevels = balanceLevels;
     this.orderLevels = orderLevels;
     this.accountLevels = accountLevels;
@@ -231,8 +240,10 @@ class GlobalState {
     this.orderMap = new Map();
     this.accounts = new Map(); // map[account_id]acount_state
     this.bufferedTxs = new Array();
-    this.next_order_ids = new Map();
+    this.bufferedBlocks = new Array();
+    this.nextOrderIds = new Map();
     this.options = options;
+    this.nTx = nTx;
   }
   root(): bigint {
     return this.accountTree.getRoot();
@@ -279,7 +290,7 @@ class GlobalState {
     }
   }
   getNextOrderIdForUser(accountID): bigint {
-    return this.next_order_ids.get(accountID);
+    return this.nextOrderIds.get(accountID);
   }
   createNewAccount({ next_order_id = 0n } = {}): bigint {
     const accountID = BigInt(this.balanceTrees.size);
@@ -289,7 +300,7 @@ class GlobalState {
     this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, 0n));
     this.orderMap.set(accountID, new Map<bigint, Order>());
     this.accountTree.setValue(accountID, this.defaultAccountLeaf);
-    this.next_order_ids.set(accountID, next_order_id);
+    this.nextOrderIds.set(accountID, next_order_id);
     //console.log("add account", accountID);
     return accountID;
   }
@@ -305,7 +316,7 @@ class GlobalState {
       total_buy: tx.amount_buy,
     };
     this.setAccountOrder(tx.accountID, orderID, order);
-    this.next_order_ids.set(tx.accountID, orderID + 1n);
+    this.nextOrderIds.set(tx.accountID, orderID + 1n);
     return orderID;
   }
 
@@ -392,7 +403,7 @@ class GlobalState {
     this.setTokenBalance(tx.accountID, tx.tokenID, tx.amount);
     this.setAccountL2Addr(tx.accountID, tx.sign, tx.ay, tx.ethAddr);
     rawTx.rootAfter = this.root();
-    this.bufferedTxs.push(rawTx);
+    this.addRawTx(rawTx);
   }
   DepositToOld(tx: DepositToOldTx) {
     assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'DepositToOld');
@@ -432,7 +443,7 @@ class GlobalState {
     this.setTokenBalance(tx.accountID, tx.tokenID, oldBalance + tx.amount);
 
     rawTx.rootAfter = this.root();
-    this.bufferedTxs.push(rawTx);
+    this.addRawTx(rawTx);
   }
 
   fillTransferTx(tx: TranferTx) {
@@ -518,7 +529,7 @@ class GlobalState {
     this.setTokenBalance(tx.to, tx.tokenID, toOldBalance + tx.amount);
 
     rawTx.rootAfter = this.root();
-    this.bufferedTxs.push(rawTx);
+    this.addRawTx(rawTx);
   }
   Withdraw(tx: WithdrawTx) {
     assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'Withdraw');
@@ -565,7 +576,7 @@ class GlobalState {
     this.increaseNonce(tx.accountID);
 
     rawTx.rootAfter = this.root();
-    this.bufferedTxs.push(rawTx);
+    this.addRawTx(rawTx);
   }
   PlaceOrder(tx: PlaceOrderTx): bigint {
     // TODO: check order signature
@@ -602,7 +613,7 @@ class GlobalState {
     rawTx.orderRoot1 = this.orderTrees.get(tx.accountID).getProof(order_id).root;
 
     rawTx.rootAfter = this.root();
-    this.bufferedTxs.push(rawTx);
+    this.addRawTx(rawTx);
     return order_id;
   }
   SpotTrade(tx: SpotTradeTx) {
@@ -724,7 +735,7 @@ class GlobalState {
     this.setTokenBalance(tx.order2_accountID, tx.tokenID_1to2, account2_balance_buy + tx.amount_1to2);
 
     rawTx.rootAfter = this.root();
-    this.bufferedTxs.push(rawTx);
+    this.addRawTx(rawTx);
   }
   Nop() {
     // assume we already have initialized the account tree and the balance tree
@@ -747,17 +758,27 @@ class GlobalState {
       rootBefore: this.root(),
       rootAfter: this.root(),
     };
-    this.bufferedTxs.push(rawTx);
+    this.addRawTx(rawTx);
   }
-  forge() {
-    let txsType = this.bufferedTxs.map(tx => tx.txType);
-    let encodedTxs = this.bufferedTxs.map(tx => tx.payload);
-    let balance_path_elements = this.bufferedTxs.map(tx => [tx.balancePath0, tx.balancePath1, tx.balancePath2, tx.balancePath3]);
-    let order_path_elements = this.bufferedTxs.map(tx => [tx.orderPath0, tx.orderPath1]);
-    let orderRoots = this.bufferedTxs.map(tx => [tx.orderRoot0, tx.orderRoot1]);
-    let account_path_elements = this.bufferedTxs.map(tx => [tx.accountPath0, tx.accountPath1]);
-    let oldAccountRoots = this.bufferedTxs.map(tx => tx.rootBefore);
-    let newAccountRoots = this.bufferedTxs.map(tx => tx.rootAfter);
+  addRawTx(rawTx) {
+    this.bufferedTxs.push(rawTx);
+    if (this.bufferedTxs.length % this.nTx == 0) {
+      // forge next block, using last nTx txs
+      const block = this.forgeWithTxs(this.bufferedTxs.slice(this.bufferedTxs.length - this.nTx));
+      this.bufferedBlocks.push(block);
+      assert(this.bufferedBlocks.length * this.nTx == this.bufferedTxs.length, 'invalid block num');
+    }
+  }
+  forgeWithTxs(bufferedTxs: Array<any>) {
+    assert(bufferedTxs.length == this.nTx, 'invalid txs len');
+    let txsType = bufferedTxs.map(tx => tx.txType);
+    let encodedTxs = bufferedTxs.map(tx => tx.payload);
+    let balance_path_elements = bufferedTxs.map(tx => [tx.balancePath0, tx.balancePath1, tx.balancePath2, tx.balancePath3]);
+    let order_path_elements = bufferedTxs.map(tx => [tx.orderPath0, tx.orderPath1]);
+    let orderRoots = bufferedTxs.map(tx => [tx.orderRoot0, tx.orderRoot1]);
+    let account_path_elements = bufferedTxs.map(tx => [tx.accountPath0, tx.accountPath1]);
+    let oldAccountRoots = bufferedTxs.map(tx => tx.rootBefore);
+    let newAccountRoots = bufferedTxs.map(tx => tx.rootAfter);
     return {
       txsType,
       encodedTxs,
@@ -768,6 +789,14 @@ class GlobalState {
       oldAccountRoots,
       newAccountRoots,
     };
+  }
+  forge() {
+    return this.forgeWithTxs(this.bufferedTxs);
+  }
+  flushWithNop() {
+    while (this.bufferedTxs.length % this.nTx != 0) {
+      this.Nop();
+    }
   }
 }
 

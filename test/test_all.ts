@@ -1,5 +1,5 @@
 import { testWithInputOutput } from './tester/c';
-// import { testWithInputOutput } from './tester/wasm';
+// import { simpleTest } from './tester/wasm';
 
 import { TestCheckLeafExists, TestCheckLeafExistsDisable, TestCheckLeafUpdate, TestCheckLeafUpdateDisable } from './binary_merkle_tree';
 import { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash } from './rescue';
@@ -10,25 +10,30 @@ import { TestWithdraw } from './withdraw';
 import { TestPlaceOrder } from './place_order';
 import { TestSpotTrade } from './spot_trade';
 import { TestBlock, TestEmptyBlock } from './block';
+import { SimpleTest } from './interface';
+
+async function simpleTest(t: SimpleTest) {
+  await testWithInputOutput(t.getInput(), t.getOutput(), t.getComponent(), t.constructor.name);
+}
 
 async function main() {
   try {
-    await testWithInputOutput(new TestRescueHash());
-    await testWithInputOutput(new TestCheckLeafExists());
-    await testWithInputOutput(new TestCheckLeafExistsDisable());
-    await testWithInputOutput(new TestCheckLeafUpdate());
-    await testWithInputOutput(new TestCheckLeafUpdateDisable());
-    await testWithInputOutput(new TestHashAccount());
-    await testWithInputOutput(new TestHashOrder());
-    await testWithInputOutput(new TestGenesisOrderRoot());
-    await testWithInputOutput(new TestDepositToNew());
-    await testWithInputOutput(new TestDepositToOld());
-    await testWithInputOutput(new TestTransfer());
-    await testWithInputOutput(new TestWithdraw());
-    await testWithInputOutput(new TestPlaceOrder());
-    await testWithInputOutput(new TestSpotTrade());
-    await testWithInputOutput(new TestBlock());
-    await testWithInputOutput(new TestEmptyBlock());
+    await simpleTest(new TestRescueHash());
+    await simpleTest(new TestCheckLeafExists());
+    await simpleTest(new TestCheckLeafExistsDisable());
+    await simpleTest(new TestCheckLeafUpdate());
+    await simpleTest(new TestCheckLeafUpdateDisable());
+    await simpleTest(new TestHashAccount());
+    await simpleTest(new TestHashOrder());
+    await simpleTest(new TestGenesisOrderRoot());
+    await simpleTest(new TestDepositToNew());
+    await simpleTest(new TestDepositToOld());
+    await simpleTest(new TestTransfer());
+    await simpleTest(new TestWithdraw());
+    await simpleTest(new TestPlaceOrder());
+    await simpleTest(new TestSpotTrade());
+    await simpleTest(new TestBlock());
+    await simpleTest(new TestEmptyBlock());
   } catch (e) {
     console.error(e);
     process.exit(1);
