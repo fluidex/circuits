@@ -81,7 +81,7 @@ function replayTrades() {
   const maxAccountNum = Math.pow(2, accountLevels);
   const maxTokenNum = Math.pow(2, balanceLevels);
   // `enable_self_trade` test purpose only
-  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs, { enable_self_trade: true });
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs, { verbose: true });
   // external id to <user_id, order_id_of_user>
   let placedOrder = new Map<bigint, [bigint, bigint]>();
   const maxUserID = Math.max(...trades.map(trade => [trade.ask_user_id, trade.bid_user_id]).flat());
@@ -199,10 +199,13 @@ async function mainTest() {
   const { blocks, component } = replayTrades();
   // finally, we check all the blocks forged are valid for the circuis
   // So we can ensure logic of matchengine VS GlobalState VS circuits are same!
-  let tester = new CircuitTester(component, 'block');
+  let tester = new CircuitTester(component, 'block', { alwaysRecompile: false, tmpDirName: '' });
   await tester.load();
-  for (const block of blocks) {
+  console.log('circuit dir', tester.tmpDirName);
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
     assert(await tester.checkInputOutput(block, {}));
+    console.log('test block ', i, 'done');
   }
 }
 
