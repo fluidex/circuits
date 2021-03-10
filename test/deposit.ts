@@ -49,7 +49,7 @@ function initDepositToNew() {
 }
 
 function initDepositToOld() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels, 1);
 
   const tokenID = 0n;
   const balance = 300n;
