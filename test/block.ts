@@ -37,7 +37,7 @@ function initBlockTestCase() {
     state.setTokenBalance(accountID1, BigInt(i), 10n + BigInt(i));
   }
   state.setAccountNonce(accountID1, 19n);
-  // // order1. (Removed. Now we use placeOrderTx to set this order. Though order1_id will be turned into 0n.)
+  // // order1. (Removed. Now we use placeOrderTx to set this order.)
   // const order1_id = 1n;
   // const order1 = {
   //   status: 0, // open
@@ -119,12 +119,12 @@ function initBlockTestCase() {
   state.DepositToOld({
     accountID: accountID1,
     tokenID: tokenID_1to2,
-    amount: 199000n,
+    amount: 199n,
   });
   state.DepositToOld({
     accountID: accountID2,
     tokenID: tokenID_2to1,
-    amount: 1990000n,
+    amount: 1990n,
   });
 
   const placeOrderTx = {
@@ -134,6 +134,7 @@ function initBlockTestCase() {
     amount_sell: 1000n,
     amount_buy: 10000n,
   };
+  const order1_id = state.nextOrderIds.get(accountID1);
   state.PlaceOrder(placeOrderTx);
 
   let spotTradeTx = {
@@ -143,7 +144,7 @@ function initBlockTestCase() {
     tokenID_2to1: tokenID_2to1,
     amount_1to2: amount_1to2,
     amount_2to1: amount_2to1,
-    order1_id: 0n,
+    order1_id: order1_id,
     order1_amountsell: placeOrderTx.amount_sell,
     order1_amountbuy: placeOrderTx.amount_buy,
     order1_filledsell: 0n,
