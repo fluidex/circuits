@@ -119,12 +119,12 @@ function initBlockTestCase() {
   state.DepositToOld({
     accountID: accountID1,
     tokenID: tokenID_1to2,
-    amount: 199n,
+    amount: 199000n,
   });
   state.DepositToOld({
     accountID: accountID2,
     tokenID: tokenID_2to1,
-    amount: 1990n,
+    amount: 1990000n,
   });
 
   const placeOrderTx = {
