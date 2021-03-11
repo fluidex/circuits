@@ -98,26 +98,26 @@ async function readSymbols(path: string) {
   return symbols;
 }
 
-function compileNativeBinary({ targetDir, r1csFilepath, circuitFilePath, symFilepath }) {
+function compileNativeBinary({ tmpDirName, r1csFilepath, circuitFilePath, symFilepath, binaryFilePath }) {
   const circomRuntimePath = path.join(__dirname, '..', '..', 'node_modules', 'circom_runtime');
   const snarkjsPath = path.join(__dirname, '..', '..', 'node_modules', 'snarkjs', 'build', 'cli.cjs');
   const ffiasmPath = path.join(__dirname, '..', '..', 'node_modules', 'ffiasm');
   const circomcliPath = path.join(__dirname, '..', '..', 'node_modules', 'circom', 'cli.js');
-  const cFilepath = path.join(targetDir.name, 'circuit.c');
+  const cFilepath = path.join(tmpDirName, 'circuit.c');
 
   var cmd: string;
-  cmd = `cp ${circomRuntimePath}/c/*.cpp ${targetDir.name}`;
+  cmd = `cp ${circomRuntimePath}/c/*.cpp ${tmpDirName}`;
   shelljs.exec(cmd);
-  cmd = `cp ${circomRuntimePath}/c/*.hpp ${targetDir.name}`;
+  cmd = `cp ${circomRuntimePath}/c/*.hpp ${tmpDirName}`;
   shelljs.exec(cmd);
   cmd = `node ${ffiasmPath}/src/buildzqfield.js -q ${primeStr} -n Fr`;
   shelljs.exec(cmd);
-  cmd = `mv fr.asm fr.cpp fr.hpp ${targetDir.name}`;
+  cmd = `mv fr.asm fr.cpp fr.hpp ${tmpDirName}`;
   shelljs.exec(cmd);
   if (process.platform === 'darwin') {
-    cmd = `nasm -fmacho64 --prefix _  ${targetDir.name}/fr.asm`;
+    cmd = `nasm -fmacho64 --prefix _  ${tmpDirName}/fr.asm`;
   } else if (process.platform === 'linux') {
-    cmd = `nasm -felf64 ${targetDir.name}/fr.asm`;
+    cmd = `nasm -felf64 ${tmpDirName}/fr.asm`;
   } else throw 'Unsupported platform';
   shelljs.exec(cmd);
   cmd = `NODE_OPTIONS=--max-old-space-size=8192 node --stack-size=65500 ${circomcliPath} ${circuitFilePath} -r ${r1csFilepath} -c ${cFilepath} -s ${symFilepath}`;
@@ -128,15 +128,16 @@ function compileNativeBinary({ targetDir, r1csFilepath, circuitFilePath, symFile
     // cmd = `NODE_OPTIONS=--max-old-space-size=8192 node ${snarkjsPath} r1cs print ${r1csFilepath} ${symFilepath}`;
     // shelljs.exec(cmd);
   }
+
   if (process.platform === 'darwin') {
-    cmd = `g++ ${targetDir.name}/main.cpp ${targetDir.name}/calcwit.cpp ${targetDir.name}/utils.cpp ${targetDir.name}/fr.cpp ${targetDir.name}/fr.o ${cFilepath} -o ${targetDir.name}/circuit -lgmp -std=c++11 -O3 -DSANITY_CHECK`;
+    cmd = `g++ ${tmpDirName}/main.cpp ${tmpDirName}/calcwit.cpp ${tmpDirName}/utils.cpp ${tmpDirName}/fr.cpp ${tmpDirName}/fr.o ${cFilepath} -o ${tmpDirName}/circuit -lgmp -std=c++11 -O3 -DSANITY_CHECK`;
     if (process.arch === 'arm64') {
       cmd = 'arch -x86_64 ' + cmd;
     } else {
       cmd = cmd + ' -fopenmp';
     }
   } else if (process.platform === 'linux') {
-    cmd = `g++ -pthread ${targetDir.name}/main.cpp ${targetDir.name}/calcwit.cpp ${targetDir.name}/utils.cpp ${targetDir.name}/fr.cpp ${targetDir.name}/fr.o ${cFilepath} -o ${targetDir.name}/circuit -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`;
+    cmd = `g++ -pthread ${tmpDirName}/main.cpp ${tmpDirName}/calcwit.cpp ${tmpDirName}/utils.cpp ${tmpDirName}/fr.cpp ${tmpDirName}/fr.o ${cFilepath} -o ${tmpDirName}/circuit -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`;
   } else throw 'Unsupported platform';
   shelljs.exec(cmd);
 }
@@ -145,43 +146,61 @@ class CircuitTester {
   circuit: any;
   component: any;
   name: string;
-  dirName: string;
+  tmpDirName: string;
   r1csFilepath: string;
   symFilepath: string;
+  binaryFilePath: string;
   r1cs: any;
   symbols: any;
-  constructor(component, name) {
+  alwaysRecompile: boolean;
+  constructor(component, name, { alwaysRecompile = true, tmpDirName = '' } = {}) {
     this.component = component;
     this.name = name;
+    // we can specify cached files to avoid compiling every time
+    this.alwaysRecompile = alwaysRecompile;
+    this.tmpDirName = tmpDirName;
   }
 
   async load() {
     // console.log(__dirname);
     // create temp target dir
-    const targetDir = tmp.dirSync({ prefix: `tmp-${this.name}-circuit` });
-    this.dirName = targetDir.name;
+    if (this.tmpDirName == '') {
+      const targetDir = tmp.dirSync({ prefix: `tmp-${this.name}-circuit` });
+      this.tmpDirName = targetDir.name;
+    }
     // console.log(targetDir.name);
-    const circuitFilePath = path.join(this.dirName, 'circuit.circom');
-    const r1csFilepath = path.join(this.dirName, 'circuit.r1cs');
+    const circuitFilePath = path.join(this.tmpDirName, 'circuit.circom');
+    const r1csFilepath = path.join(this.tmpDirName, 'circuit.r1cs');
     this.r1csFilepath = r1csFilepath;
-    const symFilepath = path.join(this.dirName, 'circuit.sym');
+    const symFilepath = path.join(this.tmpDirName, 'circuit.sym');
     this.symFilepath = symFilepath;
-    await generateMainTestCircom(circuitFilePath, this.component);
-    compileNativeBinary({ targetDir, r1csFilepath, circuitFilePath, symFilepath });
+    if (this.alwaysRecompile || !fs.existsSync(circuitFilePath)) {
+      await generateMainTestCircom(circuitFilePath, this.component);
+    } else {
+      console.log('load exsited circom ', circuitFilePath);
+    }
+    const binaryFilePath = path.join(this.tmpDirName, 'circuit');
+    this.binaryFilePath = binaryFilePath;
+    if (this.alwaysRecompile || !fs.existsSync(binaryFilePath)) {
+      compileNativeBinary({ tmpDirName: this.tmpDirName, r1csFilepath, circuitFilePath, symFilepath, binaryFilePath });
+    } else {
+      console.log('load exsited binary ', binaryFilePath);
+    }
+
     this.r1cs = await loadR1cs(this.r1csFilepath, true, false);
     this.symbols = await readSymbols(symFilepath);
   }
 
   async checkInputOutput(input, output) {
-    const inputFilePath = path.join(this.dirName, 'input.json');
-    const outputjsonFilePath = path.join(this.dirName, 'output.json');
-    const outputwtnsFilePath = path.join(this.dirName, 'output.wtns');
+    const inputFilePath = path.join(this.tmpDirName, 'input.json');
+    const outputjsonFilePath = path.join(this.tmpDirName, 'output.json');
+    const outputwtnsFilePath = path.join(this.tmpDirName, 'output.wtns');
 
     await generateInput(inputFilePath, input);
 
     var cmd: string;
     // gen witness
-    cmd = `${this.dirName}/circuit ${inputFilePath} ${outputjsonFilePath}`;
+    cmd = `${this.binaryFilePath} ${inputFilePath} ${outputjsonFilePath}`;
     const genWtnsOut = shelljs.exec(cmd);
     if (genWtnsOut.stderr || genWtnsOut.code != 0) {
       console.error(genWtnsOut.stderr);
@@ -208,7 +227,7 @@ async function testWithInputOutput(input, output, component, name) {
   let tester = new CircuitTester(component, name);
   await tester.load();
   let result = await tester.checkInputOutput(input, output);
-  console.log('test ', name, ' done');
+  // console.log('test ', name, ' done');
   return result;
 }
 

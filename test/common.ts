@@ -151,6 +151,8 @@ class RawTx {
   accountPath1: Array<bigint>;
   rootBefore: bigint;
   rootAfter: bigint;
+  // debug info
+  // extra: any;
 }
 
 class Order {
@@ -225,7 +227,7 @@ class GlobalState {
     orderLevels: number,
     accountLevels: number,
     nTx: number,
-    options: object = { enable_self_trade: false },
+    options: object = { enable_self_trade: false, verbose: false },
   ) {
     this.balanceLevels = balanceLevels;
     this.orderLevels = orderLevels;
@@ -294,6 +296,10 @@ class GlobalState {
   }
   createNewAccount({ next_order_id = 0n } = {}): bigint {
     const accountID = BigInt(this.balanceTrees.size);
+    if (accountID >= (2 ** this.accountLevels)) {
+      throw new Error(`account_id ${accountID} overflows for accountLevels ${this.accountLevels}`);
+    }
+
     let accountState = this.emptyAccount();
     this.accounts.set(accountID, accountState);
     this.balanceTrees.set(accountID, new Tree<bigint>(this.balanceLevels, 0n));
@@ -306,6 +312,10 @@ class GlobalState {
   }
   createNewOrder(tx): bigint {
     const orderID = this.getNextOrderIdForUser(tx.accountID);
+    if (orderID >= (2 ** this.orderLevels)) {
+      throw new Error(`order_id ${orderID} overflows for orderLevels ${this.orderLevels}`);
+    }
+
     let order = {
       status: 0, //open
       tokenbuy: tx.tokenID_buy,
@@ -341,6 +351,9 @@ class GlobalState {
   }
   setAccountOrder(accountID: bigint, orderID: bigint, order: Order) {
     assert(this.orderTrees.has(accountID), 'setAccountOrder');
+    if (orderID >= (2 ** this.orderLevels)) {
+      throw new Error(`order_id ${orderID} overflows for orderLevels ${this.orderLevels}`);
+    }
     this.orderTrees.get(accountID).setValue(orderID, hashOrderState(order));
     this.orderMap.get(accountID).set(orderID, order);
     this.recalculateFromOrderTree(accountID);
@@ -608,17 +621,33 @@ class GlobalState {
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
     encodedTx[TxDetailIdx.Order1ID] = order_id;
+    encodedTx[TxDetailIdx.TokenID] = tx.tokenID_sell;
+    encodedTx[TxDetailIdx.AccountID1] = tx.accountID;
+    encodedTx[TxDetailIdx.EthAddr1] = account.ethAddr;
+    encodedTx[TxDetailIdx.Sign1] = account.sign;
+    encodedTx[TxDetailIdx.Ay1] = account.ay;
+    encodedTx[TxDetailIdx.Nonce1] = account.nonce;
+    encodedTx[TxDetailIdx.Balance1] = proof.leaf;
+    encodedTx[TxDetailIdx.Order1AmountSell] = tx.amount_sell;
+    encodedTx[TxDetailIdx.TokenID2] = tx.tokenID_buy;
+    encodedTx[TxDetailIdx.Order1AmountBuy] = tx.amount_buy;
     rawTx.payload = encodedTx;
     rawTx.orderPath0 = this.orderTrees.get(tx.accountID).getProof(order_id).path_elements;
     rawTx.orderRoot1 = this.orderTrees.get(tx.accountID).getProof(order_id).root;
 
     rawTx.rootAfter = this.root();
     this.addRawTx(rawTx);
+    if (this.options.verbose) {
+      console.log('create order ', order_id, tx);
+    }
     return order_id;
   }
   SpotTrade(tx: SpotTradeTx) {
     //assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
     //assert(this.accounts.get(tx.order2_accountID).ethAddr != 0n, 'SpotTrade account2');
+
+    assert(tx.order1_id < (2**this.orderLevels), 'order1 id overflows');
+    assert(tx.order2_id < (2**this.orderLevels), 'order2 id overflows');
 
     let account1 = this.accounts.get(tx.order1_accountID);
     let account2 = this.accounts.get(tx.order2_accountID);
@@ -764,9 +793,14 @@ class GlobalState {
     this.bufferedTxs.push(rawTx);
     if (this.bufferedTxs.length % this.nTx == 0) {
       // forge next block, using last nTx txs
-      const block = this.forgeWithTxs(this.bufferedTxs.slice(this.bufferedTxs.length - this.nTx));
+      const txs = this.bufferedTxs.slice(this.bufferedTxs.length - this.nTx);
+      const block = this.forgeWithTxs(txs);
       this.bufferedBlocks.push(block);
       assert(this.bufferedBlocks.length * this.nTx == this.bufferedTxs.length, 'invalid block num');
+      if (this.options.verbose) {
+        console.log('forge block ', this.bufferedBlocks.length - 1, 'done');
+        console.log('txs', txs);
+      }
     }
   }
   forgeWithTxs(bufferedTxs: Array<any>) {
