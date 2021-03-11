@@ -227,7 +227,7 @@ async function testWithInputOutput(input, output, component, name) {
   let tester = new CircuitTester(component, name);
   await tester.load();
   let result = await tester.checkInputOutput(input, output);
-  console.log('test ', name, ' done');
+  // console.log('test ', name, ' done');
   return result;
 }
 

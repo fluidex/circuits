@@ -90,7 +90,7 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     order_update_checker.enabled <== enabled;
     order_update_checker.oldLeaf <== 0;
     order_update_checker.newLeaf <== orderHash.out;
-    for (var i = 0; i < accountLevels; i++) {
+    for (var i = 0; i < orderLevels; i++) {
         order_update_checker.path_index[i] <== order_path_index[i];
         order_update_checker.path_elements[i][0] <== order_path_elements[i][0];
     }

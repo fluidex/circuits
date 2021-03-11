@@ -56,6 +56,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     component enableDepositToOld[nTxs];
     component enableTransfer[nTxs];
     component enableWithdraw[nTxs];
+    component enablePlaceOrder[nTxs];
     component enableSpotTrade[nTxs];
     for (var i = 0; i < nTxs; i++) {
         enableDepositToNew[i] = IsEqual();
@@ -88,6 +89,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     component processDepositToOld[nTxs];
     component processTransfer[nTxs];
     component processWithdraw[nTxs];
+    component processPlaceOrder[nTxs];
     component processSpotTrade[nTxs];
     for (var i = 0; i < nTxs; i++) {
         // try process deposit_to_new
