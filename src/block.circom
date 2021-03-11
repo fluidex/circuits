@@ -193,6 +193,31 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         // try place_order
         processPlaceOrder[i] = PlaceOrder(balanceLevels, orderLevels, accountLevels);
         processPlaceOrder[i].enabled <== enablePlaceOrder[i].out;
+        processPlaceOrder[i].order_id <== decodedTx[i].order1_id;
+        // processPlaceOrder[i].order_tokensell <== decodedTx[i].tokenID;
+        // processPlaceOrder[i].order_amountsell <== decodedTx[i].order1_amountsell;
+        // processPlaceOrder[i].order_tokenbuy <== decodedTx[i].tokenID2;
+        // processPlaceOrder[i].order_amountbuy <== decodedTx[i].order1_amountbuy;
+        // processPlaceOrder[i].accountID <== decodedTx[i].accountID1;
+        // processPlaceOrder[i].tokenID <== decodedTx[i].tokenID;
+        // processPlaceOrder[i].balance <== decodedTx[i].balance1;
+        // processPlaceOrder[i].nonce <== decodedTx[i].nonce1;
+        // processPlaceOrder[i].sign <== decodedTx[i].sign1;
+        // processPlaceOrder[i].ay <== decodedTx[i].ay1;
+        // processPlaceOrder[i].ethAddr <== decodedTx[i].ethAddr1;
+        for (var j = 0; j < balanceLevels; j++) {
+            processPlaceOrder[i].balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
+        }
+        for (var j = 0; j < orderLevels; j++) {
+            processPlaceOrder[i].order_path_elements[j][0] <== order_path_elements[i][0][j][0];
+        }
+        for (var j = 0; j < accountLevels; j++) {
+            processPlaceOrder[i].account_path_elements[j][0] <== account_path_elements[i][0][j][0];
+        }
+        processPlaceOrder[i].oldOrderRoot <== orderRoots[i][0];
+        processPlaceOrder[i].newOrderRoot <== orderRoots[i][1];
+        processPlaceOrder[i].oldAccountRoot <== oldAccountRoots[i];
+        processPlaceOrder[i].newAccountRoot <== newAccountRoots[i];
 
         // try spot_trade
         processSpotTrade[i] = SpotTrade(balanceLevels, orderLevels, accountLevels);
