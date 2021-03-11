@@ -10,7 +10,7 @@ import * as common from './common';
 const assert = require('assert').strict;
 
 // circuit-level definitions
-const nTxs = 7;
+const nTxs = 8;
 const orderLevels = 1;
 const balanceLevels = 2;
 const accountLevels = 2;
@@ -37,18 +37,18 @@ function initBlockTestCase() {
     state.setTokenBalance(accountID1, BigInt(i), 10n + BigInt(i));
   }
   state.setAccountNonce(accountID1, 19n);
-  // order1
-  const order1_id = 1n;
-  const order1 = {
-    status: 0, // open
-    tokenbuy: tokenID_2to1,
-    tokensell: tokenID_1to2,
-    filled_sell: 0n,
-    filled_buy: 0n,
-    total_sell: 1000n,
-    total_buy: 10000n,
-  };
-  state.setAccountOrder(accountID1, order1_id, order1);
+  // // order1. (Removed. Now we use placeOrderTx to set this order. Though order1_id will be turned into 0n.)
+  // const order1_id = 1n;
+  // const order1 = {
+  //   status: 0, // open
+  //   tokenbuy: tokenID_2to1,
+  //   tokensell: tokenID_1to2,
+  //   filled_sell: 0n,
+  //   filled_buy: 0n,
+  //   total_sell: 1000n,
+  //   total_buy: 10000n,
+  // };
+  // state.setAccountOrder(accountID1, order1_id, order1);
 
   /// mock existing account2 data
   state.setAccountKey(accountID2, account2);
@@ -126,6 +126,16 @@ function initBlockTestCase() {
     tokenID: tokenID_2to1,
     amount: 1990n,
   });
+
+  const placeOrderTx = {
+    accountID: accountID1,
+    tokenID_sell: tokenID_1to2,
+    tokenID_buy: tokenID_2to1,
+    amount_sell: 1000n,
+    amount_buy: 10000n,
+  };
+  state.PlaceOrder(placeOrderTx);
+
   let spotTradeTx = {
     order1_accountID: accountID1,
     order2_accountID: accountID2,
