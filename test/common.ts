@@ -608,6 +608,16 @@ class GlobalState {
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
     encodedTx[TxDetailIdx.Order1ID] = order_id;
+    encodedTx[TxDetailIdx.TokenID] = tx.tokenID_sell;
+    encodedTx[TxDetailIdx.AccountID1] = tx.accountID;
+    encodedTx[TxDetailIdx.EthAddr1] = account.ethAddr;
+    encodedTx[TxDetailIdx.Sign1] = account.sign;
+    encodedTx[TxDetailIdx.Ay1] = account.ay;
+    encodedTx[TxDetailIdx.Nonce1] = account.nonce;
+    encodedTx[TxDetailIdx.Balance1] = proof.leaf;
+    encodedTx[TxDetailIdx.Order1AmountSell] = tx.amount_sell;
+    encodedTx[TxDetailIdx.TokenID2] = tx.tokenID_buy;
+    encodedTx[TxDetailIdx.Order1AmountBuy] = tx.amount_buy;
     rawTx.payload = encodedTx;
     rawTx.orderPath0 = this.orderTrees.get(tx.accountID).getProof(order_id).path_elements;
     rawTx.orderRoot1 = this.orderTrees.get(tx.accountID).getProof(order_id).root;
