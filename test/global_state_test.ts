@@ -63,19 +63,19 @@ function parseOrder(originalOrder, [baseTokenID, quoteTokenID], side) {
 }
 
 function replayTrades() {
-  const maxTradesNumToTest = 5;
+  const maxTradesNumToTest = 100;
   let lines = fs
     .readFileSync(path.join(__dirname, 'testdata/trades.jsonl'), 'utf-8')
     .split('\n')
     .filter(Boolean)
     .slice(0, maxTradesNumToTest);
-  let trades = lines.map(function(line) {
+  let trades = lines.map(function (line) {
     return JSON.parse(line);
   });
 
   const nTxs = 1;
   const balanceLevels = 2;
-  const orderLevels = 3;
+  const orderLevels = 7;
   const accountLevels = 2;
   const maxOrderNum = Math.pow(2, orderLevels);
   const maxAccountNum = Math.pow(2, accountLevels);
@@ -199,13 +199,14 @@ async function mainTest() {
   const { blocks, component } = replayTrades();
   // finally, we check all the blocks forged are valid for the circuis
   // So we can ensure logic of matchengine VS GlobalState VS circuits are same!
+  console.log('compiling', component.main, 'wait for minutes');
   let tester = new CircuitTester(component, 'block', { alwaysRecompile: false, tmpDirName: '' });
   await tester.load();
   console.log('circuit dir', tester.tmpDirName);
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
     assert(await tester.checkInputOutput(block, {}));
-    console.log('test block ', i, 'done');
+    console.log('test block', i, 'done. left', blocks.length - i - 1);
   }
 }
 
