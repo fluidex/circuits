@@ -296,6 +296,10 @@ class GlobalState {
   }
   createNewAccount({ next_order_id = 0n } = {}): bigint {
     const accountID = BigInt(this.balanceTrees.size);
+    if (accountID >= (2 ** this.accountLevels)) {
+      throw new Error(`account_id ${accountID} overflows for accountLevels ${this.accountLevels}`);
+    }
+
     let accountState = this.emptyAccount();
     this.accounts.set(accountID, accountState);
     this.balanceTrees.set(accountID, new Tree<bigint>(this.balanceLevels, 0n));
@@ -347,6 +351,9 @@ class GlobalState {
   }
   setAccountOrder(accountID: bigint, orderID: bigint, order: Order) {
     assert(this.orderTrees.has(accountID), 'setAccountOrder');
+    if (orderID >= (2 ** this.orderLevels)) {
+      throw new Error(`order_id ${orderID} overflows for orderLevels ${this.orderLevels}`);
+    }
     this.orderTrees.get(accountID).setValue(orderID, hashOrderState(order));
     this.orderMap.get(accountID).set(orderID, order);
     this.recalculateFromOrderTree(accountID);
@@ -638,6 +645,9 @@ class GlobalState {
   SpotTrade(tx: SpotTradeTx) {
     //assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
     //assert(this.accounts.get(tx.order2_accountID).ethAddr != 0n, 'SpotTrade account2');
+
+    assert(tx.order1_id < (2**this.orderLevels), 'order1 id overflows');
+    assert(tx.order2_id < (2**this.orderLevels), 'order2 id overflows');
 
     let account1 = this.accounts.get(tx.order1_accountID);
     let account2 = this.accounts.get(tx.order2_accountID);
