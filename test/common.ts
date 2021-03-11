@@ -308,7 +308,7 @@ class GlobalState {
   }
   createNewOrder(tx): bigint {
     const orderID = this.getNextOrderIdForUser(tx.accountID);
-    if (orderID > (this.orderLevels**2)) {
+    if (orderID >= (2 ** this.orderLevels)) {
       throw new Error(`order_id ${orderID} overflows for orderLevels ${this.orderLevels}`);
     }
 
