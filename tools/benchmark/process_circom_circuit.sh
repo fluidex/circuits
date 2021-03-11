@@ -28,12 +28,13 @@ else
 fi
 # "-f" means no optimization
 node $NODE_ARGS $DIR/../../node_modules/circom/cli.js $CIRCUIT_DIR/circuit.circom -r $CIRCUIT_DIR/circuit.r1cs -c $CIRCUIT_DIR/circuit.c -s $CIRCUIT_DIR/circuit.sym -v
-# generate the witness using c_tester
+# compile the circuit
 if [[ "$OSTYPE" == "darwin"* ]]; then
 	g++ $CIRCUIT_DIR/main.cpp $CIRCUIT_DIR/calcwit.cpp $CIRCUIT_DIR/utils.cpp $CIRCUIT_DIR/fr.cpp $CIRCUIT_DIR/fr.o $CIRCUIT_DIR/circuit.c -o $CIRCUIT_DIR/circuit -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK
 else
 	g++ -pthread $CIRCUIT_DIR/main.cpp $CIRCUIT_DIR/calcwit.cpp $CIRCUIT_DIR/utils.cpp $CIRCUIT_DIR/fr.cpp $CIRCUIT_DIR/fr.o $CIRCUIT_DIR/circuit.c -o $CIRCUIT_DIR/circuit -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK
 fi
+# generate the witness
 ./circuit $CIRCUIT_DIR/input.json $CIRCUIT_DIR/witness.wtns
 
 # convert the r1cs to json
