@@ -308,6 +308,10 @@ class GlobalState {
   }
   createNewOrder(tx): bigint {
     const orderID = this.getNextOrderIdForUser(tx.accountID);
+    if (orderID > (this.orderLevels**2)) {
+      throw new Error(`order_id ${orderID} overflows for orderLevels ${this.orderLevels}`);
+    }
+
     let order = {
       status: 0, //open
       tokenbuy: tx.tokenID_buy,

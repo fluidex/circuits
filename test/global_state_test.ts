@@ -75,7 +75,7 @@ function replayTrades() {
 
   const nTxs = 1;
   const balanceLevels = 2;
-  const orderLevels = 3;
+  const orderLevels = 7;
   const accountLevels = 2;
   const maxOrderNum = Math.pow(2, orderLevels);
   const maxAccountNum = Math.pow(2, accountLevels);
