@@ -194,17 +194,17 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processPlaceOrder[i] = PlaceOrder(balanceLevels, orderLevels, accountLevels);
         processPlaceOrder[i].enabled <== enablePlaceOrder[i].out;
         processPlaceOrder[i].order_id <== decodedTx[i].order1_id;
-        // processPlaceOrder[i].order_tokensell <== decodedTx[i].tokenID;
-        // processPlaceOrder[i].order_amountsell <== decodedTx[i].order1_amountsell;
-        // processPlaceOrder[i].order_tokenbuy <== decodedTx[i].tokenID2;
-        // processPlaceOrder[i].order_amountbuy <== decodedTx[i].order1_amountbuy;
-        // processPlaceOrder[i].accountID <== decodedTx[i].accountID1;
-        // processPlaceOrder[i].tokenID <== decodedTx[i].tokenID;
-        // processPlaceOrder[i].balance <== decodedTx[i].balance1;
-        // processPlaceOrder[i].nonce <== decodedTx[i].nonce1;
-        // processPlaceOrder[i].sign <== decodedTx[i].sign1;
-        // processPlaceOrder[i].ay <== decodedTx[i].ay1;
-        // processPlaceOrder[i].ethAddr <== decodedTx[i].ethAddr1;
+        processPlaceOrder[i].order_tokensell <== decodedTx[i].tokenID;
+        processPlaceOrder[i].order_amountsell <== decodedTx[i].order1_amountsell;
+        processPlaceOrder[i].order_tokenbuy <== decodedTx[i].tokenID2;
+        processPlaceOrder[i].order_amountbuy <== decodedTx[i].order1_amountbuy;
+        processPlaceOrder[i].accountID <== decodedTx[i].accountID1;
+        processPlaceOrder[i].tokenID <== decodedTx[i].tokenID;
+        processPlaceOrder[i].balance <== decodedTx[i].balance1;
+        processPlaceOrder[i].nonce <== decodedTx[i].nonce1;
+        processPlaceOrder[i].sign <== decodedTx[i].sign1;
+        processPlaceOrder[i].ay <== decodedTx[i].ay1;
+        processPlaceOrder[i].ethAddr <== decodedTx[i].ethAddr1;
         for (var j = 0; j < balanceLevels; j++) {
             processPlaceOrder[i].balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
         }
