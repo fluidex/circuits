@@ -5,6 +5,7 @@ include "./deposit_to_new.circom";
 include "./deposit_to_old.circom";
 include "./transfer.circom";
 include "./withdraw.circom";
+include "./place_order.circom";
 include "./spot_trade.circom";
 
 /**
@@ -72,6 +73,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         enableWithdraw[i] = IsEqual();
         enableWithdraw[i].in[0] <== txsType[i];
         enableWithdraw[i].in[1] <== TxTypeWithdraw();
+
+        enablePlaceOrder[i] = IsEqual();
+        enablePlaceOrder[i].in[0] <== txsType[i];
+        enablePlaceOrder[i].in[1] <== TxTypePlaceOrder();
 
         enableSpotTrade[i] = IsEqual();
         enableSpotTrade[i].in[0] <== txsType[i];
@@ -184,6 +189,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         }
         processWithdraw[i].oldAccountRoot <== oldAccountRoots[i];
         processWithdraw[i].newAccountRoot <== newAccountRoots[i];
+
+        // try place_order
+        processPlaceOrder[i] = PlaceOrder(balanceLevels, orderLevels, accountLevels);
+        processPlaceOrder[i].enabled <== enablePlaceOrder[i].out;
 
         // try spot_trade
         processSpotTrade[i] = SpotTrade(balanceLevels, orderLevels, accountLevels);
