@@ -151,6 +151,8 @@ class RawTx {
   accountPath1: Array<bigint>;
   rootBefore: bigint;
   rootAfter: bigint;
+  // debug info
+  // extra: any;
 }
 
 class Order {
@@ -225,7 +227,7 @@ class GlobalState {
     orderLevels: number,
     accountLevels: number,
     nTx: number,
-    options: object = { enable_self_trade: false },
+    options: object = { enable_self_trade: false, verbose: false },
   ) {
     this.balanceLevels = balanceLevels;
     this.orderLevels = orderLevels;
@@ -624,6 +626,9 @@ class GlobalState {
 
     rawTx.rootAfter = this.root();
     this.addRawTx(rawTx);
+    if (this.options.verbose) {
+      console.log('create order ', order_id, tx);
+    }
     return order_id;
   }
   SpotTrade(tx: SpotTradeTx) {
@@ -774,9 +779,14 @@ class GlobalState {
     this.bufferedTxs.push(rawTx);
     if (this.bufferedTxs.length % this.nTx == 0) {
       // forge next block, using last nTx txs
-      const block = this.forgeWithTxs(this.bufferedTxs.slice(this.bufferedTxs.length - this.nTx));
+      const txs = this.bufferedTxs.slice(this.bufferedTxs.length - this.nTx);
+      const block = this.forgeWithTxs(txs);
       this.bufferedBlocks.push(block);
       assert(this.bufferedBlocks.length * this.nTx == this.bufferedTxs.length, 'invalid block num');
+      if (this.options.verbose) {
+        console.log('forge block ', this.bufferedBlocks.length - 1, 'done');
+        console.log('txs', txs);
+      }
     }
   }
   forgeWithTxs(bufferedTxs: Array<any>) {
