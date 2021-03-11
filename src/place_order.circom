@@ -58,15 +58,15 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
         account_path_index[i] <== bAccountID.out[i];
     }
 
-    // check balance
-    order_tokensell === tokenID;
-    component balance_ge0 = GreaterEqThan(192);
-    balance_ge0.in[0] <== balance;
-    balance_ge0.in[1] <== order_amountsell;
-    component balance_check = ForceEqualIfEnabled();
-    balance_check.enabled <== enabled;
-    balance_check.in[0] <== balance_ge0.out;
-    balance_check.in[1] <== 1;
+    // check balance. (Removed. Since we don't have frozen_balance we cannot gurantee sufficient balance -- user may transfer/withraw after place_order.)
+    // order_tokensell === tokenID;
+    // component balance_ge0 = GreaterEqThan(192);
+    // balance_ge0.in[0] <== balance;
+    // balance_ge0.in[1] <== order_amountsell;
+    // component balance_check = ForceEqualIfEnabled();
+    // balance_check.enabled <== enabled;
+    // balance_check.in[0] <== balance_ge0.out;
+    // balance_check.in[1] <== 1;
 
     // calculate state
     component balance_tree = CalculateRootFromMerklePath(balanceLevels);
