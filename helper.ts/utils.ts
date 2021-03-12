@@ -2,6 +2,8 @@ const Scalar = require('ffjavascript').Scalar;
 import { hash } from '../helper.ts/hash';
 const crypto = require('crypto');
 const babyJub = require('circomlib').babyJub;
+const zksync_crypto = require('zksync-crypto')
+zksync_crypto.zksync_crypto_init();
 
 /**
  * Convert to hexadecimal string padding until 256 characters

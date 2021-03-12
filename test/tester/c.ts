@@ -12,6 +12,20 @@ import { SimpleTest, TestComponent } from '../interface';
 const print_info = false;
 const primeStr = '21888242871839275222246405745257275088548364400416034343698204186575808495617';
 
+function execAsync(cmd, opts = {}) {
+  return new Promise(function (resolve, reject) {
+    const verbose = false;
+    if (verbose) {
+      console.log('exec', cmd);
+    }
+    // Execute the command, reject if we exit non-zero (i.e. error)
+    shelljs.exec(cmd, opts, function (code, stdout, stderr) {
+      if (code != 0) return reject(new Error(stderr));
+      return resolve(stdout);
+    });
+  });
+}
+
 // TOOD: type
 async function checkConstraints(F, constraints, witness) {
   if (!constraints) {
@@ -98,7 +112,7 @@ async function readSymbols(path: string) {
   return symbols;
 }
 
-function compileNativeBinary({ tmpDirName, r1csFilepath, circuitFilePath, symFilepath, binaryFilePath }) {
+async function compileNativeBinary({ tmpDirName, r1csFilepath, circuitFilePath, symFilepath, binaryFilePath }) {
   const circomRuntimePath = path.join(__dirname, '..', '..', 'node_modules', 'circom_runtime');
   const snarkjsPath = path.join(__dirname, '..', '..', 'node_modules', 'snarkjs', 'build', 'cli.cjs');
   const ffiasmPath = path.join(__dirname, '..', '..', 'node_modules', 'ffiasm');
@@ -107,26 +121,24 @@ function compileNativeBinary({ tmpDirName, r1csFilepath, circuitFilePath, symFil
 
   var cmd: string;
   cmd = `cp ${circomRuntimePath}/c/*.cpp ${tmpDirName}`;
-  shelljs.exec(cmd);
+  await execAsync(cmd);
   cmd = `cp ${circomRuntimePath}/c/*.hpp ${tmpDirName}`;
-  shelljs.exec(cmd);
+  await execAsync(cmd);
   cmd = `node ${ffiasmPath}/src/buildzqfield.js -q ${primeStr} -n Fr`;
-  shelljs.exec(cmd);
-  cmd = `mv fr.asm fr.cpp fr.hpp ${tmpDirName}`;
-  shelljs.exec(cmd);
+  await execAsync(cmd, { cwd: tmpDirName });
   if (process.platform === 'darwin') {
     cmd = `nasm -fmacho64 --prefix _  ${tmpDirName}/fr.asm`;
   } else if (process.platform === 'linux') {
     cmd = `nasm -felf64 ${tmpDirName}/fr.asm`;
   } else throw 'Unsupported platform';
-  shelljs.exec(cmd);
+  await execAsync(cmd);
   cmd = `NODE_OPTIONS=--max-old-space-size=8192 node --stack-size=65500 ${circomcliPath} ${circuitFilePath} -r ${r1csFilepath} -c ${cFilepath} -s ${symFilepath}`;
-  shelljs.exec(cmd);
+  await execAsync(cmd);
   if (print_info) {
     cmd = `NODE_OPTIONS=--max-old-space-size=8192 node ${snarkjsPath} r1cs info ${r1csFilepath}`;
-    shelljs.exec(cmd);
+    await execAsync(cmd);
     // cmd = `NODE_OPTIONS=--max-old-space-size=8192 node ${snarkjsPath} r1cs print ${r1csFilepath} ${symFilepath}`;
-    // shelljs.exec(cmd);
+    // await execAsync(cmd);
   }
 
   if (process.platform === 'darwin') {
@@ -139,7 +151,7 @@ function compileNativeBinary({ tmpDirName, r1csFilepath, circuitFilePath, symFil
   } else if (process.platform === 'linux') {
     cmd = `g++ -pthread ${tmpDirName}/main.cpp ${tmpDirName}/calcwit.cpp ${tmpDirName}/utils.cpp ${tmpDirName}/fr.cpp ${tmpDirName}/fr.o ${cFilepath} -o ${tmpDirName}/circuit -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`;
   } else throw 'Unsupported platform';
-  shelljs.exec(cmd);
+  await execAsync(cmd);
 }
 
 class CircuitTester {
@@ -182,7 +194,7 @@ class CircuitTester {
     const binaryFilePath = path.join(this.tmpDirName, 'circuit');
     this.binaryFilePath = binaryFilePath;
     if (this.alwaysRecompile || !fs.existsSync(binaryFilePath)) {
-      compileNativeBinary({ tmpDirName: this.tmpDirName, r1csFilepath, circuitFilePath, symFilepath, binaryFilePath });
+      await compileNativeBinary({ tmpDirName: this.tmpDirName, r1csFilepath, circuitFilePath, symFilepath, binaryFilePath });
     } else {
       console.log('load exsited binary ', binaryFilePath);
     }
@@ -201,11 +213,13 @@ class CircuitTester {
     var cmd: string;
     // gen witness
     cmd = `${this.binaryFilePath} ${inputFilePath} ${outputjsonFilePath}`;
-    const genWtnsOut = shelljs.exec(cmd);
+    const genWtnsOut = await execAsync(cmd);
+    /*
     if (genWtnsOut.stderr || genWtnsOut.code != 0) {
       console.error(genWtnsOut.stderr);
       throw new Error('Could not generate witness');
     }
+    */
 
     // load witness
     const witness = JSON.parse(fs.readFileSync(outputjsonFilePath).toString());

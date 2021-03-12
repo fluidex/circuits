@@ -39,7 +39,7 @@ class Account {
 
   constructor(signature) {
     // TODO: skip multiple init
-    zksync_crypto.zksync_crypto_init();
+    //zksync_crypto.zksync_crypto_init();
 
     // ethers signature is 65-byte
     if (signature) {
