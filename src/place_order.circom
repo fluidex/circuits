@@ -84,6 +84,18 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
         balance_tree.path_elements[i][0] <== balance_path_elements[i][0];
     }
 
+    // here we don't need to check
+    // ((old_order_filledsell==old_order_amountsell) || (old_order_filledbuy==old_order_amountbuy))
+    // we can make sure this when updating order to "filled" in circuits
+    component oldOrderHash = HashOrder();
+    oldOrderHash.tokensell <== old_order_tokensell;
+    oldOrderHash.tokenbuy <== old_order_tokenbuy;
+    oldOrderHash.filled_sell <== old_order_filledsell;
+    oldOrderHash.filled_buy <== old_order_filledbuy;
+    oldOrderHash.total_sell <== old_order_amountsell;
+    oldOrderHash.total_buy <== old_order_amountbuy;
+    oldOrderHash.status <== 1; // TODO: maintain a table
+
     component newOrderHash = HashOrder();
     newOrderHash.tokensell <== new_order_tokensell;
     newOrderHash.tokenbuy <== new_order_tokenbuy;
@@ -93,17 +105,17 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     newOrderHash.total_buy <== new_order_amountbuy;
     newOrderHash.status <== 0;
 
-    // // - check order tree update
-    // component order_update_checker = CheckLeafUpdate(orderLevels);
-    // order_update_checker.enabled <== enabled;
-    // order_update_checker.oldLeaf <== 0;
-    // order_update_checker.newLeaf <== newOrderHash.out;
-    // for (var i = 0; i < orderLevels; i++) {
-    //     order_update_checker.path_index[i] <== order_path_index[i];
-    //     order_update_checker.path_elements[i][0] <== order_path_elements[i][0];
-    // }
-    // order_update_checker.oldRoot <== oldOrderRoot;
-    // order_update_checker.newRoot <== newOrderRoot;
+    // - check order tree update
+    component order_update_checker = CheckLeafUpdate(orderLevels);
+    order_update_checker.enabled <== enabled;
+    order_update_checker.oldLeaf <== oldOrderHash.out;
+    order_update_checker.newLeaf <== newOrderHash.out;
+    for (var i = 0; i < orderLevels; i++) {
+        order_update_checker.path_index[i] <== order_path_index[i];
+        order_update_checker.path_elements[i][0] <== order_path_elements[i][0];
+    }
+    order_update_checker.oldRoot <== oldOrderRoot;
+    order_update_checker.newRoot <== newOrderRoot;
 
     // - check account tree update
     ////////
