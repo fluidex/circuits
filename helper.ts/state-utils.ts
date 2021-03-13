@@ -35,7 +35,16 @@ function hashAccountState(st) {
 }
 
 function calculateGenesisOrderRoot(orderLevels) {
-  return new Tree<bigint>(orderLevels, 0n).getRoot();
+  const emptyOrderHash = hashOrderState({
+    status: 1n, // need to maintain a table
+    tokenbuy: 0n,
+    tokensell: 0n,
+    filled_sell: 0n,
+    filled_buy: 0n,
+    total_sell: 0n,
+    total_buy: 0n,
+  });
+  return new Tree<bigint>(orderLevels, emptyOrderHash).getRoot();
 }
 
 /**

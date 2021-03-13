@@ -233,7 +233,7 @@ class GlobalState {
     this.orderLevels = orderLevels;
     this.accountLevels = accountLevels;
     this.defaultBalanceRoot = new Tree<bigint>(balanceLevels, 0n).getRoot();
-    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels); // equivalent to `new Tree<bigint>(orderLevels, 0n).getRoot();`
+    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels);
     // defaultAccountLeaf depends on defaultOrderRoot and defaultBalanceRoot
     this.defaultAccountLeaf = this.hashForEmptyAccount();
     this.accountTree = new Tree<bigint>(accountLevels, this.defaultAccountLeaf); // Tree<account_hash>
