@@ -36,7 +36,7 @@ function hashAccountState(st) {
 
 function calculateGenesisOrderRoot(orderLevels) {
   const emptyOrderHash = hashOrderState({
-    status: 1n, // need to maintain a table
+    status: 1n, // TODO: need to maintain a table
     tokenbuy: 0n,
     tokensell: 0n,
     filled_sell: 0n,

@@ -94,7 +94,7 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     oldOrderHash.filled_buy <== old_order_filledbuy;
     oldOrderHash.total_sell <== old_order_amountsell;
     oldOrderHash.total_buy <== old_order_amountbuy;
-    oldOrderHash.status <== 1; // TODO: maintain a table
+    oldOrderHash.status <== 1; // TODO: need to maintain a table
 
     component newOrderHash = HashOrder();
     newOrderHash.tokensell <== new_order_tokensell;
