@@ -50,10 +50,10 @@ function initTestCase() {
     enabled: 1,
     order_id: block.encodedTxs[block.encodedTxs.length - 1][common.TxDetailIdx.Order1ID],
     old_order_tokensell: 0n,
-    old_order_filledsell: 0n
+    old_order_filledsell: 0n,
     old_order_amountsell: 0n,
     old_order_tokenbuy: 0n,
-    old_order_filledsell: 0n,
+    old_order_filledbuy: 0n,
     old_order_amountbuy: 0n,
     new_order_tokensell: tokenID_sell,
     new_order_amountsell: amount_sell,
