@@ -646,7 +646,7 @@ class GlobalState {
     encodedTx[TxDetailIdx.Order1AmountSell] = tx.previous_amount_sell;
     encodedTx[TxDetailIdx.Order1AmountBuy] = tx.previous_amount_buy;
     encodedTx[TxDetailIdx.Order1FilledSell] = tx.previous_filled_sell;
-    encodedTx[TxDetailIdx.Order1Filledbuy] = tx.previous_filled_buy;
+    encodedTx[TxDetailIdx.Order1FilledBuy] = tx.previous_filled_buy;
     encodedTx[TxDetailIdx.Order2AmountSell] = tx.amount_sell;
     encodedTx[TxDetailIdx.Order2AmountBuy] = tx.amount_buy;
     rawTx.payload = encodedTx;
