@@ -3,3 +3,5 @@ yarn-error.log
 data/
 .DS_Store
 *.orig
+testdata/
+dist/
