@@ -135,9 +135,9 @@ function compileNativeBinary({ circuitDirName, r1csFilepath, circuitFilePath, sy
   cmd = `cp ${circomRuntimePath}/c/*.hpp ${circuitDirName}`;
   shelljs.exec(cmd);
   cmd = `node ${ffiasmPath}/src/buildzqfield.js -q ${primeStr} -n Fr`;
-  shelljs.exec(cmd);
-  cmd = `mv fr.asm fr.cpp fr.hpp ${circuitDirName}`;
-  shelljs.exec(cmd);
+  shelljs.exec(cmd, { cwd: circuitDirName });
+  //cmd = `mv fr.asm fr.cpp fr.hpp ${circuitDirName}`;
+  //shelljs.exec(cmd);
   if (process.platform === 'darwin') {
     cmd = `nasm -fmacho64 --prefix _  ${circuitDirName}/fr.asm`;
   } else if (process.platform === 'linux') {

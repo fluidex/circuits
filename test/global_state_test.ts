@@ -143,6 +143,12 @@ function replayTrades() {
         assert(order.finishedBase == '0' && order.finishedQuote == '0', 'invalid new order', order);
         let orderToPut = {
           accountID: order.accountID,
+          previous_tokenID_sell: 0n,
+          previous_tokenID_buy: 0n,
+          previous_amount_sell: 0n,
+          previous_amount_buy: 0n,
+          previous_filled_sell: 0n,
+          previous_filled_buy: 0n,
           tokenID_sell: order.tokensell,
           tokenID_buy: order.tokenbuy,
           amount_sell: order.total_sell,
