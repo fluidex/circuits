@@ -18,7 +18,7 @@ enum TxType {
   Nop,
 }
 
-const TxLength = 32;
+const TxLength = 34;
 enum TxDetailIdx {
   TokenID,
   Amount,
