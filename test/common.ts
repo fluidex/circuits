@@ -54,6 +54,10 @@ enum TxDetailIdx {
   Order2AmountBuy,
   Order2FilledSell,
   Order2FilledBuy,
+
+  // only used in place_order
+  TokenID3,
+  TokenID4,
 }
 
 class TxSignature {

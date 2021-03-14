@@ -196,19 +196,16 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processPlaceOrder[i] = PlaceOrder(balanceLevels, orderLevels, accountLevels);
         processPlaceOrder[i].enabled <== enablePlaceOrder[i].out;
         processPlaceOrder[i].order_id <== decodedTx[i].order1_id;
-
         processPlaceOrder[i].old_order_tokensell <== decodedTx[i].tokenID;
         processPlaceOrder[i].old_order_tokenbuy <== decodedTx[i].tokenID2;
         processPlaceOrder[i].old_order_amountsell <== decodedTx[i].order1_amountsell;
         processPlaceOrder[i].old_order_amountbuy <== decodedTx[i].order1_amountbuy;
         processPlaceOrder[i].old_order_filledsell <== decodedTx[i].order1_filledsell;
         processPlaceOrder[i].old_order_filledbuy <== decodedTx[i].order1_filledbuy;
-
-        processPlaceOrder[i].new_order_tokensell <== decodedTx[i].tokenID;
-        processPlaceOrder[i].new_order_tokenbuy <== decodedTx[i].tokenID2;
+        processPlaceOrder[i].new_order_tokensell <== decodedTx[i].tokenID3;
+        processPlaceOrder[i].new_order_tokenbuy <== decodedTx[i].tokenID4;
         processPlaceOrder[i].new_order_amountsell <== decodedTx[i].order2_amountsell;
         processPlaceOrder[i].new_order_amountbuy <== decodedTx[i].order2_amountbuy;
-
         processPlaceOrder[i].accountID <== decodedTx[i].accountID1;
         processPlaceOrder[i].tokenID <== decodedTx[i].tokenID;
         processPlaceOrder[i].balance <== decodedTx[i].balance1;
