@@ -37,7 +37,7 @@ function getAllTests(): Array<SimpleTest> {
   return result;
 }
 
-async function exportAllTests() {
+export async function exportAllTests() {
   const tests = getAllTests();
   const outDir = 'testdata';
   for (const t of tests) {
@@ -62,4 +62,6 @@ async function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
