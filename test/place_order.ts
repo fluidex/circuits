@@ -37,6 +37,12 @@ function initTestCase() {
 
   const placeOrderTx = {
     accountID: accountID,
+    previous_tokenID_sell: 0n,
+    previous_tokenID_buy: 0n,
+    previous_amount_sell: 0n,
+    previous_amount_buy: 0n,
+    previous_filled_sell: 0n,
+    previous_filled_buy: 0n,
     tokenID_sell: tokenID_sell,
     tokenID_buy: tokenID_buy,
     amount_sell: amount_sell,
