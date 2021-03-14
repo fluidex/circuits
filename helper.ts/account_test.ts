@@ -6,7 +6,7 @@ import { get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature } from './acco
 async function TestRecoverPublicKeyAndAddress() {
   const MNEMONIC = 'radar blur cabbage chef fix engine embark joy scheme fiction master release';
   const wallet = ethers.Wallet.fromMnemonic(MNEMONIC, null);
-  const message = get_create_l2_account_msg(null);
+  const message = get_CREATE_L2_ACCOUNT_MSG(null);
   const expectedAddress = await wallet.getAddress();
   const expectedPublicKey = wallet._signingKey().publicKey;
   const signature = await wallet.signMessage(message);

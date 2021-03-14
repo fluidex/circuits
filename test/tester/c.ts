@@ -12,6 +12,11 @@ import { SimpleTest, TestComponent } from '../interface';
 const print_info = false;
 const primeStr = '21888242871839275222246405745257275088548364400416034343698204186575808495617';
 
+// This is an opinionated tester.
+// Rather than allowing setting data path flexibly,
+// It assumes some standard folder structure and file name
+// , like circuit.circom input.json witness.json etc
+
 // TOOD: type
 async function checkConstraints(F, constraints, witness) {
   if (!constraints) {
@@ -66,21 +71,23 @@ async function assertOut(symbols, actualOut, expectedOut) {
   }
 }
 
-async function generateMainTestCircom(path: string, { src, main }: TestComponent) {
+async function generateMainTestCircom(fileName: string, { src, main }: TestComponent) {
   if (src == '' || main == '') {
     throw new Error('invalid component ' + src + ' ' + main);
   }
   let srcCode = `include "${src}";
   component main = ${main};`;
-  fs.writeFileSync(path, srcCode, 'utf8');
+  fs.writeFileSync(fileName, srcCode, 'utf8');
 }
 
-async function generateInput(path: string, input: Object) {
+async function writeJsonWithBigint(path: string, obj: Object) {
   let text = JSON.stringify(
-    input,
+    obj,
     (key, value) => (typeof value === 'bigint' ? value.toString() : value), // return everything else unchanged
     2,
   );
+  // maybe another implementation?:
+  // let text = JSON.stringify(ffutils.stringifyBigInts(obj)));
   fs.writeFileSync(path, text, 'utf8');
 }
 
@@ -101,7 +108,7 @@ async function readSymbols(path: string) {
   return symbols;
 }
 
-function compileStandardCircuitDir(circuitDirName, alwaysRecompile) {
+function parepareCircuitDir(circuitDirName, alwaysRecompile) {
   // console.log('compiling dir', circuitDirName);
   const circuitFilePath = path.join(circuitDirName, 'circuit.circom');
   const r1csFilepath = path.join(circuitDirName, 'circuit.r1cs');
@@ -181,26 +188,29 @@ class CircuitTester {
 
   async compileAndload(circuitDirName) {
     this.circuitDirName = path.resolve(circuitDirName);
-    const { r1csFilepath, symFilepath, binaryFilePath } = compileStandardCircuitDir(this.circuitDirName, this.alwaysRecompile);
+    const { r1csFilepath, symFilepath, binaryFilePath } = parepareCircuitDir(this.circuitDirName, this.alwaysRecompile);
     this.binaryFilePath = binaryFilePath;
 
     this.r1cs = await loadR1cs(r1csFilepath, true, false);
     this.symbols = await readSymbols(symFilepath);
   }
 
-  generateWitness(inputFilePath, outputJsonFilePath) {
+  generateWitness(inputFilePath, witnessFilePath) {
     var cmd: string;
-    if (outputJsonFilePath == '') {
-      outputJsonFilePath = path.join(path.dirname(inputFilePath), 'output.json');
+    if (witnessFilePath == '') {
+      witnessFilePath = path.join(path.dirname(inputFilePath), 'witness.json');
+    }
+    if (this.binaryFilePath == '' || !fs.existsSync(this.binaryFilePath)) {
+      throw new Error('invalid bin ' + this.binaryFilePath);
     }
     // gen witness
-    cmd = `${this.binaryFilePath} ${inputFilePath} ${outputJsonFilePath}`;
+    cmd = `${this.binaryFilePath} ${inputFilePath} ${witnessFilePath}`;
     const genWtnsOut = shelljs.exec(cmd);
     if (genWtnsOut.stderr || genWtnsOut.code != 0) {
       console.error(genWtnsOut.stderr);
       throw new Error('Could not generate witness');
     }
-    return outputJsonFilePath;
+    return witnessFilePath;
   }
 
   async checkWitness(witness, expectedOutputJson) {
@@ -221,46 +231,54 @@ class CircuitTester {
   }
   async checkInputOutput(input, expectedOutputJson) {
     const inputFilePath = path.join(this.circuitDirName, 'input.json');
-    await generateInput(inputFilePath, input);
+    await writeJsonWithBigint(inputFilePath, input);
     const outputJsonFilePath = this.generateWitness(inputFilePath, '');
     const witness = JSON.parse(fs.readFileSync(outputJsonFilePath).toString());
     return this.checkWitness(witness, expectedOutputJson);
   }
 }
 
-async function testWithInputOutput(input, output, component, name) {
-  const targetDir = tmp.dirSync({ prefix: `tmp-${name}-circuit` });
-  const circuitDir = targetDir.name;
-  const circuitFilePath = path.join(circuitDir, 'circuit.circom');
-  await generateMainTestCircom(circuitFilePath, component);
-
-  let tester = new CircuitTester(name);
-  await tester.compileAndload(circuitDir);
-  const writeExpectedOutput = true;
-  if (writeExpectedOutput) {
-    // used for debugging
-    fs.writeFileSync(path.join(circuitDir, 'expected_output.json'), JSON.stringify(ffutils.stringifyBigInts(output)));
-  }
-  let result = await tester.checkInputOutput(input, output);
-  console.log('test ', name, ' done');
-  return result;
-}
-
-export { testWithInputOutput, CircuitTester };
-
-async function testCircuitDir(testDir) {
+async function testCircuitDir(testDir, testCaseName) {
   if (testDir == '') {
     throw new Error('invalid testDir');
   }
   testDir = path.resolve(testDir);
   console.log('test', testDir);
   // circuit.circom input.json expect_output.json should be in this folder
-  let tester = new CircuitTester('test', { alwaysRecompile: false, verbose: true });
+  let tester = new CircuitTester(testCaseName || 'test', { alwaysRecompile: false, verbose: true });
   await tester.compileAndload(testDir);
-  await tester.checkInputOutputFile(path.join(testDir, 'input.json'), path.join(testDir, 'expected_output.json'));
+  await tester.checkInputOutputFile(path.join(testDir, 'input.json'), path.join(testDir, 'output.json'));
   console.log('test ', testDir, ' done');
 }
 
-if (require.main === module) {
-  testCircuitDir(process.argv[2]);
+async function writeCircuitIntoDir(circuitDir, component) {
+  fs.mkdirSync(circuitDir, {recursive: true});
+  const circuitFilePath = path.join(circuitDir, 'circuit.circom');
+  await generateMainTestCircom(circuitFilePath, component);
 }
+
+async function writeInputOutputIntoDir(circuitDir, input, output) {
+  const inputFilePath = path.join(circuitDir, 'input.json');
+  await writeJsonWithBigint(inputFilePath, input);
+  const outputFilePath = path.join(circuitDir, 'output.json');
+  await writeJsonWithBigint(outputFilePath, output);
+}
+
+async function testWithInputOutput(input, output, component, name, circuitDir = '') {
+  if (circuitDir == '') {
+    // create a tmp dir for test
+    const targetDir = tmp.dirSync({ prefix: `tmp-${name}-circuit` });
+    circuitDir = targetDir.name;
+  } else {
+    circuitDir = path.resolve(circuitDir);
+    //fs.mkdirSync(circuitDir, { recursive: true });
+  }
+  // write input/output/circuit into the dir
+  await writeCircuitIntoDir(circuitDir, component);
+  await writeInputOutputIntoDir(circuitDir, input, output);
+  // test the dir
+  await testCircuitDir(circuitDir, name);
+  console.log('test', name, 'done');
+}
+
+export { testWithInputOutput, CircuitTester, writeCircuitIntoDir, writeInputOutputIntoDir, parepareCircuitDir, testCircuitDir };
