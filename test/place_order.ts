@@ -3,6 +3,7 @@ const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
+import { GlobalState } from './global_state';
 
 // circuit-level definitions
 const orderLevels = 2;
@@ -10,7 +11,7 @@ const balanceLevels = 2;
 const accountLevels = 2;
 
 function initTestCase() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels, 1);
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, 1);
 
   // order info
   const tokenID_sell = 1n;

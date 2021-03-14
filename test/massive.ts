@@ -6,6 +6,7 @@ import { Account } from '../helper.ts/account';
 import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
+import { GlobalState } from './global_state';
 //import { assert } from 'console';
 const assert = require('assert').strict;
 
@@ -18,7 +19,7 @@ const accountLevels = 20;
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initTestCase() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels, Number(nTxs));
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, Number(nTxs));
 
   const tokenID_1to2 = 0n;
   const tokenID_2to1 = 1n;
