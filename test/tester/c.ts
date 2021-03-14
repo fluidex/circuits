@@ -6,11 +6,16 @@ import * as shelljs from 'shelljs';
 import * as tmp from 'tmp-promise';
 import * as circom from 'circom';
 const loadR1cs = require('r1csfile').load;
-const ZqField = require('ffjavascript').ZqField;
+const { ZqField, utils: ffutils } = require('ffjavascript');
 import { SimpleTest, TestComponent } from '../interface';
 
 const print_info = false;
 const primeStr = '21888242871839275222246405745257275088548364400416034343698204186575808495617';
+
+// This is an opinionated tester.
+// Rather than allowing setting data path flexibly,
+// It assumes some standard folder structure and file name
+// , like circuit.circom input.json witness.json etc
 
 // TOOD: type
 async function checkConstraints(F, constraints, witness) {
@@ -66,18 +71,23 @@ async function assertOut(symbols, actualOut, expectedOut) {
   }
 }
 
-async function generateMainTestCircom(path: string, { src, main }: TestComponent) {
+async function generateMainTestCircom(fileName: string, { src, main }: TestComponent) {
+  if (src == '' || main == '') {
+    throw new Error('invalid component ' + src + ' ' + main);
+  }
   let srcCode = `include "${src}";
   component main = ${main};`;
-  fs.writeFileSync(path, srcCode, 'utf8');
+  fs.writeFileSync(fileName, srcCode, 'utf8');
 }
 
-async function generateInput(path: string, input: Object) {
+async function writeJsonWithBigint(path: string, obj: Object) {
   let text = JSON.stringify(
-    input,
+    obj,
     (key, value) => (typeof value === 'bigint' ? value.toString() : value), // return everything else unchanged
     2,
   );
+  // maybe another implementation?:
+  // let text = JSON.stringify(ffutils.stringifyBigInts(obj)));
   fs.writeFileSync(path, text, 'utf8');
 }
 
@@ -98,26 +108,40 @@ async function readSymbols(path: string) {
   return symbols;
 }
 
-function compileNativeBinary({ tmpDirName, r1csFilepath, circuitFilePath, symFilepath, binaryFilePath }) {
+function parepareCircuitDir(circuitDirName, alwaysRecompile) {
+  // console.log('compiling dir', circuitDirName);
+  const circuitFilePath = path.join(circuitDirName, 'circuit.circom');
+  const r1csFilepath = path.join(circuitDirName, 'circuit.r1cs');
+  const symFilepath = path.join(circuitDirName, 'circuit.sym');
+  const binaryFilePath = path.join(circuitDirName, 'circuit');
+  if (alwaysRecompile || !fs.existsSync(binaryFilePath)) {
+    compileNativeBinary({ circuitDirName, r1csFilepath, circuitFilePath, symFilepath, binaryFilePath });
+  } else {
+    console.log('skip compiling binary ', binaryFilePath);
+  }
+  return { circuitFilePath, r1csFilepath, symFilepath, binaryFilePath };
+}
+
+function compileNativeBinary({ circuitDirName, r1csFilepath, circuitFilePath, symFilepath, binaryFilePath }) {
   const circomRuntimePath = path.join(__dirname, '..', '..', 'node_modules', 'circom_runtime');
   const snarkjsPath = path.join(__dirname, '..', '..', 'node_modules', 'snarkjs', 'build', 'cli.cjs');
   const ffiasmPath = path.join(__dirname, '..', '..', 'node_modules', 'ffiasm');
   const circomcliPath = path.join(__dirname, '..', '..', 'node_modules', 'circom', 'cli.js');
-  const cFilepath = path.join(tmpDirName, 'circuit.c');
+  const cFilepath = path.join(circuitDirName, 'circuit.c');
 
   var cmd: string;
-  cmd = `cp ${circomRuntimePath}/c/*.cpp ${tmpDirName}`;
+  cmd = `cp ${circomRuntimePath}/c/*.cpp ${circuitDirName}`;
   shelljs.exec(cmd);
-  cmd = `cp ${circomRuntimePath}/c/*.hpp ${tmpDirName}`;
+  cmd = `cp ${circomRuntimePath}/c/*.hpp ${circuitDirName}`;
   shelljs.exec(cmd);
   cmd = `node ${ffiasmPath}/src/buildzqfield.js -q ${primeStr} -n Fr`;
   shelljs.exec(cmd);
-  cmd = `mv fr.asm fr.cpp fr.hpp ${tmpDirName}`;
+  cmd = `mv fr.asm fr.cpp fr.hpp ${circuitDirName}`;
   shelljs.exec(cmd);
   if (process.platform === 'darwin') {
-    cmd = `nasm -fmacho64 --prefix _  ${tmpDirName}/fr.asm`;
+    cmd = `nasm -fmacho64 --prefix _  ${circuitDirName}/fr.asm`;
   } else if (process.platform === 'linux') {
-    cmd = `nasm -felf64 ${tmpDirName}/fr.asm`;
+    cmd = `nasm -felf64 ${circuitDirName}/fr.asm`;
   } else throw 'Unsupported platform';
   shelljs.exec(cmd);
   cmd = `NODE_OPTIONS=--max-old-space-size=8192 node --stack-size=65500 ${circomcliPath} ${circuitFilePath} -r ${r1csFilepath} -c ${cFilepath} -s ${symFilepath}`;
@@ -130,14 +154,14 @@ function compileNativeBinary({ tmpDirName, r1csFilepath, circuitFilePath, symFil
   }
 
   if (process.platform === 'darwin') {
-    cmd = `g++ ${tmpDirName}/main.cpp ${tmpDirName}/calcwit.cpp ${tmpDirName}/utils.cpp ${tmpDirName}/fr.cpp ${tmpDirName}/fr.o ${cFilepath} -o ${tmpDirName}/circuit -lgmp -std=c++11 -O3 -DSANITY_CHECK`;
+    cmd = `g++ ${circuitDirName}/main.cpp ${circuitDirName}/calcwit.cpp ${circuitDirName}/utils.cpp ${circuitDirName}/fr.cpp ${circuitDirName}/fr.o ${cFilepath} -o ${binaryFilePath} -lgmp -std=c++11 -O3 -DSANITY_CHECK`;
     if (process.arch === 'arm64') {
       cmd = 'arch -x86_64 ' + cmd;
     } else {
       cmd = cmd + ' -fopenmp';
     }
   } else if (process.platform === 'linux') {
-    cmd = `g++ -pthread ${tmpDirName}/main.cpp ${tmpDirName}/calcwit.cpp ${tmpDirName}/utils.cpp ${tmpDirName}/fr.cpp ${tmpDirName}/fr.o ${cFilepath} -o ${tmpDirName}/circuit -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`;
+    cmd = `g++ -pthread ${circuitDirName}/main.cpp ${circuitDirName}/calcwit.cpp ${circuitDirName}/utils.cpp ${circuitDirName}/fr.cpp ${circuitDirName}/fr.o ${cFilepath} -o ${binaryFilePath} -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`;
   } else throw 'Unsupported platform';
   shelljs.exec(cmd);
 }
@@ -146,89 +170,115 @@ class CircuitTester {
   circuit: any;
   component: any;
   name: string;
-  tmpDirName: string;
+  circuitDirName: string;
   r1csFilepath: string;
   symFilepath: string;
   binaryFilePath: string;
   r1cs: any;
   symbols: any;
   alwaysRecompile: boolean;
-  constructor(component, name, { alwaysRecompile = true, tmpDirName = '' } = {}) {
-    this.component = component;
+  verbose: boolean;
+  writeExpectedOutput: boolean;
+  constructor(name, { alwaysRecompile = true, verbose = false } = {}) {
     this.name = name;
     // we can specify cached files to avoid compiling every time
     this.alwaysRecompile = alwaysRecompile;
-    this.tmpDirName = tmpDirName;
+    this.verbose = verbose;
   }
 
-  async load() {
-    // console.log(__dirname);
-    // create temp target dir
-    if (this.tmpDirName == '') {
-      const targetDir = tmp.dirSync({ prefix: `tmp-${this.name}-circuit` });
-      this.tmpDirName = targetDir.name;
-    }
-    // console.log(targetDir.name);
-    const circuitFilePath = path.join(this.tmpDirName, 'circuit.circom');
-    const r1csFilepath = path.join(this.tmpDirName, 'circuit.r1cs');
-    this.r1csFilepath = r1csFilepath;
-    const symFilepath = path.join(this.tmpDirName, 'circuit.sym');
-    this.symFilepath = symFilepath;
-    if (this.alwaysRecompile || !fs.existsSync(circuitFilePath)) {
-      await generateMainTestCircom(circuitFilePath, this.component);
-    } else {
-      console.log('load exsited circom ', circuitFilePath);
-    }
-    const binaryFilePath = path.join(this.tmpDirName, 'circuit');
+  async compileAndload(circuitDirName) {
+    this.circuitDirName = path.resolve(circuitDirName);
+    const { r1csFilepath, symFilepath, binaryFilePath } = parepareCircuitDir(this.circuitDirName, this.alwaysRecompile);
     this.binaryFilePath = binaryFilePath;
-    if (this.alwaysRecompile || !fs.existsSync(binaryFilePath)) {
-      compileNativeBinary({ tmpDirName: this.tmpDirName, r1csFilepath, circuitFilePath, symFilepath, binaryFilePath });
-    } else {
-      console.log('load exsited binary ', binaryFilePath);
-    }
 
-    this.r1cs = await loadR1cs(this.r1csFilepath, true, false);
+    this.r1cs = await loadR1cs(r1csFilepath, true, false);
     this.symbols = await readSymbols(symFilepath);
   }
 
-  async checkInputOutput(input, output) {
-    const inputFilePath = path.join(this.tmpDirName, 'input.json');
-    const outputjsonFilePath = path.join(this.tmpDirName, 'output.json');
-    const outputwtnsFilePath = path.join(this.tmpDirName, 'output.wtns');
-
-    await generateInput(inputFilePath, input);
-
+  generateWitness(inputFilePath, witnessFilePath) {
     var cmd: string;
+    if (witnessFilePath == '') {
+      witnessFilePath = path.join(path.dirname(inputFilePath), 'witness.json');
+    }
+    if (this.binaryFilePath == '' || !fs.existsSync(this.binaryFilePath)) {
+      throw new Error('invalid bin ' + this.binaryFilePath);
+    }
     // gen witness
-    cmd = `${this.binaryFilePath} ${inputFilePath} ${outputjsonFilePath}`;
+    cmd = `${this.binaryFilePath} ${inputFilePath} ${witnessFilePath}`;
     const genWtnsOut = shelljs.exec(cmd);
     if (genWtnsOut.stderr || genWtnsOut.code != 0) {
       console.error(genWtnsOut.stderr);
       throw new Error('Could not generate witness');
     }
+    return witnessFilePath;
+  }
 
-    // load witness
-    const witness = JSON.parse(fs.readFileSync(outputjsonFilePath).toString());
-
-    // calculate used field from R1Cs
+  async checkWitness(witness, expectedOutputJson) {
     const F = new ZqField(this.r1cs.prime);
     // const nVars = r1cs.nVars;
     const constraints = this.r1cs.constraints;
     await checkConstraints(F, constraints, witness);
     // assert output
-    await assertOut(this.symbols, witness, output);
-
-    console.log('test ', this.component.main, ' done', '\n');
+    await assertOut(this.symbols, witness, expectedOutputJson);
     return true;
+  }
+
+  async checkInputOutputFile(inputFilePath, expectedOutputFile) {
+    const outputJsonFilePath = this.generateWitness(inputFilePath, '');
+    const witness = JSON.parse(fs.readFileSync(outputJsonFilePath).toString());
+    const expectedOutputJson = JSON.parse(fs.readFileSync(expectedOutputFile).toString());
+    return this.checkWitness(witness, expectedOutputJson);
+  }
+  async checkInputOutput(input, expectedOutputJson) {
+    const inputFilePath = path.join(this.circuitDirName, 'input.json');
+    await writeJsonWithBigint(inputFilePath, input);
+    const outputJsonFilePath = this.generateWitness(inputFilePath, '');
+    const witness = JSON.parse(fs.readFileSync(outputJsonFilePath).toString());
+    return this.checkWitness(witness, expectedOutputJson);
   }
 }
 
-async function testWithInputOutput(input, output, component, name) {
-  let tester = new CircuitTester(component, name);
-  await tester.load();
-  let result = await tester.checkInputOutput(input, output);
-  // console.log('test ', name, ' done');
-  return result;
+async function testCircuitDir(testDir, testCaseName) {
+  if (testDir == '') {
+    throw new Error('invalid testDir');
+  }
+  testDir = path.resolve(testDir);
+  console.log('test', testDir);
+  // circuit.circom input.json expect_output.json should be in this folder
+  let tester = new CircuitTester(testCaseName || 'test', { alwaysRecompile: false, verbose: true });
+  await tester.compileAndload(testDir);
+  await tester.checkInputOutputFile(path.join(testDir, 'input.json'), path.join(testDir, 'output.json'));
+  console.log('test ', testDir, ' done');
 }
 
-export { testWithInputOutput, CircuitTester };
+async function writeCircuitIntoDir(circuitDir, component) {
+  fs.mkdirSync(circuitDir, {recursive: true});
+  const circuitFilePath = path.join(circuitDir, 'circuit.circom');
+  await generateMainTestCircom(circuitFilePath, component);
+}
+
+async function writeInputOutputIntoDir(circuitDir, input, output) {
+  const inputFilePath = path.join(circuitDir, 'input.json');
+  await writeJsonWithBigint(inputFilePath, input);
+  const outputFilePath = path.join(circuitDir, 'output.json');
+  await writeJsonWithBigint(outputFilePath, output);
+}
+
+async function testWithInputOutput(input, output, component, name, circuitDir = '') {
+  if (circuitDir == '') {
+    // create a tmp dir for test
+    const targetDir = tmp.dirSync({ prefix: `tmp-${name}-circuit` });
+    circuitDir = targetDir.name;
+  } else {
+    circuitDir = path.resolve(circuitDir);
+    //fs.mkdirSync(circuitDir, { recursive: true });
+  }
+  // write input/output/circuit into the dir
+  await writeCircuitIntoDir(circuitDir, component);
+  await writeInputOutputIntoDir(circuitDir, input, output);
+  // test the dir
+  await testCircuitDir(circuitDir, name);
+  console.log('test', name, 'done');
+}
+
+export { testWithInputOutput, CircuitTester, writeCircuitIntoDir, writeInputOutputIntoDir, parepareCircuitDir, testCircuitDir };
