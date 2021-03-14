@@ -296,7 +296,7 @@ async function testWithInputOutput(input, output, component, name, circuitDir = 
   await writeCircuitIntoDir(circuitDir, component);
   await writeInputOutputIntoDir(path.join(circuitDir, 'data', name), input, output);
   // test the dir
-  await testCircuitDir(circuitDir);
+  await testCircuitDir(circuitDir, name);
   console.log('test', name, 'done\n');
 }
 
