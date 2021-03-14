@@ -6,7 +6,7 @@ function TxTypePlaceOrder() { return 4; }
 function TxTypeSpotTrade() { return 5; }
 function TxTypeNop() { return 6; }
 
-function TxLength() { return 32; }
+function TxLength() { return 34; }
 
 /**
  * @input in - {Array(Field)} - encoded transaction
@@ -51,6 +51,10 @@ template DecodeTx() {
     signal output order2_filledsell;
     signal output order2_filledbuy;
 
+    /// only used in place_order
+    signal output tokenID3;
+    signal output tokenID4;
+
     tokenID <== in[0];
     amount <== in[1];
 
@@ -92,4 +96,8 @@ template DecodeTx() {
     order2_amountbuy <== in[29];
     order2_filledsell <== in[30];
     order2_filledbuy <== in[31];
+
+    /// only used in place_order
+    tokenID3 <== in[32];
+    tokenID4 <== in[33];
 }

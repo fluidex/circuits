@@ -2,7 +2,7 @@ import { assert } from 'console';
 import { hash } from '../helper.ts/hash';
 import { Account } from '../helper.ts/account';
 import { Tree } from '../helper.ts/binary_merkle_tree';
-import { hashAccountState, hashOrderState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { hashAccountState, hashOrderState, emptyOrderHash, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { TestCheckLeafUpdateDisable } from './binary_merkle_tree';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
@@ -18,7 +18,7 @@ enum TxType {
   Nop,
 }
 
-const TxLength = 32;
+const TxLength = 34;
 enum TxDetailIdx {
   TokenID,
   Amount,
@@ -54,6 +54,10 @@ enum TxDetailIdx {
   Order2AmountBuy,
   Order2FilledSell,
   Order2FilledBuy,
+
+  // only used in place_order
+  TokenID3,
+  TokenID4,
 }
 
 class TxSignature {
@@ -96,6 +100,12 @@ class WithdrawTx {
 
 class PlaceOrderTx {
   accountID: bigint;
+  previous_tokenID_sell: bigint;
+  previous_tokenID_buy: bigint;
+  previous_amount_sell: bigint;
+  previous_amount_buy: bigint;
+  previous_filled_sell: bigint;
+  previous_filled_buy: bigint;
   tokenID_sell: bigint;
   tokenID_buy: bigint;
   amount_sell: bigint;
@@ -218,6 +228,7 @@ class GlobalState {
   bufferedTxs: Array<RawTx>;
   bufferedBlocks: Array<any>;
   defaultBalanceRoot: bigint;
+  defaultOrderLeaf: bigint;
   defaultOrderRoot: bigint;
   defaultAccountLeaf: bigint;
   nextOrderIds: Map<bigint, bigint>;
@@ -233,7 +244,8 @@ class GlobalState {
     this.orderLevels = orderLevels;
     this.accountLevels = accountLevels;
     this.defaultBalanceRoot = new Tree<bigint>(balanceLevels, 0n).getRoot();
-    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels); // equivalent to `new Tree<bigint>(orderLevels, 0n).getRoot();`
+    this.defaultOrderLeaf = emptyOrderHash;
+    this.defaultOrderRoot = calculateGenesisOrderRoot(orderLevels);
     // defaultAccountLeaf depends on defaultOrderRoot and defaultBalanceRoot
     this.defaultAccountLeaf = this.hashForEmptyAccount();
     this.accountTree = new Tree<bigint>(accountLevels, this.defaultAccountLeaf); // Tree<account_hash>
@@ -303,7 +315,7 @@ class GlobalState {
     let accountState = this.emptyAccount();
     this.accounts.set(accountID, accountState);
     this.balanceTrees.set(accountID, new Tree<bigint>(this.balanceLevels, 0n));
-    this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, 0n));
+    this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, this.defaultOrderLeaf));
     this.orderMap.set(accountID, new Map<bigint, Order>());
     this.accountTree.setValue(accountID, this.defaultAccountLeaf);
     this.nextOrderIds.set(accountID, next_order_id);
@@ -621,16 +633,22 @@ class GlobalState {
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
     encodedTx[TxDetailIdx.Order1ID] = order_id;
-    encodedTx[TxDetailIdx.TokenID] = tx.tokenID_sell;
+    encodedTx[TxDetailIdx.TokenID] = tx.previous_tokenID_sell;
+    encodedTx[TxDetailIdx.TokenID2] = tx.previous_tokenID_buy;
+    encodedTx[TxDetailIdx.TokenID3] = tx.tokenID_sell;
+    encodedTx[TxDetailIdx.TokenID4] = tx.tokenID_buy;
     encodedTx[TxDetailIdx.AccountID1] = tx.accountID;
     encodedTx[TxDetailIdx.EthAddr1] = account.ethAddr;
     encodedTx[TxDetailIdx.Sign1] = account.sign;
     encodedTx[TxDetailIdx.Ay1] = account.ay;
     encodedTx[TxDetailIdx.Nonce1] = account.nonce;
     encodedTx[TxDetailIdx.Balance1] = proof.leaf;
-    encodedTx[TxDetailIdx.Order1AmountSell] = tx.amount_sell;
-    encodedTx[TxDetailIdx.TokenID2] = tx.tokenID_buy;
-    encodedTx[TxDetailIdx.Order1AmountBuy] = tx.amount_buy;
+    encodedTx[TxDetailIdx.Order1AmountSell] = tx.previous_amount_sell;
+    encodedTx[TxDetailIdx.Order1AmountBuy] = tx.previous_amount_buy;
+    encodedTx[TxDetailIdx.Order1FilledSell] = tx.previous_filled_sell;
+    encodedTx[TxDetailIdx.Order1FilledBuy] = tx.previous_filled_buy;
+    encodedTx[TxDetailIdx.Order2AmountSell] = tx.amount_sell;
+    encodedTx[TxDetailIdx.Order2AmountBuy] = tx.amount_buy;
     rawTx.payload = encodedTx;
     rawTx.orderPath0 = this.orderTrees.get(tx.accountID).getProof(order_id).path_elements;
     rawTx.orderRoot1 = this.orderTrees.get(tx.accountID).getProof(order_id).root;
