@@ -1,5 +1,6 @@
-import { GlobalState } from './common';
-import { testWithInputOutput, writeCircuitIntoDir, parepareCircuitDir, CircuitTester } from './tester/c';
+import { GlobalState } from './global_state';
+import { circuitSrcToName } from './common';
+import { testCircuitDir, writeCircuitIntoDir, writeInputOutputIntoDir } from './tester/c';
 import { assert } from 'console';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -69,7 +70,7 @@ function replayTrades() {
     .split('\n')
     .filter(Boolean)
     .slice(0, maxTradesNumToTest);
-  let trades = lines.map(function (line) {
+  let trades = lines.map(function(line) {
     return JSON.parse(line);
   });
 
@@ -201,20 +202,22 @@ function replayTrades() {
   };
 }
 
-async function mainTest() {
-  const { blocks, component } = replayTrades();
-  // finally, we check all the blocks forged are valid for the circuis
-  // So we can ensure logic of matchengine VS GlobalState VS circuits are same!
-  console.log('compiling', component.main, 'wait for minutes');
-  const testDir = 'testdata/state';
-  await writeCircuitIntoDir(testDir, component);
-  const tester = new CircuitTester('block', { alwaysRecompile: false, verbose: true });
-  await tester.compileAndload(testDir);
+async function exportCircuitAndTestData(blocks, component) {
+  const circuitDir = path.join('testdata', circuitSrcToName(component.main));
+  await writeCircuitIntoDir(circuitDir, component);
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
-    await tester.checkInputOutput(block, {});
-    console.log('test block', i, 'done. left', blocks.length - i - 1);
+    await writeInputOutputIntoDir(path.join(circuitDir, 'data', i.toString()), block, {});
   }
+  return circuitDir;
+}
+
+async function mainTest() {
+  const { blocks, component } = replayTrades();
+  // check all the blocks forged are valid for the block circuit
+  // So we can ensure logics of matchengine VS GlobalState VS circuit are same!
+  const circuitDir = await exportCircuitAndTestData(blocks, component);
+  await testCircuitDir(circuitDir);
 }
 
 mainTest();

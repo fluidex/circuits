@@ -24,14 +24,8 @@ jobs:
           sudo apt install nasm
 
       - name: Instal nlohmann/json
-        run: |
-          git clone https://github.com/nlohmann/json.git
-          cd json
-          mkdir build
-          cd build
-          cmake ..
-          make
-          sudo make install
+        run: 
+          sudo apt install nlohmann-json3-dev
 
       - name: Checkout sources
         uses: actions/checkout@v2

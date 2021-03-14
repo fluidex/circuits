@@ -108,16 +108,21 @@ async function readSymbols(path: string) {
   return symbols;
 }
 
-function parepareCircuitDir(circuitDirName, alwaysRecompile) {
+function parepareCircuitDir(circuitDirName, { alwaysRecompile = false, verbose = false } = {}) {
   // console.log('compiling dir', circuitDirName);
   const circuitFilePath = path.join(circuitDirName, 'circuit.circom');
   const r1csFilepath = path.join(circuitDirName, 'circuit.r1cs');
   const symFilepath = path.join(circuitDirName, 'circuit.sym');
   const binaryFilePath = path.join(circuitDirName, 'circuit');
   if (alwaysRecompile || !fs.existsSync(binaryFilePath)) {
+    if (verbose) {
+      console.log('compile', circuitDirName);
+    }
     compileNativeBinary({ circuitDirName, r1csFilepath, circuitFilePath, symFilepath, binaryFilePath });
   } else {
-    console.log('skip compiling binary ', binaryFilePath);
+    if (verbose) {
+      console.log('skip compiling binary ', binaryFilePath);
+    }
   }
   return { circuitFilePath, r1csFilepath, symFilepath, binaryFilePath };
 }
@@ -152,13 +157,12 @@ function compileNativeBinary({ circuitDirName, r1csFilepath, circuitFilePath, sy
     // cmd = `NODE_OPTIONS=--max-old-space-size=8192 node ${snarkjsPath} r1cs print ${r1csFilepath} ${symFilepath}`;
     // shelljs.exec(cmd);
   }
-
   if (process.platform === 'darwin') {
     cmd = `g++ ${circuitDirName}/main.cpp ${circuitDirName}/calcwit.cpp ${circuitDirName}/utils.cpp ${circuitDirName}/fr.cpp ${circuitDirName}/fr.o ${cFilepath} -o ${binaryFilePath} -lgmp -std=c++11 -O3 -DSANITY_CHECK`;
     if (process.arch === 'arm64') {
       cmd = 'arch -x86_64 ' + cmd;
     } else {
-      cmd = cmd + ' -fopenmp';
+      //cmd = cmd + ' -fopenmp';
     }
   } else if (process.platform === 'linux') {
     cmd = `g++ -pthread ${circuitDirName}/main.cpp ${circuitDirName}/calcwit.cpp ${circuitDirName}/utils.cpp ${circuitDirName}/fr.cpp ${circuitDirName}/fr.o ${cFilepath} -o ${binaryFilePath} -lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`;
@@ -188,7 +192,10 @@ class CircuitTester {
 
   async compileAndload(circuitDirName) {
     this.circuitDirName = path.resolve(circuitDirName);
-    const { r1csFilepath, symFilepath, binaryFilePath } = parepareCircuitDir(this.circuitDirName, this.alwaysRecompile);
+    const { r1csFilepath, symFilepath, binaryFilePath } = parepareCircuitDir(this.circuitDirName, {
+      alwaysRecompile: this.alwaysRecompile,
+      verbose: this.verbose,
+    });
     this.binaryFilePath = binaryFilePath;
 
     this.r1cs = await loadR1cs(r1csFilepath, true, false);
@@ -238,6 +245,16 @@ class CircuitTester {
   }
 }
 
+async function testCircuitDir(circuitDir) {
+  let tester = new CircuitTester(path.basename(circuitDir), { alwaysRecompile: false, verbose: true });
+  await tester.compileAndload(circuitDir);
+  for (const testCaseName of fs.readdirSync(path.join(circuitDir, 'data'))) {
+    const dataDir = path.join(circuitDir, 'data', testCaseName);
+    console.log('test', dataDir);
+    await tester.checkInputOutputFile(path.join(dataDir, 'input.json'), path.join(dataDir, 'output.json'));
+  }
+}
+/*
 async function testCircuitDir(testDir, testCaseName) {
   if (testDir == '') {
     throw new Error('invalid testDir');
@@ -250,17 +267,19 @@ async function testCircuitDir(testDir, testCaseName) {
   await tester.checkInputOutputFile(path.join(testDir, 'input.json'), path.join(testDir, 'output.json'));
   console.log('test ', testDir, ' done');
 }
+*/
 
 async function writeCircuitIntoDir(circuitDir, component) {
-  fs.mkdirSync(circuitDir, {recursive: true});
+  fs.mkdirSync(circuitDir, { recursive: true });
   const circuitFilePath = path.join(circuitDir, 'circuit.circom');
   await generateMainTestCircom(circuitFilePath, component);
 }
 
-async function writeInputOutputIntoDir(circuitDir, input, output) {
-  const inputFilePath = path.join(circuitDir, 'input.json');
+async function writeInputOutputIntoDir(dataDir, input, output) {
+  fs.mkdirSync(dataDir, { recursive: true });
+  const inputFilePath = path.join(dataDir, 'input.json');
   await writeJsonWithBigint(inputFilePath, input);
-  const outputFilePath = path.join(circuitDir, 'output.json');
+  const outputFilePath = path.join(dataDir, 'output.json');
   await writeJsonWithBigint(outputFilePath, output);
 }
 
@@ -275,9 +294,9 @@ async function testWithInputOutput(input, output, component, name, circuitDir = 
   }
   // write input/output/circuit into the dir
   await writeCircuitIntoDir(circuitDir, component);
-  await writeInputOutputIntoDir(circuitDir, input, output);
+  await writeInputOutputIntoDir(path.join(circuitDir, 'data', name), input, output);
   // test the dir
-  await testCircuitDir(circuitDir, name);
+  await testCircuitDir(circuitDir);
   console.log('test', name, 'done\n');
 }
 

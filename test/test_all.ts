@@ -1,9 +1,9 @@
 import { testWithInputOutput } from './tester/c';
 import { writeCircuitIntoDir, writeInputOutputIntoDir } from './tester/c';
 // import { simpleTest } from './tester/wasm';
-
+import { circuitSrcToName } from './common';
 import { TestCheckLeafExists, TestCheckLeafExistsDisable, TestCheckLeafUpdate, TestCheckLeafUpdateDisable } from './binary_merkle_tree';
-import { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash } from './rescue';
+import { TestRescueHash } from './rescue';
 import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './hash_state';
 import { TestDepositToNew, TestDepositToOld } from './deposit';
 import { TestTransfer } from './transfer';
@@ -40,13 +40,27 @@ function getAllTests(): Array<SimpleTest> {
 export async function exportAllTests() {
   const tests = getAllTests();
   const outDir = 'testdata';
+  let circuitToData = new Map<string, Array<any>>();
+  // group same circuits to save compile time
   for (const t of tests) {
-    const testName = t.constructor.name;
-    const circuitDir = path.join(outDir, testName);
+    // eg: Block_1_1_1_1
+    const circuitName = circuitSrcToName(t.getComponent().main);
+    if (!circuitToData.has(circuitName)) {
+      circuitToData.set(circuitName, [t]);
+    } else {
+      circuitToData.set(circuitName, circuitToData.get(circuitName).concat([t]));
+    }
+  }
+  for (const [circuitName, arr] of circuitToData.entries()) {
+    const circuitDir = path.join(outDir, circuitName);
     fs.mkdirSync(circuitDir, { recursive: true });
-    console.log('export', testName, 'to', circuitDir);
-    await writeCircuitIntoDir(circuitDir, t.getComponent());
-    await writeInputOutputIntoDir(circuitDir, t.getInput(), t.getOutput());
+    await writeCircuitIntoDir(circuitDir, arr[0].getComponent());
+    for (const t of arr) {
+      const testName = t.constructor.name;
+      const dataDir = path.join(circuitDir, 'data', testName);
+      console.log('export', testName, 'to', dataDir);
+      await writeInputOutputIntoDir(dataDir, t.getInput(), t.getOutput());
+    }
   }
 }
 

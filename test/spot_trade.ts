@@ -6,6 +6,7 @@ import { getBTreeProof } from '../helper.ts/binary_merkle_tree';
 import { hashAccountState, hashOrderState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
+import { GlobalState } from './global_state';
 
 // circuit-level definitions
 const orderLevels = 2;
@@ -15,7 +16,7 @@ const accountLevels = 2;
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initTestCase() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels, 1);
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, 1);
 
   const account1 = new Account(null);
   const account2 = new Account(null);
