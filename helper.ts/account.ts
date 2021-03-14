@@ -38,9 +38,6 @@ class Account {
   public bjjCompressed: string;
 
   constructor(signature) {
-    // TODO: skip multiple init
-    zksync_crypto.zksync_crypto_init();
-
     // ethers signature is 65-byte
     if (signature) {
       // TODO: check signature format
