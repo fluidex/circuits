@@ -633,30 +633,20 @@ class GlobalState {
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
     encodedTx[TxDetailIdx.Order1ID] = order_id;
-    encodedTx[TxDetailIdx.TokenID] = tx.tokenID_sell;
-    encodedTx[TxDetailIdx.TokenID2] = tx.tokenID_buy;
+    encodedTx[TxDetailIdx.TokenID] = tx.previous_tokenID_sell;
+    encodedTx[TxDetailIdx.TokenID2] = tx.previous_tokenID_buy;
+    encodedTx[TxDetailIdx.TokenID3] = tx.tokenID_sell;
+    encodedTx[TxDetailIdx.TokenID4] = tx.tokenID_buy;
     encodedTx[TxDetailIdx.AccountID1] = tx.accountID;
     encodedTx[TxDetailIdx.EthAddr1] = account.ethAddr;
     encodedTx[TxDetailIdx.Sign1] = account.sign;
     encodedTx[TxDetailIdx.Ay1] = account.ay;
     encodedTx[TxDetailIdx.Nonce1] = account.nonce;
     encodedTx[TxDetailIdx.Balance1] = proof.leaf;
-
-
-    // TODO: need more token id
-
-    // previous_tokenID_sell: 0n,
-    // previous_tokenID_buy: 0n,
-    // previous_amount_sell: 0n,
-    // previous_amount_buy: 0n,
-    // previous_filled_sell: 0n,
-    // previous_filled_buy: 0n,
-
-    encodedTx[TxDetailIdx.Order1AmountSell] = tx.amount_sell;
-    encodedTx[TxDetailIdx.Order1AmountBuy] = tx.amount_buy;
-    encodedTx[TxDetailIdx.Order1FilledSell] = tx.amount_sell;
-    encodedTx[TxDetailIdx.Order1Filledbuy] = tx.amount_buy;
-
+    encodedTx[TxDetailIdx.Order1AmountSell] = tx.previous_amount_sell;
+    encodedTx[TxDetailIdx.Order1AmountBuy] = tx.previous_amount_buy;
+    encodedTx[TxDetailIdx.Order1FilledSell] = tx.previous_filled_sell;
+    encodedTx[TxDetailIdx.Order1Filledbuy] = tx.previous_filled_buy;
     encodedTx[TxDetailIdx.Order2AmountSell] = tx.amount_sell;
     encodedTx[TxDetailIdx.Order2AmountBuy] = tx.amount_buy;
     rawTx.payload = encodedTx;
