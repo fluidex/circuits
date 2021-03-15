@@ -1,4 +1,5 @@
 import { assert } from 'console';
+import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 import { hash } from './hash';
 
 class Tree<T> {
@@ -71,6 +72,45 @@ class Tree<T> {
     for (let i = 1; i <= this.height; i++) {
       idx = this.parentIdx(idx);
       this.recalculateParent(i, idx);
+    }
+  }
+  // of course there is no such thing 'parallel' in Js
+  // this function is only used as pseudo code for future Rust rewrite
+  setValueParallel(idx: bigint, value: T) {
+    // the precalculating can be done parallelly
+    let precalculated = new Array<Array<T>>();
+    let curIdx = idx;
+    let curValue = value;
+    for (let i = 0; i < this.height; i++) {
+      const pair = curIdx % 2n === 0n ? [curValue, this.getValue(i, curIdx + 1n)] : [this.getValue(i, curIdx - 1n), curValue];
+      curValue = hash(pair);
+      curIdx = this.parentIdx(curIdx);
+      precalculated.push([...pair, curValue]);
+    }
+    // apply the precalculated
+    let cacheMiss = false;
+    curIdx = idx;
+    curValue = value;
+    this.data[0].set(idx, value);
+    for (let i = 0; i < this.height; i++) {
+      const pair =
+        curIdx % 2n === 0n
+          ? [this.getValue(i, curIdx), this.getValue(i, curIdx + 1n)]
+          : [this.getValue(i, curIdx - 1n), this.getValue(i, curIdx)];
+      curIdx = this.parentIdx(curIdx);
+      if (!cacheMiss) {
+        if (!(precalculated[i][0] === pair[0] || precalculated[i][1] === pair[1])) {
+          // Due to this is a merkle tree, future caches will all be missed.
+          // precalculated becomes totally useless now
+          cacheMiss = true;
+          precalculated = null;
+        }
+      }
+      if (cacheMiss) {
+        this.data[i + 1].set(curIdx, hash(pair));
+      } else {
+        this.data[i + 1].set(curIdx, precalculated[i][2]);
+      }
     }
   }
   fillWithLeaves(leaves: Array<T> | Map<bigint, T>) {
