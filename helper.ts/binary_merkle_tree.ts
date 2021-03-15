@@ -64,6 +64,9 @@ class Tree<T> {
     this.data[level].set(idx, hash([this.getValue(level - 1, idx * 2n), this.getValue(level - 1, idx * 2n + 1n)]));
   }
   setValue(idx: bigint, value: T) {
+    if (this.getLeaf(idx) === value) {
+      return;
+    }
     this.data[0].set(idx, value);
     for (let i = 1; i <= this.height; i++) {
       idx = this.parentIdx(idx);
@@ -101,12 +104,26 @@ class Tree<T> {
   }
 }
 
-function getBTreeProof(leaves, index) {
-  let height = Math.round(Math.log2(leaves.length));
-  assert(Math.pow(2, height) == leaves.length, 'getBTreeProof');
-  let tree = new Tree<bigint>(height, 0n);
-  tree.fillWithLeaves(leaves);
-  return tree.getProof(index);
+function benchmarkTree() {
+  const h = 20;
+  let tree = new Tree<bigint>(h, 0n);
+  for (let i = 0; i < 100; i++) {
+    const start = Date.now();
+    const innerCount = 100;
+    for (let j = 0; j < innerCount; j++) {
+      if (j % 100 == 0) {
+        console.log(i, j);
+      }
+      tree.setValue(BigInt(j), BigInt(j + i));
+    }
+    const end = Date.now();
+    // 2021.03.15(Apple M1): 100 ops takes 4934ms. we definitely need parallel merkle tree written in Rust
+    console.log(`${innerCount} ops takes ${end - start}ms`);
+  }
 }
 
-export { Tree, getBTreeProof };
+export { Tree };
+
+if (require.main == module) {
+  benchmarkTree();
+}
