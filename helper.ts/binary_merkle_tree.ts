@@ -1,5 +1,4 @@
 import { assert } from 'console';
-import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 import { hash } from './hash';
 
 class Tree<T> {
@@ -20,13 +19,16 @@ class Tree<T> {
     }
     this.data = Array.from({ length: height + 1 }, () => new Map());
   }
-  print(dense = true, emptyLabel = (height, value) => 'None') {
+  maxLeafNum() {
+    return Math.pow(2, this.height);
+  }
+  print(dense = true, emptyLabel = 'None') {
     console.log(`Tree(height: ${this.height}, leafNum: ${Math.pow(2, this.height)}, nonEmptyLeafNum: ${this.data[0].size})`);
     if (dense) {
       for (let i = 0; i < this.data.length; i++) {
         process.stdout.write(i == 0 ? 'Leaves\t' : `Mid(${i})\t`);
         for (let j = 0; j < Math.pow(2, this.height - i); j++) {
-          process.stdout.write(this.data[i].has(BigInt(j)) ? this.data[i].get(BigInt(j)).toString() : emptyLabel(i, this.defaultNodes[i]));
+          process.stdout.write(this.data[i].has(BigInt(j)) ? this.data[i].get(BigInt(j)).toString() : emptyLabel);
           process.stdout.write(',');
         }
         process.stdout.write('\n');
@@ -113,19 +115,18 @@ class Tree<T> {
       }
     }
   }
-  fillWithLeaves(leaves: Array<T> | Map<bigint, T>) {
-    if (Array.isArray(leaves)) {
-      if (leaves.length != Math.pow(2, this.height)) {
-        throw Error('invalid leaves size ' + leaves.length);
-      }
-      // TODO: optimize here
-      for (let i = 0; i < leaves.length; i++) {
-        this.setValue(BigInt(i), leaves[i]);
-      }
-    } else if (leaves instanceof Map) {
-      for (let [k, v] of leaves.entries()) {
-        this.setValue(k, v);
-      }
+  fillWithLeavesArray(leaves: Array<T>) {
+    if (leaves.length != this.maxLeafNum()) {
+      throw Error('invalid leaves size ' + leaves.length);
+    }
+    // TODO: optimize here
+    for (let i = 0; i < leaves.length; i++) {
+      this.setValue(BigInt(i), leaves[i]);
+    }
+  }
+  fillWithLeavesMap(leaves: Map<bigint, T>) {
+    for (let [k, v] of leaves.entries()) {
+      this.setValue(k, v);
     }
   }
   getRoot() {
