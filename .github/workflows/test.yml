@@ -19,13 +19,9 @@ jobs:
       NODE_OPTIONS: "--max_old_space_size=8192"
 
     steps:
-      - name: Instal nasm
+      - name: apt instal
         run:
-          sudo apt install nasm
-
-      - name: Instal nlohmann/json
-        run: 
-          sudo apt install nlohmann-json3-dev
+          sudo apt install nasm nlohmann-json3-dev
 
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -46,5 +42,12 @@ jobs:
       - name: NPM install
         run: npm install
 
-      - name: Run tests
-        run: time bash tools/fast_test.sh 
+      - name: Run test_all (fast_test)
+        run: |
+          rm testdata -rf
+          time bash tools/fast_test.sh 
+
+      - name: Run global_state_test (with real trades)
+        run: |
+          rm testdata -rf
+          time npx ts-node test/global_state_test.ts
