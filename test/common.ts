@@ -14,7 +14,7 @@ enum TxType {
   Nop,
 }
 
-const TxLength = 34;
+const TxLength = 32;
 enum TxDetailIdx {
   TokenID,
   Amount,
@@ -50,10 +50,6 @@ enum TxDetailIdx {
   Order2AmountBuy,
   Order2FilledSell,
   Order2FilledBuy,
-
-  // only used in place_order
-  TokenID3,
-  TokenID4,
 }
 
 class TxSignature {
@@ -96,12 +92,6 @@ class WithdrawTx {
 
 class PlaceOrderTx {
   accountID: bigint;
-  previous_tokenID_sell: bigint;
-  previous_tokenID_buy: bigint;
-  previous_amount_sell: bigint;
-  previous_amount_buy: bigint;
-  previous_filled_sell: bigint;
-  previous_filled_buy: bigint;
   tokenID_sell: bigint;
   tokenID_buy: bigint;
   amount_sell: bigint;
