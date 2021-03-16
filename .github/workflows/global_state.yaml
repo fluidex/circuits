@@ -1,0 +1,48 @@
+name: test
+
+on:
+  push:
+    branches:
+      - master
+      - prod
+      - release/*
+  pull_request:
+    branches:
+      - master
+      - prod
+      - release/*
+
+jobs:
+  global_state:
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: "--max_old_space_size=8192"
+
+    steps:
+      - name: apt instal
+        run:
+          sudo apt install nasm nlohmann-json3-dev
+
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install Node.js 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Cache npm packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: NPM install
+        run: npm install
+
+      - name: Run global_state_test (with real trades)
+        run: |
+          rm testdata -rf
+          time npx ts-node test/global_state_test.ts

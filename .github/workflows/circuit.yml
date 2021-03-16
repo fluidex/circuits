@@ -1,4 +1,4 @@
-name: CI
+name: test
 
 on:
   push:
@@ -13,13 +13,13 @@ on:
       - release/*
 
 jobs:
-  tests:
+  circuits:
     runs-on: ubuntu-latest
     env:
       NODE_OPTIONS: "--max_old_space_size=8192"
 
     steps:
-      - name: apt instal
+      - name: apt install
         run:
           sudo apt install nasm nlohmann-json3-dev
 
@@ -46,8 +46,3 @@ jobs:
         run: |
           rm testdata -rf
           time bash tools/fast_test.sh 
-
-      - name: Run global_state_test (with real trades)
-        run: |
-          rm testdata -rf
-          time npx ts-node test/global_state_test.ts
