@@ -1,10 +1,5 @@
-const EC = require('elliptic').ec;
-const ec = new EC('secp256k1');
-const keccak256 = require('js-sha3').keccak256;
-const crypto = require('crypto');
 const eddsa = require('./eddsa');
 const babyJub = require('circomlib').babyJub;
-const Scalar = require('ffjavascript').Scalar;
 const utilsScalar = require('ffjavascript').utils;
 import * as ethers from 'ethers';
 import * as zksync_crypto from 'zksync-crypto';
