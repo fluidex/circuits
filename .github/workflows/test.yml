@@ -30,10 +30,10 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Install Node.js 14
+      - name: Install Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '15'
 
       - name: Cache npm packages
         uses: actions/cache@v2
