@@ -70,7 +70,7 @@ function replayTrades() {
     .split('\n')
     .filter(Boolean)
     .slice(0, maxTradesNumToTest);
-  let trades = lines.map(function(line) {
+  let trades = lines.map(function (line) {
     return JSON.parse(line);
   });
 

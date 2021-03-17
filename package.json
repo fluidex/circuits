@@ -1,7 +1,7 @@
 {
   "scripts": {
     "test": "npx ts-node ./test/test_all.ts",
-    "fmt": "prettier --write \"**/*.{js,ts}\""
+    "fmt": "npx prettier --write \"**/*.{js,ts}\""
   },
   "devDependencies": {
     "@types/node": "^14.14.11",
@@ -12,6 +12,7 @@
     "decimal.js": "^10.2.1",
     "ethers": "^5.0.31",
     "ffjavascript": "^0.2.34",
+    "prettier": "^2.2.1",
     "scrypt-js": "^3.0.1",
     "shelljs": "^0.8.4",
     "snarkjs": "^0.3.55",

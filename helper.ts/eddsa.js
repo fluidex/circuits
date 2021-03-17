@@ -23,21 +23,14 @@ function pruneBuffer(_buff) {
 }
 
 function prv2pub(prv) {
-  const sBuff = pruneBuffer(
-    createBlakeHash('blake512')
-      .update(prv)
-      .digest()
-      .slice(0, 32),
-  );
+  const sBuff = pruneBuffer(createBlakeHash('blake512').update(prv).digest().slice(0, 32));
   let s = utils.leBuff2int(sBuff);
   const A = babyJub.mulPointEscalar(babyJub.Base8, Scalar.shr(s, 3));
   return A;
 }
 
 function signWithHasher(prv, msg, hasher) {
-  const h1 = createBlakeHash('blake512')
-    .update(prv)
-    .digest();
+  const h1 = createBlakeHash('blake512').update(prv).digest();
   const sBuff = pruneBuffer(h1.slice(0, 32));
   const s = utils.leBuff2int(sBuff);
   const A = babyJub.mulPointEscalar(babyJub.Base8, Scalar.shr(s, 3));

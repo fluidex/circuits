@@ -250,7 +250,7 @@ async function testCircuitDir(circuitDir) {
   await tester.compileAndload(circuitDir);
   for (const testCaseName of fs.readdirSync(path.join(circuitDir, 'data'))) {
     const dataDir = path.join(circuitDir, 'data', testCaseName);
-    console.log('test', dataDir);
+    console.log('\ntest', dataDir);
     await tester.checkInputOutputFile(path.join(dataDir, 'input.json'), path.join(dataDir, 'output.json'));
   }
 }

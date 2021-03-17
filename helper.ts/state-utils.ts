@@ -34,18 +34,8 @@ function hashAccountState(st) {
   return hash(accountState2Array(st));
 }
 
-const emptyOrderHash = hashOrderState({
-  status: 1n, // TODO: need to maintain a table
-  tokenbuy: 0n,
-  tokensell: 0n,
-  filled_sell: 0n,
-  filled_buy: 0n,
-  total_sell: 0n,
-  total_buy: 0n,
-});
-
 function calculateGenesisOrderRoot(orderLevels) {
-  return new Tree<bigint>(orderLevels, emptyOrderHash).getRoot();
+  return new Tree<bigint>(orderLevels, 0n).getRoot();
 }
 
 /**
@@ -72,4 +62,4 @@ function hashOrderState(st) {
   return hash(orderState2Array(st));
 }
 
-export { hashAccountState, hashOrderState, emptyOrderHash, calculateGenesisOrderRoot };
+export { hashAccountState, hashOrderState, calculateGenesisOrderRoot };
