@@ -238,7 +238,7 @@ class GlobalState {
     this.addRawTx(rawTx);
   }
   DepositToOld(tx: DepositToOldTx) {
-    assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'DepositToOld');
+    //assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'DepositToOld');
     let proof = this.stateProof(tx.accountID, tx.tokenID);
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);

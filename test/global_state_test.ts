@@ -11,6 +11,10 @@ function getTokenId(tokenName) {
   return { ETH: 0n, USDT: 1n }[tokenName];
 }
 
+function getTokenPrec(tokenName) {
+  return { ETH: 6, USDT: 6 }[tokenName];
+}
+
 function getBaseAndQuoteOfTrade(trade): [string, string] {
   return trade.market.split('_');
 }
@@ -169,7 +173,7 @@ function handleDeposit(state: GlobalState, deposit) {
   assert(balanceBefore >= 0, 'invalid balance' + deposit.toString());
   const expectedBalanceBefore = state.getTokenBalance(userID, tokenID);
   assert(expectedBalanceBefore == balanceBefore, 'invalid balance before');
-  state.setTokenBalance(userID, tokenID, balanceAfter);
+  state.DepositToOld({ accountID: userID, tokenID, amount: delta });
   // skip check balanceAfter here... the function is too simple to be wrong...
 }
 
