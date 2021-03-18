@@ -238,7 +238,7 @@ class GlobalState {
     this.addRawTx(rawTx);
   }
   DepositToOld(tx: DepositToOldTx) {
-    assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'DepositToOld');
+    //assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'DepositToOld');
     let proof = this.stateProof(tx.accountID, tx.tokenID);
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
@@ -561,9 +561,9 @@ class GlobalState {
     };
     this.setAccountOrder(tx.order1_accountID, tx.order1_id, newOrder1);
     // TODO: self trade is enabled here now. recheck it later
-    if (this.options.enable_self_trade) {
-      account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.tokenID_2to1);
-    }
+    //if (this.options.enable_self_trade) {
+    //  account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.tokenID_2to1);
+    //}
     this.setTokenBalance(tx.order1_accountID, tx.tokenID_2to1, account1_balance_buy + tx.amount_2to1);
     rawTx.accountPath1 = this.accountTree.getProof(tx.order2_accountID).path_elements;
 
@@ -577,9 +577,9 @@ class GlobalState {
       total_buy: old_order_state.order2_amountbuy,
     };
     this.setAccountOrder(tx.order2_accountID, tx.order2_id, newOrder2);
-    if (this.options.enable_self_trade) {
-      account2_balance_buy = this.getTokenBalance(tx.order2_accountID, tx.tokenID_1to2);
-    }
+    //if (this.options.enable_self_trade) {
+    //  account2_balance_buy = this.getTokenBalance(tx.order2_accountID, tx.tokenID_1to2);
+    //}
     this.setTokenBalance(tx.order2_accountID, tx.tokenID_1to2, account2_balance_buy + tx.amount_1to2);
 
     rawTx.rootAfter = this.root();

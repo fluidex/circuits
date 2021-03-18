@@ -70,6 +70,9 @@ class Tree<T> {
     if (this.getLeaf(idx) === value) {
       return;
     }
+    if (idx >= this.maxLeafNum()) {
+      throw new Error('invalid tree idx ' + idx);
+    }
     this.data[0].set(idx, value);
     for (let i = 1; i <= this.height; i++) {
       idx = this.parentIdx(idx);
@@ -101,6 +104,8 @@ class Tree<T> {
           : [this.getValue(i, curIdx - 1n), this.getValue(i, curIdx)];
       curIdx = this.parentIdx(curIdx);
       if (!cacheMiss) {
+        // TODO: is the `cacheMiss` shortcut really needed? comparing bigint is quite cheap compared to hash
+        // `cacheMiss` makes codes more difficult to read
         if (!(precalculated[i][0] === pair[0] || precalculated[i][1] === pair[1])) {
           // Due to this is a merkle tree, future caches will all be missed.
           // precalculated becomes totally useless now
