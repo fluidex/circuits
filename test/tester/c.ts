@@ -215,7 +215,7 @@ class CircuitTester {
     const genWtnsOut = shelljs.exec(cmd);
     if (genWtnsOut.stderr || genWtnsOut.code != 0) {
       console.error(genWtnsOut.stderr);
-      throw new Error('Could not generate witness');
+      throw new Error('Could not generate witness for ' + inputFilePath);
     }
     return witnessFilePath;
   }
@@ -296,7 +296,7 @@ async function testWithInputOutput(input, output, component, name, circuitDir = 
   await writeCircuitIntoDir(circuitDir, component);
   await writeInputOutputIntoDir(path.join(circuitDir, 'data', name), input, output);
   // test the dir
-  await testCircuitDir(circuitDir, name);
+  await testCircuitDir(circuitDir);
   console.log('test', name, 'done\n');
 }
 

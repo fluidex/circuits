@@ -207,7 +207,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processPlaceOrder[i].new_order_amountsell <== decodedTx[i].order2_amountsell;
         processPlaceOrder[i].new_order_amountbuy <== decodedTx[i].order2_amountbuy;
         processPlaceOrder[i].accountID <== decodedTx[i].accountID1;
-        processPlaceOrder[i].tokenID <== decodedTx[i].tokenID;
+        processPlaceOrder[i].tokenID <== decodedTx[i].tokenID3;
         processPlaceOrder[i].balance <== decodedTx[i].balance1;
         processPlaceOrder[i].nonce <== decodedTx[i].nonce1;
         processPlaceOrder[i].sign <== decodedTx[i].sign1;
