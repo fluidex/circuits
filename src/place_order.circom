@@ -45,6 +45,7 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     signal order_path_index[orderLevels];
     signal account_path_index[accountLevels];
 
+    new_order_tokensell === tokenID;
     // decode balance_path_index
     component bTokenID = Num2Bits(balanceLevels);
     bTokenID.in <== tokenID;
@@ -67,7 +68,6 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     }
 
     // check balance. (Removed. Since we don't have frozen_balance we cannot gurantee sufficient balance -- user may transfer/withraw after place_order.)
-    // new_order_tokensell === tokenID;
     // component balance_ge0 = GreaterEqThan(192);
     // balance_ge0.in[0] <== balance;
     // balance_ge0.in[1] <== new_order_amountsell;
