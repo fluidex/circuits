@@ -1,5 +1,9 @@
 import { hash } from '../helper.ts/hash';
-import { hashAccountState } from '../helper.ts/state-utils';
+import { assert } from 'console';
+import { Account } from '../helper.ts/account';
+import { Tree } from '../helper.ts/binary_merkle_tree';
+import { hashAccountState, hashOrderState, emptyOrderHash, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { TestCheckLeafUpdateDisable } from './binary_merkle_tree';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 
@@ -14,7 +18,7 @@ enum TxType {
   Nop,
 }
 
-const TxLength = 32;
+const TxLength = 34;
 enum TxDetailIdx {
   TokenID,
   Amount,
@@ -50,6 +54,10 @@ enum TxDetailIdx {
   Order2AmountBuy,
   Order2FilledSell,
   Order2FilledBuy,
+
+  // only used in place_order
+  TokenID3,
+  TokenID4,
 }
 
 class TxSignature {
@@ -92,6 +100,12 @@ class WithdrawTx {
 
 class PlaceOrderTx {
   accountID: bigint;
+  previous_tokenID_sell: bigint;
+  previous_tokenID_buy: bigint;
+  previous_amount_sell: bigint;
+  previous_amount_buy: bigint;
+  previous_filled_sell: bigint;
+  previous_filled_buy: bigint;
   tokenID_sell: bigint;
   tokenID_buy: bigint;
   amount_sell: bigint;

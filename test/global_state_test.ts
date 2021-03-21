@@ -4,8 +4,11 @@ import { testCircuitDir, writeCircuitIntoDir, writeInputOutputIntoDir } from './
 import { assert } from 'console';
 import * as fs from 'fs';
 import * as path from 'path';
+var printf = require('printf');
 import { inspect } from 'util';
 inspect.defaultOptions.depth = null;
+
+const verbose = false;
 
 function getTokenId(tokenName) {
   return { ETH: 0n, USDT: 1n }[tokenName];
@@ -129,8 +132,16 @@ function handleTrade(state, trade, placedOrder) {
       };
       let newOrderID = state.PlaceOrder(orderToPut);
       placedOrder.set(orderId, [orderToPut.accountID, newOrderID]);
+      if (verbose) {
+        console.log('global order id to user order id', orderId, orderToPut.accountID, newOrderID);
+      }
+    } else {
+      if (verbose) {
+        console.log('skip put order', orderId);
+      }
     }
   }
+
   // second check order states are same as 'GlobalState'
   function checkState(balanceState, askOrder, bidOrder) {
     let balanceStateLocal = {
@@ -160,6 +171,7 @@ function handleTrade(state, trade, placedOrder) {
   state.SpotTrade(spotTradeTx);
   // finally we check the state after this trade
   checkState(parseBalance(trade.state_after.balance), askOrderStateAfter, bidOrderStateAfter);
+
   console.log('trade', trade.id, 'test done');
 }
 
@@ -196,7 +208,8 @@ function replayMsgs() {
   const maxAccountNum = Math.pow(2, accountLevels);
   const maxTokenNum = Math.pow(2, balanceLevels);
   // `enable_self_trade` test purpose only
-  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs, { verbose: false });
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs, { verbose });
+  console.log('genesis root', state.root());
   // external id to <user_id, order_id_of_user>
   let placedOrder = new Map<bigint, [bigint, bigint]>();
   //const maxUserID = Math.max(...trades.map(trade => [trade.ask_user_id, trade.bid_user_id]).flat());
@@ -242,7 +255,7 @@ async function exportCircuitAndTestData(blocks, component) {
   await writeCircuitIntoDir(circuitDir, component);
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
-    await writeInputOutputIntoDir(path.join(circuitDir, 'data', i.toString()), block, {});
+    await writeInputOutputIntoDir(path.join(circuitDir, 'data', printf('%04d', i)), block, {});
   }
   return circuitDir;
 }

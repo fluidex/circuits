@@ -130,6 +130,12 @@ function initBlockTestCase() {
 
   const placeOrderTx = {
     accountID: accountID1,
+    previous_tokenID_sell: 0n,
+    previous_tokenID_buy: 0n,
+    previous_amount_sell: 0n,
+    previous_amount_buy: 0n,
+    previous_filled_sell: 0n,
+    previous_filled_buy: 0n,
     tokenID_sell: tokenID_1to2,
     tokenID_buy: tokenID_2to1,
     amount_sell: 1000n,

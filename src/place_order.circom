@@ -7,10 +7,18 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
 
     // order info
     signal input order_id;
-    signal input order_tokensell;
-    signal input order_amountsell;
-    signal input order_tokenbuy;
-    signal input order_amountbuy;
+    // old info
+    signal input old_order_tokensell;
+    signal input old_order_filledsell;
+    signal input old_order_amountsell;
+    signal input old_order_tokenbuy;
+    signal input old_order_filledbuy;
+    signal input old_order_amountbuy;
+    // new info
+    signal input new_order_tokensell;
+    signal input new_order_amountsell;
+    signal input new_order_tokenbuy;
+    signal input new_order_amountbuy;
 
     signal input accountID;
     signal input tokenID;
@@ -37,6 +45,7 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     signal order_path_index[orderLevels];
     signal account_path_index[accountLevels];
 
+    new_order_tokensell === tokenID;
     // decode balance_path_index
     component bTokenID = Num2Bits(balanceLevels);
     bTokenID.in <== tokenID;
@@ -59,10 +68,9 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     }
 
     // check balance. (Removed. Since we don't have frozen_balance we cannot gurantee sufficient balance -- user may transfer/withraw after place_order.)
-    // order_tokensell === tokenID;
     // component balance_ge0 = GreaterEqThan(192);
     // balance_ge0.in[0] <== balance;
-    // balance_ge0.in[1] <== order_amountsell;
+    // balance_ge0.in[1] <== new_order_amountsell;
     // component balance_check = ForceEqualIfEnabled();
     // balance_check.enabled <== enabled;
     // balance_check.in[0] <== balance_ge0.out;
@@ -76,20 +84,32 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
         balance_tree.path_elements[i][0] <== balance_path_elements[i][0];
     }
 
-    component orderHash = HashOrder();
-    orderHash.tokensell <== order_tokensell;
-    orderHash.tokenbuy <== order_tokenbuy;
-    orderHash.filled_sell <== 0;
-    orderHash.filled_buy <== 0;
-    orderHash.total_sell <== order_amountsell;
-    orderHash.total_buy <== order_amountbuy;
-    orderHash.status <== 0;
+    // here we don't need to check
+    // ((old_order_filledsell==old_order_amountsell) || (old_order_filledbuy==old_order_amountbuy))
+    // we can make sure this when updating order to "filled" in circuits
+    component oldOrderHash = HashOrder();
+    oldOrderHash.tokensell <== old_order_tokensell;
+    oldOrderHash.tokenbuy <== old_order_tokenbuy;
+    oldOrderHash.filled_sell <== old_order_filledsell;
+    oldOrderHash.filled_buy <== old_order_filledbuy;
+    oldOrderHash.total_sell <== old_order_amountsell;
+    oldOrderHash.total_buy <== old_order_amountbuy;
+    oldOrderHash.status <== 1; // TODO: need to maintain a table
+
+    component newOrderHash = HashOrder();
+    newOrderHash.tokensell <== new_order_tokensell;
+    newOrderHash.tokenbuy <== new_order_tokenbuy;
+    newOrderHash.filled_sell <== 0;
+    newOrderHash.filled_buy <== 0;
+    newOrderHash.total_sell <== new_order_amountsell;
+    newOrderHash.total_buy <== new_order_amountbuy;
+    newOrderHash.status <== 0;
 
     // - check order tree update
     component order_update_checker = CheckLeafUpdate(orderLevels);
     order_update_checker.enabled <== enabled;
-    order_update_checker.oldLeaf <== 0;
-    order_update_checker.newLeaf <== orderHash.out;
+    order_update_checker.oldLeaf <== oldOrderHash.out;
+    order_update_checker.newLeaf <== newOrderHash.out;
     for (var i = 0; i < orderLevels; i++) {
         order_update_checker.path_index[i] <== order_path_index[i];
         order_update_checker.path_elements[i][0] <== order_path_elements[i][0];

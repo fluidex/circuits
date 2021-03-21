@@ -215,7 +215,7 @@ class CircuitTester {
     const genWtnsOut = shelljs.exec(cmd);
     if (genWtnsOut.stderr || genWtnsOut.code != 0) {
       console.error(genWtnsOut.stderr);
-      throw new Error('Could not generate witness');
+      throw new Error('Could not generate witness for ' + inputFilePath);
     }
     return witnessFilePath;
   }
