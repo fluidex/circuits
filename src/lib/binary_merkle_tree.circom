@@ -166,3 +166,28 @@ template CalculateRootFromLeaves(levels) {
     // Wire the output of the final hash to this circuit's output
     root <== hashers[numHashers-1].hash;
 }
+
+template CalculateRootFromRepeatedLeaves(n_levels) {
+    signal input leaf;
+    signal output root;
+
+    // TODO: how many?
+    for (var i = 0; i < numHashers; i++) {
+        hashers[i] = HashLeftRight();
+    }
+    // TODO: how many?
+    for (i=0; i < numLeafHashers; i++){
+        hashers[i].left <== leaves[i*2];
+        hashers[i].right <== leaves[i*2+1];
+    }
+
+    var k = 0;
+    // TODO: how many?
+    for (i=numLeafHashers; i<numLeafHashers + numIntermediateHashers; i++) {
+        hashers[i].left <== hashers[k*2].hash;
+        hashers[i].right <== hashers[k*2+1].hash;
+        k++;
+    }
+
+    root <== hashers[numHashers-1].hash;
+}
