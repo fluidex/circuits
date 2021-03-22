@@ -180,8 +180,8 @@ template CalculateRootFromRepeatedLeaves(n_levels) {
     hashers.right <== leaf;
 
     for (var i = 1; i < n_levels; i++) {
-        hashers[i].left = hashers[i-1].hash;
-        hashers[i].right = hashers[i-1].hash;
+        hashers[i].left <== hashers[i-1].hash;
+        hashers[i].right <== hashers[i-1].hash;
     }
 
     root <== hashers[n_levels-1].hash;
