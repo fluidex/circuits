@@ -171,23 +171,17 @@ template CalculateRootFromRepeatedLeaves(n_levels) {
     signal input leaf;
     signal output root;
 
-    // TODO: how many?
-    for (var i = 0; i < numHashers; i++) {
+    for (var i = 0; i < n_levels; i++) {
         hashers[i] = HashLeftRight();
     }
-    // TODO: how many?
-    for (i=0; i < numLeafHashers; i++){
-        hashers[i].left <== leaves[i*2];
-        hashers[i].right <== leaves[i*2+1];
+
+    hashers.left <== leaf;
+    hashers.right <== leaf;
+
+    for (var i = 1; i < n_levels; i++) {
+        hashers[i].left = hashers[i-1].hash;
+        hashers[i].right = hashers[i-1].hash;
     }
 
-    var k = 0;
-    // TODO: how many?
-    for (i=numLeafHashers; i<numLeafHashers + numIntermediateHashers; i++) {
-        hashers[i].left <== hashers[k*2].hash;
-        hashers[i].right <== hashers[k*2+1].hash;
-        k++;
-    }
-
-    root <== hashers[numHashers-1].hash;
+    root <== hashers[n_levels-1].hash;
 }
