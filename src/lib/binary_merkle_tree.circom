@@ -171,6 +171,7 @@ template CalculateRootFromRepeatedLeaves(n_levels) {
     signal input leaf;
     signal output root;
 
+    component hashers[n_levels];
     for (var i = 0; i < n_levels; i++) {
         hashers[i] = HashLeftRight();
     }
