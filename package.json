@@ -9,7 +9,7 @@
     "@typescript-eslint/parser": "^4.18.0",
     "aes-js": "^3.1.2",
     "bech32": "^2.0.0",
-    "circom": "^0.5.35",
+    "circom": "git+https://github.com/fluidex/circom.git",
     "circomlib": "^0.5.0",
     "decimal.js": "^10.2.1",
     "eslint": "^7.22.0",
