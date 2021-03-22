@@ -19,9 +19,20 @@ function testAll() {
 	do
 		node dist/test/cli/snarkit.js test testdata/$d &
 	done
-	wait
+	for job in `jobs -p`
+	do
+		wait $job || exit 1
+	done
 }
 
+function checkCPU() {
+	for f in bmi2 adx
+	do
+		(cat /proc/cpuinfo |grep flags|head -n 1|grep -q $f) || (echo 'invalid cpu'; exit 1)
+	done
+}
+
+checkCPU
 setup
 generateTestCases
 testAll
