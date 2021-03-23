@@ -5,6 +5,7 @@ import { Account } from '../helper.ts/account';
 import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
+import { GlobalState } from './global_state';
 
 // circuit-level definitions
 const orderLevels = 2;
@@ -14,7 +15,7 @@ const accountLevels = 5;
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initTestCase() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, 1);
 
   const tokenID = 2n;
   const amount = 300n;
@@ -24,13 +25,13 @@ function initTestCase() {
   const balance2 = 200n;
   const nonce2 = 77n;
 
-  const account1 = new Account(2);
+  const account1 = new Account(null);
   const accountID1 = state.createNewAccount();
-  const account2 = new Account(1);
+  const account2 = new Account(null);
   const accountID2 = state.createNewAccount();
 
   // set up account1 initial state
-  state.setAccountKey(accountID1, account1.publicKey);
+  state.setAccountKey(accountID1, account1);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID) {
       state.setTokenBalance(accountID1, tokenID, balance1);
@@ -41,7 +42,7 @@ function initTestCase() {
   state.setAccountNonce(accountID1, nonce1);
   state.setAccountOrderRoot(accountID1, genesisOrderRoot);
   // set up account2 initial state
-  state.setAccountKey(accountID2, account2.publicKey);
+  state.setAccountKey(accountID2, account2);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID) {
       state.setTokenBalance(accountID2, tokenID, balance2);
@@ -84,18 +85,18 @@ function initTestCase() {
     ay1: Scalar.fromString(account1.ay, 16),
     ethAddr1: Scalar.fromString(account1.ethAddr, 16),
     orderRoot1: genesisOrderRoot,
-    sender_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],
-    sender_account_path_elements: block.account_path_elements[block.account_path_elements.length-1][0],
+    sender_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][0],
+    sender_account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][0],
     nonce2: nonce2,
     sign2: account2.sign,
     balance2: balance2,
     ay2: Scalar.fromString(account2.ay, 16),
     ethAddr2: Scalar.fromString(account2.ethAddr, 16),
     orderRoot2: genesisOrderRoot,
-    receiver_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
-    receiver_account_path_elements: block.account_path_elements[block.account_path_elements.length-1][1],
-    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
-    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length-1],
+    receiver_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][1],
+    receiver_account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][1],
+    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
+    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
   };
 }
 

@@ -16,24 +16,48 @@ async function generateMainTestCircom({ src, main }: TestComponent) {
   return circuit;
 }
 
-async function testWithInputOutput(t: SimpleTest) {
-  let circuit = await generateMainTestCircom(t.getComponent());
-  let logFn = console.log;
-  let calculateWitnessOptions = {
-    sanityCheck: true,
-    logTrigger: logFn,
-    logOutput: logFn,
-    logStartComponent: logFn,
-    logFinishComponent: logFn,
-    logSetSignal: logFn,
-    logGetSignal: logFn,
-  };
-  const witness = await circuit.calculateWitness(t.getInput(), calculateWitnessOptions);
-  await circuit.checkConstraints(witness);
-  await circuit.loadSymbols();
-  await circuit.assertOut(witness, t.getOutput());
-  console.log('test ', t.constructor.name, ' done');
-  return true;
+// It seems instance cannot be reused
+class CircuitTester {
+  circuit: any;
+  component: any;
+  constructor(component) {
+    this.component = component;
+  }
+  async load() {
+    let circuit = await generateMainTestCircom(this.component);
+    this.circuit = circuit;
+  }
+  defaultWitnessOption() {
+    let logFn = console.log;
+    let calculateWitnessOptions = {
+      sanityCheck: true,
+      logTrigger: logFn,
+      logOutput: logFn,
+      logStartComponent: logFn,
+      logFinishComponent: logFn,
+      logSetSignal: logFn,
+      logGetSignal: logFn,
+    };
+    return calculateWitnessOptions;
+  }
+  async checkInputOutput(input, output) {
+    const witness = await this.circuit.calculateWitness(input, this.defaultWitnessOption());
+    await this.circuit.checkConstraints(witness);
+    if (Object.keys(output).length !== 0) {
+      await this.circuit.loadSymbols();
+      await this.circuit.assertOut(witness, output);
+    }
+    console.log('test ', this.component.main, ' done');
+    return true;
+  }
 }
 
-export { testWithInputOutput };
+async function testWithInputOutput(input, output, component, name) {
+  let tester = new CircuitTester(component);
+  await tester.load();
+  let result = await tester.checkInputOutput(input, output);
+  console.log('test ', name, ' done');
+  return result;
+}
+
+export { testWithInputOutput, CircuitTester };

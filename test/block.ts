@@ -6,54 +6,55 @@ import { Account } from '../helper.ts/account';
 import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
+import { GlobalState } from './global_state';
 //import { assert } from 'console';
 const assert = require('assert').strict;
 
 // circuit-level definitions
-const nTxs = 7;
+const nTxs = 8;
 const orderLevels = 1;
 const balanceLevels = 2;
 const accountLevels = 2;
 
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
-function initTestCase() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+function initBlockTestCase() {
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs);
 
   const tokenID = 0n;
   const tokenID_1to2 = 0n;
   const tokenID_2to1 = 1n;
 
-  const account0 = new Account(2);
-  const account1 = new Account(1);
-  const account2 = new Account(0);
+  const account0 = new Account(null);
+  const account1 = new Account(null);
+  const account2 = new Account(null);
   const accountID0 = state.createNewAccount();
   const accountID1 = state.createNewAccount();
   const accountID2 = state.createNewAccount();
 
   /// mock existing account1 data
-  state.setAccountKey(accountID1, account1.publicKey);
+  state.setAccountKey(accountID1, account1);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
-      state.setTokenBalance(accountID1, BigInt(i), 10n + BigInt(i));
+    state.setTokenBalance(accountID1, BigInt(i), 10n + BigInt(i));
   }
   state.setAccountNonce(accountID1, 19n);
-  // order1
-  const order1_id = 1n;
-  const order1 = {
-    status: 0, // open
-    tokenbuy: tokenID_2to1,
-    tokensell: tokenID_1to2,
-    filled_sell: 0n,
-    filled_buy: 0n,
-    total_sell: 1000n,
-    total_buy: 10000n,
-  };
-  state.setAccountOrder(accountID1, order1_id, order1);
+  // // order1. (Removed. Now we use placeOrderTx to set this order.)
+  // const order1_id = 1n;
+  // const order1 = {
+  //   status: 0, // open
+  //   tokenbuy: tokenID_2to1,
+  //   tokensell: tokenID_1to2,
+  //   filled_sell: 0n,
+  //   filled_buy: 0n,
+  //   total_sell: 1000n,
+  //   total_buy: 10000n,
+  // };
+  // state.setAccountOrder(accountID1, order1_id, order1);
 
   /// mock existing account2 data
-  state.setAccountKey(accountID2, account2.publicKey);
+  state.setAccountKey(accountID2, account2);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
-      state.setTokenBalance(accountID2, BigInt(i), 20n + BigInt(i));
+    state.setTokenBalance(accountID2, BigInt(i), 20n + BigInt(i));
   }
   state.setAccountNonce(accountID2, 29n);
   // order2
@@ -126,6 +127,23 @@ function initTestCase() {
     tokenID: tokenID_2to1,
     amount: 1990n,
   });
+
+  const placeOrderTx = {
+    accountID: accountID1,
+    previous_tokenID_sell: 0n,
+    previous_tokenID_buy: 0n,
+    previous_amount_sell: 0n,
+    previous_amount_buy: 0n,
+    previous_filled_sell: 0n,
+    previous_filled_buy: 0n,
+    tokenID_sell: tokenID_1to2,
+    tokenID_buy: tokenID_2to1,
+    amount_sell: 1000n,
+    amount_buy: 10000n,
+  };
+  const order1_id = state.nextOrderIds.get(accountID1);
+  state.PlaceOrder(placeOrderTx);
+
   let spotTradeTx = {
     order1_accountID: accountID1,
     order2_accountID: accountID2,
@@ -134,10 +152,10 @@ function initTestCase() {
     amount_1to2: amount_1to2,
     amount_2to1: amount_2to1,
     order1_id: order1_id,
-    order1_amountsell: order1.total_sell,
-    order1_amountbuy: order1.total_buy,
-    order1_filledsell: order1.filled_sell,
-    order1_filledbuy: order1.filled_buy,
+    order1_amountsell: placeOrderTx.amount_sell,
+    order1_amountbuy: placeOrderTx.amount_buy,
+    order1_filledsell: 0n,
+    order1_filledbuy: 0n,
     order2_id: order2_id,
     order2_amountsell: order2.total_sell,
     order2_amountbuy: order2.total_buy,
@@ -146,22 +164,26 @@ function initTestCase() {
   };
   state.SpotTrade(spotTradeTx);
 
+  for (var i = state.bufferedTxs.length; i < nTxs; i++) {
+    state.Nop();
+  }
+
   let block = state.forge();
   return block;
 }
 
-let test_case = initTestCase();
+let block_test_case = initBlockTestCase();
 class TestBlock implements SimpleTest {
   getInput() {
     let input = {
-      txsType: test_case.txsType,
-      encodedTxs: test_case.encodedTxs,
-      balance_path_elements: test_case.balance_path_elements,
-      order_path_elements: test_case.order_path_elements,
-      account_path_elements: test_case.account_path_elements,
-      orderRoots: test_case.orderRoots,
-      oldAccountRoots: test_case.oldAccountRoots,
-      newAccountRoots: test_case.newAccountRoots,
+      txsType: block_test_case.txsType,
+      encodedTxs: block_test_case.encodedTxs,
+      balance_path_elements: block_test_case.balance_path_elements,
+      order_path_elements: block_test_case.order_path_elements,
+      account_path_elements: block_test_case.account_path_elements,
+      orderRoots: block_test_case.orderRoots,
+      oldAccountRoots: block_test_case.oldAccountRoots,
+      newAccountRoots: block_test_case.newAccountRoots,
     };
     //console.log(JSON.stringify(input, null, 2));
     return input;
@@ -177,4 +199,42 @@ class TestBlock implements SimpleTest {
   }
 }
 
-export { TestBlock };
+function initEmptyBlockTestCase() {
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs);
+  // we need to have at least 1 account
+  state.createNewAccount();
+  for (var i = state.bufferedTxs.length; i < nTxs; i++) {
+    state.Nop();
+  }
+  let block = state.forge();
+  return block;
+}
+
+let empty_block_test_case = initEmptyBlockTestCase();
+class TestEmptyBlock implements SimpleTest {
+  getInput() {
+    let input = {
+      txsType: empty_block_test_case.txsType,
+      encodedTxs: empty_block_test_case.encodedTxs,
+      balance_path_elements: empty_block_test_case.balance_path_elements,
+      order_path_elements: empty_block_test_case.order_path_elements,
+      account_path_elements: empty_block_test_case.account_path_elements,
+      orderRoots: empty_block_test_case.orderRoots,
+      oldAccountRoots: empty_block_test_case.oldAccountRoots,
+      newAccountRoots: empty_block_test_case.newAccountRoots,
+    };
+    //console.log(JSON.stringify(input, null, 2));
+    return input;
+  }
+  getOutput() {
+    return {};
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'block.circom'),
+      main: `Block(${nTxs}, ${balanceLevels}, ${orderLevels}, ${accountLevels})`,
+    };
+  }
+}
+
+export { TestBlock, TestEmptyBlock };

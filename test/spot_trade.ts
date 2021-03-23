@@ -2,10 +2,10 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { getBTreeProof } from '../helper.ts/binary_merkle_tree';
 import { hashAccountState, hashOrderState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
+import { GlobalState } from './global_state';
 
 // circuit-level definitions
 const orderLevels = 2;
@@ -15,10 +15,10 @@ const accountLevels = 2;
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initTestCase() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, 1);
 
-  const account1 = new Account(111);
-  const account2 = new Account(222);
+  const account1 = new Account(null);
+  const account2 = new Account(null);
   const accountID1 = state.createNewAccount();
   const accountID2 = state.createNewAccount();
 
@@ -34,7 +34,7 @@ function initTestCase() {
   const nonce1 = 11n;
   const account1_balance_sell = 199n;
   const account1_balance_buy = 111n;
-  state.setAccountKey(accountID1, account1.publicKey);
+  state.setAccountKey(accountID1, account1);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID_1to2) {
       state.setTokenBalance(accountID1, tokenID_1to2, account1_balance_sell);
@@ -49,7 +49,7 @@ function initTestCase() {
   const nonce2 = 22n;
   const account2_balance_sell = 1990n;
   const account2_balance_buy = 1110n;
-  state.setAccountKey(accountID2, account2.publicKey);
+  state.setAccountKey(accountID2, account2);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID_2to1) {
       state.setTokenBalance(accountID2, tokenID_2to1, account2_balance_sell);
@@ -100,15 +100,7 @@ function initTestCase() {
     amount_1to2: amount_1to2,
     amount_2to1: amount_2to1,
     order1_id: order1_id,
-    order1_amountsell: order1.total_sell,
-    order1_amountbuy: order1.total_buy,
-    order1_filledsell: order1.filled_sell,
-    order1_filledbuy: order1.filled_buy,
     order2_id: order2_id,
-    order2_amountsell: order2.total_sell,
-    order2_amountbuy: order2.total_buy,
-    order2_filledsell: order2.filled_sell,
-    order2_filledbuy: order2.filled_buy,
   };
   state.SpotTrade(spotTradeTx);
 
@@ -146,15 +138,15 @@ function initTestCase() {
     order1_token_buy_balance: account1_balance_buy,
     order2_token_sell_balance: account2_balance_sell,
     order2_token_buy_balance: account2_balance_buy,
-    order_path_elements: block.order_path_elements[block.order_path_elements.length-1],
-    old_account_root: block.oldAccountRoots[block.oldAccountRoots.length-1],
-    new_account_root: block.newAccountRoots[block.newAccountRoots.length-1],
-    old_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][0],
-    tmp_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][3],
-    old_account1_path_elements: block.account_path_elements[block.account_path_elements.length-1][0],
-    old_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][2],
-    tmp_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
-    tmp_account2_path_elements: block.account_path_elements[block.account_path_elements.length-1][1],
+    order_path_elements: block.order_path_elements[block.order_path_elements.length - 1],
+    old_account_root: block.oldAccountRoots[block.oldAccountRoots.length - 1],
+    new_account_root: block.newAccountRoots[block.newAccountRoots.length - 1],
+    old_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][0],
+    tmp_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][3],
+    old_account1_path_elements: block.account_path_elements[block.account_path_elements.length - 1][0],
+    old_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][2],
+    tmp_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][1],
+    tmp_account2_path_elements: block.account_path_elements[block.account_path_elements.length - 1][1],
   };
 }
 

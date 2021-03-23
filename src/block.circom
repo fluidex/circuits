@@ -5,6 +5,7 @@ include "./deposit_to_new.circom";
 include "./deposit_to_old.circom";
 include "./transfer.circom";
 include "./withdraw.circom";
+include "./place_order.circom";
 include "./spot_trade.circom";
 
 /**
@@ -55,6 +56,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     component enableDepositToOld[nTxs];
     component enableTransfer[nTxs];
     component enableWithdraw[nTxs];
+    component enablePlaceOrder[nTxs];
     component enableSpotTrade[nTxs];
     for (var i = 0; i < nTxs; i++) {
         enableDepositToNew[i] = IsEqual();
@@ -73,6 +75,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         enableWithdraw[i].in[0] <== txsType[i];
         enableWithdraw[i].in[1] <== TxTypeWithdraw();
 
+        enablePlaceOrder[i] = IsEqual();
+        enablePlaceOrder[i].in[0] <== txsType[i];
+        enablePlaceOrder[i].in[1] <== TxTypePlaceOrder();
+
         enableSpotTrade[i] = IsEqual();
         enableSpotTrade[i].in[0] <== txsType[i];
         enableSpotTrade[i].in[1] <== TxTypeSpotTrade();
@@ -83,6 +89,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     component processDepositToOld[nTxs];
     component processTransfer[nTxs];
     component processWithdraw[nTxs];
+    component processPlaceOrder[nTxs];
     component processSpotTrade[nTxs];
     for (var i = 0; i < nTxs; i++) {
         // try process deposit_to_new
@@ -184,6 +191,41 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         }
         processWithdraw[i].oldAccountRoot <== oldAccountRoots[i];
         processWithdraw[i].newAccountRoot <== newAccountRoots[i];
+
+        // try place_order
+        processPlaceOrder[i] = PlaceOrder(balanceLevels, orderLevels, accountLevels);
+        processPlaceOrder[i].enabled <== enablePlaceOrder[i].out;
+        processPlaceOrder[i].order_id <== decodedTx[i].order1_id;
+        processPlaceOrder[i].old_order_tokensell <== decodedTx[i].tokenID;
+        processPlaceOrder[i].old_order_tokenbuy <== decodedTx[i].tokenID2;
+        processPlaceOrder[i].old_order_amountsell <== decodedTx[i].order1_amountsell;
+        processPlaceOrder[i].old_order_amountbuy <== decodedTx[i].order1_amountbuy;
+        processPlaceOrder[i].old_order_filledsell <== decodedTx[i].order1_filledsell;
+        processPlaceOrder[i].old_order_filledbuy <== decodedTx[i].order1_filledbuy;
+        processPlaceOrder[i].new_order_tokensell <== decodedTx[i].tokenID3;
+        processPlaceOrder[i].new_order_tokenbuy <== decodedTx[i].tokenID4;
+        processPlaceOrder[i].new_order_amountsell <== decodedTx[i].order2_amountsell;
+        processPlaceOrder[i].new_order_amountbuy <== decodedTx[i].order2_amountbuy;
+        processPlaceOrder[i].accountID <== decodedTx[i].accountID1;
+        processPlaceOrder[i].tokenID <== decodedTx[i].tokenID3;
+        processPlaceOrder[i].balance <== decodedTx[i].balance1;
+        processPlaceOrder[i].nonce <== decodedTx[i].nonce1;
+        processPlaceOrder[i].sign <== decodedTx[i].sign1;
+        processPlaceOrder[i].ay <== decodedTx[i].ay1;
+        processPlaceOrder[i].ethAddr <== decodedTx[i].ethAddr1;
+        for (var j = 0; j < balanceLevels; j++) {
+            processPlaceOrder[i].balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
+        }
+        for (var j = 0; j < orderLevels; j++) {
+            processPlaceOrder[i].order_path_elements[j][0] <== order_path_elements[i][0][j][0];
+        }
+        for (var j = 0; j < accountLevels; j++) {
+            processPlaceOrder[i].account_path_elements[j][0] <== account_path_elements[i][0][j][0];
+        }
+        processPlaceOrder[i].oldOrderRoot <== orderRoots[i][0];
+        processPlaceOrder[i].newOrderRoot <== orderRoots[i][1];
+        processPlaceOrder[i].oldAccountRoot <== oldAccountRoots[i];
+        processPlaceOrder[i].newAccountRoot <== newAccountRoots[i];
 
         // try spot_trade
         processSpotTrade[i] = SpotTrade(balanceLevels, orderLevels, accountLevels);

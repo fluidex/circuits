@@ -43,10 +43,7 @@ function padZeros(str, length) {
  * @returns {String} Resulting string encoded as hexadecimal
  */
 function sha256Snark(str) {
-  const hash = crypto
-    .createHash('sha256')
-    .update(str, 'hex')
-    .digest('hex');
+  const hash = crypto.createHash('sha256').update(str, 'hex').digest('hex');
   const h = Scalar.mod(Scalar.fromString(hash, 16), babyJub.p);
   return h;
 }

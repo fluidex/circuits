@@ -1,3 +1,4 @@
+include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
 include "./lib/binary_merkle_tree.circom";

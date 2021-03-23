@@ -1,14 +1,27 @@
-const EC = require('elliptic').ec;
-const ec = new EC('secp256k1');
-const keccak256 = require('js-sha3').keccak256;
-const crypto = require('crypto');
 const eddsa = require('./eddsa');
 const babyJub = require('circomlib').babyJub;
-const Scalar = require('ffjavascript').Scalar;
 const utilsScalar = require('ffjavascript').utils;
+import * as ethers from 'ethers';
+import * as zksync_crypto from 'zksync-crypto';
 import { hash } from '../helper.ts/hash';
-
 const utils = require('./utils');
+
+// TODO: get chainID from provider
+function get_CREATE_L2_ACCOUNT_MSG(chainID): string {
+  chainID = chainID ? chainID : 1;
+  if (typeof chainID != 'number') {
+    throw new Error(`invalid chainID: ${chainID}`);
+  }
+
+  return 'FLUIDEX_L2_ACCOUNT' + `\nChain ID: ${chainID}.`;
+}
+
+// https://github.com/ethers-io/ethers.js/issues/447#issuecomment-519163178
+function recoverPublicKeyFromSignature(message: string, signature: string): string {
+  const msgHash = ethers.utils.hashMessage(message);
+  const msgHashBytes = ethers.utils.arrayify(msgHash);
+  return ethers.utils.recoverPublicKey(msgHashBytes, signature);
+}
 
 class Account {
   public publicKey: string;
@@ -19,31 +32,22 @@ class Account {
   public sign: number;
   public bjjCompressed: string;
 
-  constructor(publicKey) {
-    if (publicKey) {
-      if (typeof publicKey != 'string') {
-        this.publicKey = Scalar.e(publicKey).toString(16);
-      } else {
-        this.publicKey = publicKey;
-      }
-      while (this.publicKey.length < 64) this.publicKey = '0' + this.publicKey;
+  constructor(signature) {
+    // ethers signature is 65-byte
+    if (signature) {
+      // TODO: check signature format
     } else {
-      this.publicKey = crypto.randomBytes(32).toString('hex');
+      const wallet = ethers.Wallet.createRandom();
+      const msgHash = ethers.utils.hashMessage(get_CREATE_L2_ACCOUNT_MSG(null));
+      signature = ethers.utils.joinSignature(wallet._signingKey().signDigest(msgHash));
     }
 
-    // Use Keccak-256 hash function to get public key hash
-    const hashOfPublicKey = keccak256(Buffer.from(this.publicKey, 'hex'));
+    this.publicKey = recoverPublicKeyFromSignature(get_CREATE_L2_ACCOUNT_MSG(null), signature);
+    this.ethAddr = ethers.utils.computeAddress(this.publicKey);
 
-    // Convert hash to buffer
-    const ethAddressBuffer = Buffer.from(hashOfPublicKey, 'hex');
-
-    // Ethereum Address is '0x' concatenated with last 20 bytes
-    // of the public key hash
-    const ethAddress = ethAddressBuffer.slice(-20).toString('hex');
-    this.ethAddr = `0x${ethAddress}`;
-
-    // Derive a private key wit a hash
-    this.rollupPrvKey = Buffer.from(keccak256('FLUIDEX_ACCOUNT' + this.publicKey), 'hex');
+    // Derive a private key from seed
+    const seed = ethers.utils.arrayify(signature);
+    this.rollupPrvKey = Buffer.from(zksync_crypto.privateKeyFromSeed(seed)); // zksync_crypto.privateKeyFromSeed(seed) returns Uint8Array
 
     const bjPubKey = eddsa.prv2pub(this.rollupPrvKey);
 
@@ -69,4 +73,4 @@ class Account {
   }
 }
 
-export { Account };
+export { Account, get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature };

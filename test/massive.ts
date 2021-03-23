@@ -6,6 +6,7 @@ import { Account } from '../helper.ts/account';
 import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
+import { GlobalState } from './global_state';
 //import { assert } from 'console';
 const assert = require('assert').strict;
 
@@ -18,7 +19,7 @@ const accountLevels = 20;
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initTestCase() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, Number(nTxs));
 
   const tokenID_1to2 = 0n;
   const tokenID_2to1 = 1n;
@@ -27,15 +28,15 @@ function initTestCase() {
   const amount_1to2 = 1n;
   const amount_2to1 = 10n;
 
-  const account0 = new Account(2);
-  const account1 = new Account(1);
-  const account2 = new Account(0);
+  const account0 = new Account(null);
+  const account1 = new Account(null);
+  const account2 = new Account(null);
   const accountID0 = state.createNewAccount();
   const accountID1 = state.createNewAccount();
   const accountID2 = state.createNewAccount();
 
   /// mock existing account1 data, ensure balance to trade
-  state.setAccountKey(accountID1, account1.publicKey);
+  state.setAccountKey(accountID1, account1);
   state.setTokenBalance(accountID1, tokenID_1to2, amount_1to2 * nTxs * 10n);
   state.setAccountNonce(accountID1, 19n);
   // order1
@@ -52,7 +53,7 @@ function initTestCase() {
   state.setAccountOrder(accountID1, order1_id, order1);
 
   /// mock existing account2 data, ensure balance to trade
-  state.setAccountKey(accountID2, account2.publicKey);
+  state.setAccountKey(accountID2, account2);
   state.setTokenBalance(accountID2, tokenID_2to1, amount_2to1 * nTxs * 10n);
   state.setAccountNonce(accountID2, 29n);
   // order2

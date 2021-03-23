@@ -5,6 +5,7 @@ import { Account } from '../helper.ts/account';
 import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
+import { GlobalState } from './global_state';
 
 // circuit-level definitions
 const orderLevels = 2;
@@ -14,11 +15,11 @@ const accountLevels = 2;
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initDepositToNew() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, 1);
 
   const tokenID = 0n;
-  const amount = 200n
-  const account = new Account(2);
+  const amount = 200n;
+  const account = new Account(null);
   const accountID = state.createNewAccount();
 
   state.DepositToNew({
@@ -41,25 +42,25 @@ function initDepositToNew() {
     sign: account.sign,
     ay: Scalar.fromString(account.ay, 16),
     amount: amount,
-    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
-    account_path_elements: block.account_path_elements[block.account_path_elements.length-1][1],
-    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
-    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length-1],
+    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][1],
+    account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][1],
+    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
+    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
   };
 }
 
 function initDepositToOld() {
-  let state = new common.GlobalState(balanceLevels, orderLevels, accountLevels);
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, 1);
 
   const tokenID = 0n;
   const balance = 300n;
   const amount = 100n;
-  const account = new Account(2);
+  const account = new Account(null);
   const accountID = state.createNewAccount();
   const nonce = 99n;
 
   // mock existing account1 data
-  state.setAccountKey(accountID, account.publicKey);
+  state.setAccountKey(accountID, account);
   for (let i = 0; i < 2 ** balanceLevels; i++) {
     if (BigInt(i) == tokenID) {
       state.setTokenBalance(accountID, tokenID, balance);
@@ -89,10 +90,10 @@ function initDepositToOld() {
     balance: balance,
     ethAddr: Scalar.fromString(account.ethAddr, 16),
     orderRoot: genesisOrderRoot,
-    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length-1][1],
-    account_path_elements: block.account_path_elements[block.account_path_elements.length-1][1],
-    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length-1],
-    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length-1],
+    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][1],
+    account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][1],
+    oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
+    newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
   };
 }
 
