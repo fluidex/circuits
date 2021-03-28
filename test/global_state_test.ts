@@ -18,6 +18,10 @@ function getTokenPrec(tokenName) {
   return { ETH: 6, USDT: 6 }[tokenName];
 }
 
+function convertNumber(num, tokenName) {
+  return (num * 10 ** getTokenPrec(tokenName)).toFixed();
+}
+
 function getBaseAndQuoteOfTrade(trade): [string, string] {
   return trade.market.split('_');
 }
@@ -31,24 +35,24 @@ function checkEqByKeys(obj1, obj2, keys = null) {
   }
 }
 
-function parseBalance(originalBalance) {
+function parseBalance(originalBalance, [baseToken, quoteToken]) {
   return {
-    bid_user_base: BigInt(originalBalance.bid_user_base),
-    bid_user_quote: BigInt(originalBalance.bid_user_quote),
-    ask_user_base: BigInt(originalBalance.ask_user_base),
-    ask_user_quote: BigInt(originalBalance.ask_user_quote),
+    bid_user_base: BigInt(convertNumber(originalBalance.bid_user_base, baseToken)),
+    bid_user_quote: BigInt(convertNumber(originalBalance.bid_user_quote, quoteToken)),
+    ask_user_base: BigInt(convertNumber(originalBalance.ask_user_base, baseToken)),
+    ask_user_quote: BigInt(convertNumber(originalBalance.ask_user_quote, quoteToken)),
   };
 }
 
-function parseOrder(originalOrder, [baseTokenID, quoteTokenID], side) {
+function parseOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quoteToken], side) {
   let obj: any = {
-    baseAmount: BigInt(originalOrder.amount),
-    price: BigInt(originalOrder.price),
-    finishedQuote: BigInt(originalOrder.finished_quote),
-    finishedBase: BigInt(originalOrder.finished_base),
+    baseAmount: BigInt(convertNumber(originalOrder.amount, baseToken)),
+    price: BigInt(convertNumber(originalOrder.price, baseToken)),
+    finishedQuote: BigInt(convertNumber(originalOrder.finished_quote, quoteToken)),
+    finishedBase: BigInt(convertNumber(originalOrder.finished_base, baseToken)),
     status: 0,
   };
-  obj.quoteAmount = obj.baseAmount * obj.price;
+  obj.quoteAmount = BigInt(convertNumber(originalOrder.amount * originalOrder.price, quoteToken));
   if (side == 'ASK') {
     obj.tokensell = baseTokenID;
     obj.tokenbuy = quoteTokenID;
@@ -81,22 +85,22 @@ function handleTrade(state, trade, placedOrder) {
   const baseTokenID = getTokenId(baseToken);
   const quoteTokenID = getTokenId(quoteToken);
 
-  const askOrderStateBefore = Object.assign(parseOrder(trade.state_before.ask_order_state, [baseTokenID, quoteTokenID], 'ASK'), {
+  const askOrderStateBefore = Object.assign(parseOrder(trade.state_before.ask_order_state, [baseTokenID, quoteTokenID], [baseToken, quoteToken], 'ASK'), {
     ID: askOrderID,
     accountID: askUserID,
     role: trade.ask_role,
   });
-  const bidOrderStateBefore = Object.assign(parseOrder(trade.state_before.bid_order_state, [baseTokenID, quoteTokenID], 'BID'), {
+  const bidOrderStateBefore = Object.assign(parseOrder(trade.state_before.bid_order_state, [baseTokenID, quoteTokenID], [baseToken, quoteToken], 'BID'), {
     ID: bidOrderID,
     accountID: bidUserID,
     role: trade.bid_role,
   });
-  const askOrderStateAfter = Object.assign(parseOrder(trade.state_after.ask_order_state, [baseTokenID, quoteTokenID], 'ASK'), {
+  const askOrderStateAfter = Object.assign(parseOrder(trade.state_after.ask_order_state, [baseTokenID, quoteTokenID], [baseToken, quoteToken], 'ASK'), {
     ID: askOrderID,
     accountID: askUserID,
     role: trade.ask_role,
   });
-  const bidOrderStateAfter = Object.assign(parseOrder(trade.state_after.bid_order_state, [baseTokenID, quoteTokenID], 'BID'), {
+  const bidOrderStateAfter = Object.assign(parseOrder(trade.state_after.bid_order_state, [baseTokenID, quoteTokenID], [baseToken, quoteToken], 'BID'), {
     ID: bidOrderID,
     accountID: bidUserID,
     role: trade.bid_role,
@@ -156,21 +160,21 @@ function handleTrade(state, trade, placedOrder) {
     checkEqByKeys(askOrderLocal, askOrder);
     checkEqByKeys(bidOrderLocal, bidOrder);
   }
-  checkState(parseBalance(trade.state_before.balance), askOrderStateBefore, bidOrderStateBefore);
+  checkState(parseBalance(trade.state_before.balance, [baseToken, quoteToken]), askOrderStateBefore, bidOrderStateBefore);
   // now we construct the trade and exec it
   let spotTradeTx = {
     order1_accountID: bidIsTaker ? askOrderStateBefore.accountID : bidOrderStateBefore.accountID,
     order2_accountID: bidIsTaker ? bidOrderStateBefore.accountID : askOrderStateBefore.accountID,
     tokenID_1to2: bidIsTaker ? baseTokenID : quoteTokenID,
     tokenID_2to1: bidIsTaker ? quoteTokenID : baseTokenID,
-    amount_1to2: bidIsTaker ? BigInt(trade.amount) : BigInt(trade.quote_amount),
-    amount_2to1: bidIsTaker ? BigInt(trade.quote_amount) : BigInt(trade.amount),
+    amount_1to2: bidIsTaker ? BigInt(convertNumber(trade.amount, baseToken)) : BigInt(convertNumber(trade.quote_amount, quoteToken)),
+    amount_2to1: bidIsTaker ? BigInt(convertNumber(trade.quote_amount, quoteToken)) : BigInt(convertNumber(trade.amount, baseToken)),
     order1_id: placedOrder.get(bidIsTaker ? askOrderStateBefore.ID : bidOrderStateBefore.ID)[1],
     order2_id: placedOrder.get(bidIsTaker ? bidOrderStateBefore.ID : askOrderStateBefore.ID)[1],
   };
   state.SpotTrade(spotTradeTx);
   // finally we check the state after this trade
-  checkState(parseBalance(trade.state_after.balance), askOrderStateAfter, bidOrderStateAfter);
+  checkState(parseBalance(trade.state_after.balance, [baseToken, quoteToken]), askOrderStateAfter, bidOrderStateAfter);
 
   console.log('trade', trade.id, 'test done');
 }
@@ -179,8 +183,8 @@ function handleDeposit(state: GlobalState, deposit) {
   //{"timestamp":1616062584.0,"user_id":1,"asset":"ETH","business":"deposit","change":"1000000","balance":"1000000","detail":"{\"id\":3}"}}
   const tokenID = getTokenId(deposit.asset);
   const userID = BigInt(deposit.user_id);
-  const balanceAfter = BigInt(deposit.balance);
-  const delta = BigInt(deposit.change);
+  const balanceAfter = BigInt(convertNumber(deposit.balance, deposit.asset));
+  const delta = BigInt(convertNumber(deposit.change, deposit.asset));
   const balanceBefore = balanceAfter - delta;
   assert(balanceBefore >= 0, 'invalid balance' + deposit.toString());
   const expectedBalanceBefore = state.getTokenBalance(userID, tokenID);
@@ -192,7 +196,7 @@ function handleDeposit(state: GlobalState, deposit) {
 function replayMsgs() {
   const maxMsgsNumToTest = 1000;
   let lines = fs
-    .readFileSync(path.join(__dirname, 'testdata/msgs_int.jsonl'), 'utf-8')
+    .readFileSync(path.join(__dirname, 'testdata/msgs_float.jsonl'), 'utf-8')
     .split('\n')
     .filter(Boolean)
     .slice(0, maxMsgsNumToTest);
@@ -225,7 +229,7 @@ function replayMsgs() {
   for (const msg of msgs) {
     if (msg.type === 'BalanceMessage') {
       // handle deposit or withdraw
-      const change = BigInt(msg.value.change);
+      const change = BigInt(convertNumber(msg.value.change, msg.value.asset));
       if (change < 0n) {
         throw new Error('only support deposit now');
       }
