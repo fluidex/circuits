@@ -1,12 +1,12 @@
 // Refer to:
 // https://github.com/hermeznetwork/circuits/blob/master/src/lib/hash-state.circom
 
-include "rescue.circom";
+include "poseidon.circom";
 include "binary_merkle_tree.circom";
 
 /**
  * Computes the hash of an account state
- * State Hash = Rescue(e0, e1, e2, e3)
+ * State Hash = Poseidon(e0, e1, e2, e3)
  * e0: sign(1 bit) | nonce(40bits)
  * e1: balanceRoot
  * e2: ay
@@ -17,7 +17,7 @@ include "binary_merkle_tree.circom";
  * @input ay - {Field} - babyjubjub Y coordinate
  * @input ethAddr - {Uint160} - etehreum address
  * @input orderRoot - {Field} - account's order_tree root
- * @output out - {Field} - resulting rescue hash
+ * @output out - {Field} - resulting poseidon hash
  */
 template HashAccount() {
     signal input nonce;
@@ -33,7 +33,7 @@ template HashAccount() {
 
     e0 <== nonce + sign * (1 << 40);
 
-    component hash = Rescue(5);
+    component hash = Poseidon(5);
 
     hash.inputs[0] <== e0;
     hash.inputs[1] <== balanceRoot;
@@ -46,7 +46,7 @@ template HashAccount() {
 
 /**
  * Computes the hash of an order state
- * Order Hash = Rescue(e0, filled_sell, filled_buy, total_sell, total_buy)
+ * Order Hash = Poseidon(e0, filled_sell, filled_buy, total_sell, total_buy)
  * e0: tokensell(32bits) | tokenbuy(32bits) | tokenbuy(2bits)
  * @input tokensell - {Uint32} - token to sell
  * @input tokenbuy - {Uint32} - token to buy
@@ -55,7 +55,7 @@ template HashAccount() {
  * @input total_sell - {Field} - token to sell
  * @input total_buy - {Field} - token to sell
  * @input status - {Uint2} - order status
- * @output out - {Field} - resulting rescue hash
+ * @output out - {Field} - resulting poseidon hash
  */
 template HashOrder() {
     signal input tokensell;
@@ -71,7 +71,7 @@ template HashOrder() {
     signal e0; // build e0 element
     e0 <== tokensell * (1 << 64) + tokenbuy * (1 << 32) + status;
 
-    component hash = Rescue(5);
+    component hash = Poseidon(5);
     hash.inputs[0] <== e0;
     hash.inputs[1] <== filled_sell;
     hash.inputs[2] <== filled_buy;

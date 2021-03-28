@@ -1,5 +1,5 @@
 include "../node_modules/circomlib/circuits/bitify.circom";
-include "lib/eddsarescue.circom";
+include "lib/eddsaposeidon.circom";
 include "./lib/utils_bjj.circom";
 include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
@@ -113,7 +113,7 @@ template Transfer(balanceLevels, accountLevels) {
     getAx.sign <== sign1;
 
     // signature L2 verifier
-    component sigVerifier = EdDSARescueVerifier();
+    component sigVerifier = EdDSAPoseidonVerifier();
     sigVerifier.enabled <== enabled;
 
     sigVerifier.Ax <== getAx.ax;

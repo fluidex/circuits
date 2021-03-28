@@ -23,7 +23,7 @@ function rescueHashWasm(input: any /*Array<bigint>*/): any /*bigint*/ {
 const rescue = rescueHashWasm;
 //const rescue = rescueHashJs;
 
-export { rescue as hash };
+export { poseidon as hash };
 
 function benchmarkRescue() {
   for (let i = 0; i < 100; i++) {
