@@ -3,7 +3,7 @@
 
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
-include "rescue.circom";
+include "poseidon.circom";
 
 template HashLeftRight() {
   signal input left;
@@ -11,7 +11,7 @@ template HashLeftRight() {
 
   signal output hash;
 
-  component hasher = Rescue(2);
+  component hasher = Poseidon(2);
   left ==> hasher.inputs[0];
   right ==> hasher.inputs[1];
 
