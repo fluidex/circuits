@@ -1,8 +1,7 @@
 const eddsa = require('./eddsa');
 const babyJub = require('circomlib').babyJub;
-const utilsScalar = require('ffjavascript').utils;
+const { utils: utilsScalar } = require('ffjavascript');
 import * as ethers from 'ethers';
-import * as zksync_crypto from 'zksync-crypto';
 import { hash } from '../helper.ts/hash';
 const utils = require('./utils');
 
@@ -46,8 +45,8 @@ class Account {
     this.ethAddr = ethers.utils.computeAddress(this.publicKey);
 
     // Derive a private key from seed
-    const seed = ethers.utils.arrayify(signature);
-    this.rollupPrvKey = Buffer.from(zksync_crypto.privateKeyFromSeed(seed)); // zksync_crypto.privateKeyFromSeed(seed) returns Uint8Array
+    const seed = ethers.utils.arrayify(signature).slice(0, 32);
+    this.rollupPrvKey = Buffer.from(seed);
 
     const bjPubKey = eddsa.prv2pub(this.rollupPrvKey);
 
@@ -64,7 +63,7 @@ class Account {
     this.bjjCompressed = utils.padZeros(utilsScalar.leBuff2int(compressedBuff).toString(16), 64);
   }
 
-  signHash(h) {
+  signHash(h: bigint) {
     const signature = eddsa.signWithHasher(this.rollupPrvKey, h, hash);
     // r8x = signature.R8[0];
     // r8y = signature.R8[1];
