@@ -1,8 +1,7 @@
 const eddsa = require('./eddsa');
 const babyJub = require('circomlib').babyJub;
-const utilsScalar = require('ffjavascript').utils;
+const { utils: utilsScalar } = require('ffjavascript');
 import * as ethers from 'ethers';
-import * as zksync_crypto from 'zksync-crypto';
 import { hash } from '../helper.ts/hash';
 const utils = require('./utils');
 
@@ -23,31 +22,18 @@ function recoverPublicKeyFromSignature(message: string, signature: string): stri
   return ethers.utils.recoverPublicKey(msgHashBytes, signature);
 }
 
-class Account {
-  public publicKey: string;
-  public ethAddr: string;
+class L2Account {
   private rollupPrvKey: Buffer;
   public ax: string;
   public ay: string;
   public sign: number;
   public bjjCompressed: string;
-
-  constructor(signature) {
-    // ethers signature is 65-byte
-    if (signature) {
-      // TODO: check signature format
-    } else {
-      const wallet = ethers.Wallet.createRandom();
-      const msgHash = ethers.utils.hashMessage(get_CREATE_L2_ACCOUNT_MSG(null));
-      signature = ethers.utils.joinSignature(wallet._signingKey().signDigest(msgHash));
+  constructor(seed) {
+    if (seed.length != 32) {
+      throw new Error('invalid l2 key seed');
     }
 
-    this.publicKey = recoverPublicKeyFromSignature(get_CREATE_L2_ACCOUNT_MSG(null), signature);
-    this.ethAddr = ethers.utils.computeAddress(this.publicKey);
-
-    // Derive a private key from seed
-    const seed = ethers.utils.arrayify(signature);
-    this.rollupPrvKey = Buffer.from(zksync_crypto.privateKeyFromSeed(seed)); // zksync_crypto.privateKeyFromSeed(seed) returns Uint8Array
+    this.rollupPrvKey = Buffer.from(seed);
 
     const bjPubKey = eddsa.prv2pub(this.rollupPrvKey);
 
@@ -64,7 +50,7 @@ class Account {
     this.bjjCompressed = utils.padZeros(utilsScalar.leBuff2int(compressedBuff).toString(16), 64);
   }
 
-  signHash(h) {
+  signHash(h: bigint) {
     const signature = eddsa.signWithHasher(this.rollupPrvKey, h, hash);
     // r8x = signature.R8[0];
     // r8y = signature.R8[1];
@@ -73,4 +59,41 @@ class Account {
   }
 }
 
-export { Account, get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature };
+class Account {
+  public publicKey: string;
+  public ethAddr: string;
+  public l2Account: L2Account;
+  constructor(signature) {
+    // ethers signature is 65-byte
+    if (signature) {
+      // TODO: check signature format
+    } else {
+      const wallet = ethers.Wallet.createRandom();
+      const msgHash = ethers.utils.hashMessage(get_CREATE_L2_ACCOUNT_MSG(null));
+      signature = ethers.utils.joinSignature(wallet._signingKey().signDigest(msgHash));
+    }
+
+    this.publicKey = recoverPublicKeyFromSignature(get_CREATE_L2_ACCOUNT_MSG(null), signature);
+    this.ethAddr = ethers.utils.computeAddress(this.publicKey);
+
+    // Derive a private key from seed
+    const seed = ethers.utils.arrayify(signature).slice(0, 32);
+    this.l2Account = new L2Account(seed);
+  }
+  signHash(h: bigint) {
+    return this.l2Account.signHash(h);
+  }
+  get ay() {
+    return this.l2Account.ay;
+  }
+  get ax() {
+    return this.l2Account.ax;
+  }
+  get sign() {
+    return this.l2Account.sign;
+  }
+  get bjjCompressed() {
+    return this.l2Account.bjjCompressed;
+  }
+}
+export { L2Account, Account, get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature };

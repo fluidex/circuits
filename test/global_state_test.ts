@@ -85,26 +85,38 @@ function handleTrade(state, trade, placedOrder) {
   const baseTokenID = getTokenId(baseToken);
   const quoteTokenID = getTokenId(quoteToken);
 
-  const askOrderStateBefore = Object.assign(parseOrder(trade.state_before.ask_order_state, [baseTokenID, quoteTokenID], [baseToken, quoteToken], 'ASK'), {
-    ID: askOrderID,
-    accountID: askUserID,
-    role: trade.ask_role,
-  });
-  const bidOrderStateBefore = Object.assign(parseOrder(trade.state_before.bid_order_state, [baseTokenID, quoteTokenID], [baseToken, quoteToken], 'BID'), {
-    ID: bidOrderID,
-    accountID: bidUserID,
-    role: trade.bid_role,
-  });
-  const askOrderStateAfter = Object.assign(parseOrder(trade.state_after.ask_order_state, [baseTokenID, quoteTokenID], [baseToken, quoteToken], 'ASK'), {
-    ID: askOrderID,
-    accountID: askUserID,
-    role: trade.ask_role,
-  });
-  const bidOrderStateAfter = Object.assign(parseOrder(trade.state_after.bid_order_state, [baseTokenID, quoteTokenID], [baseToken, quoteToken], 'BID'), {
-    ID: bidOrderID,
-    accountID: bidUserID,
-    role: trade.bid_role,
-  });
+  const askOrderStateBefore = Object.assign(
+    parseOrder(trade.state_before.ask_order_state, [baseTokenID, quoteTokenID], [baseToken, quoteToken], 'ASK'),
+    {
+      ID: askOrderID,
+      accountID: askUserID,
+      role: trade.ask_role,
+    },
+  );
+  const bidOrderStateBefore = Object.assign(
+    parseOrder(trade.state_before.bid_order_state, [baseTokenID, quoteTokenID], [baseToken, quoteToken], 'BID'),
+    {
+      ID: bidOrderID,
+      accountID: bidUserID,
+      role: trade.bid_role,
+    },
+  );
+  const askOrderStateAfter = Object.assign(
+    parseOrder(trade.state_after.ask_order_state, [baseTokenID, quoteTokenID], [baseToken, quoteToken], 'ASK'),
+    {
+      ID: askOrderID,
+      accountID: askUserID,
+      role: trade.ask_role,
+    },
+  );
+  const bidOrderStateAfter = Object.assign(
+    parseOrder(trade.state_after.bid_order_state, [baseTokenID, quoteTokenID], [baseToken, quoteToken], 'BID'),
+    {
+      ID: bidOrderID,
+      accountID: bidUserID,
+      role: trade.bid_role,
+    },
+  );
 
   let orderStateBefore = new Map([
     [BigInt(trade.ask_order_id), askOrderStateBefore],
