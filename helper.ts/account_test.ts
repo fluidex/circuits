@@ -1,7 +1,7 @@
 import * as ethers from 'ethers';
 import * as assert from 'assert';
 const keccak256 = require('js-sha3').keccak256;
-import { get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature } from './account';
+import { Account, get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature } from './account';
 
 async function TestRecoverPublicKeyAndAddress() {
   const MNEMONIC = 'radar blur cabbage chef fix engine embark joy scheme fiction master release';
