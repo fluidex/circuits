@@ -1,7 +1,7 @@
 import * as ethers from 'ethers';
 import * as assert from 'assert';
 const keccak256 = require('js-sha3').keccak256;
-import { Account, get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature } from './account';
+import { L2Account, Account, get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature } from './account';
 
 async function TestRecoverPublicKeyAndAddress() {
   const MNEMONIC = 'radar blur cabbage chef fix engine embark joy scheme fiction master release';
@@ -26,7 +26,8 @@ function TestL2AccountKeyAndSign() {
   const wallet = ethers.Wallet.createRandom();
   const msgHash = ethers.utils.hashMessage(get_CREATE_L2_ACCOUNT_MSG(null));
   const signature = ethers.utils.joinSignature(wallet._signingKey().signDigest(msgHash));
-  const account = new Account(signature);
+  const seed = ethers.utils.arrayify(signature).slice(0, 32);
+  const account = new L2Account(seed);
   const printDetail = false;
   if (printDetail) {
     //	87b34b2b842db0cc945659366068053f325ff227fd9c6788b2504ac2c4c5dc2a
