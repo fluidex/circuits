@@ -4,7 +4,7 @@ set -exu
 function checkCPU() {
 	for f in bmi2 adx
 	do
-		(cat /proc/cpuinfo |grep flags|head -n 1|grep $f) || (echo 'invalid cpu'; exit 1)
+		(cat /proc/cpuinfo |grep flags|head -n 1|grep $f) || (echo 'invalid cpu'; cat /proc/cpuinfo; exit 1)
 	done
 }
 
