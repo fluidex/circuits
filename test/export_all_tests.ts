@@ -1,6 +1,4 @@
-import { testWithInputOutput } from './tester/c';
-import { writeCircuitIntoDir, writeInputOutputIntoDir } from './tester/c';
-// import { simpleTest } from './tester/wasm';
+import * as snarkit from 'snarkit';
 import { circuitSrcToName } from './common';
 import { TestCheckLeafExists, TestCheckLeafExistsDisable, TestCheckLeafUpdate, TestCheckLeafUpdateDisable } from './binary_merkle_tree';
 import { TestRescueHash } from './rescue';
@@ -54,22 +52,19 @@ export async function exportAllTests() {
   for (const [circuitName, arr] of circuitToData.entries()) {
     const circuitDir = path.join(outDir, circuitName);
     fs.mkdirSync(circuitDir, { recursive: true });
-    await writeCircuitIntoDir(circuitDir, arr[0].getComponent());
+    await snarkit.utils.writeCircuitIntoDir(circuitDir, arr[0].getComponent());
     for (const t of arr) {
       const testName = t.constructor.name;
       const dataDir = path.join(circuitDir, 'data', testName);
       console.log('export', testName, 'to', dataDir);
-      await writeInputOutputIntoDir(dataDir, t.getInput(), t.getOutput());
+      await snarkit.utils.writeInputOutputIntoDir(dataDir, t.getInput(), t.getOutput());
     }
   }
 }
 
 async function main() {
   try {
-    const tests = getAllTests();
-    for (const t of tests) {
-      await testWithInputOutput(t.getInput(), t.getOutput(), t.getComponent(), t.constructor.name);
-    }
+    await exportAllTests();
   } catch (e) {
     console.error(e);
     process.exit(1);

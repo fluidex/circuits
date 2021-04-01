@@ -1,6 +1,6 @@
 import { GlobalState } from './global_state';
+import * as snarkit from 'snarkit';
 import { circuitSrcToName } from './common';
-import { testCircuitDir, writeCircuitIntoDir, writeInputOutputIntoDir } from './tester/c';
 import { assert } from 'console';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -268,10 +268,11 @@ function replayMsgs() {
 
 async function exportCircuitAndTestData(blocks, component) {
   const circuitDir = path.join('testdata', circuitSrcToName(component.main));
-  await writeCircuitIntoDir(circuitDir, component);
+  const dataDir = path.join(circuitDir, 'data');
+  await snarkit.utils.writeCircuitIntoDir(circuitDir, component);
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
-    await writeInputOutputIntoDir(path.join(circuitDir, 'data', printf('%04d', i)), block, {});
+    await snarkit.utils.writeInputOutputIntoDir(path.join(dataDir, printf('%04d', i)), block, {});
   }
   return circuitDir;
 }
@@ -279,10 +280,17 @@ async function exportCircuitAndTestData(blocks, component) {
 async function mainTest() {
   const { blocks, component } = replayMsgs();
   console.log(`generate ${blocks.length} blocks`);
+
   // check all the blocks forged are valid for the block circuit
   // So we can ensure logics of matchengine VS GlobalState VS circuit are same!
   const circuitDir = await exportCircuitAndTestData(blocks, component);
-  await testCircuitDir(circuitDir);
+  const testOptions = {
+    alwaysRecompile: false,
+    verbose: true,
+    backend: 'native',
+    witnessFileType: 'wtns',
+  };
+  await snarkit.testCircuitDir(circuitDir, path.join(circuitDir, 'data'), testOptions);
 }
 
 mainTest();

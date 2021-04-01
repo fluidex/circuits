@@ -21,6 +21,7 @@
     "printf": "^0.6.1",
     "scrypt-js": "^3.0.1",
     "shelljs": "^0.8.4",
+    "snarkit": "^0.0.2",
     "snarkjs": "^0.3.55",
     "tmp-promise": "^3.0.2",
     "ts-node": "^9.1.1",
