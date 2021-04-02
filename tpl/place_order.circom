@@ -7,49 +7,41 @@ function TxLength() { return 34; }
 
 template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     signal input in[TxLength()];
-    signal enabled;
-    enabled <== in[0];
-    signal order_pos;
-    order_pos <== in[1];
-    signal old_order_id;
-    old_order_id <== in[2];
-    signal new_order_id;
-    new_order_id <== in[3];
-    signal old_order_tokensell;
-    old_order_tokensell <== in[4];
-    signal old_order_filledsell;
-    old_order_filledsell <== in[5];
-    signal old_order_amountsell;
-    old_order_amountsell <== in[6];
-    signal old_order_tokenbuy;
-    old_order_tokenbuy <== in[7];
-    signal old_order_filledbuy;
-    old_order_filledbuy <== in[8];
-    signal old_order_amountbuy;
-    old_order_amountbuy <== in[9];
-    signal new_order_tokensell;
-    new_order_tokensell <== in[10];
-    signal new_order_amountsell;
-    new_order_amountsell <== in[11];
-    signal new_order_tokenbuy;
-    new_order_tokenbuy <== in[12];
-    signal new_order_amountbuy;
-    new_order_amountbuy <== in[13];
-    signal accountID;
-    accountID <== in[14];
-    signal tokenID;
-    tokenID <== in[15];
-    signal balance;
-    balance <== in[16];
-    signal nonce;
-    nonce <== in[17];
-    signal sign;
-    sign <== in[18];
-    signal ay;
-    ay <== in[19];
-    signal ethAddr;
-    ethAddr <== in[20];
-
+/*codegen:start
+let current_indent = 4;
+let code = '';
+function addLine(text) {
+    code += ' '.repeat(current_indent) + text + '\n';
+}
+let input_signals = `
+    enabled
+    order_pos
+    old_order_id
+    new_order_id
+    old_order_tokensell
+    old_order_filledsell
+    old_order_amountsell
+    old_order_tokenbuy
+    old_order_filledbuy
+    old_order_amountbuy
+    new_order_tokensell
+    new_order_amountsell
+    new_order_tokenbuy
+    new_order_amountbuy
+    accountID
+    tokenID
+    balance
+    nonce
+    sign
+    ay
+    ethAddr
+`.split(/\s+/).filter(item => item != '');
+for(let i = 0; i < input_signals.length; i++) {
+    addLine(`signal ${input_signals[i]};`);
+    addLine(`${input_signals[i]} <== in[${i}];`);
+}
+code;
+codegen:end*/
 
     // Roots
     signal input oldOrderRoot;
@@ -179,4 +171,3 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     account_update_checker.oldRoot <== oldAccountRoot;
     account_update_checker.newRoot <== newAccountRoot;
 }
-

@@ -35,7 +35,7 @@ function hashAccountState(st) {
 }
 
 const emptyOrderHash = hashOrderState({
-  status: 1n, // TODO: need to maintain a table
+  order_id: 0n,
   tokenbuy: 0n,
   tokensell: 0n,
   filled_sell: 0n,

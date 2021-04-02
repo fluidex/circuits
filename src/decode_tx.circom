@@ -8,6 +8,7 @@ function TxTypeNop() { return 6; }
 
 function TxLength() { return 34; }
 
+// TODO: i suggest remove this component and let each child op component to do its own decoding
 /**
  * @input in - {Array(Field)} - encoded transaction
  */

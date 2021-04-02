@@ -71,7 +71,10 @@ template fillLimitCheck() {
 
 // TODO: delete order if fullfilled
 template orderUpdater(orderLevels) {
-    signal input orderID;
+    // order pos is the order location/index inside the tree, less than 2**n
+    // order id is the incremental order id, like a nouce.
+    signal input order_pos;
+    signal input order_id;
     signal input tokensell;
     signal input tokenbuy;
     signal input filled_sell;
@@ -91,12 +94,14 @@ template orderUpdater(orderLevels) {
     signal order_path_index[orderLevels];
 
    // decode order_path_index
-    component bOrderID = Num2Bits(orderLevels);
-    bOrderID.in <== orderID;
+    component border_pos = Num2Bits(orderLevels);
+    border_pos.in <== order_pos;
     for (var i = 0; i < orderLevels; i++) {
-        order_path_index[i] <== bOrderID.out[i];
+        order_path_index[i] <== border_pos.out[i];
     }
 
+    // TODO: we can just update old order with new order like PlaceOrder here
+    // so we can use less txs to finish a SpotTrade
     component oldOrderHash = HashOrder();
     oldOrderHash.tokensell <== tokensell;
     oldOrderHash.tokenbuy <== tokenbuy;
@@ -104,7 +109,7 @@ template orderUpdater(orderLevels) {
     oldOrderHash.filled_buy <== filled_buy;
     oldOrderHash.total_sell <== total_sell;
     oldOrderHash.total_buy <== total_buy;
-    oldOrderHash.status <== old_status;
+    oldOrderHash.order_id <== order_id;
 
     // TODO: underflow check
 
@@ -117,7 +122,7 @@ template orderUpdater(orderLevels) {
     newOrderHash.filled_buy <== filled_buy + this_buy;
     newOrderHash.total_sell <== total_sell;
     newOrderHash.total_buy <== total_buy;
-    newOrderHash.status <== new_status;
+    newOrderHash.order_id <== order_id;
 
     // - order tree
     ////////
@@ -140,11 +145,13 @@ template orderUpdater(orderLevels) {
 template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
 
+    signal input order1_pos;
     signal input order1_id;
     signal input order1_tokensell;
     signal input order1_amountsell;
     signal input order1_tokenbuy;
     signal input order1_amountbuy;
+    signal input order2_pos;
     signal input order2_id;
     signal input order2_tokensell;
     signal input order2_amountsell;
@@ -212,7 +219,8 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input order_path_elements[2][orderLevels][1];
     /// update order 1
     component order1_updater = orderUpdater(orderLevels);
-    order1_updater.orderID <== order1_id;
+    order1_updater.order_pos <== order1_pos;
+    order1_updater.order_id <== order1_id;
     order1_updater.tokensell <== order1_tokensell;
     order1_updater.tokenbuy <== order1_tokenbuy;
     order1_updater.filled_sell <== order1_filledsell;
@@ -221,15 +229,14 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     order1_updater.filled_buy <== order1_filledbuy;
     order1_updater.this_buy <== amount_2to1;
     order1_updater.total_buy <== order1_amountbuy;
-    order1_updater.old_status <== 0; // TODO:
-    order1_updater.new_status <== 0; // TODO:
     for (var i = 0; i < orderLevels; i++) {
         order1_updater.order_path_elements[i][0] <== order_path_elements[0][i][0];
     }
 
     /// update order 2
     component order2_updater = orderUpdater(orderLevels);
-    order2_updater.orderID <== order2_id;
+    order2_updater.order_pos <== order2_pos;
+    order2_updater.order_id <== order2_id;
     order2_updater.tokensell <== order2_tokensell;
     order2_updater.tokenbuy <== order2_tokenbuy;
     order2_updater.filled_sell <== order2_filledsell;
@@ -238,8 +245,6 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     order2_updater.filled_buy <== order2_filledbuy;
     order2_updater.this_buy <== amount_1to2;
     order2_updater.total_buy <== order2_amountbuy;
-    order2_updater.old_status <== 0; // TODO:
-    order2_updater.new_status <== 0; // TODO:
     for (var i = 0; i < orderLevels; i++) {
         order2_updater.order_path_elements[i][0] <== order_path_elements[1][i][0];
     }

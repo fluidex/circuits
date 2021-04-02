@@ -91,7 +91,7 @@ template CalculateGenesisOrderRoot(orderLevels) {
     emptyOrderHash.filled_buy <== 0;
     emptyOrderHash.total_sell <== 0;
     emptyOrderHash.total_buy <== 0;
-    emptyOrderHash.status <== 1; // TODO: need to maintain a table
+    emptyOrderHash.order_id <== 0;
 
     component orderTree = CalculateRootFromRepeatedLeaves(orderLevels);
     orderTree.leaf <== emptyOrderHash.out;
