@@ -67,7 +67,7 @@ function initTestCase() {
   const order1_amountsell = 1000n;
   const order1_amountbuy = 10000n;
   const order1 = {
-    status: 0, // open
+    order_id: 1n, // open
     tokenbuy: tokenID_2to1,
     tokensell: tokenID_1to2,
     filled_sell: 0n,
@@ -82,7 +82,7 @@ function initTestCase() {
   const order2_amountsell = 10000n;
   const order2_amountbuy = 1000n;
   const order2 = {
-    status: 0, // open
+    order_id: 2n, // open
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
     filled_sell: 10n,
@@ -198,6 +198,9 @@ class TestSpotTrade implements SimpleTest {
   }
   getOutput() {
     return {};
+  }
+  getTestData() {
+    return [{input: this.getInput(), output: this.getOutput(), name: this.constructor.name}]
   }
   getComponent(): TestComponent {
     return {

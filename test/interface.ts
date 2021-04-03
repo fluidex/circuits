@@ -3,8 +3,7 @@ interface TestComponent {
   main: string;
 }
 interface SimpleTest {
-  getInput();
-  getOutput();
+  getTestData(): Array<{name:string, input: object, output?: object}>;
   getComponent(): TestComponent;
 }
 

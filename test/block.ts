@@ -16,6 +16,33 @@ const orderLevels = 1;
 const balanceLevels = 2;
 const accountLevels = 2;
 
+
+class TestBlock implements SimpleTest {
+  getTestData() {
+    return [initBlockTestCase(),
+    initEmptyBlockTestCase()];
+    /*
+    let input = {
+      txsType: block_test_case.txsType,
+      encodedTxs: block_test_case.encodedTxs,
+      balance_path_elements: block_test_case.balance_path_elements,
+      order_path_elements: block_test_case.order_path_elements,
+      account_path_elements: block_test_case.account_path_elements,
+      orderRoots: block_test_case.orderRoots,
+      oldAccountRoots: block_test_case.oldAccountRoots,
+      newAccountRoots: block_test_case.newAccountRoots,
+    };
+    */
+    //console.log(JSON.stringify(input, null, 2));
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'block.circom'),
+      main: `Block(${nTxs}, ${balanceLevels}, ${orderLevels}, ${accountLevels})`,
+    };
+  }
+}
+
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initBlockTestCase() {
@@ -168,36 +195,22 @@ function initBlockTestCase() {
     state.Nop();
   }
 
-  let block = state.forge();
-  return block;
+  let block_test_case = state.forge();
+
+  let input = {
+    txsType: block_test_case.txsType,
+    encodedTxs: block_test_case.encodedTxs,
+    balance_path_elements: block_test_case.balance_path_elements,
+    order_path_elements: block_test_case.order_path_elements,
+    account_path_elements: block_test_case.account_path_elements,
+    orderRoots: block_test_case.orderRoots,
+    oldAccountRoots: block_test_case.oldAccountRoots,
+    newAccountRoots: block_test_case.newAccountRoots,
+  };
+  return {input, name: 'block'};
 }
 
 let block_test_case = initBlockTestCase();
-class TestBlock implements SimpleTest {
-  getInput() {
-    let input = {
-      txsType: block_test_case.txsType,
-      encodedTxs: block_test_case.encodedTxs,
-      balance_path_elements: block_test_case.balance_path_elements,
-      order_path_elements: block_test_case.order_path_elements,
-      account_path_elements: block_test_case.account_path_elements,
-      orderRoots: block_test_case.orderRoots,
-      oldAccountRoots: block_test_case.oldAccountRoots,
-      newAccountRoots: block_test_case.newAccountRoots,
-    };
-    //console.log(JSON.stringify(input, null, 2));
-    return input;
-  }
-  getOutput() {
-    return {};
-  }
-  getComponent(): TestComponent {
-    return {
-      src: path.join(__dirname, '..', 'src', 'block.circom'),
-      main: `Block(${nTxs}, ${balanceLevels}, ${orderLevels}, ${accountLevels})`,
-    };
-  }
-}
 
 function initEmptyBlockTestCase() {
   let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs);
@@ -206,11 +219,22 @@ function initEmptyBlockTestCase() {
   for (var i = state.bufferedTxs.length; i < nTxs; i++) {
     state.Nop();
   }
-  let block = state.forge();
-  return block;
+  let empty_block_test_case = state.forge();
+  let input = {
+    txsType: empty_block_test_case.txsType,
+    encodedTxs: empty_block_test_case.encodedTxs,
+    balance_path_elements: empty_block_test_case.balance_path_elements,
+    order_path_elements: empty_block_test_case.order_path_elements,
+    account_path_elements: empty_block_test_case.account_path_elements,
+    orderRoots: empty_block_test_case.orderRoots,
+    oldAccountRoots: empty_block_test_case.oldAccountRoots,
+    newAccountRoots: empty_block_test_case.newAccountRoots,
+  };
+  return  {input, name:'emptyBlock'};
 }
 
 let empty_block_test_case = initEmptyBlockTestCase();
+/*
 class TestEmptyBlock implements SimpleTest {
   getInput() {
     let input = {
@@ -236,5 +260,6 @@ class TestEmptyBlock implements SimpleTest {
     };
   }
 }
+*/
 
-export { TestBlock, TestEmptyBlock };
+export { TestBlock };

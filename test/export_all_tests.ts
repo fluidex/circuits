@@ -1,14 +1,14 @@
 import * as snarkit from 'snarkit';
 import { circuitSrcToName } from './common';
-import { TestCheckLeafExists, TestCheckLeafExistsDisable, TestCheckLeafUpdate, TestCheckLeafUpdateDisable } from './binary_merkle_tree';
-import { TestRescueHash } from './rescue';
+import { TestCheckLeafExists, TestCheckLeafUpdate } from './binary_merkle_tree';
+//import { TestRescueHash } from './rescue';
 import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './hash_state';
-import { TestDepositToNew, TestDepositToOld } from './deposit';
-import { TestTransfer } from './transfer';
-import { TestWithdraw } from './withdraw';
+import { TestDeposit  } from './deposit';
+//import { TestTransfer } from './transfer';
+//import { TestWithdraw } from './withdraw';
 import { TestPlaceOrder } from './place_order';
-import { TestSpotTrade } from './spot_trade';
-import { TestBlock, TestEmptyBlock } from './block';
+//import { TestSpotTrade } from './spot_trade';
+//import { TestBlock } from './block';
 import { SimpleTest } from './interface';
 
 import * as path from 'path';
@@ -16,48 +16,36 @@ import * as fs from 'fs';
 
 function getAllTests(): Array<SimpleTest> {
   let result = [];
-  result.push(new TestRescueHash());
-  result.push(new TestCheckLeafExists());
-  result.push(new TestCheckLeafExistsDisable());
-  result.push(new TestCheckLeafUpdate());
-  result.push(new TestCheckLeafUpdateDisable());
+  //result.push(new TestRescueHash());
+  //result.push(new TestCheckLeafExists());
+  //result.push(new TestCheckLeafUpdate());
   result.push(new TestHashAccount());
   result.push(new TestHashOrder());
   result.push(new TestGenesisOrderRoot());
-  result.push(new TestDepositToNew());
-  result.push(new TestDepositToOld());
-  result.push(new TestTransfer());
-  result.push(new TestWithdraw());
+  //result.push(new TestDeposit());
+  //result.push(new TestTransfer());
+  //result.push(new TestWithdraw());
   result.push(new TestPlaceOrder());
-  result.push(new TestSpotTrade());
-  result.push(new TestBlock());
-  result.push(new TestEmptyBlock());
+  //result.push(new TestSpotTrade());
+  //result.push(new TestBlock());
   return result;
 }
 
 export async function exportAllTests() {
   const tests = getAllTests();
   const outDir = 'testdata';
-  let circuitToData = new Map<string, Array<any>>();
   // group same circuits to save compile time
   for (const t of tests) {
     // eg: Block_1_1_1_1
     const circuitName = circuitSrcToName(t.getComponent().main);
-    if (!circuitToData.has(circuitName)) {
-      circuitToData.set(circuitName, [t]);
-    } else {
-      circuitToData.set(circuitName, circuitToData.get(circuitName).concat([t]));
-    }
-  }
-  for (const [circuitName, arr] of circuitToData.entries()) {
     const circuitDir = path.join(outDir, circuitName);
     fs.mkdirSync(circuitDir, { recursive: true });
-    await snarkit.utils.writeCircuitIntoDir(circuitDir, arr[0].getComponent());
-    for (const t of arr) {
-      const testName = t.constructor.name;
-      const dataDir = path.join(circuitDir, 'data', testName);
+    await snarkit.utils.writeCircuitIntoDir(circuitDir, t.getComponent());
+    for (const d of t.getTestData()) {
+      const testName = d.name;
+      const dataDir = path.join(circuitDir, 'data', d.name);
       console.log('export', testName, 'to', dataDir);
-      await snarkit.utils.writeInputOutputIntoDir(dataDir, t.getInput(), t.getOutput());
+      await snarkit.utils.writeInputOutputIntoDir(dataDir, d.input, d.output || {});
     }
   }
 }

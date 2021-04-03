@@ -35,7 +35,7 @@ function initTestCase() {
     }
   }
   state.setAccountNonce(accountID, nonce);
-
+  //state.setAccountKey(accountID, account);
   const placeOrderTx = {
     accountID: accountID,
     previous_tokenID_sell: 0n,
@@ -54,7 +54,9 @@ function initTestCase() {
   let block = state.forge();
   // TODO: assert length
   return {
-    enabled: 1,
+    enabled: 0,
+    in: block.encodedTxs[block.encodedTxs.length - 1],
+    /*
     order_id: block.encodedTxs[block.encodedTxs.length - 1][common.TxDetailIdx.Order1ID],
     old_order_tokensell: placeOrderTx.previous_tokenID_sell,
     old_order_filledsell: placeOrderTx.previous_filled_sell,
@@ -73,6 +75,7 @@ function initTestCase() {
     sign: account.sign,
     ay: Scalar.fromString(account.ay, 16),
     ethAddr: Scalar.fromString(account.ethAddr, 16),
+    */
     balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][0],
     order_path_elements: block.order_path_elements[block.order_path_elements.length - 1][0],
     account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][0],
@@ -85,9 +88,11 @@ function initTestCase() {
 
 let test_case = initTestCase();
 class TestPlaceOrder implements SimpleTest {
-  getInput() {
+  getTestData() {
     let input = {
       enabled: test_case.enabled,
+      in: test_case.in,
+      /*
       order_id: test_case.order_id,
       old_order_tokensell: test_case.old_order_tokensell,
       old_order_filledsell: test_case.old_order_filledsell,
@@ -106,6 +111,7 @@ class TestPlaceOrder implements SimpleTest {
       sign: test_case.sign,
       ay: test_case.ay,
       ethAddr: test_case.ethAddr,
+      */
       balance_path_elements: test_case.balance_path_elements,
       order_path_elements: test_case.order_path_elements,
       account_path_elements: test_case.account_path_elements,
@@ -115,10 +121,7 @@ class TestPlaceOrder implements SimpleTest {
       newAccountRoot: test_case.newAccountRoot,
     };
     //console.log(JSON.stringify(input, null, 2));
-    return input;
-  }
-  getOutput() {
-    return {};
+    return [{input, name: 'TestPlaceOrder'}];
   }
   getComponent(): TestComponent {
     return {

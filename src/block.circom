@@ -195,6 +195,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         // try place_order
         processPlaceOrder[i] = PlaceOrder(balanceLevels, orderLevels, accountLevels);
         processPlaceOrder[i].enabled <== enablePlaceOrder[i].out;
+        processPlaceOrder[i].in <== encodedTxs[i];
+        /*
+        // so what..? the name is irrelevant. We will refactor these later.
+        processPlaceOrder[i].order_pos <== decodedTx[i].accountID2;
         processPlaceOrder[i].old_order_id <== decodedTx[i].order1_id;
         processPlaceOrder[i].new_order_id <== decodedTx[i].order2_id;
         processPlaceOrder[i].old_order_tokensell <== decodedTx[i].tokenID;
@@ -214,6 +218,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processPlaceOrder[i].sign <== decodedTx[i].sign1;
         processPlaceOrder[i].ay <== decodedTx[i].ay1;
         processPlaceOrder[i].ethAddr <== decodedTx[i].ethAddr1;
+        */
         for (var j = 0; j < balanceLevels; j++) {
             processPlaceOrder[i].balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
         }

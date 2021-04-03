@@ -12,6 +12,21 @@ const orderLevels = 2;
 const balanceLevels = 2;
 const accountLevels = 2;
 
+
+class TestDeposit implements SimpleTest {
+  getTestData() {
+    return [initDepositToOld(),
+      initDepositToNew()];
+    }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'deposit_to_new.circom'),
+      main: `DepositToNew(${balanceLevels}, ${accountLevels})`,
+    };
+  }
+}
+
+
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
 function initDepositToNew() {
@@ -33,7 +48,7 @@ function initDepositToNew() {
 
   let block = state.forge();
   // TODO: assert length
-  return {
+  const input = {
     enabled: 1,
     genesisOrderRoot: state.defaultOrderRoot,
     accountID: accountID,
@@ -47,6 +62,7 @@ function initDepositToNew() {
     oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
     newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
   };
+  return {input, name: 'depositToNew'};
 }
 
 function initDepositToOld() {
@@ -79,7 +95,7 @@ function initDepositToOld() {
 
   let block = state.forge();
   // TODO: assert length
-  return {
+  const input = {
     enabled: 1,
     accountID: accountID,
     tokenID: tokenID,
@@ -95,38 +111,12 @@ function initDepositToOld() {
     oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
     newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
   };
+  return {input, name: 'depositToNew'}
 }
 
 let deposit_to_new_test_case = initDepositToNew();
-class TestDepositToNew implements SimpleTest {
-  getInput() {
-    return {
-      enabled: deposit_to_new_test_case.enabled,
-      genesisOrderRoot: deposit_to_new_test_case.genesisOrderRoot,
-      accountID: deposit_to_new_test_case.accountID,
-      tokenID: deposit_to_new_test_case.tokenID,
-      ethAddr: deposit_to_new_test_case.ethAddr,
-      sign: deposit_to_new_test_case.sign,
-      ay: deposit_to_new_test_case.ay,
-      amount: deposit_to_new_test_case.amount,
-      balance_path_elements: deposit_to_new_test_case.balance_path_elements,
-      account_path_elements: deposit_to_new_test_case.account_path_elements,
-      oldAccountRoot: deposit_to_new_test_case.oldAccountRoot,
-      newAccountRoot: deposit_to_new_test_case.newAccountRoot,
-    };
-  }
-  getOutput() {
-    return {};
-  }
-  getComponent(): TestComponent {
-    return {
-      src: path.join(__dirname, '..', 'src', 'deposit_to_new.circom'),
-      main: `DepositToNew(${balanceLevels}, ${accountLevels})`,
-    };
-  }
-}
-
 let deposit_to_old_test_case = initDepositToOld();
+/*
 class TestDepositToOld implements SimpleTest {
   getInput() {
     return {
@@ -156,5 +146,5 @@ class TestDepositToOld implements SimpleTest {
     };
   }
 }
-
-export { TestDepositToNew, TestDepositToOld };
+*/
+export { TestDeposit };

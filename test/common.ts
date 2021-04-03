@@ -3,7 +3,6 @@ import { assert } from 'console';
 import { Account } from '../helper.ts/account';
 import { Tree } from '../helper.ts/binary_merkle_tree';
 import { hashAccountState, hashOrderState, emptyOrderHash, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
-import { TestCheckLeafUpdateDisable } from './binary_merkle_tree';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 
@@ -170,7 +169,7 @@ class RawTx {
 }
 
 class Order {
-  status: number;
+  order_id: bigint;
   tokenbuy: bigint;
   tokensell: bigint;
   filled_sell: bigint;

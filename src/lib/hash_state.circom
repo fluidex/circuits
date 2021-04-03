@@ -64,12 +64,12 @@ template HashOrder() {
     signal input filled_buy;
     signal input total_sell;
     signal input total_buy;
-    signal input status; // open, filled, closed
+    signal input order_id;
 
     signal output out;
 
     signal e0; // build e0 element
-    e0 <== tokensell * (1 << 64) + tokenbuy * (1 << 32) + status;
+    e0 <== tokensell * (1 << 64) + tokenbuy * (1 << 32) + order_id;
 
     component hash = Poseidon(5);
     hash.inputs[0] <== e0;

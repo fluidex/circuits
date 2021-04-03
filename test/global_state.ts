@@ -2,6 +2,7 @@ import { assert } from 'console';
 import { hash } from '../helper.ts/hash';
 import { Account } from '../helper.ts/account';
 import { Tree } from '../helper.ts/binary_merkle_tree';
+import {PlaceOrderTxData} from "./codec/place_order_tx_data"
 import { hashAccountState, hashOrderState, calculateGenesisOrderRoot, emptyOrderHash } from '../helper.ts/state-utils';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
@@ -113,7 +114,7 @@ class GlobalState {
   getNextOrderIdForUser(accountID): bigint {
     return this.nextOrderIds.get(accountID);
   }
-  createNewAccount({ next_order_id = 0n } = {}): bigint {
+  createNewAccount({ next_order_id = 1n } = {}): bigint {
     const accountID = BigInt(this.balanceTrees.size);
     if (accountID >= 2 ** this.accountLevels) {
       throw new Error(`account_id ${accountID} overflows for accountLevels ${this.accountLevels}`);
@@ -136,7 +137,7 @@ class GlobalState {
     }
 
     let order = {
-      status: 0, //open
+      order_id: orderID, //open
       tokenbuy: tx.tokenID_buy,
       tokensell: tx.tokenID_sell,
       filled_sell: 0n,
@@ -437,10 +438,37 @@ class GlobalState {
       rootAfter: 0n,
     };
     //console.log("orderRoo0", rawTx.orderRoot0);
-
     let order_id = this.createNewOrder(tx);
+    let order_pos = order_id;
+    order_pos = 0n;
 
     // fill in the tx
+    let txData = new PlaceOrderTxData();
+
+
+    txData.order_pos = order_pos;
+    txData.old_order_id = 0n;
+    txData.new_order_id = order_id;
+    txData.old_order_tokensell = tx.previous_tokenID_sell;
+    txData.old_order_filledsell = tx.previous_filled_sell;
+    txData.old_order_amountsell = tx.previous_amount_sell;
+    txData.old_order_tokenbuy = tx.previous_tokenID_buy;
+    txData.old_order_filledbuy = tx.previous_filled_buy;
+    txData.old_order_amountbuy = tx.previous_amount_buy;;
+    txData.new_order_tokensell = tx.tokenID_sell;
+    txData.new_order_amountsell = tx.amount_sell;
+    txData.new_order_tokenbuy  = tx.tokenID_buy;
+    txData.new_order_amountbuy = tx.amount_buy;
+    txData.accountID = tx.accountID;
+    txData.tokenID = tx.tokenID_sell;
+    txData.balance = proof.leaf;
+    txData.nonce = account.nonce;
+    txData.sign = account.sign;
+    txData.ay = account.ay;
+    txData.ethAddr = account.ethAddr;
+
+    let encodedTx = txData.encode();
+    /*
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
     encodedTx[TxDetailIdx.Order1ID] = order_id;
@@ -460,10 +488,11 @@ class GlobalState {
     encodedTx[TxDetailIdx.Order1FilledBuy] = tx.previous_filled_buy;
     encodedTx[TxDetailIdx.Order2AmountSell] = tx.amount_sell;
     encodedTx[TxDetailIdx.Order2AmountBuy] = tx.amount_buy;
+    */
     rawTx.payload = encodedTx;
-    rawTx.orderPath0 = this.orderTrees.get(tx.accountID).getProof(order_id).path_elements;
+    rawTx.orderPath0 = this.orderTrees.get(tx.accountID).getProof(order_pos).path_elements;
     //console.log('rawTx.orderPath0', rawTx.orderPath0)
-    rawTx.orderRoot1 = this.orderTrees.get(tx.accountID).getProof(order_id).root;
+    rawTx.orderRoot1 = this.orderTrees.get(tx.accountID).getProof(order_pos).root;
 
     rawTx.rootAfter = this.root();
     this.addRawTx(rawTx);
@@ -562,7 +591,7 @@ class GlobalState {
     rawTx.balancePath1 = this.balanceTrees.get(tx.order2_accountID).getProof(tx.tokenID_1to2).path_elements;
 
     let newOrder1 = {
-      status: 0, // open
+      order_id: order1.order_id, // open
       tokenbuy: tx.tokenID_2to1,
       tokensell: tx.tokenID_1to2,
       filled_sell: old_order_state.order1_filledsell + tx.amount_1to2,
@@ -579,7 +608,7 @@ class GlobalState {
     rawTx.accountPath1 = this.accountTree.getProof(tx.order2_accountID).path_elements;
 
     let newOrder2 = {
-      status: 0, // open
+      order_id: order2.order_id, // open
       tokenbuy: tx.tokenID_1to2,
       tokensell: tx.tokenID_2to1,
       filled_sell: old_order_state.order2_filledsell + tx.amount_2to1,

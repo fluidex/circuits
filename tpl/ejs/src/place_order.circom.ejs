@@ -2,46 +2,10 @@ include "../node_modules/circomlib/circuits/bitify.circom";
 include "./lib/binary_merkle_tree.circom";
 include "./lib/hash_state.circom";
 
-
-function TxLength() { return 34; }
-
 template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
-    signal input in[TxLength()];
-/*codegen:start
-let current_indent = 4;
-let code = '';
-function addLine(text) {
-    code += ' '.repeat(current_indent) + text + '\n';
-}
-let input_signals = `
-    enabled
-    order_pos
-    old_order_id
-    new_order_id
-    old_order_tokensell
-    old_order_filledsell
-    old_order_amountsell
-    old_order_tokenbuy
-    old_order_filledbuy
-    old_order_amountbuy
-    new_order_tokensell
-    new_order_amountsell
-    new_order_tokenbuy
-    new_order_amountbuy
-    accountID
-    tokenID
-    balance
-    nonce
-    sign
-    ay
-    ethAddr
-`.split(/\s+/).filter(item => item != '');
-for(let i = 0; i < input_signals.length; i++) {
-    addLine(`signal ${input_signals[i]};`);
-    addLine(`${input_signals[i]} <== in[${i}];`);
-}
-code;
-codegen:end*/
+    signal input enabled;
+
+<%- codegen.generateCircuitInputDecoderCircom(codegen.config.placeOrder.inputSignals) %>
 
     // Roots
     signal input oldOrderRoot;
@@ -102,11 +66,12 @@ codegen:end*/
     // Even the old order has not been filled already. 
     // Then the old order cannot be matched any more, it is 'canceled' in fact
     // Besides, you need to make sure your order id starts from 1 rather than 0
+    /*
     component comp = LessThan(192);
-    comp.input[0] <== old_order_id;
-    comp.input[1] <== new_order_id;
-    (comp.output - 1) * enabled === 0;
-
+    comp.in[0] <== old_order_id;
+    comp.in[1] <== new_order_id;
+    (comp.out - 1) * enabled === 0;
+    */
 
     // here we don't need to check
     // ((old_order_filledsell==old_order_amountsell) || (old_order_filledbuy==old_order_amountbuy))
@@ -118,7 +83,7 @@ codegen:end*/
     oldOrderHash.filled_buy <== old_order_filledbuy;
     oldOrderHash.total_sell <== old_order_amountsell;
     oldOrderHash.total_buy <== old_order_amountbuy;
-    oldOrderHash.order_id <== old_order_id; // TODO: need to maintain a table
+    oldOrderHash.order_id <== old_order_id;
 
     component newOrderHash = HashOrder();
     newOrderHash.tokensell <== new_order_tokensell;

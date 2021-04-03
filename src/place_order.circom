@@ -3,53 +3,60 @@ include "./lib/binary_merkle_tree.circom";
 include "./lib/hash_state.circom";
 
 
-function TxLength() { return 34; }
+//function TxLength() { return 34; }
 
 template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
-    signal input in[TxLength()];
-    signal enabled;
-    enabled <== in[0];
+    signal input enabled;
+    //signal input in[TxLength()];
+    // **************** CODEGEN START **************
+    signal input in[34];
     signal order_pos;
-    order_pos <== in[1];
     signal old_order_id;
-    old_order_id <== in[2];
     signal new_order_id;
-    new_order_id <== in[3];
     signal old_order_tokensell;
-    old_order_tokensell <== in[4];
     signal old_order_filledsell;
-    old_order_filledsell <== in[5];
     signal old_order_amountsell;
-    old_order_amountsell <== in[6];
     signal old_order_tokenbuy;
-    old_order_tokenbuy <== in[7];
     signal old_order_filledbuy;
-    old_order_filledbuy <== in[8];
     signal old_order_amountbuy;
-    old_order_amountbuy <== in[9];
     signal new_order_tokensell;
-    new_order_tokensell <== in[10];
     signal new_order_amountsell;
-    new_order_amountsell <== in[11];
     signal new_order_tokenbuy;
-    new_order_tokenbuy <== in[12];
     signal new_order_amountbuy;
-    new_order_amountbuy <== in[13];
     signal accountID;
-    accountID <== in[14];
     signal tokenID;
-    tokenID <== in[15];
     signal balance;
-    balance <== in[16];
     signal nonce;
-    nonce <== in[17];
     signal sign;
-    sign <== in[18];
     signal ay;
-    ay <== in[19];
     signal ethAddr;
-    ethAddr <== in[20];
+    order_pos <== in[0];
+    old_order_id <== in[1];
+    new_order_id <== in[2];
+    old_order_tokensell <== in[3];
+    old_order_filledsell <== in[4];
+    old_order_amountsell <== in[5];
+    old_order_tokenbuy <== in[6];
+    old_order_filledbuy <== in[7];
+    old_order_amountbuy <== in[8];
+    new_order_tokensell <== in[9];
+    new_order_amountsell <== in[10];
+    new_order_tokenbuy <== in[11];
+    new_order_amountbuy <== in[12];
+    accountID <== in[13];
+    tokenID <== in[14];
+    balance <== in[15];
+    nonce <== in[16];
+    sign <== in[17];
+    ay <== in[18];
+    ethAddr <== in[19];
+    // **************** CODEGEN END **************
 
+/*codegen:start
+let current_indent = 4;
+let input_signals = ;
+codegen_generate_basic_decoder("PlaceOrderTxData", input_signals, current_indent)
+codegen:end*/
 
     // Roots
     signal input oldOrderRoot;
@@ -110,11 +117,12 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     // Even the old order has not been filled already. 
     // Then the old order cannot be matched any more, it is 'canceled' in fact
     // Besides, you need to make sure your order id starts from 1 rather than 0
+    /*
     component comp = LessThan(192);
-    comp.input[0] <== old_order_id;
-    comp.input[1] <== new_order_id;
-    (comp.output - 1) * enabled === 0;
-
+    comp.in[0] <== old_order_id;
+    comp.in[1] <== new_order_id;
+    (comp.out - 1) * enabled === 0;
+    */
 
     // here we don't need to check
     // ((old_order_filledsell==old_order_amountsell) || (old_order_filledbuy==old_order_amountbuy))
@@ -126,7 +134,7 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     oldOrderHash.filled_buy <== old_order_filledbuy;
     oldOrderHash.total_sell <== old_order_amountsell;
     oldOrderHash.total_buy <== old_order_amountbuy;
-    oldOrderHash.order_id <== old_order_id; // TODO: need to maintain a table
+    oldOrderHash.order_id <== old_order_id;
 
     component newOrderHash = HashOrder();
     newOrderHash.tokensell <== new_order_tokensell;

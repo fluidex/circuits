@@ -2,8 +2,31 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 import { SimpleTest, TestComponent } from './interface';
 
-class TestCheckLeafExists implements SimpleTest {
-  getInput() {
+
+class  TestCheckLeafExists implements SimpleTest {
+  getTestData() {
+    return [checkLeafExists(), checkLeafExistsDisable()]
+  }
+  getComponent() {
+    return {
+      src: path.join(__dirname, '..', 'src', 'lib', 'binary_merkle_tree.circom'),
+      main: 'CheckLeafExists(2)',
+    };
+  }
+}
+class  TestCheckLeafUpdate implements SimpleTest {
+  getTestData() {
+  return [checkLeafUpdate(), checkLeafUpdateDisable()]
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'lib', 'binary_merkle_tree.circom'),
+      main: 'CheckLeafUpdate(2)',
+    };
+  }
+}
+
+function checkLeafExists() {
     let leaves = [10n, 11n, 12n, 13n];
     let midLevel = [hash([leaves[0], leaves[1]]), hash([leaves[2], leaves[3]])];
     let root = hash(midLevel);
@@ -12,21 +35,11 @@ class TestCheckLeafExists implements SimpleTest {
     let path_elements = [[leaves[3]], [midLevel[0]]];
     let path_index = [0, 1];
     let enabled = 1;
-    return { enabled, leaf, path_elements, path_index, root };
+    return {input: { enabled, leaf, path_elements, path_index, root }, output: {}, name:'checkLeafExists'};
   }
-  getOutput() {
-    return {};
-  }
-  getComponent(): TestComponent {
-    return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'binary_merkle_tree.circom'),
-      main: 'CheckLeafExists(2)',
-    };
-  }
-}
 
-class TestCheckLeafExistsDisable implements SimpleTest {
-  getInput() {
+
+function checkLeafExistsDisable() {
     let leaves = [10n, 11n, 12n, 13n];
     let midLevel = [hash([leaves[0], leaves[1]]), hash([leaves[2], leaves[3]])];
     let root = hash(midLevel) - 1n;
@@ -36,21 +49,10 @@ class TestCheckLeafExistsDisable implements SimpleTest {
     let path_index = [0, 1];
     let enabled = 0;
     root = root - 1n;
-    return { enabled, leaf, path_elements, path_index, root };
-  }
-  getOutput() {
-    return {};
-  }
-  getComponent(): TestComponent {
-    return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'binary_merkle_tree.circom'),
-      main: 'CheckLeafExists(2)',
-    };
-  }
+    return {input:{ enabled, leaf, path_elements, path_index, root }, output: {}, name:'checkLeafExistsDisable'};
 }
 
-class TestCheckLeafUpdate implements SimpleTest {
-  getInput() {
+function checkLeafUpdate() {
     let leaves = [10n, 11n, 12n, 13n];
     function getSampleMerklePath() {
       let midLevel = [hash([leaves[0], leaves[1]]), hash([leaves[2], leaves[3]])];
@@ -74,21 +76,10 @@ class TestCheckLeafUpdate implements SimpleTest {
       path_elements,
       path_index,
     };
-    return result;
-  }
-  getOutput() {
-    return {};
-  }
-  getComponent(): TestComponent {
-    return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'binary_merkle_tree.circom'),
-      main: 'CheckLeafUpdate(2)',
-    };
-  }
+    return {input: result, name: 'checkLeafUpdate'};
 }
 
-class TestCheckLeafUpdateDisable implements SimpleTest {
-  getInput() {
+function checkLeafUpdateDisable() {
     let leaves = [10n, 11n, 12n, 13n];
     function getSampleMerklePath() {
       let midLevel = [hash([leaves[0], leaves[1]]), hash([leaves[2], leaves[3]])];
@@ -113,17 +104,7 @@ class TestCheckLeafUpdateDisable implements SimpleTest {
       path_elements,
       path_index,
     };
-    return result;
-  }
-  getOutput() {
-    return {};
-  }
-  getComponent(): TestComponent {
-    return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'binary_merkle_tree.circom'),
-      main: 'CheckLeafUpdate(2)',
-    };
-  }
+    return {input:result, name :'checkLeafUpdateDisable'};
 }
 
-export { TestCheckLeafExists, TestCheckLeafExistsDisable, TestCheckLeafUpdate, TestCheckLeafUpdateDisable };
+export { TestCheckLeafExists, TestCheckLeafUpdate };

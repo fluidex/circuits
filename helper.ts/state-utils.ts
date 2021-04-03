@@ -56,7 +56,7 @@ function calculateGenesisOrderRoot(orderLevels) {
 function orderState2Array(st) {
   let data = Scalar.e(0);
 
-  data = Scalar.add(data, st.status);
+  data = Scalar.add(data, st.order_id);
   data = Scalar.add(data, Scalar.shl(st.tokenbuy, 32));
   data = Scalar.add(data, Scalar.shl(st.tokensell, 64));
 
