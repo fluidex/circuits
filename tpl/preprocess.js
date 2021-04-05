@@ -31,25 +31,7 @@ function generateCircuitInputDecoderCircom(inputSignals, indent = 4) {
     addLine(`${inputSignals[i]} <== ${encodedSignalsName}[${i}];`);
   }
   addLine('// **************** CODEGEN END **************');
-  // generate js encoding code.
-  // it is a bit wired to put codes here.. so codegen implys side effect.. FIX later
-
-  //let encodingCode = generateEncodingCode(encoderName, inputSignals);/
-  //const w = path.join(path.dirname(__filename), "..", "test", "codec", changeCase.snakeCase(encoderName) + ".ts");
-  //fs.writeFileSync(w, encodingCode);
-
   return code;
-}
-function renderTemplateOld(txt) {
-  const r = /\/\*codegen:start([\s\S]+?)codegen:end\*\//;
-  let m = txt.match(r);
-  while (m) {
-    const macro = m[1];
-    const code = eval(macro);
-    txt = txt.replace(r, code);
-    m = txt.match(r);
-  }
-  return txt;
 }
 function main() {
   const tplFile = process.argv[2];

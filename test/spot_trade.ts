@@ -156,50 +156,6 @@ let test_case = initTestCase();
 class TestSpotTrade implements SimpleTest {
   getInput() {
     return test_case;
-    /*
-    return {
-      enabled: test_case.enabled,
-      order1_id: test_case.order1_id,
-      order1_tokensell: test_case.order1_tokensell,
-      order1_amountsell: test_case.order1_amountsell,
-      order1_tokenbuy: test_case.order1_tokenbuy,
-      order1_amountbuy: test_case.order1_amountbuy,
-      order2_id: test_case.order2_id,
-      order2_tokensell: test_case.order2_tokensell,
-      order2_amountsell: test_case.order2_amountsell,
-      order2_tokenbuy: test_case.order2_tokenbuy,
-      order2_amountbuy: test_case.order2_amountbuy,
-      amount_2to1: test_case.amount_2to1,
-      amount_1to2: test_case.amount_1to2,
-      order1_filledsell: test_case.order1_filledsell,
-      order1_filledbuy: test_case.order1_filledbuy,
-      order2_filledsell: test_case.order2_filledsell,
-      order2_filledbuy: test_case.order2_filledbuy,
-      order1_accountID: test_case.order1_accountID,
-      order2_accountID: test_case.order2_accountID,
-      order1_account_nonce: test_case.order1_account_nonce,
-      order2_account_nonce: test_case.order2_account_nonce,
-      order1_account_sign: test_case.order1_account_sign,
-      order2_account_sign: test_case.order2_account_sign,
-      order1_account_ay: test_case.order1_account_ay,
-      order2_account_ay: test_case.order2_account_ay,
-      order1_account_ethAddr: test_case.order1_account_ethAddr,
-      order2_account_ethAddr: test_case.order2_account_ethAddr,
-      order1_token_sell_balance: test_case.order1_token_sell_balance,
-      order1_token_buy_balance: test_case.order1_token_buy_balance,
-      order2_token_sell_balance: test_case.order2_token_sell_balance,
-      order2_token_buy_balance: test_case.order2_token_buy_balance,
-      order_path_elements: test_case.order_path_elements,
-      old_account_root: test_case.old_account_root,
-      new_account_root: test_case.new_account_root,
-      old_account1_balance_path_elements: test_case.old_account1_balance_path_elements,
-      tmp_account1_balance_path_elements: test_case.tmp_account1_balance_path_elements,
-      old_account1_path_elements: test_case.old_account1_path_elements,
-      old_account2_balance_path_elements: test_case.old_account2_balance_path_elements,
-      tmp_account2_balance_path_elements: test_case.tmp_account2_balance_path_elements,
-      tmp_account2_path_elements: test_case.tmp_account2_path_elements,
-    };
-    */
   }
   getOutput() {
     return {};
