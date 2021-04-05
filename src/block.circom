@@ -200,29 +200,6 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
             processPlaceOrder[i].in[j] <== encodedTxs[i][j];
         }
         
-        /*
-        // so what..? the name is irrelevant. We will refactor these later.
-        processPlaceOrder[i].order_pos <== decodedTx[i].accountID2;
-        processPlaceOrder[i].old_order_id <== decodedTx[i].order1_id;
-        processPlaceOrder[i].new_order_id <== decodedTx[i].order2_id;
-        processPlaceOrder[i].old_order_tokensell <== decodedTx[i].tokenID;
-        processPlaceOrder[i].old_order_tokenbuy <== decodedTx[i].tokenID2;
-        processPlaceOrder[i].old_order_amountsell <== decodedTx[i].order1_amountsell;
-        processPlaceOrder[i].old_order_amountbuy <== decodedTx[i].order1_amountbuy;
-        processPlaceOrder[i].old_order_filledsell <== decodedTx[i].order1_filledsell;
-        processPlaceOrder[i].old_order_filledbuy <== decodedTx[i].order1_filledbuy;
-        processPlaceOrder[i].new_order_tokensell <== decodedTx[i].tokenID3;
-        processPlaceOrder[i].new_order_tokenbuy <== decodedTx[i].tokenID4;
-        processPlaceOrder[i].new_order_amountsell <== decodedTx[i].order2_amountsell;
-        processPlaceOrder[i].new_order_amountbuy <== decodedTx[i].order2_amountbuy;
-        processPlaceOrder[i].accountID <== decodedTx[i].accountID1;
-        processPlaceOrder[i].tokenID <== decodedTx[i].tokenID3;
-        processPlaceOrder[i].balance <== decodedTx[i].balance1;
-        processPlaceOrder[i].nonce <== decodedTx[i].nonce1;
-        processPlaceOrder[i].sign <== decodedTx[i].sign1;
-        processPlaceOrder[i].ay <== decodedTx[i].ay1;
-        processPlaceOrder[i].ethAddr <== decodedTx[i].ethAddr1;
-        */
         for (var j = 0; j < balanceLevels; j++) {
             processPlaceOrder[i].balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
         }

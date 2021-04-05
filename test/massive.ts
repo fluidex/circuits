@@ -111,7 +111,7 @@ class TestMassive implements SimpleTest {
       newAccountRoots: test_case.newAccountRoots,
     };
     //console.log(JSON.stringify(input, null, 2));
-    return [{input, name:'TestMassive'}];
+    return [{ input, name: 'TestMassive' }];
   }
   getComponent(): TestComponent {
     return {

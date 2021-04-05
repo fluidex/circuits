@@ -9,7 +9,7 @@ class TestPow5 implements SimpleTest {
     return { out: 243 };
   }
   getTestData() {
-    return [{input: this.getInput(), output: this.getOutput(), name: this.constructor.name}]
+    return [{ input: this.getInput(), output: this.getOutput(), name: this.constructor.name }];
   }
   getComponent(): TestComponent {
     return {
@@ -27,7 +27,7 @@ class TestInvPow5 implements SimpleTest {
     return { out: 3 };
   }
   getTestData() {
-    return [{input: this.getInput(), output: this.getOutput(), name: this.constructor.name}]
+    return [{ input: this.getInput(), output: this.getOutput(), name: this.constructor.name }];
   }
   getComponent(): TestComponent {
     return {
@@ -50,7 +50,7 @@ class TestRescueMimc implements SimpleTest {
     };
   }
   getTestData() {
-    return [{input: this.getInput(), output: this.getOutput(), name: this.constructor.name}]
+    return [{ input: this.getInput(), output: this.getOutput(), name: this.constructor.name }];
   }
   getComponent(): TestComponent {
     return {
@@ -69,7 +69,7 @@ class TestRescueHash implements SimpleTest {
     return { out: 15131965683816686492029126038145678019083347981596432597977339723207837174957n };
   }
   getTestData() {
-    return [{input: this.getInput(), output: this.getOutput(), name: this.constructor.name}]
+    return [{ input: this.getInput(), output: this.getOutput(), name: this.constructor.name }];
   }
   getComponent(): TestComponent {
     const inputLen = this.getInput().inputs.length;

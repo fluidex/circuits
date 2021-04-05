@@ -102,7 +102,7 @@ class TestWithdraw implements SimpleTest {
   }
 
   getTestData() {
-    return [{input: this.getInput(), output: this.getOutput(), name: this.constructor.name}]
+    return [{ input: this.getInput(), output: this.getOutput(), name: this.constructor.name }];
   }
   getComponent(): TestComponent {
     return {

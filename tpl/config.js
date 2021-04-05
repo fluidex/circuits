@@ -1,7 +1,7 @@
 const config = {
-    txLength: 34,
-    placeOrder: {
-        inputSignals: `
+  txLength: 34,
+  placeOrder: {
+    inputSignals: `
         order_pos
         old_order_id
         new_order_id
@@ -21,9 +21,11 @@ const config = {
         sign
         ay
         ethAddr
-    `.split(/\s+/).filter(item => item != ''),
-        encoderName: "PlaceOrderTxData"
-    }
-}
+    `
+      .split(/\s+/)
+      .filter(item => item != ''),
+    encoderName: 'PlaceOrderTxData',
+  },
+};
 
-export {config};
+export { config };

@@ -3,7 +3,7 @@ import { circuitSrcToName } from './common';
 import { TestCheckLeafExists, TestCheckLeafUpdate } from './binary_merkle_tree';
 import { TestRescueHash } from './rescue';
 import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './hash_state';
-import { TestDeposit  } from './deposit';
+import { TestDeposit } from './deposit';
 import { TestTransfer } from './transfer';
 import { TestWithdraw } from './withdraw';
 import { TestPlaceOrder } from './place_order';

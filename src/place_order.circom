@@ -107,15 +107,15 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
 
     // make sure new order id is greater than old order id
     // the old order is permanently disappeared for the merkle tree
-    // Even the old order has not been filled already. 
+    // Even the old order has not been filled already.
     // Then the old order cannot be matched any more, it is 'canceled' in fact
     // Besides, you need to make sure your order id starts from 1 rather than 0
-    /*
+    
     component comp = LessThan(192);
     comp.in[0] <== old_order_id;
     comp.in[1] <== new_order_id;
     (comp.out - 1) * enabled === 0;
-    */
+    
 
     // here we don't need to check
     // ((old_order_filledsell==old_order_amountsell) || (old_order_filledbuy==old_order_amountbuy))

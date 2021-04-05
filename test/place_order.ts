@@ -35,7 +35,6 @@ function initTestCase() {
     }
   }
   state.setAccountNonce(accountID, nonce);
-  //state.setAccountKey(accountID, account);
   const placeOrderTx = {
     orderID: 1n,
     accountID: accountID,
@@ -55,7 +54,7 @@ function initTestCase() {
   let block = state.forge();
   // TODO: assert length
   return {
-    enabled: 0,
+    enabled: 1,
     in: block.encodedTxs[block.encodedTxs.length - 1],
     /*
     order_id: block.encodedTxs[block.encodedTxs.length - 1][common.TxDetailIdx.Order1ID],
@@ -122,7 +121,7 @@ class TestPlaceOrder implements SimpleTest {
       newAccountRoot: test_case.newAccountRoot,
     };
     //console.log(JSON.stringify(input, null, 2));
-    return [{input, name: 'TestPlaceOrder'}];
+    return [{ input, name: 'TestPlaceOrder' }];
   }
   getComponent(): TestComponent {
     return {

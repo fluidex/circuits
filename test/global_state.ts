@@ -2,7 +2,7 @@ import { assert } from 'console';
 import { hash } from '../helper.ts/hash';
 import { Account } from '../helper.ts/account';
 import { Tree } from '../helper.ts/binary_merkle_tree';
-import {PlaceOrderTxData} from "./codec/place_order_tx_data"
+import { PlaceOrderTxData } from './codec/place_order_tx_data';
 import { hashAccountState, hashOrderState, calculateGenesisOrderRoot, emptyOrderHash } from '../helper.ts/state-utils';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
@@ -446,7 +446,6 @@ class GlobalState {
     // fill in the tx
     let txData = new PlaceOrderTxData();
 
-
     txData.order_pos = order_pos;
     txData.old_order_id = 0n;
     txData.new_order_id = tx.orderID;
@@ -455,10 +454,10 @@ class GlobalState {
     txData.old_order_amountsell = tx.previous_amount_sell;
     txData.old_order_tokenbuy = tx.previous_tokenID_buy;
     txData.old_order_filledbuy = tx.previous_filled_buy;
-    txData.old_order_amountbuy = tx.previous_amount_buy;;
+    txData.old_order_amountbuy = tx.previous_amount_buy;
     txData.new_order_tokensell = tx.tokenID_sell;
     txData.new_order_amountsell = tx.amount_sell;
-    txData.new_order_tokenbuy  = tx.tokenID_buy;
+    txData.new_order_tokenbuy = tx.tokenID_buy;
     txData.new_order_amountbuy = tx.amount_buy;
     txData.accountID = tx.accountID;
     txData.balance = proof.leaf;
@@ -468,27 +467,7 @@ class GlobalState {
     txData.ethAddr = account.ethAddr;
 
     let encodedTx = txData.encode();
-    /*
-    let encodedTx: Array<bigint> = new Array(TxLength);
-    encodedTx.fill(0n, 0, TxLength);
-    encodedTx[TxDetailIdx.Order1ID] = order_id;
-    encodedTx[TxDetailIdx.TokenID] = tx.previous_tokenID_sell;
-    encodedTx[TxDetailIdx.TokenID2] = tx.previous_tokenID_buy;
-    encodedTx[TxDetailIdx.TokenID3] = tx.tokenID_sell;
-    encodedTx[TxDetailIdx.TokenID4] = tx.tokenID_buy;
-    encodedTx[TxDetailIdx.AccountID1] = tx.accountID;
-    encodedTx[TxDetailIdx.EthAddr1] = account.ethAddr;
-    encodedTx[TxDetailIdx.Sign1] = account.sign;
-    encodedTx[TxDetailIdx.Ay1] = account.ay;
-    encodedTx[TxDetailIdx.Nonce1] = account.nonce;
-    encodedTx[TxDetailIdx.Balance1] = proof.leaf;
-    encodedTx[TxDetailIdx.Order1AmountSell] = tx.previous_amount_sell;
-    encodedTx[TxDetailIdx.Order1AmountBuy] = tx.previous_amount_buy;
-    encodedTx[TxDetailIdx.Order1FilledSell] = tx.previous_filled_sell;
-    encodedTx[TxDetailIdx.Order1FilledBuy] = tx.previous_filled_buy;
-    encodedTx[TxDetailIdx.Order2AmountSell] = tx.amount_sell;
-    encodedTx[TxDetailIdx.Order2AmountBuy] = tx.amount_buy;
-    */
+
     rawTx.payload = encodedTx;
     rawTx.orderPath0 = this.orderTrees.get(tx.accountID).getProof(order_pos).path_elements;
     //console.log('rawTx.orderPath0', rawTx.orderPath0)
@@ -664,7 +643,7 @@ class GlobalState {
       }
     }
   }
-  forgeWithTxs(bufferedTxs: Array<any>) : L2Block {
+  forgeWithTxs(bufferedTxs: Array<any>): L2Block {
     assert(bufferedTxs.length == this.nTx, 'invalid txs len');
     let txsType = bufferedTxs.map(tx => tx.txType);
     let encodedTxs = bufferedTxs.map(tx => tx.payload);
@@ -696,7 +675,7 @@ class GlobalState {
       this.Nop();
     }
   }
-  forgeAllL2Blocks() : Array<L2Block> {
+  forgeAllL2Blocks(): Array<L2Block> {
     this.flushWithNop();
     return this.bufferedBlocks;
   }

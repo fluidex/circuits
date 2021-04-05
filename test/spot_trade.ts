@@ -78,7 +78,7 @@ function initTestCase() {
   state.setAccountOrder(accountID1, order1_id, order1);
 
   // order2
-  const order2_id = 2n;
+  const order2_id = 1n;
   const order2_amountsell = 10000n;
   const order2_amountbuy = 1000n;
   const order2 = {
@@ -205,7 +205,7 @@ class TestSpotTrade implements SimpleTest {
     return {};
   }
   getTestData() {
-    return [{input: this.getInput(), output: this.getOutput(), name: this.constructor.name}]
+    return [{ input: this.getInput(), output: this.getOutput(), name: this.constructor.name }];
   }
   getComponent(): TestComponent {
     return {
