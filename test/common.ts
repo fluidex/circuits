@@ -217,6 +217,17 @@ class AccountState {
   }
 }
 
+class L2Block {
+    txsType: Array<any>;
+    encodedTxs: Array<any>;
+    balance_path_elements: Array<any>;
+    order_path_elements: Array<any>;
+    account_path_elements: Array<any>;
+    orderRoots: Array<any>;
+    oldAccountRoots: Array<any>;
+    newAccountRoots: Array<any>;
+}
+
 export {
   TxType,
   TxLength,
@@ -234,4 +245,5 @@ export {
   WithdrawTx,
   SpotTradeTx,
   PlaceOrderTx,
+  L2Block
 };

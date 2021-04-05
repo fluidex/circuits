@@ -4,7 +4,7 @@ import { circuitSrcToName } from './common';
 import { assert } from 'console';
 import * as fs from 'fs';
 import * as path from 'path';
-var printf = require('printf');
+const printf = require('printf');
 import { inspect } from 'util';
 inspect.defaultOptions.depth = null;
 

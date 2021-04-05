@@ -1,14 +1,14 @@
 import * as snarkit from 'snarkit';
 import { circuitSrcToName } from './common';
 import { TestCheckLeafExists, TestCheckLeafUpdate } from './binary_merkle_tree';
-//import { TestRescueHash } from './rescue';
+import { TestRescueHash } from './rescue';
 import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './hash_state';
 import { TestDeposit  } from './deposit';
-//import { TestTransfer } from './transfer';
-//import { TestWithdraw } from './withdraw';
+import { TestTransfer } from './transfer';
+import { TestWithdraw } from './withdraw';
 import { TestPlaceOrder } from './place_order';
-//import { TestSpotTrade } from './spot_trade';
-//import { TestBlock } from './block';
+import { TestSpotTrade } from './spot_trade';
+import { TestBlock } from './block';
 import { SimpleTest } from './interface';
 
 import * as path from 'path';
@@ -16,18 +16,18 @@ import * as fs from 'fs';
 
 function getAllTests(): Array<SimpleTest> {
   let result = [];
-  //result.push(new TestRescueHash());
-  //result.push(new TestCheckLeafExists());
-  //result.push(new TestCheckLeafUpdate());
+  result.push(new TestRescueHash());
+  result.push(new TestCheckLeafExists());
+  result.push(new TestCheckLeafUpdate());
   result.push(new TestHashAccount());
   result.push(new TestHashOrder());
   result.push(new TestGenesisOrderRoot());
-  //result.push(new TestDeposit());
-  //result.push(new TestTransfer());
-  //result.push(new TestWithdraw());
+  result.push(new TestDeposit());
+  result.push(new TestTransfer());
+  result.push(new TestWithdraw());
   result.push(new TestPlaceOrder());
-  //result.push(new TestSpotTrade());
-  //result.push(new TestBlock());
+  result.push(new TestSpotTrade());
+  result.push(new TestBlock());
   return result;
 }
 

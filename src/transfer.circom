@@ -1,4 +1,4 @@
-include "../node_modules/circomlib/circuits/bitify.circom";
+include "./lib/bitify.circom";
 include "lib/eddsaposeidon.circom";
 include "./lib/utils_bjj.circom";
 include "./lib/hash_state.circom";
@@ -81,19 +81,22 @@ template Transfer(balanceLevels, accountLevels) {
     signal receiver_account_path_index[accountLevels];
 
     // decode balance_path_index
-    component bTokenID = Num2Bits(balanceLevels);
+    component bTokenID = Num2BitsIfEnabled(balanceLevels);
+    bTokenID.enabled <== enabled;
     bTokenID.in <== tokenID;
     for (var i = 0; i < balanceLevels; i++) {
         balance_path_index[i] <== bTokenID.out[i];
     }
 
     // decode account_path_index
-    component bFrom = Num2Bits(accountLevels);
+    component bFrom = Num2BitsIfEnabled(accountLevels);
+    bFrom.enabled <== enabled;
     bFrom.in <== fromAccountID;
     for (var i = 0; i < accountLevels; i++) {
         sender_account_path_index[i] <== bFrom.out[i];
     }
-    component bTo = Num2Bits(accountLevels);
+    component bTo = Num2BitsIfEnabled(accountLevels);
+    bTo.enabled <== enabled;
     bTo.in <== toAccountID;
     for (var i = 0; i < accountLevels; i++) {
         receiver_account_path_index[i] <== bTo.out[i];

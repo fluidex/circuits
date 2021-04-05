@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
-const changeCase = require("change-case");
+const printDiff = require("print-diff");
 const {config} = require("./config");
 const {circuitInputEncoderTpl} = require("./templates");
 
@@ -52,8 +52,22 @@ function renderTemplateOld(txt) {
   return txt;
 }
 function main() {
-  let tpl = fs.readFileSync(process.stdin.fd, 'utf-8');
-  const result = ejs.render(tpl, {codegen})
-  console.log(result);
+  const tplFile = process.argv[2];
+  const outputFile = process.argv[3];
+  if (!tplFile || !outputFile) {
+    throw new Error("invalid argv" + process.argv);
+  }
+  console.log(`generate ${outputFile} from ${tplFile}`);
+  let tpl = fs.readFileSync(tplFile, 'utf-8');
+  const output = ejs.render(tpl, {codegen})
+  const overwrite = true;
+  if (!overwrite && fs.existsSync(outputFile)) {
+    const oldOutput = fs.readFileSync(outputFile, "utf-8");
+    if (output != oldOutput) {
+      printDiff(oldOutput, output);
+      throw new Error('dirty output. You should never modify the output file!')
+    }
+  }
+  fs.writeFileSync(outputFile, output);
 }
 main();

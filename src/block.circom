@@ -193,9 +193,13 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processWithdraw[i].newAccountRoot <== newAccountRoots[i];
 
         // try place_order
+        
         processPlaceOrder[i] = PlaceOrder(balanceLevels, orderLevels, accountLevels);
         processPlaceOrder[i].enabled <== enablePlaceOrder[i].out;
-        processPlaceOrder[i].in <== encodedTxs[i];
+        for (var j = 0; j < TxLength(); j++) {
+            processPlaceOrder[i].in[j] <== encodedTxs[i][j];
+        }
+        
         /*
         // so what..? the name is irrelevant. We will refactor these later.
         processPlaceOrder[i].order_pos <== decodedTx[i].accountID2;

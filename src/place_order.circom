@@ -1,13 +1,10 @@
-include "../node_modules/circomlib/circuits/bitify.circom";
+include "./lib/bitify.circom";
 include "./lib/binary_merkle_tree.circom";
 include "./lib/hash_state.circom";
 
-
-//function TxLength() { return 34; }
-
 template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
-    //signal input in[TxLength()];
+
     // **************** CODEGEN START **************
     signal input in[34];
     signal order_pos;
@@ -24,7 +21,6 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     signal new_order_tokenbuy;
     signal new_order_amountbuy;
     signal accountID;
-    signal tokenID;
     signal balance;
     signal nonce;
     signal sign;
@@ -44,19 +40,13 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     new_order_tokenbuy <== in[11];
     new_order_amountbuy <== in[12];
     accountID <== in[13];
-    tokenID <== in[14];
-    balance <== in[15];
-    nonce <== in[16];
-    sign <== in[17];
-    ay <== in[18];
-    ethAddr <== in[19];
+    balance <== in[14];
+    nonce <== in[15];
+    sign <== in[16];
+    ay <== in[17];
+    ethAddr <== in[18];
     // **************** CODEGEN END **************
 
-/*codegen:start
-let current_indent = 4;
-let input_signals = ;
-codegen_generate_basic_decoder("PlaceOrderTxData", input_signals, current_indent)
-codegen:end*/
 
     // Roots
     signal input oldOrderRoot;
@@ -73,23 +63,26 @@ codegen:end*/
     signal order_path_index[orderLevels];
     signal account_path_index[accountLevels];
 
-    new_order_tokensell === tokenID;
+    signal tokenID <== new_order_tokensell;
     // decode balance_path_index
-    component bTokenID = Num2Bits(balanceLevels);
+    component bTokenID = Num2BitsIfEnabled(balanceLevels);
+    bTokenID.enabled <== enabled;
     bTokenID.in <== tokenID;
     for (var i = 0; i < balanceLevels; i++) {
         balance_path_index[i] <== bTokenID.out[i];
     }
 
     // decode order_path_index
-    component bOrderID = Num2Bits(orderLevels);
+    component bOrderID = Num2BitsIfEnabled(orderLevels);
+    bOrderID.enabled <== enabled;
     bOrderID.in <== order_pos;
     for (var i = 0; i < orderLevels; i++) {
         order_path_index[i] <== bOrderID.out[i];
     }
 
     // decode account_path_index
-    component bAccountID = Num2Bits(accountLevels);
+    component bAccountID = Num2BitsIfEnabled(accountLevels);
+    bAccountID.enabled <== enabled;
     bAccountID.in <== accountID;
     for (var i = 0; i < accountLevels; i++) {
         account_path_index[i] <== bAccountID.out[i];
@@ -187,4 +180,3 @@ codegen:end*/
     account_update_checker.oldRoot <== oldAccountRoot;
     account_update_checker.newRoot <== newAccountRoot;
 }
-

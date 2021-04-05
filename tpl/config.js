@@ -16,7 +16,6 @@ const config = {
         new_order_tokenbuy
         new_order_amountbuy
         accountID
-        tokenID
         balance
         nonce
         sign

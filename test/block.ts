@@ -1,5 +1,6 @@
 import * as path from 'path';
 import { hash } from '../helper.ts/hash';
+const printf = require('printf');
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 import { Account } from '../helper.ts/account';
@@ -7,20 +8,27 @@ import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 import { GlobalState } from './global_state';
+import { resourceLimits } from 'worker_threads';
 //import { assert } from 'console';
 const assert = require('assert').strict;
 
 // circuit-level definitions
-const nTxs = 8;
-const orderLevels = 1;
+const nTxs = 1;// you can use any number here. bigger nTxs means larger circuit and longer test time
+const orderLevels = 2;
 const balanceLevels = 2;
 const accountLevels = 2;
 
 
 class TestBlock implements SimpleTest {
   getTestData() {
-    return [initBlockTestCase(),
-    initEmptyBlockTestCase()];
+    let result = [];
+    result.push({input: initEmptyBlockTestCase(), name: 'emptyBlock'});
+    let blks = initBlockTestCase();
+    for(let i in blks) {
+      const name = printf("block_%02d", i);
+      result.push({input: blks[i], name});
+    }
+    return result;
     /*
     let input = {
       txsType: block_test_case.txsType,
@@ -85,9 +93,9 @@ function initBlockTestCase() {
   }
   state.setAccountNonce(accountID2, 29n);
   // order2
-  const order2_id = 1n;
+  const order2_id = 2n;
   const order2 = {
-    status: 0, // open
+    order_id: order2_id,
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
     filled_sell: 10n,
@@ -169,6 +177,7 @@ function initBlockTestCase() {
     amount_buy: 10000n,
   };
   const order1_id = state.nextOrderIds.get(accountID1);
+  assert(order1_id === 1n, "order id wrong");
   state.PlaceOrder(placeOrderTx);
 
   let spotTradeTx = {
@@ -195,7 +204,9 @@ function initBlockTestCase() {
     state.Nop();
   }
 
-  let block_test_case = state.forge();
+  let blocks = state.forgeAllL2Blocks();
+  return blocks;
+  /*
 
   let input = {
     txsType: block_test_case.txsType,
@@ -208,18 +219,21 @@ function initBlockTestCase() {
     newAccountRoots: block_test_case.newAccountRoots,
   };
   return {input, name: 'block'};
+  */
 }
 
 let block_test_case = initBlockTestCase();
 
-function initEmptyBlockTestCase() {
+function initEmptyBlockTestCase() : common.L2Block{
   let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs);
   // we need to have at least 1 account
   state.createNewAccount();
   for (var i = state.bufferedTxs.length; i < nTxs; i++) {
     state.Nop();
   }
-  let empty_block_test_case = state.forge();
+  let block = state.forgeAllL2Blocks()[0];
+  return block;
+  /*
   let input = {
     txsType: empty_block_test_case.txsType,
     encodedTxs: empty_block_test_case.encodedTxs,
@@ -229,8 +243,8 @@ function initEmptyBlockTestCase() {
     orderRoots: empty_block_test_case.orderRoots,
     oldAccountRoots: empty_block_test_case.oldAccountRoots,
     newAccountRoots: empty_block_test_case.newAccountRoots,
-  };
-  return  {input, name:'emptyBlock'};
+  };*/
+  //return  {input: block, name:'emptyBlock'};
 }
 
 let empty_block_test_case = initEmptyBlockTestCase();

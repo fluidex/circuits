@@ -1,4 +1,4 @@
-include "../node_modules/circomlib/circuits/bitify.circom";
+include "./lib/bitify.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
 include "./lib/binary_merkle_tree.circom";
@@ -73,6 +73,7 @@ template fillLimitCheck() {
 template orderUpdater(orderLevels) {
     // order pos is the order location/index inside the tree, less than 2**n
     // order id is the incremental order id, like a nouce.
+    signal input enabled;
     signal input order_pos;
     signal input order_id;
     signal input tokensell;
@@ -94,7 +95,8 @@ template orderUpdater(orderLevels) {
     signal order_path_index[orderLevels];
 
    // decode order_path_index
-    component border_pos = Num2Bits(orderLevels);
+    component border_pos = Num2BitsIfEnabled(orderLevels);
+    border_pos.enabled <== enabled;
     border_pos.in <== order_pos;
     for (var i = 0; i < orderLevels; i++) {
         order_path_index[i] <== border_pos.out[i];
@@ -219,6 +221,7 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input order_path_elements[2][orderLevels][1];
     /// update order 1
     component order1_updater = orderUpdater(orderLevels);
+    order1_updater.enabled <== enabled;
     order1_updater.order_pos <== order1_pos;
     order1_updater.order_id <== order1_id;
     order1_updater.tokensell <== order1_tokensell;
@@ -235,6 +238,7 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
 
     /// update order 2
     component order2_updater = orderUpdater(orderLevels);
+    order2_updater.enabled <== enabled;
     order2_updater.order_pos <== order2_pos;
     order2_updater.order_id <== order2_id;
     order2_updater.tokensell <== order2_tokensell;
@@ -360,24 +364,28 @@ template tradeTransfer(balanceLevels, accountLevels) {
     signal account2_path_index[accountLevels];
 
     // decode balance_path_index
-    component bTokenID_1to2 = Num2Bits(balanceLevels);
+    component bTokenID_1to2 = Num2BitsIfEnabled(balanceLevels);
+    bTokenID_1to2.enabled <== enabled;
     bTokenID_1to2.in <== tokenID_1to2;
     for (var i = 0; i < balanceLevels; i++) {
         balance_1to2_path_index[i] <== bTokenID_1to2.out[i];
     }
-    component bTokenID_2to1 = Num2Bits(balanceLevels);
+    component bTokenID_2to1 = Num2BitsIfEnabled(balanceLevels);
+    bTokenID_2to1.enabled <== enabled;
     bTokenID_2to1.in <== tokenID_2to1;
     for (var i = 0; i < balanceLevels; i++) {
         balance_2to1_path_index[i] <== bTokenID_2to1.out[i];
     }
 
     // decode account_path_index
-    component bAccountID1 = Num2Bits(accountLevels);
+    component bAccountID1 = Num2BitsIfEnabled(accountLevels);
+    bAccountID1.enabled <== enabled;
     bAccountID1.in <== accountID1;
     for (var i = 0; i < accountLevels; i++) {
         account1_path_index[i] <== bAccountID1.out[i];
     }
-    component bAccountID2 = Num2Bits(accountLevels);
+    component bAccountID2 = Num2BitsIfEnabled(accountLevels);
+    bAccountID2.enabled <== enabled;
     bAccountID2.in <== accountID2;
     for (var i = 0; i < accountLevels; i++) {
         account2_path_index[i] <== bAccountID2.out[i];

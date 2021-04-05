@@ -1,7 +1,8 @@
 {
   "scripts": {
     "test": "npx ts-node ./test/test_all.ts",
-    "fmt": "npx prettier --write \"**/*.{js,ts}\""
+    "fmt": "npx prettier --write \"**/*.{js,ts}\"",
+    "codegen": "bash tpl/generate_codes_from_templates.sh"
   },
   "devDependencies": {
     "@types/node": "^14.14.11",
@@ -20,10 +21,11 @@
     "ethers": "^5.0.31",
     "ffjavascript": "^0.2.34",
     "prettier": "^2.2.1",
+    "print-diff": "^1.0.0",
     "printf": "^0.6.1",
     "scrypt-js": "^3.0.1",
     "shelljs": "^0.8.4",
-    "snarkit": "^0.0.3",
+    "snarkit": "git+https://github.com/fluidex/snarkit.git",
     "snarkjs": "^0.3.55",
     "tmp-promise": "^3.0.2",
     "ts-node": "^9.1.1",

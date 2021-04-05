@@ -20,6 +20,7 @@ import {
   TxLength,
   TxDetailIdx,
   TxType,
+  L2Block,
 } from './common';
 
 class GlobalState {
@@ -460,7 +461,6 @@ class GlobalState {
     txData.new_order_tokenbuy  = tx.tokenID_buy;
     txData.new_order_amountbuy = tx.amount_buy;
     txData.accountID = tx.accountID;
-    txData.tokenID = tx.tokenID_sell;
     txData.balance = proof.leaf;
     txData.nonce = account.nonce;
     txData.sign = account.sign;
@@ -662,7 +662,7 @@ class GlobalState {
       }
     }
   }
-  forgeWithTxs(bufferedTxs: Array<any>) {
+  forgeWithTxs(bufferedTxs: Array<any>) : L2Block {
     assert(bufferedTxs.length == this.nTx, 'invalid txs len');
     let txsType = bufferedTxs.map(tx => tx.txType);
     let encodedTxs = bufferedTxs.map(tx => tx.payload);
@@ -683,13 +683,20 @@ class GlobalState {
       newAccountRoots,
     };
   }
-  forge() {
+  forge(autoPad = true): L2Block {
+    if (autoPad) {
+      this.flushWithNop();
+    }
     return this.forgeWithTxs(this.bufferedTxs);
   }
   flushWithNop() {
     while (this.bufferedTxs.length % this.nTx != 0) {
       this.Nop();
     }
+  }
+  forgeAllL2Blocks() : Array<L2Block> {
+    this.flushWithNop();
+    return this.bufferedBlocks;
   }
 }
 
