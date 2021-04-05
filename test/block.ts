@@ -25,7 +25,7 @@ class TestBlock implements SimpleTest {
     result.push({input: initEmptyBlockTestCase(), name: 'emptyBlock'});
     let blks = initBlockTestCase();
     for(let i in blks) {
-      const name = printf("block_%02d", i);
+      const name = printf("nonempty_block_%02d", i);
       result.push({input: blks[i], name});
     }
     return result;
@@ -162,8 +162,9 @@ function initBlockTestCase() {
     tokenID: tokenID_2to1,
     amount: 1990n,
   });
-
+  const order1_id = 1n;
   const placeOrderTx = {
+    orderID: order1_id,
     accountID: accountID1,
     previous_tokenID_sell: 0n,
     previous_tokenID_buy: 0n,
@@ -176,8 +177,10 @@ function initBlockTestCase() {
     amount_sell: 1000n,
     amount_buy: 10000n,
   };
-  const order1_id = state.nextOrderIds.get(accountID1);
-  assert(order1_id === 1n, "order id wrong");
+  // order_id is known to the user, user should sign this order_id
+  // while order_idx(or order_pos) is maintained by the global state keeper. User dont need to know anything about order_pos
+  const order1_pos = state.nextOrderIds.get(accountID1);
+  assert(order1_pos === 1n, "unexpected order pos");
   state.PlaceOrder(placeOrderTx);
 
   let spotTradeTx = {
@@ -228,7 +231,7 @@ function initEmptyBlockTestCase() : common.L2Block{
   let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs);
   // we need to have at least 1 account
   state.createNewAccount();
-  for (var i = state.bufferedTxs.length; i < nTxs; i++) {
+  for (var i = 0; i < nTxs; i++) {
     state.Nop();
   }
   let block = state.forgeAllL2Blocks()[0];

@@ -67,7 +67,7 @@ function initTestCase() {
   const order1_amountsell = 1000n;
   const order1_amountbuy = 10000n;
   const order1 = {
-    order_id: 1n, // open
+    order_id: order1_id,
     tokenbuy: tokenID_2to1,
     tokensell: tokenID_1to2,
     filled_sell: 0n,
@@ -78,11 +78,11 @@ function initTestCase() {
   state.setAccountOrder(accountID1, order1_id, order1);
 
   // order2
-  const order2_id = 1n;
+  const order2_id = 2n;
   const order2_amountsell = 10000n;
   const order2_amountbuy = 1000n;
   const order2 = {
-    order_id: 2n, // open
+    order_id: order2_id,
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
     filled_sell: 10n,
@@ -109,10 +109,12 @@ function initTestCase() {
   return {
     enabled: 1,
     order1_id: order1_id,
+    order1_pos: order1_id,
     order1_tokensell: tokenID_1to2,
     order1_amountsell: order1_amountsell,
     order1_tokenbuy: tokenID_2to1,
     order1_amountbuy: order1_amountbuy,
+    order2_pos: order2_id,
     order2_id: order2_id,
     order2_tokensell: tokenID_2to1,
     order2_amountsell: order2_amountsell,
@@ -153,6 +155,8 @@ function initTestCase() {
 let test_case = initTestCase();
 class TestSpotTrade implements SimpleTest {
   getInput() {
+    return test_case;
+    /*
     return {
       enabled: test_case.enabled,
       order1_id: test_case.order1_id,
@@ -195,6 +199,7 @@ class TestSpotTrade implements SimpleTest {
       tmp_account2_balance_path_elements: test_case.tmp_account2_balance_path_elements,
       tmp_account2_path_elements: test_case.tmp_account2_path_elements,
     };
+    */
   }
   getOutput() {
     return {};

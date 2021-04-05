@@ -112,6 +112,8 @@ class GlobalState {
       throw Error('account_id overflow');
     }
   }
+  // TODO: find a position range 0..2**n where the slot is either empty or occupied by a close order
+  // so we can place the new order here
   getNextOrderIdForUser(accountID): bigint {
     return this.nextOrderIds.get(accountID);
   }
@@ -131,14 +133,14 @@ class GlobalState {
     //console.log("add account", accountID);
     return accountID;
   }
-  createNewOrder(tx): bigint {
-    const orderID = this.getNextOrderIdForUser(tx.accountID);
-    if (orderID >= 2 ** this.orderLevels) {
-      throw new Error(`order_id ${orderID} overflows for orderLevels ${this.orderLevels}`);
+  createNewOrder(tx: PlaceOrderTx): bigint {
+    const orderPos = this.getNextOrderIdForUser(tx.accountID);
+    if (orderPos >= 2 ** this.orderLevels) {
+      throw new Error(`invalid orderPos ${orderPos} for orderLevels ${this.orderLevels}`);
     }
 
     let order = {
-      order_id: orderID, //open
+      order_id: tx.orderID, //open
       tokenbuy: tx.tokenID_buy,
       tokensell: tx.tokenID_sell,
       filled_sell: 0n,
@@ -146,9 +148,9 @@ class GlobalState {
       total_sell: tx.amount_sell,
       total_buy: tx.amount_buy,
     };
-    this.setAccountOrder(tx.accountID, orderID, order);
-    this.nextOrderIds.set(tx.accountID, orderID + 1n);
-    return orderID;
+    this.setAccountOrder(tx.accountID, orderPos, order);
+    this.nextOrderIds.set(tx.accountID, orderPos + 1n);
+    return orderPos;
   }
 
   recalculateFromAccountState(accountID: bigint) {
@@ -439,9 +441,7 @@ class GlobalState {
       rootAfter: 0n,
     };
     //console.log("orderRoo0", rawTx.orderRoot0);
-    let order_id = this.createNewOrder(tx);
-    let order_pos = order_id;
-    order_pos = 0n;
+    let order_pos = this.createNewOrder(tx);
 
     // fill in the tx
     let txData = new PlaceOrderTxData();
@@ -449,7 +449,7 @@ class GlobalState {
 
     txData.order_pos = order_pos;
     txData.old_order_id = 0n;
-    txData.new_order_id = order_id;
+    txData.new_order_id = tx.orderID;
     txData.old_order_tokensell = tx.previous_tokenID_sell;
     txData.old_order_filledsell = tx.previous_filled_sell;
     txData.old_order_amountsell = tx.previous_amount_sell;
@@ -499,7 +499,7 @@ class GlobalState {
     if (this.options.verbose) {
       //console.log('create order ', order_id, tx);
     }
-    return order_id;
+    return order_pos;
   }
   SpotTrade(tx: SpotTradeTx) {
     //assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
@@ -554,11 +554,13 @@ class GlobalState {
     encodedTx[TxDetailIdx.Balance4] = account1_balance_buy;
     encodedTx[TxDetailIdx.TokenID2] = tx.tokenID_2to1;
     encodedTx[TxDetailIdx.Amount2] = tx.amount_2to1;
+    encodedTx[TxDetailIdx.TokenID3] = tx.order1_id;
     encodedTx[TxDetailIdx.Order1ID] = tx.order1_id;
     encodedTx[TxDetailIdx.Order1AmountSell] = old_order_state.order1_amountsell;
     encodedTx[TxDetailIdx.Order1AmountBuy] = old_order_state.order1_amountbuy;
     encodedTx[TxDetailIdx.Order1FilledSell] = old_order_state.order1_filledsell;
     encodedTx[TxDetailIdx.Order1FilledBuy] = old_order_state.order1_filledbuy;
+    encodedTx[TxDetailIdx.TokenID4] = tx.order2_id;
     encodedTx[TxDetailIdx.Order2ID] = tx.order2_id;
     encodedTx[TxDetailIdx.Order2AmountSell] = old_order_state.order2_amountsell;
     encodedTx[TxDetailIdx.Order2AmountBuy] = old_order_state.order2_amountbuy;
@@ -591,7 +593,7 @@ class GlobalState {
     rawTx.balancePath1 = this.balanceTrees.get(tx.order2_accountID).getProof(tx.tokenID_1to2).path_elements;
 
     let newOrder1 = {
-      order_id: order1.order_id, // open
+      order_id: order1.order_id,
       tokenbuy: tx.tokenID_2to1,
       tokensell: tx.tokenID_1to2,
       filled_sell: old_order_state.order1_filledsell + tx.amount_1to2,
@@ -608,7 +610,7 @@ class GlobalState {
     rawTx.accountPath1 = this.accountTree.getProof(tx.order2_accountID).path_elements;
 
     let newOrder2 = {
-      order_id: order2.order_id, // open
+      order_id: order2.order_id,
       tokenbuy: tx.tokenID_1to2,
       tokensell: tx.tokenID_2to1,
       filled_sell: old_order_state.order2_filledsell + tx.amount_2to1,

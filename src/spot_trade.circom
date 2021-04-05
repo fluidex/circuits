@@ -84,8 +84,6 @@ template orderUpdater(orderLevels) {
     signal input filled_buy;
     signal input this_buy;
     signal input total_buy;
-    signal input old_status;
-    signal input new_status;
 
     signal input order_path_elements[orderLevels][1];
 
@@ -159,8 +157,14 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input order2_amountsell;
     signal input order2_tokenbuy;
     signal input order2_amountbuy;
-    order1_tokensell === order2_tokenbuy;
-    order1_tokenbuy === order2_tokensell;
+    component check1 = ForceEqualIfEnabled();
+    check1.enabled <== enabled;
+    check1.in[0] <== order1_tokensell
+    check1.in[1] <== order2_tokenbuy;
+    component check2 = ForceEqualIfEnabled();
+    check2.enabled <== enabled;
+    check2.in[0] <== order1_tokenbuy;
+    check2.in[1] <== order2_tokensell;
 
     signal input amount_2to1;
     signal input amount_1to2;

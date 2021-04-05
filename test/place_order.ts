@@ -37,6 +37,7 @@ function initTestCase() {
   state.setAccountNonce(accountID, nonce);
   //state.setAccountKey(accountID, account);
   const placeOrderTx = {
+    orderID: 1n,
     accountID: accountID,
     previous_tokenID_sell: 0n,
     previous_tokenID_buy: 0n,

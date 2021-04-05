@@ -98,6 +98,7 @@ class WithdrawTx {
 }
 
 class PlaceOrderTx {
+  orderID: bigint;
   accountID: bigint;
   previous_tokenID_sell: bigint;
   previous_tokenID_buy: bigint;

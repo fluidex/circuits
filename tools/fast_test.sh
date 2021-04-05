@@ -32,7 +32,10 @@ function testAll() {
 		wait $job || exit 1
 	done
 }
-
+function cleanOld() {
+	rm -rf testdata
+}
+cleanOld
 checkCPU
 generateTestCases
 testAll

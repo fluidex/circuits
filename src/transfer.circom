@@ -106,7 +106,10 @@ template Transfer(balanceLevels, accountLevels) {
     ////////
     // sender nonce check on L2
     // nonce signed by the user must match nonce of the sender account
-    nonce === nonce1;
+    component check = ForceEqualIfEnabled();
+    check.enabled <== enabled;
+    check.in[0] <== nonce;
+    check.in[1] <== nonce1;
 
     // - verify eddsa signature
     ////////
