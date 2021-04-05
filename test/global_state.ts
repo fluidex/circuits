@@ -33,6 +33,8 @@ class GlobalState {
   balanceTrees: Map<bigint, Tree<bigint>>;
   orderTrees: Map<bigint, Tree<bigint>>;
   orderMap: Map<bigint, Map<bigint, Order>>;
+  // (user, order_id) -> order_pos
+  orderIdToPos: Map<bigint, Map<bigint, bigint>>;
   accounts: Map<bigint, AccountState>;
   bufferedTxs: Array<RawTx>;
   bufferedBlocks: Array<any>;
@@ -61,6 +63,7 @@ class GlobalState {
     this.balanceTrees = new Map(); // map[account_id]balance_tree
     this.orderTrees = new Map(); // map[account_id]order_tree
     this.orderMap = new Map();
+    this.orderIdToPos = new Map();
     this.accounts = new Map(); // map[account_id]acount_state
     this.bufferedTxs = new Array();
     this.bufferedBlocks = new Array();
@@ -128,6 +131,7 @@ class GlobalState {
     this.balanceTrees.set(accountID, new Tree<bigint>(this.balanceLevels, 0n));
     this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, this.defaultOrderLeaf));
     this.orderMap.set(accountID, new Map<bigint, Order>());
+    this.orderIdToPos.set(accountID, new Map<bigint, bigint>());
     this.accountTree.setValue(accountID, this.defaultAccountLeaf);
     this.nextOrderIds.set(accountID, next_order_id);
     //console.log("add account", accountID);
@@ -152,6 +156,9 @@ class GlobalState {
     this.nextOrderIds.set(tx.accountID, orderPos + 1n);
     return orderPos;
   }
+  getOrderPosByID(accountID: bigint, orderID: bigint): bigint {
+    return this.orderIdToPos.get(accountID).get(orderID);
+  }
 
   recalculateFromAccountState(accountID: bigint) {
     this.accountTree.setValue(accountID, this.accounts.get(accountID).hash());
@@ -172,13 +179,14 @@ class GlobalState {
     this.balanceTrees.get(accountID).setValue(tokenID, balance);
     this.recalculateFromBalanceTree(accountID);
   }
-  setAccountOrder(accountID: bigint, orderID: bigint, order: Order) {
+  setAccountOrder(accountID: bigint, orderPos: bigint, order: Order) {
     assert(this.orderTrees.has(accountID), 'setAccountOrder');
-    if (orderID >= 2 ** this.orderLevels) {
-      throw new Error(`order_id ${orderID} overflows for orderLevels ${this.orderLevels}`);
+    if (orderPos >= 2 ** this.orderLevels) {
+      throw new Error(`orderPos ${orderPos} invalid for orderLevels ${this.orderLevels}`);
     }
-    this.orderTrees.get(accountID).setValue(orderID, hashOrderState(order));
-    this.orderMap.get(accountID).set(orderID, order);
+    this.orderTrees.get(accountID).setValue(orderPos, hashOrderState(order));
+    this.orderMap.get(accountID).set(orderPos, order);
+    this.orderIdToPos.get(accountID).set(order.order_id, orderPos);
     this.recalculateFromOrderTree(accountID);
   }
   getAccountOrder(accountID: bigint, orderID: bigint): Order {
@@ -491,9 +499,11 @@ class GlobalState {
     let account2 = this.accounts.get(tx.order2_accountID);
     let proof_order1_seller = this.stateProof(tx.order1_accountID, tx.tokenID_1to2);
     let proof_order2_seller = this.stateProof(tx.order2_accountID, tx.tokenID_2to1);
+    let order1_pos = this.getOrderPosByID(tx.order1_accountID, tx.order1_id);
+    let order2_pos = this.getOrderPosByID(tx.order2_accountID, tx.order2_id);
 
-    const order1 = this.orderMap.get(tx.order1_accountID).get(tx.order1_id);
-    const order2 = this.orderMap.get(tx.order2_accountID).get(tx.order2_id);
+    const order1 = this.orderMap.get(tx.order1_accountID).get(order1_pos);
+    const order2 = this.orderMap.get(tx.order2_accountID).get(order2_pos);
     let old_order_state = {
       order1_amountsell: order1.total_sell,
       order1_amountbuy: order1.total_buy,
@@ -533,13 +543,13 @@ class GlobalState {
     encodedTx[TxDetailIdx.Balance4] = account1_balance_buy;
     encodedTx[TxDetailIdx.TokenID2] = tx.tokenID_2to1;
     encodedTx[TxDetailIdx.Amount2] = tx.amount_2to1;
-    encodedTx[TxDetailIdx.TokenID3] = tx.order1_id;
+    encodedTx[TxDetailIdx.TokenID3] = order1_pos;
     encodedTx[TxDetailIdx.Order1ID] = tx.order1_id;
     encodedTx[TxDetailIdx.Order1AmountSell] = old_order_state.order1_amountsell;
     encodedTx[TxDetailIdx.Order1AmountBuy] = old_order_state.order1_amountbuy;
     encodedTx[TxDetailIdx.Order1FilledSell] = old_order_state.order1_filledsell;
     encodedTx[TxDetailIdx.Order1FilledBuy] = old_order_state.order1_filledbuy;
-    encodedTx[TxDetailIdx.TokenID4] = tx.order2_id;
+    encodedTx[TxDetailIdx.TokenID4] = order2_pos;
     encodedTx[TxDetailIdx.Order2ID] = tx.order2_id;
     encodedTx[TxDetailIdx.Order2AmountSell] = old_order_state.order2_amountsell;
     encodedTx[TxDetailIdx.Order2AmountBuy] = old_order_state.order2_amountbuy;
@@ -553,8 +563,8 @@ class GlobalState {
       balancePath1: null,
       balancePath2: proof_order2_seller.balancePath,
       balancePath3: null,
-      orderPath0: this.orderTrees.get(tx.order1_accountID).getProof(tx.order1_id).path_elements,
-      orderPath1: this.orderTrees.get(tx.order2_accountID).getProof(tx.order2_id).path_elements,
+      orderPath0: this.orderTrees.get(tx.order1_accountID).getProof(order1_pos).path_elements,
+      orderPath1: this.orderTrees.get(tx.order2_accountID).getProof(order2_pos).path_elements,
       orderRoot0: account1.orderRoot, // not really used in the circuit
       orderRoot1: account2.orderRoot, // not really used in the circuit
       accountPath0: proof_order1_seller.accountPath,
@@ -580,7 +590,7 @@ class GlobalState {
       total_sell: old_order_state.order1_amountsell,
       total_buy: old_order_state.order1_amountbuy,
     };
-    this.setAccountOrder(tx.order1_accountID, tx.order1_id, newOrder1);
+    this.setAccountOrder(tx.order1_accountID, order1_pos, newOrder1);
     // TODO: self trade is enabled here now. recheck it later
     //if (this.options.enable_self_trade) {
     //  account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.tokenID_2to1);
@@ -597,7 +607,7 @@ class GlobalState {
       total_sell: old_order_state.order2_amountsell,
       total_buy: old_order_state.order2_amountbuy,
     };
-    this.setAccountOrder(tx.order2_accountID, tx.order2_id, newOrder2);
+    this.setAccountOrder(tx.order2_accountID, order2_pos, newOrder2);
     //if (this.options.enable_self_trade) {
     //  account2_balance_buy = this.getTokenBalance(tx.order2_accountID, tx.tokenID_1to2);
     //}
