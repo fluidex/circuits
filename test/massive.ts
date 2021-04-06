@@ -11,7 +11,7 @@ import { GlobalState } from './global_state';
 const assert = require('assert').strict;
 
 // circuit-level definitions
-const nTxs = 100n;
+const nTxs = 50n;
 const orderLevels = 20;
 const balanceLevels = 20;
 const accountLevels = 20;
