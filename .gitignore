@@ -5,3 +5,4 @@ data/
 *.orig
 testdata/
 dist/
+*.swp

@@ -10,16 +10,9 @@ import { GlobalState } from './global_state';
 //import { assert } from 'console';
 const assert = require('assert').strict;
 
-// circuit-level definitions
-const nTxs = 10000n;
-const orderLevels = 20;
-const balanceLevels = 20;
-const accountLevels = 20;
-
-const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
-
-function initTestCase() {
-  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, Number(nTxs));
+function initTestCase(nTxsn, balanceLevels, orderLevels, accountLevels) {
+  let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxsn);
+  let nTxs = BigInt(nTxsn);
 
   const tokenID_1to2 = 0n;
   const tokenID_2to1 = 1n;
@@ -42,7 +35,7 @@ function initTestCase() {
   // order1
   const order1_id = 1n;
   const order1 = {
-    order_id: 1n, // open
+    order_id: order1_id,
     tokenbuy: tokenID_2to1,
     tokensell: tokenID_1to2,
     filled_sell: 0n,
@@ -59,7 +52,7 @@ function initTestCase() {
   // order2
   const order2_id = 1n;
   const order2 = {
-    order_id: 2n, // open
+    order_id: order2_id,
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
     filled_sell: 0n,
@@ -97,9 +90,19 @@ function initTestCase() {
   return block;
 }
 
-let test_case = initTestCase();
 class TestMassive implements SimpleTest {
+  nTxs: number;
+  balanceLevels: number;
+  orderLevels: number;
+  accountLevels: number;
+  constructor(nTxs = 100, balanceLevels = 10, orderLevels = 10, accountLevels = 10) {
+    this.nTxs = nTxs;
+    this.balanceLevels = balanceLevels;
+    this.orderLevels = orderLevels;
+    this.accountLevels = accountLevels;
+  }
   getTestData() {
+    let test_case = initTestCase(this.nTxs, this.balanceLevels, this.orderLevels, this.accountLevels);
     let input = {
       txsType: test_case.txsType,
       encodedTxs: test_case.encodedTxs,
@@ -116,7 +119,7 @@ class TestMassive implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'block.circom'),
-      main: `Block(${nTxs}, ${balanceLevels}, ${orderLevels}, ${accountLevels})`,
+      main: `Block(${this.nTxs}, ${this.balanceLevels}, ${this.orderLevels}, ${this.accountLevels})`,
     };
   }
 }

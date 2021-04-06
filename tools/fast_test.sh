@@ -25,6 +25,7 @@ function generateTestCases() {
 function testAll() {
 	for d in `ls testdata`;
 	do
+		#npx snarkit test --backend wasm --witness_type bin testdata/$d &
 		npx snarkit test --backend native --witness_type bin testdata/$d &
 	done
 	for job in `jobs -p`
@@ -38,7 +39,7 @@ function cleanOld() {
 }
 
 #cleanOld
-checkCPU
+#checkCPU
 generateTestCases
 testAll
 
