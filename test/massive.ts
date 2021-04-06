@@ -95,7 +95,7 @@ class TestMassive implements SimpleTest {
   balanceLevels: number;
   orderLevels: number;
   accountLevels: number;
-  constructor(nTxs=100, balanceLevels=10, orderLevels=10, accountLevels=10) {
+  constructor(nTxs = 100, balanceLevels = 10, orderLevels = 10, accountLevels = 10) {
     this.nTxs = nTxs;
     this.balanceLevels = balanceLevels;
     this.orderLevels = orderLevels;
