@@ -7,6 +7,7 @@ const babyJub = require('circomlib').babyJub;
 const utils = require('ffjavascript').utils;
 const poseidon = require('circomlib').poseidon;
 
+exports.prv2bigint = prv2bigint;
 exports.prv2pub = prv2pub;
 exports.signWithHasher = signWithHasher;
 exports.verifyWithHasher = verifyWithHasher;
@@ -22,10 +23,14 @@ function pruneBuffer(_buff) {
   return buff;
 }
 
-function prv2pub(prv) {
+function prv2bigint(prv) {
   const sBuff = pruneBuffer(createBlakeHash('blake512').update(prv).digest().slice(0, 32));
   let s = utils.leBuff2int(sBuff);
-  const A = babyJub.mulPointEscalar(babyJub.Base8, Scalar.shr(s, 3));
+  return Scalar.shr(s, 3);
+}
+
+function prv2pub(prv) {
+  const A = babyJub.mulPointEscalar(babyJub.Base8, prv2bigint(prv));
   return A;
 }
 

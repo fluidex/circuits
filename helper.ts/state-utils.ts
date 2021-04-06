@@ -35,7 +35,7 @@ function hashAccountState(st) {
 }
 
 const emptyOrderHash = hashOrderState({
-  status: 1n, // TODO: need to maintain a table
+  order_id: 0n,
   tokenbuy: 0n,
   tokensell: 0n,
   filled_sell: 0n,
@@ -56,7 +56,7 @@ function calculateGenesisOrderRoot(orderLevels) {
 function orderState2Array(st) {
   let data = Scalar.e(0);
 
-  data = Scalar.add(data, st.status);
+  data = Scalar.add(data, st.order_id);
   data = Scalar.add(data, Scalar.shl(st.tokenbuy, 32));
   data = Scalar.add(data, Scalar.shl(st.tokensell, 64));
 

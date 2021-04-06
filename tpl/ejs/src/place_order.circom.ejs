@@ -5,48 +5,7 @@ include "./lib/hash_state.circom";
 template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
 
-    // **************** CODEGEN START **************
-    signal input in[34];
-    signal order_pos;
-    signal old_order_id;
-    signal new_order_id;
-    signal old_order_tokensell;
-    signal old_order_filledsell;
-    signal old_order_amountsell;
-    signal old_order_tokenbuy;
-    signal old_order_filledbuy;
-    signal old_order_amountbuy;
-    signal new_order_tokensell;
-    signal new_order_amountsell;
-    signal new_order_tokenbuy;
-    signal new_order_amountbuy;
-    signal accountID;
-    signal balance;
-    signal nonce;
-    signal sign;
-    signal ay;
-    signal ethAddr;
-    order_pos <== in[0];
-    old_order_id <== in[1];
-    new_order_id <== in[2];
-    old_order_tokensell <== in[3];
-    old_order_filledsell <== in[4];
-    old_order_amountsell <== in[5];
-    old_order_tokenbuy <== in[6];
-    old_order_filledbuy <== in[7];
-    old_order_amountbuy <== in[8];
-    new_order_tokensell <== in[9];
-    new_order_amountsell <== in[10];
-    new_order_tokenbuy <== in[11];
-    new_order_amountbuy <== in[12];
-    accountID <== in[13];
-    balance <== in[14];
-    nonce <== in[15];
-    sign <== in[16];
-    ay <== in[17];
-    ethAddr <== in[18];
-    // **************** CODEGEN END **************
-
+<%- codegen.generateCircuitInputDecoderCircom(codegen.config.placeOrder.inputSignals) %>
 
     // Roots
     signal input oldOrderRoot;

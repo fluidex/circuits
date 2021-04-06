@@ -1,4 +1,4 @@
-include "../node_modules/circomlib/circuits/bitify.circom";
+include "./lib/bitify.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
 include "./lib/binary_merkle_tree.circom";
@@ -71,7 +71,11 @@ template fillLimitCheck() {
 
 // TODO: delete order if fullfilled
 template orderUpdater(orderLevels) {
-    signal input orderID;
+    // order pos is the order location/index inside the tree, less than 2**n
+    // order id is the incremental order id, like a nouce.
+    signal input enabled;
+    signal input order_pos;
+    signal input order_id;
     signal input tokensell;
     signal input tokenbuy;
     signal input filled_sell;
@@ -80,8 +84,6 @@ template orderUpdater(orderLevels) {
     signal input filled_buy;
     signal input this_buy;
     signal input total_buy;
-    signal input old_status;
-    signal input new_status;
 
     signal input order_path_elements[orderLevels][1];
 
@@ -91,12 +93,15 @@ template orderUpdater(orderLevels) {
     signal order_path_index[orderLevels];
 
    // decode order_path_index
-    component bOrderID = Num2Bits(orderLevels);
-    bOrderID.in <== orderID;
+    component border_pos = Num2BitsIfEnabled(orderLevels);
+    border_pos.enabled <== enabled;
+    border_pos.in <== order_pos;
     for (var i = 0; i < orderLevels; i++) {
-        order_path_index[i] <== bOrderID.out[i];
+        order_path_index[i] <== border_pos.out[i];
     }
 
+    // TODO: we can just update old order with new order like PlaceOrder here
+    // so we can use less txs to finish a SpotTrade
     component oldOrderHash = HashOrder();
     oldOrderHash.tokensell <== tokensell;
     oldOrderHash.tokenbuy <== tokenbuy;
@@ -104,7 +109,7 @@ template orderUpdater(orderLevels) {
     oldOrderHash.filled_buy <== filled_buy;
     oldOrderHash.total_sell <== total_sell;
     oldOrderHash.total_buy <== total_buy;
-    oldOrderHash.status <== old_status;
+    oldOrderHash.order_id <== order_id;
 
     // TODO: underflow check
 
@@ -117,7 +122,7 @@ template orderUpdater(orderLevels) {
     newOrderHash.filled_buy <== filled_buy + this_buy;
     newOrderHash.total_sell <== total_sell;
     newOrderHash.total_buy <== total_buy;
-    newOrderHash.status <== new_status;
+    newOrderHash.order_id <== order_id;
 
     // - order tree
     ////////
@@ -140,18 +145,26 @@ template orderUpdater(orderLevels) {
 template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
 
+    signal input order1_pos;
     signal input order1_id;
     signal input order1_tokensell;
     signal input order1_amountsell;
     signal input order1_tokenbuy;
     signal input order1_amountbuy;
+    signal input order2_pos;
     signal input order2_id;
     signal input order2_tokensell;
     signal input order2_amountsell;
     signal input order2_tokenbuy;
     signal input order2_amountbuy;
-    order1_tokensell === order2_tokenbuy;
-    order1_tokenbuy === order2_tokensell;
+    component check1 = ForceEqualIfEnabled();
+    check1.enabled <== enabled;
+    check1.in[0] <== order1_tokensell
+    check1.in[1] <== order2_tokenbuy;
+    component check2 = ForceEqualIfEnabled();
+    check2.enabled <== enabled;
+    check2.in[0] <== order1_tokenbuy;
+    check2.in[1] <== order2_tokensell;
 
     signal input amount_2to1;
     signal input amount_1to2;
@@ -212,7 +225,9 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input order_path_elements[2][orderLevels][1];
     /// update order 1
     component order1_updater = orderUpdater(orderLevels);
-    order1_updater.orderID <== order1_id;
+    order1_updater.enabled <== enabled;
+    order1_updater.order_pos <== order1_pos;
+    order1_updater.order_id <== order1_id;
     order1_updater.tokensell <== order1_tokensell;
     order1_updater.tokenbuy <== order1_tokenbuy;
     order1_updater.filled_sell <== order1_filledsell;
@@ -221,15 +236,15 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     order1_updater.filled_buy <== order1_filledbuy;
     order1_updater.this_buy <== amount_2to1;
     order1_updater.total_buy <== order1_amountbuy;
-    order1_updater.old_status <== 0; // TODO:
-    order1_updater.new_status <== 0; // TODO:
     for (var i = 0; i < orderLevels; i++) {
         order1_updater.order_path_elements[i][0] <== order_path_elements[0][i][0];
     }
 
     /// update order 2
     component order2_updater = orderUpdater(orderLevels);
-    order2_updater.orderID <== order2_id;
+    order2_updater.enabled <== enabled;
+    order2_updater.order_pos <== order2_pos;
+    order2_updater.order_id <== order2_id;
     order2_updater.tokensell <== order2_tokensell;
     order2_updater.tokenbuy <== order2_tokenbuy;
     order2_updater.filled_sell <== order2_filledsell;
@@ -238,8 +253,6 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     order2_updater.filled_buy <== order2_filledbuy;
     order2_updater.this_buy <== amount_1to2;
     order2_updater.total_buy <== order2_amountbuy;
-    order2_updater.old_status <== 0; // TODO:
-    order2_updater.new_status <== 0; // TODO:
     for (var i = 0; i < orderLevels; i++) {
         order2_updater.order_path_elements[i][0] <== order_path_elements[1][i][0];
     }
@@ -355,24 +368,28 @@ template tradeTransfer(balanceLevels, accountLevels) {
     signal account2_path_index[accountLevels];
 
     // decode balance_path_index
-    component bTokenID_1to2 = Num2Bits(balanceLevels);
+    component bTokenID_1to2 = Num2BitsIfEnabled(balanceLevels);
+    bTokenID_1to2.enabled <== enabled;
     bTokenID_1to2.in <== tokenID_1to2;
     for (var i = 0; i < balanceLevels; i++) {
         balance_1to2_path_index[i] <== bTokenID_1to2.out[i];
     }
-    component bTokenID_2to1 = Num2Bits(balanceLevels);
+    component bTokenID_2to1 = Num2BitsIfEnabled(balanceLevels);
+    bTokenID_2to1.enabled <== enabled;
     bTokenID_2to1.in <== tokenID_2to1;
     for (var i = 0; i < balanceLevels; i++) {
         balance_2to1_path_index[i] <== bTokenID_2to1.out[i];
     }
 
     // decode account_path_index
-    component bAccountID1 = Num2Bits(accountLevels);
+    component bAccountID1 = Num2BitsIfEnabled(accountLevels);
+    bAccountID1.enabled <== enabled;
     bAccountID1.in <== accountID1;
     for (var i = 0; i < accountLevels; i++) {
         account1_path_index[i] <== bAccountID1.out[i];
     }
-    component bAccountID2 = Num2Bits(accountLevels);
+    component bAccountID2 = Num2BitsIfEnabled(accountLevels);
+    bAccountID2.enabled <== enabled;
     bAccountID2.in <== accountID2;
     for (var i = 0; i < accountLevels; i++) {
         account2_path_index[i] <== bAccountID2.out[i];

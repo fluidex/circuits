@@ -2,20 +2,21 @@ import { poseidon } from 'circomlib';
 
 import { rescueHash as rescueHashJs } from './rescue_hash';
 
-function evenCharHex(n /*: number|bigint*/): string {
+// ff_ce needs length be even https://github.com/matter-labs/ff/blob/2e40bce7452a2d4249397f0ce6efe16dae86a2b9/src/lib.rs#L603
+function evenCharHex(n: bigint): string {
   var hex = n.toString(16);
   if (hex.length % 2 == 1) {
     hex = '0' + hex;
   }
-  return hex;
+  return '0x' + hex;
 }
 const rescueWasm = require('./rescue_wasm/rescue-wasm.js');
 function rescueHashBigInt(input: Uint8Array): bigint {
   let resultBytes: Uint8Array = rescueWasm.rescueHash(input);
-  let resultBigInt = '0x' + Array.from(resultBytes).map(evenCharHex).join('');
+  let resultBigInt = '0x' + Buffer.from(resultBytes).toString('hex');
   return BigInt(resultBigInt);
 }
-function rescueHashWasm(input: any /*Array<bigint>*/): any /*bigint*/ {
+function rescueHashWasm(input: Array<bigint>): bigint {
   let resultBigInt: string = rescueWasm.rescueHashHex(input.map(evenCharHex));
   return BigInt(resultBigInt);
 }
@@ -23,7 +24,7 @@ function rescueHashWasm(input: any /*Array<bigint>*/): any /*bigint*/ {
 const rescue = rescueHashWasm;
 //const rescue = rescueHashJs;
 
-export { rescue as hash };
+export { poseidon as hash };
 
 function benchmarkRescue() {
   for (let i = 0; i < 100; i++) {
