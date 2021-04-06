@@ -1,4 +1,4 @@
-const circuitInputEncoderTpl = `import { TxLength } from '../common';
+const circuitInputEncoderJsTpl = `import { TxLength } from '../common';
 import { assert } from 'console';
 class <%= encoderName %> {<% for (const s of inputSignals) { %>
   <%= s %>: bigint;<% } %>
@@ -21,4 +21,29 @@ class <%= encoderName %> {<% for (const s of inputSignals) { %>
 export { <%= encoderName %> };
 `;
 
-export { circuitInputEncoderTpl };
+const circuitInputEncoderRsTpl = `#![allow(non_snake_case)]
+#![allow(clippy::assertions_on_constants)]
+use crate::state::common::TX_LENGTH;
+use crate::state::types::Fr;
+use ff::Field;
+#[derive(Default)]
+pub struct <%= encoderName %> {<% for (const s of inputSignals) { %>
+    pub <%= s %>: Fr,<% } %>
+}
+
+impl <%= encoderName %> {
+    pub fn encode(self) -> Vec<Fr> {
+        // double check template config is consistent
+        assert!(TX_LENGTH == <%= config.txLength %>, "invalid length, check your template config");
+        let mut results = vec![<% for (const s of inputSignals) { %>
+            self.<%= s %>,<% } %>
+        ];
+        while results.len() < TX_LENGTH {
+            results.push(Fr::zero());
+        }
+        results
+    }
+}`;
+
+
+export { circuitInputEncoderJsTpl, circuitInputEncoderRsTpl };

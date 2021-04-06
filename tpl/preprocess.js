@@ -3,16 +3,22 @@ const path = require('path');
 const ejs = require('ejs');
 const printDiff = require('print-diff');
 const { config } = require('./config');
-const { circuitInputEncoderTpl } = require('./templates');
+const { circuitInputEncoderJsTpl, circuitInputEncoderRsTpl } = require('./templates');
 
 // codegen is the module to inject inside the ejs template system
 const codegen = {
   config,
   generateCircuitInputEncoderJs,
+  generateCircuitInputEncoderRs,
   generateCircuitInputDecoderCircom,
 };
+
 function generateCircuitInputEncoderJs(encoderName, inputSignals, config) {
-  return ejs.render(circuitInputEncoderTpl, { encoderName, inputSignals, config });
+  return ejs.render(circuitInputEncoderJsTpl, { encoderName, inputSignals, config });
+}
+
+function generateCircuitInputEncoderRs(encoderName, inputSignals, config) {
+  return ejs.render(circuitInputEncoderRsTpl, { encoderName, inputSignals, config });
 }
 
 // TODO: rewrite this function using template

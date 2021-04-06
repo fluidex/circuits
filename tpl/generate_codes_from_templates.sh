@@ -8,5 +8,6 @@ do
     to=`echo $t|sed 's#.ejs$##'`
     from=tpl/ejs/$t
     #echo generate $to from $from;
+    mkdir -p `dirname $to`
     npx ts-node tpl/preprocess.js $from $to
 done;
