@@ -9,18 +9,18 @@ export CIRCUIT=massive
 
 # source $DIR/prepare_swap.sh
 # source $DIR/compile_batched_node.sh
+
+
 export HASH=rescue
-pushd $DIR/..
-source replace_hash.sh
-popd
+#pushd $DIR/..
+#source replace_hash.sh
+#popd
 source $DIR/bench_with_hash.sh
-: '
-export HASH=poseidon
-pushd $DIR/..
-source replace_hash.sh
-popd
-source $DIR/bench_with_hash.sh
-'
+#export HASH=poseidon
+#pushd $DIR/..
+#source replace_hash.sh
+#popd
+#source $DIR/bench_with_hash.sh
 
 
 echo -e "\n\n =========== benchmark results: ================= \n"

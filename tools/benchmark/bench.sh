@@ -4,7 +4,11 @@ set -uex
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 CIRCUIT_POW=26
-export CIRCUIT_DIR=$DIR/data/$HASH/$CIRCUIT
+# if no env var, use massive as default
+: "${CIRCUIT:=massive}"  
+#export CIRCUIT_DIR=$DIR/data/$HASH/$CIRCUIT
+export CIRCUIT_DIR=$DIR/data/$CIRCUIT
+echo CIRCUIT is $CIRCUIT
 
 ZKUTIL_BIN=zkutil
 PLONKIT_BIN=plonkit
@@ -22,7 +26,7 @@ function prepare_tools() {
     cargo install --git https://github.com/Fluidex/plonkit
 }
 
-function prepare_data() {
+function prepare_circuit() {
     echo process circuit in $CIRCUIT_DIR
     source $DIR/process_circom_circuit.sh
 }
@@ -93,15 +97,26 @@ function bench_plonk_plonkit() {
 }
 
 function main() {
-    mkdir -p $CIRCUIT_DIR
-    npx ts-node $DIR/export_circuit.ts $CIRCUIT_DIR
+    # keep a backup of script and env
+    env > $CIRCUIT_DIR/env
+    cp $0 $CIRCUIT_DIR
+
+    npx ts-node $DIR/export_circuit.ts $CIRCUIT $CIRCUIT_DIR
     #prepare_tools
-    #prepare_data
+    prepare_circuit
     #bench_groth16_zkutil
     #bench_groth16_rapidsnark
     bench_plonk_plonkit
+
+    #chmod -R a-w $CIRCUIT_DIR # don't modify it anymore
+    #output results
+    echo -e "\n\n =========== benchmark results: ================= \n"
+    tail -n 3 `find $CIRCUIT_DIR -name "*.time"`
+    tail -n 3 `find $CIRCUIT_DIR -name "circuit.circom"` 
 }
 
+
+[ -d $CIRCUIT_DIR ] && (echo "$CIRCUIT_DIR exists, exit"; exit 1)
 mkdir -p $CIRCUIT_DIR
 #check_ptau
 main 2>&1 | tee $CIRCUIT_DIR/all.log

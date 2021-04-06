@@ -31,14 +31,10 @@ function getAllTests(): Array<SimpleTest> {
   return result;
 }
 
-export async function exportAllTests() {
-  const tests = getAllTests();
-  const outDir = 'testdata';
-  // group same circuits to save compile time
-  for (const t of tests) {
+export async function exportTestCase(outDir: string, t: SimpleTest, createChildDir = true) {
     // eg: Block_1_1_1_1
     const circuitName = circuitSrcToName(t.getComponent().main);
-    const circuitDir = path.join(outDir, circuitName);
+    const circuitDir = createChildDir ? path.join(outDir, circuitName) : outDir;
     fs.mkdirSync(circuitDir, { recursive: true });
     await snarkit.utils.writeCircuitIntoDir(circuitDir, t.getComponent());
     for (const d of t.getTestData()) {
@@ -48,6 +44,15 @@ export async function exportAllTests() {
       await snarkit.utils.writeInputOutputIntoDir(dataDir, d.input, d.output || {});
     }
   }
+
+
+export async function exportAllTests() {
+  const tests = getAllTests();
+  const outDir = 'testdata';
+  // group same circuits to save compile time
+  for (const t of tests) {
+await exportTestCase(outDir, t);
+ }
 }
 
 async function main() {
