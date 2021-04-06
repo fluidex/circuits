@@ -6,3 +6,4 @@ data/
 testdata/
 dist/
 *.swp
+/extra
