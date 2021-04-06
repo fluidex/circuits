@@ -137,6 +137,10 @@ class TestTransfer implements SimpleTest {
   getOutput() {
     return {};
   }
+
+  getTestData() {
+    return [{ input: this.getInput(), output: this.getOutput(), name: this.constructor.name }];
+  }
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'transfer.circom'),

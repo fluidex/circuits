@@ -1,5 +1,6 @@
 import * as path from 'path';
 import { hash } from '../helper.ts/hash';
+const printf = require('printf');
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 import { Account } from '../helper.ts/account';
@@ -11,10 +12,29 @@ import { GlobalState } from './global_state';
 const assert = require('assert').strict;
 
 // circuit-level definitions
-const nTxs = 8;
-const orderLevels = 1;
+const nTxs = 2; // you can use any number here. bigger nTxs means larger circuit and longer test time
+const orderLevels = 2;
 const balanceLevels = 2;
 const accountLevels = 2;
+
+class TestBlock implements SimpleTest {
+  getTestData() {
+    let result = [];
+    result.push({ input: initEmptyBlockTestCase(), name: 'emptyBlock' });
+    let blks = initBlockTestCase();
+    for (let i in blks) {
+      const name = printf('nonempty_block_%02d', i);
+      result.push({ input: blks[i], name });
+    }
+    return result;
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'block.circom'),
+      main: `Block(${nTxs}, ${balanceLevels}, ${orderLevels}, ${accountLevels})`,
+    };
+  }
+}
 
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
@@ -60,7 +80,7 @@ function initBlockTestCase() {
   // order2
   const order2_id = 1n;
   const order2 = {
-    status: 0, // open
+    order_id: order2_id,
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
     filled_sell: 10n,
@@ -127,8 +147,9 @@ function initBlockTestCase() {
     tokenID: tokenID_2to1,
     amount: 1990n,
   });
-
+  const order1_id = 1n;
   const placeOrderTx = {
+    orderID: order1_id,
     accountID: accountID1,
     previous_tokenID_sell: 0n,
     previous_tokenID_buy: 0n,
@@ -141,7 +162,10 @@ function initBlockTestCase() {
     amount_sell: 1000n,
     amount_buy: 10000n,
   };
-  const order1_id = state.nextOrderIds.get(accountID1);
+  // order_id is known to the user, user should sign this order_id
+  // while order_idx(or order_pos) is maintained by the global state keeper. User dont need to know anything about order_pos
+  const order1_pos = state.nextOrderIds.get(accountID1);
+  assert(order1_pos === 1n, 'unexpected order pos');
   state.PlaceOrder(placeOrderTx);
 
   let spotTradeTx = {
@@ -168,73 +192,23 @@ function initBlockTestCase() {
     state.Nop();
   }
 
-  let block = state.forge();
-  return block;
+  let blocks = state.forgeAllL2Blocks();
+  return blocks;
 }
 
 let block_test_case = initBlockTestCase();
-class TestBlock implements SimpleTest {
-  getInput() {
-    let input = {
-      txsType: block_test_case.txsType,
-      encodedTxs: block_test_case.encodedTxs,
-      balance_path_elements: block_test_case.balance_path_elements,
-      order_path_elements: block_test_case.order_path_elements,
-      account_path_elements: block_test_case.account_path_elements,
-      orderRoots: block_test_case.orderRoots,
-      oldAccountRoots: block_test_case.oldAccountRoots,
-      newAccountRoots: block_test_case.newAccountRoots,
-    };
-    //console.log(JSON.stringify(input, null, 2));
-    return input;
-  }
-  getOutput() {
-    return {};
-  }
-  getComponent(): TestComponent {
-    return {
-      src: path.join(__dirname, '..', 'src', 'block.circom'),
-      main: `Block(${nTxs}, ${balanceLevels}, ${orderLevels}, ${accountLevels})`,
-    };
-  }
-}
 
-function initEmptyBlockTestCase() {
+function initEmptyBlockTestCase(): common.L2Block {
   let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs);
   // we need to have at least 1 account
   state.createNewAccount();
-  for (var i = state.bufferedTxs.length; i < nTxs; i++) {
+  for (var i = 0; i < nTxs; i++) {
     state.Nop();
   }
-  let block = state.forge();
+  let block = state.forgeAllL2Blocks()[0];
   return block;
 }
 
 let empty_block_test_case = initEmptyBlockTestCase();
-class TestEmptyBlock implements SimpleTest {
-  getInput() {
-    let input = {
-      txsType: empty_block_test_case.txsType,
-      encodedTxs: empty_block_test_case.encodedTxs,
-      balance_path_elements: empty_block_test_case.balance_path_elements,
-      order_path_elements: empty_block_test_case.order_path_elements,
-      account_path_elements: empty_block_test_case.account_path_elements,
-      orderRoots: empty_block_test_case.orderRoots,
-      oldAccountRoots: empty_block_test_case.oldAccountRoots,
-      newAccountRoots: empty_block_test_case.newAccountRoots,
-    };
-    //console.log(JSON.stringify(input, null, 2));
-    return input;
-  }
-  getOutput() {
-    return {};
-  }
-  getComponent(): TestComponent {
-    return {
-      src: path.join(__dirname, '..', 'src', 'block.circom'),
-      main: `Block(${nTxs}, ${balanceLevels}, ${orderLevels}, ${accountLevels})`,
-    };
-  }
-}
 
-export { TestBlock, TestEmptyBlock };
+export { TestBlock };

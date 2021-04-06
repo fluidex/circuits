@@ -19,20 +19,23 @@ const account_state = {
   orderRoot: calculateGenesisOrderRoot(orderLevels),
 };
 class TestHashAccount implements SimpleTest {
-  getInput() {
-    return {
-      nonce: account_state.nonce,
-      sign: account_state.sign,
-      balanceRoot: account_state.balanceRoot,
-      ay: Scalar.fromString(account_state.ay, 16),
-      ethAddr: Scalar.fromString(account_state.ethAddr, 16),
-      orderRoot: account_state.orderRoot,
-    };
-  }
-  getOutput() {
-    return {
-      out: hashAccountState(account_state),
-    };
+  getTestData() {
+    return [
+      {
+        input: {
+          nonce: account_state.nonce,
+          sign: account_state.sign,
+          balanceRoot: account_state.balanceRoot,
+          ay: Scalar.fromString(account_state.ay, 16),
+          ethAddr: Scalar.fromString(account_state.ethAddr, 16),
+          orderRoot: account_state.orderRoot,
+        },
+        output: {
+          out: hashAccountState(account_state),
+        },
+        name: 'TestHashAccount',
+      },
+    ];
   }
   getComponent(): TestComponent {
     return {
@@ -49,24 +52,27 @@ const order_state = {
   filled_buy: 0,
   total_sell: 100,
   total_buy: 1000,
-  status: 0,
+  order_id: 0,
 };
 class TestHashOrder implements SimpleTest {
-  getInput() {
-    return {
-      tokensell: order_state.tokensell,
-      tokenbuy: order_state.tokenbuy,
-      filled_sell: order_state.filled_sell,
-      filled_buy: order_state.filled_buy,
-      total_sell: order_state.total_sell,
-      total_buy: order_state.total_buy,
-      status: order_state.status,
-    };
-  }
-  getOutput() {
-    return {
-      out: hashOrderState(order_state),
-    };
+  getTestData() {
+    return [
+      {
+        input: {
+          tokensell: order_state.tokensell,
+          tokenbuy: order_state.tokenbuy,
+          filled_sell: order_state.filled_sell,
+          filled_buy: order_state.filled_buy,
+          total_sell: order_state.total_sell,
+          total_buy: order_state.total_buy,
+          order_id: order_state.order_id,
+        },
+        output: {
+          out: hashOrderState(order_state),
+        },
+        name: 'TestHashOrder',
+      },
+    ];
   }
   getComponent(): TestComponent {
     return {
@@ -77,13 +83,16 @@ class TestHashOrder implements SimpleTest {
 }
 
 class TestGenesisOrderRoot implements SimpleTest {
-  getInput() {
-    return {};
-  }
-  getOutput() {
-    return {
-      root: calculateGenesisOrderRoot(orderLevels),
-    };
+  getTestData() {
+    return [
+      {
+        input: {},
+        output: {
+          root: calculateGenesisOrderRoot(orderLevels),
+        },
+        name: 'TestGenesisOrderRoot',
+      },
+    ];
   }
   getComponent(): TestComponent {
     return {

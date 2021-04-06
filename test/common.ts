@@ -3,7 +3,6 @@ import { assert } from 'console';
 import { Account } from '../helper.ts/account';
 import { Tree } from '../helper.ts/binary_merkle_tree';
 import { hashAccountState, hashOrderState, emptyOrderHash, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
-import { TestCheckLeafUpdateDisable } from './binary_merkle_tree';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 
@@ -99,6 +98,7 @@ class WithdrawTx {
 }
 
 class PlaceOrderTx {
+  orderID: bigint;
   accountID: bigint;
   previous_tokenID_sell: bigint;
   previous_tokenID_buy: bigint;
@@ -170,7 +170,7 @@ class RawTx {
 }
 
 class Order {
-  status: number;
+  order_id: bigint;
   tokenbuy: bigint;
   tokensell: bigint;
   filled_sell: bigint;
@@ -218,6 +218,17 @@ class AccountState {
   }
 }
 
+class L2Block {
+  txsType: Array<any>;
+  encodedTxs: Array<any>;
+  balance_path_elements: Array<any>;
+  order_path_elements: Array<any>;
+  account_path_elements: Array<any>;
+  orderRoots: Array<any>;
+  oldAccountRoots: Array<any>;
+  newAccountRoots: Array<any>;
+}
+
 export {
   TxType,
   TxLength,
@@ -235,4 +246,5 @@ export {
   WithdrawTx,
   SpotTradeTx,
   PlaceOrderTx,
+  L2Block,
 };

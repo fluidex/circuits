@@ -35,8 +35,8 @@ function initTestCase() {
     }
   }
   state.setAccountNonce(accountID, nonce);
-
   const placeOrderTx = {
+    orderID: 1n,
     accountID: accountID,
     previous_tokenID_sell: 0n,
     previous_tokenID_buy: 0n,
@@ -55,24 +55,7 @@ function initTestCase() {
   // TODO: assert length
   return {
     enabled: 1,
-    order_id: block.encodedTxs[block.encodedTxs.length - 1][common.TxDetailIdx.Order1ID],
-    old_order_tokensell: placeOrderTx.previous_tokenID_sell,
-    old_order_filledsell: placeOrderTx.previous_filled_sell,
-    old_order_amountsell: placeOrderTx.previous_amount_sell,
-    old_order_tokenbuy: placeOrderTx.previous_tokenID_buy,
-    old_order_filledbuy: placeOrderTx.previous_filled_buy,
-    old_order_amountbuy: placeOrderTx.previous_amount_buy,
-    new_order_tokensell: tokenID_sell,
-    new_order_amountsell: amount_sell,
-    new_order_tokenbuy: tokenID_buy,
-    new_order_amountbuy: amount_buy,
-    accountID: accountID,
-    tokenID: tokenID_sell,
-    balance: account_balance_sell,
-    nonce: nonce,
-    sign: account.sign,
-    ay: Scalar.fromString(account.ay, 16),
-    ethAddr: Scalar.fromString(account.ethAddr, 16),
+    in: block.encodedTxs[block.encodedTxs.length - 1],
     balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][0],
     order_path_elements: block.order_path_elements[block.order_path_elements.length - 1][0],
     account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][0],
@@ -85,27 +68,10 @@ function initTestCase() {
 
 let test_case = initTestCase();
 class TestPlaceOrder implements SimpleTest {
-  getInput() {
+  getTestData() {
     let input = {
       enabled: test_case.enabled,
-      order_id: test_case.order_id,
-      old_order_tokensell: test_case.old_order_tokensell,
-      old_order_filledsell: test_case.old_order_filledsell,
-      old_order_amountsell: test_case.old_order_amountsell,
-      old_order_tokenbuy: test_case.old_order_tokenbuy,
-      old_order_filledbuy: test_case.old_order_filledbuy,
-      old_order_amountbuy: test_case.old_order_amountbuy,
-      new_order_tokensell: test_case.new_order_tokensell,
-      new_order_amountsell: test_case.new_order_amountsell,
-      new_order_tokenbuy: test_case.new_order_tokenbuy,
-      new_order_amountbuy: test_case.new_order_amountbuy,
-      accountID: test_case.accountID,
-      tokenID: test_case.tokenID,
-      balance: test_case.balance,
-      nonce: test_case.nonce,
-      sign: test_case.sign,
-      ay: test_case.ay,
-      ethAddr: test_case.ethAddr,
+      in: test_case.in,
       balance_path_elements: test_case.balance_path_elements,
       order_path_elements: test_case.order_path_elements,
       account_path_elements: test_case.account_path_elements,
@@ -115,10 +81,7 @@ class TestPlaceOrder implements SimpleTest {
       newAccountRoot: test_case.newAccountRoot,
     };
     //console.log(JSON.stringify(input, null, 2));
-    return input;
-  }
-  getOutput() {
-    return {};
+    return [{ input, name: 'TestPlaceOrder' }];
   }
   getComponent(): TestComponent {
     return {

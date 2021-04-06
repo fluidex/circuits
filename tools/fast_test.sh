@@ -1,5 +1,15 @@
 #!/bin/bash
-set -exu
+set -eu
+
+trap 'killall' INT
+
+killall() {
+    trap '' INT TERM     # ignore INT and TERM while shutting down
+    echo "**** Shutting down... ****"     # added double quotes
+    kill -TERM 0         # fixed order, send TERM not INT
+    wait
+    echo DONE
+}
 
 function checkCPU() {
 	for f in bmi2 adx
@@ -23,6 +33,11 @@ function testAll() {
 	done
 }
 
+function cleanOld() {
+	rm -rf testdata
+}
+
+#cleanOld
 checkCPU
 generateTestCases
 testAll

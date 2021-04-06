@@ -1,4 +1,4 @@
-include "../node_modules/circomlib/circuits/bitify.circom";
+include "./lib/bitify.circom";
 include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
 
@@ -46,14 +46,16 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal account_path_index[accountLevels];
 
     // decode balance_path_index
-    component bTokenID = Num2Bits(balanceLevels);
+    component bTokenID = Num2BitsIfEnabled(balanceLevels);
+    bTokenID.enabled <== enabled;
     bTokenID.in <== tokenID;
     for (var i = 0; i < balanceLevels; i++) {
         balance_path_index[i] <== bTokenID.out[i];
     }
 
     // decode account_path_index
-    component bAccountID = Num2Bits(accountLevels);
+    component bAccountID = Num2BitsIfEnabled(accountLevels);
+    bAccountID.enabled <== enabled;
     bAccountID.in <== accountID;
     for (var i = 0; i < accountLevels; i++) {
         account_path_index[i] <== bAccountID.out[i];

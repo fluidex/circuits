@@ -42,7 +42,7 @@ function initTestCase() {
   // order1
   const order1_id = 1n;
   const order1 = {
-    status: 0, // open
+    order_id: 1n, // open
     tokenbuy: tokenID_2to1,
     tokensell: tokenID_1to2,
     filled_sell: 0n,
@@ -59,7 +59,7 @@ function initTestCase() {
   // order2
   const order2_id = 1n;
   const order2 = {
-    status: 0, // open
+    order_id: 2n, // open
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
     filled_sell: 0n,
@@ -99,7 +99,7 @@ function initTestCase() {
 
 let test_case = initTestCase();
 class TestMassive implements SimpleTest {
-  getInput() {
+  getTestData() {
     let input = {
       txsType: test_case.txsType,
       encodedTxs: test_case.encodedTxs,
@@ -111,10 +111,7 @@ class TestMassive implements SimpleTest {
       newAccountRoots: test_case.newAccountRoots,
     };
     //console.log(JSON.stringify(input, null, 2));
-    return input;
-  }
-  getOutput() {
-    return {};
+    return [{ input, name: 'TestMassive' }];
   }
   getComponent(): TestComponent {
     return {
