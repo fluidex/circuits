@@ -38,7 +38,7 @@ function cleanOld() {
 	rm -rf testdata
 }
 
-#cleanOld
+cleanOld
 #checkCPU
 generateTestCases
 testAll
