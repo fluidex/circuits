@@ -1,11 +1,13 @@
 ## Circuits for FluiDex
 
 ## Prerequisite
-+ nlohmann-json3-dev
-+ nasm
+
+```
+sudo apt install nlohmann-json3-dev nasm g++ libgmp-dev
+```
 
 ## Test
 
 ```
-NODE_OPTIONS="--max_old_space_size=8192" npx ts-node ./test/test_all.ts
+bash tools/fast_test.sh
 ```
