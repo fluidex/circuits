@@ -2,6 +2,8 @@ const eddsa = require('./eddsa');
 const babyJub = require('circomlib').babyJub;
 const { utils: utilsScalar } = require('ffjavascript');
 import * as ethers from 'ethers';
+import { randomBytes } from '@ethersproject/random';
+import { entropyToMnemonic } from '@ethersproject/hdnode';
 import { hash } from '../helper.ts/hash';
 const utils = require('./utils');
 
@@ -59,26 +61,36 @@ class L2Account {
   }
 }
 
+function randomMnemonic() {
+  let entropy: Uint8Array = randomBytes(16);
+  const mnemonic = entropyToMnemonic(entropy);
+  return mnemonic;
+}
+
 class Account {
   public publicKey: string;
   public ethAddr: string;
   public l2Account: L2Account;
-  constructor(signature) {
+
+  static fromMnemonic(mnemonic) {
+    const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+    const msgHash = ethers.utils.hashMessage(get_CREATE_L2_ACCOUNT_MSG(null));
+    const signature = ethers.utils.joinSignature(wallet._signingKey().signDigest(msgHash));
+    return Account.fromSignature(signature);
+  }
+  static fromSignature(signature) {
     // ethers signature is 65-byte
-    if (signature) {
-      // TODO: check signature format
-    } else {
-      const wallet = ethers.Wallet.createRandom();
-      const msgHash = ethers.utils.hashMessage(get_CREATE_L2_ACCOUNT_MSG(null));
-      signature = ethers.utils.joinSignature(wallet._signingKey().signDigest(msgHash));
-    }
-
-    this.publicKey = recoverPublicKeyFromSignature(get_CREATE_L2_ACCOUNT_MSG(null), signature);
-    this.ethAddr = ethers.utils.computeAddress(this.publicKey);
-
-    // Derive a private key from seed
+    let acc = new Account();
+    acc.publicKey = recoverPublicKeyFromSignature(get_CREATE_L2_ACCOUNT_MSG(null), signature);
+    acc.ethAddr = ethers.utils.computeAddress(acc.publicKey);
+    // Derive a L2 private key from seed
     const seed = ethers.utils.arrayify(signature).slice(0, 32);
-    this.l2Account = new L2Account(seed);
+    acc.l2Account = new L2Account(seed);
+    return acc;
+  }
+  static random() {
+    const mnemonic = randomMnemonic();
+    return Account.fromMnemonic(mnemonic);
   }
   signHash(h: bigint) {
     return this.l2Account.signHash(h);
@@ -96,4 +108,4 @@ class Account {
     return this.l2Account.bjjCompressed;
   }
 }
-export { L2Account, Account, get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature };
+export { L2Account, Account, get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature, randomMnemonic };

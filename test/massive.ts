@@ -21,9 +21,9 @@ function initTestCase(nTxsn, balanceLevels, orderLevels, accountLevels) {
   const amount_1to2 = 1n;
   const amount_2to1 = 10n;
 
-  const account0 = new Account(null);
-  const account1 = new Account(null);
-  const account2 = new Account(null);
+  const account0 = Account.random();
+  const account1 = Account.random();
+  const account2 = Account.random();
   const accountID0 = state.createNewAccount();
   const accountID1 = state.createNewAccount();
   const accountID2 = state.createNewAccount();

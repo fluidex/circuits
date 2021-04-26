@@ -31,7 +31,7 @@ function initDepositToNew() {
 
   const tokenID = 0n;
   const amount = 200n;
-  const account = new Account(null);
+  const account = Account.random();
   const accountID = state.createNewAccount();
 
   state.DepositToNew({
@@ -68,7 +68,7 @@ function initDepositToOld() {
   const tokenID = 0n;
   const balance = 300n;
   const amount = 100n;
-  const account = new Account(null);
+  const account = Account.random();
   const accountID = state.createNewAccount();
   const nonce = 99n;
 
