@@ -1,3 +1,4 @@
+// Generated from tpl/ejs/./src/place_order.circom.ejs. Don't modify this file manually
 include "./lib/bitify.circom";
 include "./lib/binary_merkle_tree.circom";
 include "./lib/hash_state.circom";
@@ -120,63 +121,63 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     // here we don't need to check
     // ((old_order_filledsell==old_order_amountsell) || (old_order_filledbuy==old_order_amountbuy))
     // we can make sure this when updating order to "filled" in circuits
-    component oldOrderHash = HashOrder();
-    oldOrderHash.tokensell <== old_order_tokensell;
-    oldOrderHash.tokenbuy <== old_order_tokenbuy;
-    oldOrderHash.filled_sell <== old_order_filledsell;
-    oldOrderHash.filled_buy <== old_order_filledbuy;
-    oldOrderHash.total_sell <== old_order_amountsell;
-    oldOrderHash.total_buy <== old_order_amountbuy;
-    oldOrderHash.order_id <== old_order_id;
 
-    component newOrderHash = HashOrder();
-    newOrderHash.tokensell <== new_order_tokensell;
-    newOrderHash.tokenbuy <== new_order_tokenbuy;
-    newOrderHash.filled_sell <== 0;
-    newOrderHash.filled_buy <== 0;
-    newOrderHash.total_sell <== new_order_amountsell;
-    newOrderHash.total_buy <== new_order_amountbuy;
-    newOrderHash.order_id <== new_order_id;
+    signal balanceRoot <== balance_tree.root;
 
-    // - check order tree update
-    component order_update_checker = CheckLeafUpdate(orderLevels);
-    order_update_checker.enabled <== enabled;
-    order_update_checker.oldLeaf <== oldOrderHash.out;
-    order_update_checker.newLeaf <== newOrderHash.out;
-    for (var i = 0; i < orderLevels; i++) {
-        order_update_checker.path_index[i] <== order_path_index[i];
-        order_update_checker.path_elements[i][0] <== order_path_elements[i][0];
+    
+    component balanceTreeOld = CalculateRootFromMerklePath(balanceLevels);
+    balanceTreeOld.leaf <== balance;
+    for (var i = 0; i < balanceLevels; i++) {
+      balanceTreeOld.path_index[i] <== balance_path_index[i];
+      balanceTreeOld.path_elements[i][0] <== balance_path_elements[i][0];
     }
-    order_update_checker.oldRoot <== oldOrderRoot;
-    order_update_checker.newRoot <== newOrderRoot;
-
-    // - check account tree update
-    ////////
-    // old account state hash
-    component oldAccountHash = HashAccount();
-    oldAccountHash.nonce <== nonce;
-    oldAccountHash.sign <== sign;
-    oldAccountHash.balanceRoot <== balance_tree.root;
-    oldAccountHash.ay <== ay;
-    oldAccountHash.ethAddr <== ethAddr;
-    oldAccountHash.orderRoot <== oldOrderRoot;
-    // new account state hash
-    component newAccountHash = HashAccount();
-    newAccountHash.nonce <== nonce;
-    newAccountHash.sign <== sign;
-    newAccountHash.balanceRoot <== balance_tree.root;
-    newAccountHash.ay <== ay;
-    newAccountHash.ethAddr <== ethAddr;
-    newAccountHash.orderRoot <== newOrderRoot;
-    // check update
-    component account_update_checker = CheckLeafUpdate(accountLevels);
-    account_update_checker.enabled <== enabled;
-    account_update_checker.oldLeaf <== oldAccountHash.out;
-    account_update_checker.newLeaf <== newAccountHash.out;
+    
+    // account state hash
+    component accountHashOld = HashAccount();
+    accountHashOld.nonce <== nonce;
+    accountHashOld.sign <== sign;
+    accountHashOld.balanceRoot <== balanceTreeOld.root;
+    accountHashOld.ay <== ay;
+    accountHashOld.ethAddr <== ethAddr;
+    accountHashOld.orderRoot <== oldOrderRoot;
+    // check account tree
+    component accountCheckerOld = CheckLeafExists(accountLevels);
+    accountCheckerOld.enabled <== enabled;
+    accountCheckerOld.leaf <== accountHashOld.out;
     for (var i = 0; i < accountLevels; i++) {
-        account_update_checker.path_index[i] <== account_path_index[i];
-        account_update_checker.path_elements[i][0] <== account_path_elements[i][0];
+      accountCheckerOld.path_index[i] <== account_path_index[i];
+      accountCheckerOld.path_elements[i][0] <== account_path_elements[i][0];
     }
-    account_update_checker.oldRoot <== oldAccountRoot;
-    account_update_checker.newRoot <== newAccountRoot;
+    accountCheckerOld.root <== oldAccountRoot;
+
+    
+
+    
+    component balanceTreeNew = CalculateRootFromMerklePath(balanceLevels);
+    balanceTreeNew.leaf <== balance;
+    for (var i = 0; i < balanceLevels; i++) {
+      balanceTreeNew.path_index[i] <== balance_path_index[i];
+      balanceTreeNew.path_elements[i][0] <== balance_path_elements[i][0];
+    }
+    
+    // account state hash
+    component accountHashNew = HashAccount();
+    accountHashNew.nonce <== nonce;
+    accountHashNew.sign <== sign;
+    accountHashNew.balanceRoot <== balanceTreeNew.root;
+    accountHashNew.ay <== ay;
+    accountHashNew.ethAddr <== ethAddr;
+    accountHashNew.orderRoot <== newOrderRoot;
+    // check account tree
+    component accountCheckerNew = CheckLeafExists(accountLevels);
+    accountCheckerNew.enabled <== enabled;
+    accountCheckerNew.leaf <== accountHashNew.out;
+    for (var i = 0; i < accountLevels; i++) {
+      accountCheckerNew.path_index[i] <== account_path_index[i];
+      accountCheckerNew.path_elements[i][0] <== account_path_elements[i][0];
+    }
+    accountCheckerNew.root <== newAccountRoot;
+
+    
+    
 }

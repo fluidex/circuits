@@ -1,3 +1,4 @@
+// Generated from tpl/ejs/./test/codec/place_order_tx_data.ts.ejs. Don't modify this file manually
 import { TxLength } from '../common';
 import { assert } from 'console';
 class PlaceOrderTxData {

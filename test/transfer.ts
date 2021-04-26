@@ -25,13 +25,13 @@ function initTestCase() {
   const balance2 = 200n;
   const nonce2 = 77n;
 
-  const account1Mnemonic = randomMnemonic();
+  const account1Mnemonic = 'recipe ship bean core moon coral spray hurt grocery person still mimic'; //randomMnemonic();
   const account1 = Account.fromMnemonic(account1Mnemonic);
   const accountID1 = state.createNewAccount();
-  const account2Mnemonic = randomMnemonic();
+  const account2Mnemonic = 'cover holiday payment suspect medal soup switch blood obey rocket game width'; //randomMnemonic();
   const account2 = Account.fromMnemonic(account2Mnemonic);
   const accountID2 = state.createNewAccount();
-  console.log('test transfer', { account1Mnemonic, account2Mnemonic });
+  //console.log('test transfer', { account1Mnemonic, account2Mnemonic });
 
   // set up account1 initial state
   state.setAccountKey(accountID1, account1);

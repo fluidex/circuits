@@ -12,9 +12,21 @@ const orderLevels = 2;
 const balanceLevels = 2;
 const accountLevels = 2;
 
-class TestDeposit implements SimpleTest {
+class TestDepositToOld implements SimpleTest {
   getTestData() {
-    return [initDepositToOld(), initDepositToNew()];
+    return [initDepositToOld()];
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(__dirname, '..', 'src', 'deposit_to_old.circom'),
+      main: `DepositToOld(${balanceLevels}, ${accountLevels})`,
+    };
+  }
+}
+
+class TestDepositToNew implements SimpleTest {
+  getTestData() {
+    return [initDepositToNew()];
   }
   getComponent(): TestComponent {
     return {
@@ -108,9 +120,9 @@ function initDepositToOld() {
     oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
     newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
   };
-  return { input, name: 'depositToNew' };
+  return { input, name: 'depositToOld' };
 }
 
 let deposit_to_new_test_case = initDepositToNew();
 let deposit_to_old_test_case = initDepositToOld();
-export { TestDeposit };
+export { TestDepositToNew, TestDepositToOld };

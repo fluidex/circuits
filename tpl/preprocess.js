@@ -3,7 +3,7 @@ const path = require('path');
 const ejs = require('ejs');
 const printDiff = require('print-diff');
 const { config } = require('./config');
-const { circuitInputEncoderJsTpl, circuitInputEncoderRsTpl } = require('./templates');
+const { circuitInputEncoderJsTpl, circuitInputEncoderRsTpl, CheckOrderTreeTpl, CheckBalanceTreeTpl } = require('./templates');
 
 // codegen is the module to inject inside the ejs template system
 const codegen = {
@@ -11,6 +11,8 @@ const codegen = {
   generateCircuitInputEncoderJs,
   generateCircuitInputEncoderRs,
   generateCircuitInputDecoderCircom,
+  generateCircuitBalanceCheckCircom,
+  generateCircuitOrderCheckCircom,
 };
 
 function generateCircuitInputEncoderJs(encoderName, inputSignals, config) {
@@ -19,6 +21,23 @@ function generateCircuitInputEncoderJs(encoderName, inputSignals, config) {
 
 function generateCircuitInputEncoderRs(encoderName, inputSignals, config) {
   return ejs.render(circuitInputEncoderRsTpl, { encoderName, inputSignals, config });
+}
+function generateCircuitOrderCheckCircom({ ctx, vars }) {
+  return generateCircuitTreeCheckCircom(CheckOrderTreeTpl, { ctx, vars });
+}
+function generateCircuitBalanceCheckCircom({ ctx, vars }) {
+  return generateCircuitTreeCheckCircom(CheckBalanceTreeTpl, { ctx, vars });
+}
+function generateCircuitTreeCheckCircom(tpl, { ctx, vars }) {
+  let output = tpl.replaceAll('__', ctx);
+  for (let k of Object.keys(vars)) {
+    // only replace signals
+    // currently we use str.replace(' old', ' new') to avoid replace component member
+    // TODO: using correct semantic/grammer analysis
+    const r = ` ${k}\\b`;
+    output = output.replaceAll(new RegExp(r, 'g'), ' ' + vars[k]);
+  }
+  return output;
 }
 
 // TODO: rewrite this function using template
@@ -47,7 +66,8 @@ function main() {
   }
   console.log(`generate ${outputFile} from ${tplFile}`);
   let tpl = fs.readFileSync(tplFile, 'utf-8');
-  const output = ejs.render(tpl, { codegen });
+  let output = `// Generated from ${tplFile}. Don't modify this file manually\n`;
+  output += ejs.render(tpl, { codegen });
   const overwrite = true;
   if (!overwrite && fs.existsSync(outputFile)) {
     const oldOutput = fs.readFileSync(outputFile, 'utf-8');
