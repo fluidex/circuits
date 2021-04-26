@@ -1,7 +1,10 @@
+function splitAndTrim(s) {
+  return s.split(/\s+/).filter(item => item != '');
+}
 const config = {
   txLength: 34,
   placeOrder: {
-    inputSignals: `
+    inputSignals: splitAndTrim(`
         order_pos
         old_order_id
         new_order_id
@@ -21,10 +24,32 @@ const config = {
         sign
         ay
         ethAddr
-    `
-      .split(/\s+/)
-      .filter(item => item != ''),
+    `),
     encoderName: 'PlaceOrderTxData',
+  },
+  transfer: {
+    inputSignals: splitAndTrim(`
+        fromAccountID
+        toAccountID
+        amount
+        tokenID
+        sigL2Hash
+        s
+        r8x
+        r8y
+        nonce1
+        sign1
+        balance1
+        ay1
+        ethAddr1
+        nonce2
+        sign2
+        balance2
+        ay2
+        ethAddr2
+        midAccountRoot
+    `),
+    encoderName: 'TransferTxData',
   },
 };
 

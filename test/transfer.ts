@@ -73,28 +73,10 @@ function initTestCase() {
   // TODO: assert length
   return {
     enabled: 1,
-    fromAccountID: accountID1,
-    toAccountID: accountID2,
-    amount: amount,
-    tokenID: tokenID,
-    nonce: nonce1,
-    sigL2Hash: txhash,
-    s: transferTx.signature.S,
-    r8x: transferTx.signature.R8x,
-    r8y: transferTx.signature.R8y,
-    nonce1: nonce1,
-    sign1: account1.sign,
-    balance1: balance1,
-    ay1: Scalar.fromString(account1.ay, 16),
-    ethAddr1: Scalar.fromString(account1.ethAddr, 16),
+    in: block.encodedTxs[block.encodedTxs.length - 1],
     orderRoot1: genesisOrderRoot,
     sender_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][0],
     sender_account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][0],
-    nonce2: nonce2,
-    sign2: account2.sign,
-    balance2: balance2,
-    ay2: Scalar.fromString(account2.ay, 16),
-    ethAddr2: Scalar.fromString(account2.ethAddr, 16),
     orderRoot2: genesisOrderRoot,
     receiver_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][1],
     receiver_account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][1],
@@ -106,36 +88,7 @@ function initTestCase() {
 let test_case = initTestCase();
 class TestTransfer implements SimpleTest {
   getInput() {
-    return {
-      enabled: test_case.enabled,
-      fromAccountID: test_case.fromAccountID,
-      toAccountID: test_case.toAccountID,
-      amount: test_case.amount,
-      tokenID: test_case.tokenID,
-      nonce: test_case.nonce,
-      sigL2Hash: test_case.sigL2Hash,
-      s: test_case.s,
-      r8x: test_case.r8x,
-      r8y: test_case.r8y,
-      nonce1: test_case.nonce1,
-      sign1: test_case.sign1,
-      balance1: test_case.balance1,
-      ay1: test_case.ay1,
-      ethAddr1: test_case.ethAddr1,
-      orderRoot1: test_case.orderRoot1,
-      sender_balance_path_elements: test_case.sender_balance_path_elements,
-      sender_account_path_elements: test_case.sender_account_path_elements,
-      nonce2: test_case.nonce2,
-      sign2: test_case.sign2,
-      balance2: test_case.balance2,
-      ay2: test_case.ay2,
-      ethAddr2: test_case.ethAddr2,
-      orderRoot2: test_case.orderRoot2,
-      receiver_balance_path_elements: test_case.receiver_balance_path_elements,
-      receiver_account_path_elements: test_case.receiver_account_path_elements,
-      oldAccountRoot: test_case.oldAccountRoot,
-      newAccountRoot: test_case.newAccountRoot,
-    };
+    return test_case;
   }
   getOutput() {
     return {};

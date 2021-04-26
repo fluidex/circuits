@@ -3,6 +3,7 @@ import { hash } from '../helper.ts/hash';
 import { Account } from '../helper.ts/account';
 import { Tree } from '../helper.ts/binary_merkle_tree';
 import { PlaceOrderTxData } from './codec/place_order_tx_data';
+import { TransferTxData } from './codec/transfer_tx_data';
 import { hashAccountState, hashOrderState, calculateGenesisOrderRoot, emptyOrderHash } from '../helper.ts/state-utils';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
@@ -320,31 +321,38 @@ class GlobalState {
     let fromAccount = this.accounts.get(tx.from);
     let toAccount = this.accounts.get(tx.to);
 
-    // first, generate the tx
-    let encodedTx: Array<bigint> = new Array(TxLength);
-    encodedTx.fill(0n, 0, TxLength);
-
     let fromOldBalance = this.getTokenBalance(tx.from, tx.tokenID);
     let toOldBalance = this.getTokenBalance(tx.to, tx.tokenID);
     assert(fromOldBalance > tx.amount, 'Transfer balance not enough');
-    encodedTx[TxDetailIdx.AccountID1] = tx.from;
-    encodedTx[TxDetailIdx.AccountID2] = tx.to;
-    encodedTx[TxDetailIdx.TokenID] = tx.tokenID;
-    encodedTx[TxDetailIdx.Amount] = tx.amount;
-    encodedTx[TxDetailIdx.Nonce1] = fromAccount.nonce;
-    encodedTx[TxDetailIdx.Nonce2] = toAccount.nonce;
-    encodedTx[TxDetailIdx.Sign1] = fromAccount.sign;
-    encodedTx[TxDetailIdx.Sign2] = toAccount.sign;
-    encodedTx[TxDetailIdx.Ay1] = fromAccount.ay;
-    encodedTx[TxDetailIdx.Ay2] = toAccount.ay;
-    encodedTx[TxDetailIdx.EthAddr1] = fromAccount.ethAddr;
-    encodedTx[TxDetailIdx.EthAddr2] = toAccount.ethAddr;
-    encodedTx[TxDetailIdx.Balance1] = fromOldBalance;
-    encodedTx[TxDetailIdx.Balance2] = toOldBalance;
-    encodedTx[TxDetailIdx.SigL2Hash] = tx.signature.hash;
-    encodedTx[TxDetailIdx.S] = tx.signature.S;
-    encodedTx[TxDetailIdx.R8x] = tx.signature.R8x;
-    encodedTx[TxDetailIdx.R8y] = tx.signature.R8y;
+
+    let txData = new TransferTxData();
+    txData.fromAccountID = tx.from;
+    txData.toAccountID = tx.to;
+    txData.amount = tx.amount;
+    txData.tokenID = tx.tokenID;
+    txData.sigL2Hash = tx.signature.hash;
+    txData.s = tx.signature.S;
+
+    txData.r8x = tx.signature.R8x;
+    txData.r8y = tx.signature.R8y;
+    txData.nonce1 = fromAccount.nonce;
+    txData.sign1 = fromAccount.sign;
+    txData.balance1 = fromOldBalance;
+    txData.ay1 = fromAccount.ay;
+    txData.ethAddr1 = fromAccount.ethAddr;
+
+    txData.nonce2 = toAccount.nonce;
+    txData.sign2 = toAccount.sign;
+    txData.balance2 = toOldBalance;
+    txData.ay2 = toAccount.ay;
+    txData.ethAddr2 = toAccount.ethAddr;
+
+    this.setTokenBalance(tx.from, tx.tokenID, fromOldBalance - tx.amount);
+    this.increaseNonce(tx.from);
+
+    txData.midAccountRoot = this.root();
+
+    let encodedTx = txData.encode();
 
     let rawTx: RawTx = {
       txType: TxType.Transfer,
@@ -362,9 +370,6 @@ class GlobalState {
       rootBefore: proofFrom.root,
       rootAfter: 0n,
     };
-
-    this.setTokenBalance(tx.from, tx.tokenID, fromOldBalance - tx.amount);
-    this.increaseNonce(tx.from);
 
     let proofTo = this.stateProof(tx.to, tx.tokenID);
     rawTx.balancePath1 = proofTo.balancePath;
