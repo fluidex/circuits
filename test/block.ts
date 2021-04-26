@@ -45,9 +45,9 @@ function initBlockTestCase() {
   const tokenID_1to2 = 0n;
   const tokenID_2to1 = 1n;
 
-  const account0 = new Account(null);
-  const account1 = new Account(null);
-  const account2 = new Account(null);
+  const account0 = Account.random();
+  const account1 = Account.random();
+  const account2 = Account.random();
   const accountID0 = state.createNewAccount();
   const accountID1 = state.createNewAccount();
   const accountID2 = state.createNewAccount();

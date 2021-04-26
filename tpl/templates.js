@@ -45,5 +45,4 @@ impl <%= encoderName %> {
     }
 }`;
 
-
 export { circuitInputEncoderJsTpl, circuitInputEncoderRsTpl };
