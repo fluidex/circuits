@@ -5,7 +5,7 @@ include "./lib/hash_state.circom";
 template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
 
-<%- codegen.generateCircuitInputDecoderCircom(codegen.config.placeOrder.inputSignals) %>
+<%- codegen.renderInputDecoderCircom(codegen.config.placeOrder.inputSignals) %>
 
     // Roots
     signal input oldOrderRoot;
@@ -82,12 +82,12 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
 
     signal balanceRoot <== balance_tree.root;
 
-    <%- codegen.generateCircuitBalanceCheckCircom({ctx: 'Old', vars: { order_tokensell: 'old_order_tokensell',
+    <%- codegen.generateBalanceCheckCircom({ctx: 'Old', vars: { order_tokensell: 'old_order_tokensell',
     order_tokenbuy: 'old_order_tokenbuy', order_filledsell: 'old_order_filledsell', order_filledbuy: 'old_order_filledbuy',
      order_amountsell: 'old_order_amountsell', order_amountbuy: 'old_order_amountbuy', order_id: 'old_order_id',
     orderRoot: 'oldOrderRoot', accountRoot: 'oldAccountRoot' }}) %>
 
-    <%- codegen.generateCircuitBalanceCheckCircom({ctx: 'New', vars: { order_tokensell: 'new_order_tokensell',
+    <%- codegen.generateBalanceCheckCircom({ctx: 'New', vars: { order_tokensell: 'new_order_tokensell',
     order_tokenbuy: 'new_order_tokenbuy', order_filledsell: '0', order_filledbuy: '0',
      order_amountsell: 'new_order_amountsell', order_amountbuy: 'new_order_amountbuy', order_id: 'new_order_id',
     orderRoot: 'newOrderRoot', accountRoot: 'newAccountRoot' }}) %>

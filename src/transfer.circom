@@ -130,8 +130,8 @@ template Transfer(balanceLevels, accountLevels) {
     component balanceTreeSenderOld = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeSenderOld.leaf <== balance1;
     for (var i = 0; i < balanceLevels; i++) {
-      balanceTreeSenderOld.path_index[i] <== balance_path_index[i];
-      balanceTreeSenderOld.path_elements[i][0] <== sender_balance_path_elements[i][0];
+        balanceTreeSenderOld.path_index[i] <== balance_path_index[i];
+        balanceTreeSenderOld.path_elements[i][0] <== sender_balance_path_elements[i][0];
     }
     
     // account state hash
@@ -143,14 +143,17 @@ template Transfer(balanceLevels, accountLevels) {
     accountHashSenderOld.ethAddr <== ethAddr1;
     accountHashSenderOld.orderRoot <== orderRoot1;
     // check account tree
-    component accountCheckerSenderOld = CheckLeafExists(accountLevels);
-    accountCheckerSenderOld.enabled <== enabled;
-    accountCheckerSenderOld.leaf <== accountHashSenderOld.out;
+    component accountTreeSenderOld = CalculateRootFromMerklePath(accountLevels);
+    accountTreeSenderOld.leaf <== accountHashSenderOld.out;
     for (var i = 0; i < accountLevels; i++) {
-      accountCheckerSenderOld.path_index[i] <== sender_account_path_index[i];
-      accountCheckerSenderOld.path_elements[i][0] <== sender_account_path_elements[i][0];
+        accountTreeSenderOld.path_index[i] <== sender_account_path_index[i];
+        accountTreeSenderOld.path_elements[i][0] <== sender_account_path_elements[i][0];
     }
-    accountCheckerSenderOld.root <== oldAccountRoot;
+
+    component checkSenderOld = ForceEqualIfEnabled();
+    checkSenderOld.enabled <== enabled;
+    checkSenderOld.in[0] <== accountTreeSenderOld.root;
+    checkSenderOld.in[1] <== oldAccountRoot;
 
     
 
@@ -202,8 +205,8 @@ template Transfer(balanceLevels, accountLevels) {
     component balanceTreeSenderNew = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeSenderNew.leaf <== balance1 - amount;
     for (var i = 0; i < balanceLevels; i++) {
-      balanceTreeSenderNew.path_index[i] <== balance_path_index[i];
-      balanceTreeSenderNew.path_elements[i][0] <== sender_balance_path_elements[i][0];
+        balanceTreeSenderNew.path_index[i] <== balance_path_index[i];
+        balanceTreeSenderNew.path_elements[i][0] <== sender_balance_path_elements[i][0];
     }
     
     // account state hash
@@ -215,14 +218,17 @@ template Transfer(balanceLevels, accountLevels) {
     accountHashSenderNew.ethAddr <== ethAddr1;
     accountHashSenderNew.orderRoot <== orderRoot1;
     // check account tree
-    component accountCheckerSenderNew = CheckLeafExists(accountLevels);
-    accountCheckerSenderNew.enabled <== enabled;
-    accountCheckerSenderNew.leaf <== accountHashSenderNew.out;
+    component accountTreeSenderNew = CalculateRootFromMerklePath(accountLevels);
+    accountTreeSenderNew.leaf <== accountHashSenderNew.out;
     for (var i = 0; i < accountLevels; i++) {
-      accountCheckerSenderNew.path_index[i] <== sender_account_path_index[i];
-      accountCheckerSenderNew.path_elements[i][0] <== sender_account_path_elements[i][0];
+        accountTreeSenderNew.path_index[i] <== sender_account_path_index[i];
+        accountTreeSenderNew.path_elements[i][0] <== sender_account_path_elements[i][0];
     }
-    accountCheckerSenderNew.root <== midAccountRoot;
+
+    component checkSenderNew = ForceEqualIfEnabled();
+    checkSenderNew.enabled <== enabled;
+    checkSenderNew.in[0] <== accountTreeSenderNew.root;
+    checkSenderNew.in[1] <== midAccountRoot;
 
     
 
@@ -230,8 +236,8 @@ template Transfer(balanceLevels, accountLevels) {
     component balanceTreeReceiverOld = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeReceiverOld.leaf <== balance2;
     for (var i = 0; i < balanceLevels; i++) {
-      balanceTreeReceiverOld.path_index[i] <== balance_path_index[i];
-      balanceTreeReceiverOld.path_elements[i][0] <== receiver_balance_path_elements[i][0];
+        balanceTreeReceiverOld.path_index[i] <== balance_path_index[i];
+        balanceTreeReceiverOld.path_elements[i][0] <== receiver_balance_path_elements[i][0];
     }
     
     // account state hash
@@ -243,14 +249,17 @@ template Transfer(balanceLevels, accountLevels) {
     accountHashReceiverOld.ethAddr <== ethAddr2;
     accountHashReceiverOld.orderRoot <== orderRoot2;
     // check account tree
-    component accountCheckerReceiverOld = CheckLeafExists(accountLevels);
-    accountCheckerReceiverOld.enabled <== enabled;
-    accountCheckerReceiverOld.leaf <== accountHashReceiverOld.out;
+    component accountTreeReceiverOld = CalculateRootFromMerklePath(accountLevels);
+    accountTreeReceiverOld.leaf <== accountHashReceiverOld.out;
     for (var i = 0; i < accountLevels; i++) {
-      accountCheckerReceiverOld.path_index[i] <== receiver_account_path_index[i];
-      accountCheckerReceiverOld.path_elements[i][0] <== receiver_account_path_elements[i][0];
+        accountTreeReceiverOld.path_index[i] <== receiver_account_path_index[i];
+        accountTreeReceiverOld.path_elements[i][0] <== receiver_account_path_elements[i][0];
     }
-    accountCheckerReceiverOld.root <== midAccountRoot;
+
+    component checkReceiverOld = ForceEqualIfEnabled();
+    checkReceiverOld.enabled <== enabled;
+    checkReceiverOld.in[0] <== accountTreeReceiverOld.root;
+    checkReceiverOld.in[1] <== midAccountRoot;
 
     
 
@@ -258,8 +267,8 @@ template Transfer(balanceLevels, accountLevels) {
     component balanceTreeReceiverNew = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeReceiverNew.leaf <== balance2 + amount;
     for (var i = 0; i < balanceLevels; i++) {
-      balanceTreeReceiverNew.path_index[i] <== balance_path_index[i];
-      balanceTreeReceiverNew.path_elements[i][0] <== receiver_balance_path_elements[i][0];
+        balanceTreeReceiverNew.path_index[i] <== balance_path_index[i];
+        balanceTreeReceiverNew.path_elements[i][0] <== receiver_balance_path_elements[i][0];
     }
     
     // account state hash
@@ -271,14 +280,17 @@ template Transfer(balanceLevels, accountLevels) {
     accountHashReceiverNew.ethAddr <== ethAddr2;
     accountHashReceiverNew.orderRoot <== orderRoot2;
     // check account tree
-    component accountCheckerReceiverNew = CheckLeafExists(accountLevels);
-    accountCheckerReceiverNew.enabled <== enabled;
-    accountCheckerReceiverNew.leaf <== accountHashReceiverNew.out;
+    component accountTreeReceiverNew = CalculateRootFromMerklePath(accountLevels);
+    accountTreeReceiverNew.leaf <== accountHashReceiverNew.out;
     for (var i = 0; i < accountLevels; i++) {
-      accountCheckerReceiverNew.path_index[i] <== receiver_account_path_index[i];
-      accountCheckerReceiverNew.path_elements[i][0] <== receiver_account_path_elements[i][0];
+        accountTreeReceiverNew.path_index[i] <== receiver_account_path_index[i];
+        accountTreeReceiverNew.path_elements[i][0] <== receiver_account_path_elements[i][0];
     }
-    accountCheckerReceiverNew.root <== newAccountRoot;
+
+    component checkReceiverNew = ForceEqualIfEnabled();
+    checkReceiverNew.enabled <== enabled;
+    checkReceiverNew.in[0] <== accountTreeReceiverNew.root;
+    checkReceiverNew.in[1] <== newAccountRoot;
 
     
 

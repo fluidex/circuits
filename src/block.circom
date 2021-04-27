@@ -137,7 +137,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processTransfer[i].enabled <== enableTransfer[i].out;
 
         for (var j = 0; j < TxLength(); j++) {
-            processPlaceOrder[i].in[j] <== encodedTxs[i][j];
+            processTransfer[i].in[j] <== encodedTxs[i][j];
         }
 
         processTransfer[i].orderRoot1 <== orderRoots[i][0];

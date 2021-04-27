@@ -3,32 +3,49 @@ const path = require('path');
 const ejs = require('ejs');
 const printDiff = require('print-diff');
 const { config } = require('./config');
-const { circuitInputEncoderJsTpl, circuitInputEncoderRsTpl, CheckOrderTreeTpl, CheckBalanceTreeTpl } = require('./templates');
+const tpls = require('./templates');
+const {
+  circuitInputEncoderJsTpl,
+  circuitInputEncoderRsTpl,
+  CheckOrderTreeTpl,
+  CheckBalanceTreeTpl,
+  CheckFullOrderTreeTpl,
+  CheckFullBalanceTreeTpl,
+  CheckSameTreeRootTpl,
+} = tpls;
 
 // codegen is the module to inject inside the ejs template system
 const codegen = {
   config,
-  generateCircuitInputEncoderJs,
-  generateCircuitInputEncoderRs,
-  generateCircuitInputDecoderCircom,
-  generateCircuitBalanceCheckCircom,
-  generateCircuitOrderCheckCircom,
+  tpls,
+  // renderXXX uses ejs template
+  renderInputEncoderJs,
+  renderInputEncoderRs,
+  renderInputDecoderCircom,
+  // generateXXX uses simple str.replace
+  generateBalanceCheckCircom,
+  generateOrderCheckCircom,
+  generateSameRootCircom,
+  generateFromTpl,
 };
 
-function generateCircuitInputEncoderJs(encoderName, inputSignals, config) {
+function renderInputEncoderJs(encoderName, inputSignals, config) {
   return ejs.render(circuitInputEncoderJsTpl, { encoderName, inputSignals, config });
 }
 
-function generateCircuitInputEncoderRs(encoderName, inputSignals, config) {
+function renderInputEncoderRs(encoderName, inputSignals, config) {
   return ejs.render(circuitInputEncoderRsTpl, { encoderName, inputSignals, config });
 }
-function generateCircuitOrderCheckCircom({ ctx, vars }) {
-  return generateCircuitTreeCheckCircom(CheckOrderTreeTpl, { ctx, vars });
+function generateOrderCheckCircom({ ctx, vars }) {
+  return generateFromTpl(CheckFullOrderTreeTpl, { ctx, vars });
 }
-function generateCircuitBalanceCheckCircom({ ctx, vars }) {
-  return generateCircuitTreeCheckCircom(CheckBalanceTreeTpl, { ctx, vars });
+function generateBalanceCheckCircom({ ctx, vars }) {
+  return generateFromTpl(CheckFullBalanceTreeTpl, { ctx, vars });
 }
-function generateCircuitTreeCheckCircom(tpl, { ctx, vars }) {
+function generateSameRootCircom({ ctx, vars }) {
+  return generateFromTpl(CheckSameTreeRootTpl, { ctx, vars });
+}
+function generateFromTpl(tpl, { ctx, vars }) {
   let output = tpl.replaceAll('__', ctx);
   for (let k of Object.keys(vars)) {
     // only replace signals
@@ -41,7 +58,7 @@ function generateCircuitTreeCheckCircom(tpl, { ctx, vars }) {
 }
 
 // TODO: rewrite this function using template
-function generateCircuitInputDecoderCircom(inputSignals, indent = 4) {
+function renderInputDecoderCircom(inputSignals, indent = 4) {
   const encodedSignalsName = 'in';
   let code = '';
   function addLine(text) {

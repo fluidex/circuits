@@ -128,8 +128,8 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     component balanceTreeOld = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeOld.leaf <== balance;
     for (var i = 0; i < balanceLevels; i++) {
-      balanceTreeOld.path_index[i] <== balance_path_index[i];
-      balanceTreeOld.path_elements[i][0] <== balance_path_elements[i][0];
+        balanceTreeOld.path_index[i] <== balance_path_index[i];
+        balanceTreeOld.path_elements[i][0] <== balance_path_elements[i][0];
     }
     
     // account state hash
@@ -141,14 +141,17 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     accountHashOld.ethAddr <== ethAddr;
     accountHashOld.orderRoot <== oldOrderRoot;
     // check account tree
-    component accountCheckerOld = CheckLeafExists(accountLevels);
-    accountCheckerOld.enabled <== enabled;
-    accountCheckerOld.leaf <== accountHashOld.out;
+    component accountTreeOld = CalculateRootFromMerklePath(accountLevels);
+    accountTreeOld.leaf <== accountHashOld.out;
     for (var i = 0; i < accountLevels; i++) {
-      accountCheckerOld.path_index[i] <== account_path_index[i];
-      accountCheckerOld.path_elements[i][0] <== account_path_elements[i][0];
+        accountTreeOld.path_index[i] <== account_path_index[i];
+        accountTreeOld.path_elements[i][0] <== account_path_elements[i][0];
     }
-    accountCheckerOld.root <== oldAccountRoot;
+
+    component checkOld = ForceEqualIfEnabled();
+    checkOld.enabled <== enabled;
+    checkOld.in[0] <== accountTreeOld.root;
+    checkOld.in[1] <== oldAccountRoot;
 
     
 
@@ -156,8 +159,8 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     component balanceTreeNew = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeNew.leaf <== balance;
     for (var i = 0; i < balanceLevels; i++) {
-      balanceTreeNew.path_index[i] <== balance_path_index[i];
-      balanceTreeNew.path_elements[i][0] <== balance_path_elements[i][0];
+        balanceTreeNew.path_index[i] <== balance_path_index[i];
+        balanceTreeNew.path_elements[i][0] <== balance_path_elements[i][0];
     }
     
     // account state hash
@@ -169,14 +172,17 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     accountHashNew.ethAddr <== ethAddr;
     accountHashNew.orderRoot <== newOrderRoot;
     // check account tree
-    component accountCheckerNew = CheckLeafExists(accountLevels);
-    accountCheckerNew.enabled <== enabled;
-    accountCheckerNew.leaf <== accountHashNew.out;
+    component accountTreeNew = CalculateRootFromMerklePath(accountLevels);
+    accountTreeNew.leaf <== accountHashNew.out;
     for (var i = 0; i < accountLevels; i++) {
-      accountCheckerNew.path_index[i] <== account_path_index[i];
-      accountCheckerNew.path_elements[i][0] <== account_path_elements[i][0];
+        accountTreeNew.path_index[i] <== account_path_index[i];
+        accountTreeNew.path_elements[i][0] <== account_path_elements[i][0];
     }
-    accountCheckerNew.root <== newAccountRoot;
+
+    component checkNew = ForceEqualIfEnabled();
+    checkNew.enabled <== enabled;
+    checkNew.in[0] <== accountTreeNew.root;
+    checkNew.in[1] <== newAccountRoot;
 
     
     

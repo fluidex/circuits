@@ -75,11 +75,11 @@ template DepositToOld(balanceLevels, accountLevels) {
 
     /////////////////////////////// Step 1: check old state //////////////////////////////
 
-    <%- codegen.generateCircuitBalanceCheckCircom({ctx: 'Old', vars: { accountRoot: 'oldAccountRoot'}}) %>
+    <%- codegen.generateBalanceCheckCircom({ctx: 'Old', vars: { accountRoot: 'oldAccountRoot'}}) %>
 
     /////////////////////////////// Step 2: check new state //////////////////////////////
 
     signal newBalance <== balance + amount;
-    <%- codegen.generateCircuitBalanceCheckCircom({ctx: 'New', vars: {balance: 'newBalance', accountRoot: 'newAccountRoot'}}) %>
+    <%- codegen.generateBalanceCheckCircom({ctx: 'New', vars: {balance: 'newBalance', accountRoot: 'newAccountRoot'}}) %>
 
 }
