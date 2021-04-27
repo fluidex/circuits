@@ -3,7 +3,8 @@ const babyJub = require('circomlib').babyJub;
 const { utils: utilsScalar } = require('ffjavascript');
 import * as ethers from 'ethers';
 import { randomBytes } from '@ethersproject/random';
-import { entropyToMnemonic } from '@ethersproject/hdnode';
+import { defaultPath, HDNode, entropyToMnemonic, Mnemonic } from '@ethersproject/hdnode';
+import { SigningKey } from '@ethersproject/signing-key';
 import { hash } from '../helper.ts/hash';
 const utils = require('./utils');
 
@@ -73,9 +74,13 @@ class Account {
   public l2Account: L2Account;
 
   static fromMnemonic(mnemonic) {
-    const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+    const privKey = HDNode.fromMnemonic(mnemonic, null, null).derivePath(defaultPath).privateKey;
+    return Account.fromPrivkey(privKey);
+  }
+  static fromPrivkey(privKey) {
     const msgHash = ethers.utils.hashMessage(get_CREATE_L2_ACCOUNT_MSG(null));
-    const signature = ethers.utils.joinSignature(wallet._signingKey().signDigest(msgHash));
+    const signKey = new SigningKey(privKey);
+    const signature = ethers.utils.joinSignature(signKey.signDigest(msgHash));
     return Account.fromSignature(signature);
   }
   static fromSignature(signature) {
