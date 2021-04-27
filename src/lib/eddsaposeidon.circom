@@ -20,6 +20,7 @@
 include "../../node_modules/circomlib/circuits/compconstant.circom";
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
+include "bitify.circom";
 include "../../node_modules/circomlib/circuits/escalarmulany.circom";
 include "../../node_modules/circomlib/circuits/escalarmulfix.circom";
 
@@ -38,7 +39,8 @@ template EdDSAPoseidonVerifier() {
 
 // Ensure S<Subgroup Order
 
-    component snum2bits = Num2Bits(253);
+    component snum2bits = Num2BitsIfEnabled(253);
+    snum2bits.enabled <== enabled;
     snum2bits.in <== S;
 
     component  compConstant = CompConstant(2736030358979909402780800718157159386076813972158567259200215660948447373040);
