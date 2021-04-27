@@ -35,17 +35,17 @@ const config = {
         tokenID
         sigL2Hash
         s
+        sign1
+        sign2
+        ay1
+        ay2
         r8x
         r8y
         nonce1
-        sign1
         balance1
-        ay1
         ethAddr1
         nonce2
-        sign2
         balance2
-        ay2
         ethAddr2
         midAccountRoot
     `),

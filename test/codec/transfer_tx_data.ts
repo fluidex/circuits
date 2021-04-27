@@ -8,17 +8,17 @@ class TransferTxData {
   tokenID: bigint;
   sigL2Hash: bigint;
   s: bigint;
+  sign1: bigint;
+  sign2: bigint;
+  ay1: bigint;
+  ay2: bigint;
   r8x: bigint;
   r8y: bigint;
   nonce1: bigint;
-  sign1: bigint;
   balance1: bigint;
-  ay1: bigint;
   ethAddr1: bigint;
   nonce2: bigint;
-  sign2: bigint;
   balance2: bigint;
-  ay2: bigint;
   ethAddr2: bigint;
   midAccountRoot: bigint;
   encode(): Array<bigint> {
@@ -31,17 +31,17 @@ class TransferTxData {
     results.push(this.tokenID);
     results.push(this.sigL2Hash);
     results.push(this.s);
+    results.push(this.sign1);
+    results.push(this.sign2);
+    results.push(this.ay1);
+    results.push(this.ay2);
     results.push(this.r8x);
     results.push(this.r8y);
     results.push(this.nonce1);
-    results.push(this.sign1);
     results.push(this.balance1);
-    results.push(this.ay1);
     results.push(this.ethAddr1);
     results.push(this.nonce2);
-    results.push(this.sign2);
     results.push(this.balance2);
-    results.push(this.ay2);
     results.push(this.ethAddr2);
     results.push(this.midAccountRoot);
     while (results.length < TxLength) {
