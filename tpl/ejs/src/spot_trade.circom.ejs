@@ -1,4 +1,3 @@
-// Generated from tpl/ejs/./src/spot_trade.circom.ejs. Don't modify this file manually
 include "./lib/bitify.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
@@ -409,160 +408,84 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // we need make 4 updates to the tree here {sender,receiver}x{token1,token2}
 
     // Step1: check old sender state
-    
-    component balanceTreeAccount1Old = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeAccount1Old.leaf <== account1_balance_sell;
-    for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeAccount1Old.path_index[i] <== balance_1to2_path_index[i];
-        balanceTreeAccount1Old.path_elements[i][0] <== old_account1_balance_path_elements[i][0];
-    }
-    
-    // account state hash
-    component accountHashAccount1Old = HashAccount();
-    accountHashAccount1Old.nonce <== nonce1;
-    accountHashAccount1Old.sign <== sign1;
-    accountHashAccount1Old.balanceRoot <== balanceTreeAccount1Old.root;
-    accountHashAccount1Old.ay <== ay1;
-    accountHashAccount1Old.ethAddr <== ethAddr1;
-    accountHashAccount1Old.orderRoot <== oldOrder1Root;
-    // check account tree
-    component accountTreeAccount1Old = CalculateRootFromMerklePath(accountLevels);
-    accountTreeAccount1Old.leaf <== accountHashAccount1Old.out;
-    for (var i = 0; i < accountLevels; i++) {
-        accountTreeAccount1Old.path_index[i] <== account1_path_index[i];
-        accountTreeAccount1Old.path_elements[i][0] <== old_account1_path_elements[i][0];
-    }
-
-    component checkAccount1Old = ForceEqualIfEnabled();
-    checkAccount1Old.enabled <== enabled;
-    checkAccount1Old.in[0] <== accountTreeAccount1Old.root;
-    checkAccount1Old.in[1] <== oldAccountRoot;
-
-    
+    <%- codegen.generateBalanceCheckCircom({ctx: 'Account1Old', vars: {
+        balance: 'account1_balance_sell',
+        balance_path_index: 'balance_1to2_path_index',
+        balance_path_elements: 'old_account1_balance_path_elements',
+        account_path_index: 'account1_path_index',
+        account_path_elements: 'old_account1_path_elements',
+        sign: "sign1",
+        ay: 'ay1',
+        nonce: 'nonce1',
+        ethAddr: 'ethAddr1',
+        accountRoot: 'oldAccountRoot',
+        orderRoot: 'oldOrder1Root'
+    }}) %>
 
     // Step2: update sender balance
-    
-    component tree1Account1Update = CalculateRootFromMerklePath( balanceLevels);
-    tree1Account1Update.leaf <== account1_balance_sell - amount_1to2;
-    for (var i = 0; i < balanceLevels; i++) {
-        tree1Account1Update.path_index[i] <== balance_1to2_path_index[i];
-        tree1Account1Update.path_elements[i][0] <== old_account1_balance_path_elements[i][0];
-    }
-
-    component tree2Account1Update = CalculateRootFromMerklePath( balanceLevels);
-    tree2Account1Update.leaf <== account1_balance_buy;
-    for (var i = 0; i < balanceLevels; i++) {
-        tree2Account1Update.path_index[i] <== balance_2to1_path_index[i];
-        tree2Account1Update.path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
-    }
-    component checkAccount1Update = ForceEqualIfEnabled();
-    checkAccount1Update.enabled <== enabled;
-    checkAccount1Update.in[0] <== tree1Account1Update.root;
-    checkAccount1Update.in[1] <== tree2Account1Update.root;
-
+    <%- codegen.generateSameRootCircom({ctx: 'Account1Update', vars: {
+        leaf1: 'account1_balance_sell - amount_1to2',
+        path_elements1: 'old_account1_balance_path_elements',
+        path_index1: 'balance_1to2_path_index',
+        leaf2: 'account1_balance_buy',
+        path_elements2: 'tmp_account1_balance_path_elements',
+        path_index2: 'balance_2to1_path_index',
+        levels: 'balanceLevels'
+    }}) %>
 
     // Step3: after update account1, before update account2
-    component balanceTreeMidAccount1 = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeMidAccount1.leaf <== account1_balance_buy + amount_2to1;
-    for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeMidAccount1.path_index[i] <== balance_2to1_path_index[i];
-        balanceTreeMidAccount1.path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
-    }
-    
-    // account state hash
-    component accountHashMidAccount1 = HashAccount();
-    accountHashMidAccount1.nonce <== nonce1;
-    accountHashMidAccount1.sign <== sign1;
-    accountHashMidAccount1.balanceRoot <== balanceTreeMidAccount1.root;
-    accountHashMidAccount1.ay <== ay1;
-    accountHashMidAccount1.ethAddr <== ethAddr1;
-    accountHashMidAccount1.orderRoot <== newOrder1Root;
-    // check account tree
-    component accountTreeMidAccount1 = CalculateRootFromMerklePath(accountLevels);
-    accountTreeMidAccount1.leaf <== accountHashMidAccount1.out;
-    for (var i = 0; i < accountLevels; i++) {
-        accountTreeMidAccount1.path_index[i] <== account1_path_index[i];
-        accountTreeMidAccount1.path_elements[i][0] <== old_account1_path_elements[i][0];
-    }
-
-    component balanceTreeMidAccount2 = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeMidAccount2.leaf <== account2_balance_sell;
-    for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeMidAccount2.path_index[i] <== balance_2to1_path_index[i];
-        balanceTreeMidAccount2.path_elements[i][0] <== old_account2_balance_path_elements[i][0];
-    }
-    
-    // account state hash
-    component accountHashMidAccount2 = HashAccount();
-    accountHashMidAccount2.nonce <== nonce2;
-    accountHashMidAccount2.sign <== sign2;
-    accountHashMidAccount2.balanceRoot <== balanceTreeMidAccount2.root;
-    accountHashMidAccount2.ay <== ay2;
-    accountHashMidAccount2.ethAddr <== ethAddr2;
-    accountHashMidAccount2.orderRoot <== oldOrder2Root;
-    // check account tree
-    component accountTreeMidAccount2 = CalculateRootFromMerklePath(accountLevels);
-    accountTreeMidAccount2.leaf <== accountHashMidAccount2.out;
-    for (var i = 0; i < accountLevels; i++) {
-        accountTreeMidAccount2.path_index[i] <== account2_path_index[i];
-        accountTreeMidAccount2.path_elements[i][0] <== tmp_account2_path_elements[i][0];
-    }
-
+    <%- codegen.generateFromTpl(codegen.tpls.CalcAccountTreeFromBalanceTpl, {ctx: 'MidAccount1', vars: {
+        balance: 'account1_balance_buy + amount_2to1',
+        balance_path_index: 'balance_2to1_path_index',
+        balance_path_elements: 'tmp_account1_balance_path_elements',
+        account_path_index: 'account1_path_index',
+        account_path_elements: 'old_account1_path_elements',
+        nonce: 'nonce1',
+        sign: "sign1",
+        ay: 'ay1',
+        ethAddr: 'ethAddr1',
+        orderRoot: 'newOrder1Root'
+    }}) %>
+    <%- codegen.generateFromTpl(codegen.tpls.CalcAccountTreeFromBalanceTpl, {ctx: 'MidAccount2', vars: {
+        balance: 'account2_balance_sell',
+        balance_path_index: 'balance_2to1_path_index',
+        balance_path_elements: 'old_account2_balance_path_elements',
+        account_path_index: 'account2_path_index',
+        account_path_elements: 'tmp_account2_path_elements',
+        nonce: 'nonce2',
+        sign: "sign2",
+        ay: 'ay2',
+        ethAddr: 'ethAddr2',
+        orderRoot: 'oldOrder2Root'
+    }}) %>
     component checkMid = ForceEqualIfEnabled();
     checkMid.enabled <== enabled;
     checkMid.in[0] <== accountTreeMidAccount1.root;
     checkMid.in[1] <== accountTreeMidAccount2.root;
 
     // Step4: update account 2 balance
-    
-    component tree1Account2Update = CalculateRootFromMerklePath( balanceLevels);
-    tree1Account2Update.leaf <== account2_balance_sell - amount_2to1;
-    for (var i = 0; i < balanceLevels; i++) {
-        tree1Account2Update.path_index[i] <== balance_2to1_path_index[i];
-        tree1Account2Update.path_elements[i][0] <== old_account2_balance_path_elements[i][0];
-    }
-
-    component tree2Account2Update = CalculateRootFromMerklePath( balanceLevels);
-    tree2Account2Update.leaf <== account2_balance_buy;
-    for (var i = 0; i < balanceLevels; i++) {
-        tree2Account2Update.path_index[i] <== balance_1to2_path_index[i];
-        tree2Account2Update.path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
-    }
-    component checkAccount2Update = ForceEqualIfEnabled();
-    checkAccount2Update.enabled <== enabled;
-    checkAccount2Update.in[0] <== tree1Account2Update.root;
-    checkAccount2Update.in[1] <== tree2Account2Update.root;
-
+    <%- codegen.generateSameRootCircom({ctx: 'Account2Update', vars: {
+        leaf1: 'account2_balance_sell - amount_2to1',
+        path_elements1: 'old_account2_balance_path_elements',
+        path_index1: 'balance_2to1_path_index',
+        leaf2: 'account2_balance_buy',
+        path_elements2: 'tmp_account2_balance_path_elements',
+        path_index2: 'balance_1to2_path_index',
+        levels: 'balanceLevels'
+    }}) %>
 
     // Step5: check new state root
-    
-    component balanceTreeAccount2New = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeAccount2New.leaf <== account2_balance_buy + amount_1to2;
-    for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeAccount2New.path_index[i] <== balance_1to2_path_index[i];
-        balanceTreeAccount2New.path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
-    }
-    
-    // account state hash
-    component accountHashAccount2New = HashAccount();
-    accountHashAccount2New.nonce <== nonce2;
-    accountHashAccount2New.sign <== sign2;
-    accountHashAccount2New.balanceRoot <== balanceTreeAccount2New.root;
-    accountHashAccount2New.ay <== ay2;
-    accountHashAccount2New.ethAddr <== ethAddr2;
-    accountHashAccount2New.orderRoot <== newOrder2Root;
-    // check account tree
-    component accountTreeAccount2New = CalculateRootFromMerklePath(accountLevels);
-    accountTreeAccount2New.leaf <== accountHashAccount2New.out;
-    for (var i = 0; i < accountLevels; i++) {
-        accountTreeAccount2New.path_index[i] <== account2_path_index[i];
-        accountTreeAccount2New.path_elements[i][0] <== tmp_account2_path_elements[i][0];
-    }
-
-    component checkAccount2New = ForceEqualIfEnabled();
-    checkAccount2New.enabled <== enabled;
-    checkAccount2New.in[0] <== accountTreeAccount2New.root;
-    checkAccount2New.in[1] <== newAccountRoot;
-
-    
+    <%- codegen.generateBalanceCheckCircom({ctx: 'Account2New', vars: {
+        balance: 'account2_balance_buy + amount_1to2',
+        balance_path_index: 'balance_1to2_path_index',
+        balance_path_elements: 'tmp_account2_balance_path_elements',
+        account_path_index: 'account2_path_index',
+        account_path_elements: 'tmp_account2_path_elements',
+        nonce: 'nonce2',
+        sign: "sign2",
+        ay: 'ay2',
+        ethAddr: 'ethAddr2',
+        accountRoot: 'newAccountRoot',
+        orderRoot: 'newOrder2Root'
+    }}) %>
 }

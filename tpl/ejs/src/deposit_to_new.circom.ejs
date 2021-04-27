@@ -1,4 +1,3 @@
-// Generated from tpl/ejs/./src/deposit_to_new.circom.ejs. Don't modify this file manually
 include "./lib/bitify.circom";
 include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
@@ -74,67 +73,9 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal orderRoot <== genesisOrderRoot;
     signal nonce <== 0;
 
-    
-    component balanceTreeOld = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeOld.leaf <== 0;
-    for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeOld.path_index[i] <== balance_path_index[i];
-        balanceTreeOld.path_elements[i][0] <== balance_path_elements[i][0];
-    }
-    
-    // account state hash
-    component accountHashOld = HashAccount();
-    accountHashOld.nonce <== nonce;
-    accountHashOld.sign <== 0;
-    accountHashOld.balanceRoot <== balanceTreeOld.root;
-    accountHashOld.ay <== 0;
-    accountHashOld.ethAddr <== 0;
-    accountHashOld.orderRoot <== orderRoot;
-    // check account tree
-    component accountTreeOld = CalculateRootFromMerklePath(accountLevels);
-    accountTreeOld.leaf <== accountHashOld.out;
-    for (var i = 0; i < accountLevels; i++) {
-        accountTreeOld.path_index[i] <== account_path_index[i];
-        accountTreeOld.path_elements[i][0] <== account_path_elements[i][0];
-    }
-
-    component checkOld = ForceEqualIfEnabled();
-    checkOld.enabled <== enabled;
-    checkOld.in[0] <== accountTreeOld.root;
-    checkOld.in[1] <== oldAccountRoot;
-
-    
+    <%- codegen.generateBalanceCheckCircom({ctx: 'Old', vars: { balance: '0', accountRoot: 'oldAccountRoot', sign: '0', ay: '0', 'ethAddr': '0'}}) %>
 
 
-    
-    component balanceTreeNew = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeNew.leaf <== amount;
-    for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeNew.path_index[i] <== balance_path_index[i];
-        balanceTreeNew.path_elements[i][0] <== balance_path_elements[i][0];
-    }
-    
-    // account state hash
-    component accountHashNew = HashAccount();
-    accountHashNew.nonce <== nonce;
-    accountHashNew.sign <== sign;
-    accountHashNew.balanceRoot <== balanceTreeNew.root;
-    accountHashNew.ay <== ay;
-    accountHashNew.ethAddr <== ethAddr;
-    accountHashNew.orderRoot <== orderRoot;
-    // check account tree
-    component accountTreeNew = CalculateRootFromMerklePath(accountLevels);
-    accountTreeNew.leaf <== accountHashNew.out;
-    for (var i = 0; i < accountLevels; i++) {
-        accountTreeNew.path_index[i] <== account_path_index[i];
-        accountTreeNew.path_elements[i][0] <== account_path_elements[i][0];
-    }
-
-    component checkNew = ForceEqualIfEnabled();
-    checkNew.enabled <== enabled;
-    checkNew.in[0] <== accountTreeNew.root;
-    checkNew.in[1] <== newAccountRoot;
-
-    
+    <%- codegen.generateBalanceCheckCircom({ctx: 'New', vars: { balance: 'amount', accountRoot: 'newAccountRoot'}}) %>
 
 }
