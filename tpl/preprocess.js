@@ -22,6 +22,8 @@ const codegen = {
   renderInputEncoderJs,
   renderInputEncoderRs,
   renderInputDecoderCircom,
+  renderLoopAssign,
+  generateUniversalBalanceCheck,
   // generateXXX uses simple str.replace
   generateBalanceCheckCircom,
   generateOrderCheckCircom,
@@ -32,27 +34,34 @@ const codegen = {
 function renderInputEncoderJs(encoderName, inputSignals, config) {
   return ejs.render(circuitInputEncoderJsTpl, { encoderName, inputSignals, config });
 }
+function renderLoopAssign(assignItems, loopVar, loopCount) {
+  return ejs.render(tpls.LoopAssignTpl, { assignItems, loopVar, loopCount });
+}
 
 function renderInputEncoderRs(encoderName, inputSignals, config) {
   return ejs.render(circuitInputEncoderRsTpl, { encoderName, inputSignals, config });
 }
-function generateOrderCheckCircom({ ctx, vars }) {
-  return generateFromTpl(CheckFullOrderTreeTpl, { ctx, vars });
+function generateUniversalBalanceCheck(compName, prefix, suffix, { ctx, replacers }) {
+  const tpl = tpls.UniversalBalanceCheckTplFn(compName, prefix, suffix);
+  return generateFromTpl(tpl, { ctx, replacers });
 }
-function generateBalanceCheckCircom({ ctx, vars }) {
-  return generateFromTpl(CheckFullBalanceTreeTpl, { ctx, vars });
+function generateOrderCheckCircom({ ctx, replacers }) {
+  return generateFromTpl(CheckFullOrderTreeTpl, { ctx, replacers });
 }
-function generateSameRootCircom({ ctx, vars }) {
-  return generateFromTpl(CheckSameTreeRootTpl, { ctx, vars });
+function generateBalanceCheckCircom({ ctx, replacers }) {
+  return generateFromTpl(CheckFullBalanceTreeTpl, { ctx, replacers });
 }
-function generateFromTpl(tpl, { ctx, vars }) {
+function generateSameRootCircom({ ctx, replacers }) {
+  return generateFromTpl(CheckSameTreeRootTpl, { ctx, replacers });
+}
+function generateFromTpl(tpl, { ctx, replacers }) {
   let output = tpl.replaceAll('__', ctx);
-  for (let k of Object.keys(vars)) {
+  for (let k of Object.keys(replacers)) {
     // only replace signals
     // currently we use str.replace(' old', ' new') to avoid replace component member
     // TODO: using correct semantic/grammer analysis
     const r = ` ${k}\\b`;
-    output = output.replaceAll(new RegExp(r, 'g'), ' ' + vars[k]);
+    output = output.replaceAll(new RegExp(r, 'g'), ' ' + replacers[k]);
   }
   return output;
 }
@@ -75,13 +84,17 @@ function renderInputDecoderCircom(inputSignals, indent = 4) {
   addLine('// **************** CODEGEN END **************');
   return code;
 }
+function post_process(content) {
+  // codegen_loop
+  //function gen_loop(dst, src, loop_count, loop_var)
+}
 function main() {
   const tplFile = process.argv[2];
   const outputFile = process.argv[3];
   if (!tplFile || !outputFile) {
     throw new Error('invalid argv' + process.argv);
   }
-  console.log(`generate ${outputFile} from ${tplFile}`);
+  //console.log(`generate ${outputFile} from ${tplFile}`);
   let tpl = fs.readFileSync(tplFile, 'utf-8');
   let output = `// Generated from ${tplFile}. Don't modify this file manually\n`;
   output += ejs.render(tpl, { codegen });

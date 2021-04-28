@@ -1,4 +1,3 @@
-// Generated from tpl/ejs/./src/block.circom.ejs. Don't modify this file manually
 include "../node_modules/circomlib/circuits/compconstant.circom";
 include "./lib/hash_state.circom";
 include "./decode_tx.circom";
@@ -103,44 +102,22 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
 
         // universal check
-        balanceChecker1[i] = BalanceChecker(balanceLevels, accountLevels);
-        balanceChecker1[i].enabled <== enableDepositToOld[i].out;
-        balanceChecker1[i].accountRoot <== oldAccountRoots[i];
-        balanceChecker1[i].orderRoot <== orderRoots[i][0];
-        balanceChecker1[i].tokenID <== decodedTx[i].tokenID;
-        balanceChecker1[i].accountID <== decodedTx[i].accountID1;
-        balanceChecker1[i].ethAddr <== decodedTx[i].ethAddr1;
-        balanceChecker1[i].sign <== decodedTx[i].sign1;
-        balanceChecker1[i].ay <== decodedTx[i].ay1;
-        balanceChecker1[i].nonce <== decodedTx[i].nonce1;
-        balanceChecker1[i].balance <== decodedTx[i].balance1;
-
-        for (var j = 0; j < balanceLevels; j++) {
-            balanceChecker1[i].balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
-        }
-        for (var j = 0; j < accountLevels; j++) {
-            balanceChecker1[i].account_path_elements[j][0] <== account_path_elements[i][0][j][0];
-        }
-
-        balanceChecker2[i] = BalanceChecker(balanceLevels, accountLevels);
-        balanceChecker2[i].enabled <== enableDepositToOld[i].out;
-        balanceChecker2[i].accountRoot <== newAccountRoots[i];
-        balanceChecker2[i].orderRoot <== orderRoots[i][1];
-        balanceChecker2[i].tokenID <== decodedTx[i].tokenID2;
-        balanceChecker2[i].accountID <== decodedTx[i].accountID2;
-        balanceChecker2[i].ethAddr <== decodedTx[i].ethAddr2;
-        balanceChecker2[i].sign <== decodedTx[i].sign2;
-        balanceChecker2[i].ay <== decodedTx[i].ay2;
-        balanceChecker2[i].nonce <== decodedTx[i].nonce2;
-        balanceChecker2[i].balance <== decodedTx[i].balance2;
-
-        for (var j = 0; j < balanceLevels; j++) {
-            balanceChecker2[i].balance_path_elements[j][0] <== balance_path_elements[i][1][j][0];
-        }
-        for (var j = 0; j < accountLevels; j++) {
-            balanceChecker2[i].account_path_elements[j][0] <== account_path_elements[i][1][j][0];
-        }
-
+        <%- codegen.generateUniversalBalanceCheck('balanceChecker1[i]', 'decodedTx[i].', '1', {ctx: '1', replacers: {
+            'enabled': 'enableDepositToOld[i].out',
+            accountRoot: 'oldAccountRoots[i]',
+            tokenID: 'decodedTx[i].tokenID',
+            orderRoot: 'orderRoots[i][0]',
+            balance_path_elements: 'balance_path_elements[i][0]',
+            account_path_elements: 'account_path_elements[i][0]',
+        }}) %>
+        <%- codegen.generateUniversalBalanceCheck('balanceChecker2[i]', 'decodedTx[i].', '2', {ctx: '2', replacers: {
+            'enabled': 'enableDepositToOld[i].out',
+            accountRoot: 'newAccountRoots[i]',
+            tokenID: 'decodedTx[i].tokenID2',
+            orderRoot:  'orderRoots[i][1]',
+            balance_path_elements: 'balance_path_elements[i][1]',
+            account_path_elements: 'account_path_elements[i][1]',
+        }}) %>
 
         // try process deposit_to_new
         processDepositToNew[i] = DepositToNew(balanceLevels, accountLevels);

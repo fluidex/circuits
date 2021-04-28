@@ -84,7 +84,7 @@ template Transfer(balanceLevels, accountLevels) {
 
     ////////////////////////// Step 2: check old state: check old sender state ////////////////////////////
 
-    <%- codegen.generateBalanceCheckCircom({ctx: 'SenderOld', vars: { accountRoot: 'oldAccountRoot', balance: 'balance1',
+    <%- codegen.generateBalanceCheckCircom({ctx: 'SenderOld', replacers: { accountRoot: 'oldAccountRoot', balance: 'balance1',
         nonce: 'nonce1', sign: 'sign1', ay: 'ay1', ethAddr: 'ethAddr1', orderRoot: 'orderRoot1',
         account_path_index: 'sender_account_path_index',
         balance_path_elements: 'sender_balance_path_elements', account_path_elements: 'sender_account_path_elements'}}) %>
@@ -133,17 +133,17 @@ template Transfer(balanceLevels, accountLevels) {
     ////////////////////////// Step 4: check state: check sender and receiver state after sending but before receiving ////////////////////////////
 
 
-    <%- codegen.generateBalanceCheckCircom({ctx: 'SenderNew', vars: { accountRoot: 'midAccountRoot', balance: 'balance1 - amount',
+    <%- codegen.generateBalanceCheckCircom({ctx: 'SenderNew', replacers: { accountRoot: 'midAccountRoot', balance: 'balance1 - amount',
         nonce: 'nonce1 + 1', sign: 'sign1', ay: 'ay1', ethAddr: 'ethAddr1', orderRoot: 'orderRoot1',
         account_path_index: 'sender_account_path_index',
         balance_path_elements: 'sender_balance_path_elements', account_path_elements: 'sender_account_path_elements'}}) %>
 
-    <%- codegen.generateBalanceCheckCircom({ctx: 'ReceiverOld', vars: { accountRoot: 'midAccountRoot', balance: 'balance2',
+    <%- codegen.generateBalanceCheckCircom({ctx: 'ReceiverOld', replacers: { accountRoot: 'midAccountRoot', balance: 'balance2',
         nonce: 'nonce2', sign: 'sign2', ay: 'ay2', ethAddr: 'ethAddr2', orderRoot: 'orderRoot2',
         account_path_index: 'receiver_account_path_index',
         balance_path_elements: 'receiver_balance_path_elements', account_path_elements: 'receiver_account_path_elements'}}) %>
 
-    <%- codegen.generateBalanceCheckCircom({ctx: 'ReceiverNew', vars: { accountRoot: 'newAccountRoot', balance: 'balance2 + amount',
+    <%- codegen.generateBalanceCheckCircom({ctx: 'ReceiverNew', replacers: { accountRoot: 'newAccountRoot', balance: 'balance2 + amount',
         nonce: 'nonce2', sign: 'sign2', ay: 'ay2', ethAddr: 'ethAddr2', orderRoot: 'orderRoot2',
         account_path_index: 'receiver_account_path_index',
         balance_path_elements: 'receiver_balance_path_elements', account_path_elements: 'receiver_account_path_elements'}}) %>

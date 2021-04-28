@@ -73,9 +73,9 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal orderRoot <== genesisOrderRoot;
     signal nonce <== 0;
 
-    <%- codegen.generateBalanceCheckCircom({ctx: 'Old', vars: { balance: '0', accountRoot: 'oldAccountRoot', sign: '0', ay: '0', 'ethAddr': '0'}}) %>
+    <%- codegen.generateBalanceCheckCircom({ctx: 'Old', replacers: { balance: '0', accountRoot: 'oldAccountRoot', sign: '0', ay: '0', 'ethAddr': '0'}}) %>
 
 
-    <%- codegen.generateBalanceCheckCircom({ctx: 'New', vars: { balance: 'amount', accountRoot: 'newAccountRoot'}}) %>
+    <%- codegen.generateBalanceCheckCircom({ctx: 'New', replacers: { balance: 'amount', accountRoot: 'newAccountRoot'}}) %>
 
 }

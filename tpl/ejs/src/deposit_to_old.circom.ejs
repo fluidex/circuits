@@ -2,6 +2,27 @@ include "./lib/bitify.circom";
 include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
 
+
+/**
+ * Process a deposit_to_existed_account transaction
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
+ * @input amount - {Uint192} - amount to deposit from L1 to L2
+ * @input balance - {Uint192} - balance of the account leaf
+ */
+template DepositToOld(balanceLevels, accountLevels) {
+    signal input enabled;
+    // For L1 TX
+    signal input amount;
+    signal input balance;
+    signal input balance2;
+
+    component checker = ForceEqualIfEnabled();
+    checker.enabled <== enabled;
+    checker.in[0] <== balance + amount;
+    checker.in[1] <== balance2;
+}
+
 /**
  * Process a deposit_to_existed_account transaction
  * @param balanceLevels - balance tree depth
@@ -20,20 +41,22 @@ include "./lib/binary_merkle_tree.circom";
  * @input oldAccountRoot - {Field} - initial account state root
  * @input newAccountRoot - {Field} - final account state root
  */
-template DepositToOld(balanceLevels, accountLevels) {
+template DepositToOldLegacy(balanceLevels, accountLevels) {
     signal input enabled;
+    // For L1 TX
+    signal input amount;
+    signal input balance;
+    signal input balance2;
 
+    
     // Tx
     signal input accountID;
     signal input tokenID;
 
-    // For L1 TX
-    signal input amount;
 
     // State
     signal input nonce;
     signal input sign;
-    signal input balance;
     signal input ay;
     signal input ethAddr;
     signal input orderRoot;
@@ -63,7 +86,7 @@ template DepositToOld(balanceLevels, accountLevels) {
     for (var i = 0; i < accountLevels; i++) {
         account_path_index[i] <== bAccountID.out[i];
     }
-
+    
     // TODO: underflow check
 
     // TODO: overflow check
@@ -73,13 +96,19 @@ template DepositToOld(balanceLevels, accountLevels) {
     // - check balance tree update
     ////////
 
+    component checker = ForceEqualIfEnabled();
+    checker.enabled <== enabled;
+    checker.in[0] <== balance + amount;
+    checker.in[1] <== balance2;
+
+    
     /////////////////////////////// Step 1: check old state //////////////////////////////
 
-    <%- codegen.generateBalanceCheckCircom({ctx: 'Old', vars: { accountRoot: 'oldAccountRoot'}}) %>
+    <%- codegen.generateBalanceCheckCircom({ctx: 'Old', replacers: { accountRoot: 'oldAccountRoot'}}) %>
 
     /////////////////////////////// Step 2: check new state //////////////////////////////
 
-    signal newBalance <== balance + amount;
-    <%- codegen.generateBalanceCheckCircom({ctx: 'New', vars: {balance: 'newBalance', accountRoot: 'newAccountRoot'}}) %>
+    <%- codegen.generateBalanceCheckCircom({ctx: 'New', replacers: {balance: 'balance2', accountRoot: 'newAccountRoot'}}) %>
+    
 
 }

@@ -128,8 +128,9 @@ const CheckBalanceTreeTpl = `
 
 const CheckOrderTreeTpl = `
 `;
-const CalcFullTreeTpl = `
-`;
+const LoopAssignTpl = `    for (var <%= loopVar %> = 0; <%= loopVar %> < <%= loopCount %>; <%= loopVar %>++) {
+<% for (const item of assignItems) { %>        <%= item[0] %>[<%= loopVar %>] <== <%= item[1] %>[<%= loopVar %>];
+<% } %>    }`;
 const CheckFullOrderTreeTpl = `
     component orderHash__ = HashOrder();
     orderHash__.tokensell <== order_tokensell;
@@ -153,6 +154,29 @@ const CheckFullOrderTreeTpl = `
     ${CheckAccountTreeTpl.replaceAll(' orderRoot', ' orderTree__.root')}
     `;
 
+function genAssign(comp, fields, prefix, suffix, indent = ' '.repeat(8)) {
+  let output = '';
+  for (const f of fields) {
+    output += indent + `${comp}.${f} <== ${prefix}${f}${suffix};\n`;
+  }
+  return output;
+}
+
+const UniversalBalanceCheckTplFn = function (compName, prefix, suffix) {
+  return `${compName} = BalanceChecker(balanceLevels, accountLevels);
+        ${compName}.enabled <== enabled;
+        ${compName}.accountRoot <== accountRoot;
+        ${compName}.orderRoot <== orderRoot;
+        ${compName}.tokenID <== tokenID;
+${genAssign(compName, ['accountID', 'ethAddr', 'sign', 'ay', 'nonce', 'balance'], prefix, suffix)}
+        for (var j = 0; j < balanceLevels; j++) {
+            ${compName}.balance_path_elements[j][0] <== balance_path_elements[j][0];
+        }
+        for (var j = 0; j < accountLevels; j++) {
+            ${compName}.account_path_elements[j][0] <== account_path_elements[j][0];
+        }
+`;
+};
 export {
   circuitInputEncoderJsTpl,
   circuitInputEncoderRsTpl,
@@ -162,4 +186,6 @@ export {
   CheckFullOrderTreeTpl,
   CheckSameTreeRootTpl,
   CalcAccountTreeFromBalanceTpl,
+  LoopAssignTpl,
+  UniversalBalanceCheckTplFn,
 };

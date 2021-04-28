@@ -253,17 +253,29 @@ class GlobalState {
   DepositToOld(tx: DepositToOldTx) {
     //assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'DepositToOld');
     let proof = this.stateProof(tx.accountID, tx.tokenID);
+    let oldBalance = this.getTokenBalance(tx.accountID, tx.tokenID);
+    let nonce = this.accounts.get(tx.accountID).nonce;
+    let acc = this.accounts.get(tx.accountID);
+
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
-    encodedTx[TxDetailIdx.TokenID] = Scalar.e(tx.tokenID);
+
     encodedTx[TxDetailIdx.Amount] = tx.amount;
+
+    encodedTx[TxDetailIdx.TokenID] = Scalar.e(tx.tokenID);
+    encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
+    encodedTx[TxDetailIdx.Balance1] = oldBalance;
+    encodedTx[TxDetailIdx.Nonce1] = nonce;
+    encodedTx[TxDetailIdx.EthAddr1] = acc.ethAddr;
+    encodedTx[TxDetailIdx.Sign1] = acc.sign;
+    encodedTx[TxDetailIdx.Ay1] = acc.ay;
+
+    // TODO: we may disable 'balanceChecker2'?
+    encodedTx[TxDetailIdx.TokenID2] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID2] = Scalar.e(tx.accountID);
-    let oldBalance = this.getTokenBalance(tx.accountID, tx.tokenID);
-    //console.log('getTokenBalance', tx.accountID, tx.tokenID, oldBalance);
-    encodedTx[TxDetailIdx.Balance2] = oldBalance;
-    encodedTx[TxDetailIdx.Nonce2] = this.accounts.get(tx.accountID).nonce;
-    let acc = this.accounts.get(tx.accountID);
+    encodedTx[TxDetailIdx.Balance2] = oldBalance + tx.amount;
+    encodedTx[TxDetailIdx.Nonce2] = nonce;
     encodedTx[TxDetailIdx.EthAddr2] = acc.ethAddr;
     encodedTx[TxDetailIdx.Sign2] = acc.sign;
     encodedTx[TxDetailIdx.Ay2] = acc.ay;

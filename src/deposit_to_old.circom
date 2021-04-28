@@ -3,6 +3,27 @@ include "./lib/bitify.circom";
 include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
 
+
+/**
+ * Process a deposit_to_existed_account transaction
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
+ * @input amount - {Uint192} - amount to deposit from L1 to L2
+ * @input balance - {Uint192} - balance of the account leaf
+ */
+template DepositToOld(balanceLevels, accountLevels) {
+    signal input enabled;
+    // For L1 TX
+    signal input amount;
+    signal input balance;
+    signal input balance2;
+
+    component checker = ForceEqualIfEnabled();
+    checker.enabled <== enabled;
+    checker.in[0] <== balance + amount;
+    checker.in[1] <== balance2;
+}
+
 /**
  * Process a deposit_to_existed_account transaction
  * @param balanceLevels - balance tree depth
@@ -21,20 +42,22 @@ include "./lib/binary_merkle_tree.circom";
  * @input oldAccountRoot - {Field} - initial account state root
  * @input newAccountRoot - {Field} - final account state root
  */
-template DepositToOld(balanceLevels, accountLevels) {
+template DepositToOldLegacy(balanceLevels, accountLevels) {
     signal input enabled;
+    // For L1 TX
+    signal input amount;
+    signal input balance;
+    signal input balance2;
 
+    
     // Tx
     signal input accountID;
     signal input tokenID;
 
-    // For L1 TX
-    signal input amount;
 
     // State
     signal input nonce;
     signal input sign;
-    signal input balance;
     signal input ay;
     signal input ethAddr;
     signal input orderRoot;
@@ -64,7 +87,7 @@ template DepositToOld(balanceLevels, accountLevels) {
     for (var i = 0; i < accountLevels; i++) {
         account_path_index[i] <== bAccountID.out[i];
     }
-
+    
     // TODO: underflow check
 
     // TODO: overflow check
@@ -74,6 +97,12 @@ template DepositToOld(balanceLevels, accountLevels) {
     // - check balance tree update
     ////////
 
+    component checker = ForceEqualIfEnabled();
+    checker.enabled <== enabled;
+    checker.in[0] <== balance + amount;
+    checker.in[1] <== balance2;
+
+    
     /////////////////////////////// Step 1: check old state //////////////////////////////
 
     
@@ -109,10 +138,9 @@ template DepositToOld(balanceLevels, accountLevels) {
 
     /////////////////////////////// Step 2: check new state //////////////////////////////
 
-    signal newBalance <== balance + amount;
     
     component balanceTreeNew = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeNew.leaf <== newBalance;
+    balanceTreeNew.leaf <== balance2;
     for (var i = 0; i < balanceLevels; i++) {
         balanceTreeNew.path_index[i] <== balance_path_index[i];
         balanceTreeNew.path_elements[i][0] <== balance_path_elements[i][0];
@@ -139,6 +167,7 @@ template DepositToOld(balanceLevels, accountLevels) {
     checkNew.in[0] <== accountTreeNew.root;
     checkNew.in[1] <== newAccountRoot;
 
+    
     
 
 }
