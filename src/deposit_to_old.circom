@@ -18,6 +18,12 @@ template DepositToOld(balanceLevels, accountLevels) {
     signal input balance;
     signal input balance2;
 
+    // TODO: underflow check
+
+    // TODO: overflow check
+
+    // TODO: fee
+
     component checker = ForceEqualIfEnabled();
     checker.enabled <== enabled;
     checker.in[0] <== balance + amount;

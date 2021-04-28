@@ -101,13 +101,14 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
     for (var i = 0; i < nTxs; i++) {
 
-
+        // TODO: enableDepositToNew || enableDepositToOld
         // universal check
         balanceChecker1[i] = BalanceChecker(balanceLevels, accountLevels);
-        balanceChecker1[i].enabled <== enableDepositToOld[i].out;
+        balanceChecker1[i].enabled <== enableDepositToNew[i].out;
         balanceChecker1[i].accountRoot <== oldAccountRoots[i];
         balanceChecker1[i].orderRoot <== orderRoots[i][0];
         balanceChecker1[i].tokenID <== decodedTx[i].tokenID;
+
         balanceChecker1[i].accountID <== decodedTx[i].accountID1;
         balanceChecker1[i].ethAddr <== decodedTx[i].ethAddr1;
         balanceChecker1[i].sign <== decodedTx[i].sign1;
@@ -123,10 +124,11 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         }
 
         balanceChecker2[i] = BalanceChecker(balanceLevels, accountLevels);
-        balanceChecker2[i].enabled <== enableDepositToOld[i].out;
+        balanceChecker2[i].enabled <== enableDepositToNew[i].out;
         balanceChecker2[i].accountRoot <== newAccountRoots[i];
         balanceChecker2[i].orderRoot <== orderRoots[i][1];
         balanceChecker2[i].tokenID <== decodedTx[i].tokenID2;
+
         balanceChecker2[i].accountID <== decodedTx[i].accountID2;
         balanceChecker2[i].ethAddr <== decodedTx[i].ethAddr2;
         balanceChecker2[i].sign <== decodedTx[i].sign2;
@@ -146,20 +148,18 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDepositToNew[i] = DepositToNew(balanceLevels, accountLevels);
         processDepositToNew[i].enabled <== enableDepositToNew[i].out;
         processDepositToNew[i].genesisOrderRoot <== genesisOrderRoot.root;
-        processDepositToNew[i].accountID <== decodedTx[i].accountID2;
-        processDepositToNew[i].tokenID <== decodedTx[i].tokenID;
-        processDepositToNew[i].ethAddr <== decodedTx[i].ethAddr2;
-        processDepositToNew[i].sign <== decodedTx[i].sign2;
-        processDepositToNew[i].ay <== decodedTx[i].ay2;
+        processDepositToNew[i].orderRoot1 <== orderRoots[i][0];
+
+        
         processDepositToNew[i].amount <== decodedTx[i].amount;
-        for (var j = 0; j < balanceLevels; j++) {
-            processDepositToNew[i].balance_path_elements[j][0] <== balance_path_elements[i][1][j][0];
-        }
-        for (var j = 0; j < accountLevels; j++) {
-            processDepositToNew[i].account_path_elements[j][0] <== account_path_elements[i][1][j][0];
-        }
-        processDepositToNew[i].oldAccountRoot <== oldAccountRoots[i];
-        processDepositToNew[i].newAccountRoot <== newAccountRoots[i];
+        processDepositToNew[i].ethAddr1 <== decodedTx[i].ethAddr1;
+        processDepositToNew[i].ay1 <== decodedTx[i].ay1;
+        processDepositToNew[i].balance1 <== decodedTx[i].balance1;
+        processDepositToNew[i].sign1 <== decodedTx[i].sign1;
+        processDepositToNew[i].nonce1 <== decodedTx[i].nonce1;
+        processDepositToNew[i].balance2 <== decodedTx[i].balance2;
+
+
 
         // try process deposit_to_old
         processDepositToOld[i] = DepositToOld(balanceLevels, accountLevels);

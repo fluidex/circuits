@@ -6,6 +6,66 @@ include "./lib/binary_merkle_tree.circom";
  * Process a deposit_and_create_account transaction, also support create 0 balance account
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
+ * @input amount - {Uint192} - amount to deposit from L1 to L2
+ */
+template DepositToNew(balanceLevels, accountLevels) {
+    signal input enabled;
+
+    // should only be calculated from the main circuit itself
+    signal input genesisOrderRoot;
+
+    // check old account is empty
+    signal input orderRoot1;
+
+    signal input nonce1;
+    signal input sign1;
+    signal input ay1;
+    signal input ethAddr1;
+    signal input balance1;
+
+    signal input balance2;
+    signal input amount;
+
+    <%- codegen.generateCheckEq({ctx: 'OldOrderRoot', replacers: {
+        lhs: 'genesisOrderRoot',
+        rhs: 'orderRoot1',
+    }}) %>
+    <%- codegen.generateCheckEq({ctx: 'OldNonce', replacers: {
+        lhs: 'nonce1',
+        rhs: '0',
+    }}) %>
+    <%- codegen.generateCheckEq({ctx: 'OldAy', replacers: {
+        lhs: 'ay1',
+        rhs: '0',
+    }}) %>
+    <%- codegen.generateCheckEq({ctx: 'OldSign', replacers: {
+        lhs: 'sign1',
+        rhs: '0',
+    }}) %>
+    <%- codegen.generateCheckEq({ctx: 'OldEthAddr', replacers: {
+        lhs: 'ethAddr1',
+        rhs: '0',
+    }}) %>
+    <%- codegen.generateCheckEq({ctx: 'OldBalance', replacers: {
+        lhs: 'balance1',
+        rhs: '0',
+    }}) %>
+    <%- codegen.generateCheckEq({ctx: 'NewBalance', replacers: {
+        lhs: 'balance2',
+        rhs: 'amount',
+    }}) %>
+
+    // TODO: underflow check
+
+    // TODO: overflow check
+
+    // TODO: fee
+}
+
+/**
+ * Process a deposit_and_create_account transaction, also support create 0 balance account
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
  * @input accountID - {Uint48} - auxiliary index to create accounts
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input ethAddr - {Uint160} - L1 sender ethereum address
@@ -17,7 +77,7 @@ include "./lib/binary_merkle_tree.circom";
  * @input oldAccountRoot - {Field} - initial account state root
  * @input newAccountRoot - {Field} - final account state root
  */
-template DepositToNew(balanceLevels, accountLevels) {
+template DepositToNewLegacy(balanceLevels, accountLevels) {
     signal input enabled;
 
     // should only be calculated from the main circuit itself

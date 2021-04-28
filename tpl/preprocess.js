@@ -28,7 +28,9 @@ const codegen = {
   generateBalanceCheckCircom,
   generateOrderCheckCircom,
   generateSameRootCircom,
+  generateCheckEq,
   generateFromTpl,
+  generateMultiFieldsAssign,
 };
 
 function renderInputEncoderJs(encoderName, inputSignals, config) {
@@ -40,6 +42,9 @@ function renderLoopAssign(assignItems, loopVar, loopCount) {
 
 function renderInputEncoderRs(encoderName, inputSignals, config) {
   return ejs.render(circuitInputEncoderRsTpl, { encoderName, inputSignals, config });
+}
+function generateMultiFieldsAssign(comp, fields, prefix, suffix = '', indent = 8) {
+  return tpls.genAssign(comp, fields, prefix, suffix, indent);
 }
 function generateUniversalBalanceCheck(compName, prefix, suffix, { ctx, replacers }) {
   const tpl = tpls.UniversalBalanceCheckTplFn(compName, prefix, suffix);
@@ -53,6 +58,9 @@ function generateBalanceCheckCircom({ ctx, replacers }) {
 }
 function generateSameRootCircom({ ctx, replacers }) {
   return generateFromTpl(CheckSameTreeRootTpl, { ctx, replacers });
+}
+function generateCheckEq({ ctx, replacers }) {
+  return generateFromTpl(tpls.CheckEqTpl, { ctx, replacers });
 }
 function generateFromTpl(tpl, { ctx, replacers }) {
   let output = tpl.replaceAll('__', ctx);

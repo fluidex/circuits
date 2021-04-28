@@ -100,10 +100,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
     for (var i = 0; i < nTxs; i++) {
 
-
+        // TODO: enableDepositToNew || enableDepositToOld
         // universal check
         <%- codegen.generateUniversalBalanceCheck('balanceChecker1[i]', 'decodedTx[i].', '1', {ctx: '1', replacers: {
-            'enabled': 'enableDepositToOld[i].out',
+            'enabled': 'enableDepositToNew[i].out',
             accountRoot: 'oldAccountRoots[i]',
             tokenID: 'decodedTx[i].tokenID',
             orderRoot: 'orderRoots[i][0]',
@@ -111,7 +111,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
             account_path_elements: 'account_path_elements[i][0]',
         }}) %>
         <%- codegen.generateUniversalBalanceCheck('balanceChecker2[i]', 'decodedTx[i].', '2', {ctx: '2', replacers: {
-            'enabled': 'enableDepositToOld[i].out',
+            'enabled': 'enableDepositToNew[i].out',
             accountRoot: 'newAccountRoots[i]',
             tokenID: 'decodedTx[i].tokenID2',
             orderRoot:  'orderRoots[i][1]',
@@ -123,20 +123,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDepositToNew[i] = DepositToNew(balanceLevels, accountLevels);
         processDepositToNew[i].enabled <== enableDepositToNew[i].out;
         processDepositToNew[i].genesisOrderRoot <== genesisOrderRoot.root;
-        processDepositToNew[i].accountID <== decodedTx[i].accountID2;
-        processDepositToNew[i].tokenID <== decodedTx[i].tokenID;
-        processDepositToNew[i].ethAddr <== decodedTx[i].ethAddr2;
-        processDepositToNew[i].sign <== decodedTx[i].sign2;
-        processDepositToNew[i].ay <== decodedTx[i].ay2;
-        processDepositToNew[i].amount <== decodedTx[i].amount;
-        for (var j = 0; j < balanceLevels; j++) {
-            processDepositToNew[i].balance_path_elements[j][0] <== balance_path_elements[i][1][j][0];
-        }
-        for (var j = 0; j < accountLevels; j++) {
-            processDepositToNew[i].account_path_elements[j][0] <== account_path_elements[i][1][j][0];
-        }
-        processDepositToNew[i].oldAccountRoot <== oldAccountRoots[i];
-        processDepositToNew[i].newAccountRoot <== newAccountRoots[i];
+        processDepositToNew[i].orderRoot1 <== orderRoots[i][0];
+
+        <%- codegen.generateMultiFieldsAssign('processDepositToNew[i]', ['amount', 'ethAddr1', 'ay1', 'balance1', 'sign1', 'nonce1', 'balance2'], 'decodedTx[i].') %>
+
 
         // try process deposit_to_old
         processDepositToOld[i] = DepositToOld(balanceLevels, accountLevels);

@@ -221,12 +221,24 @@ class GlobalState {
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
-    encodedTx[TxDetailIdx.TokenID] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.Amount] = tx.amount;
+
+    encodedTx[TxDetailIdx.TokenID] = Scalar.e(tx.tokenID);
+    encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
+    encodedTx[TxDetailIdx.Balance1] = 0n;
+    encodedTx[TxDetailIdx.Nonce1] = 0n;
+    encodedTx[TxDetailIdx.EthAddr1] = 0n;
+    encodedTx[TxDetailIdx.Sign1] = 0n;
+    encodedTx[TxDetailIdx.Ay1] = 0n;
+
+    encodedTx[TxDetailIdx.TokenID2] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID2] = Scalar.e(tx.accountID);
+    encodedTx[TxDetailIdx.Balance2] = tx.amount;
+    encodedTx[TxDetailIdx.Nonce2] = 0n;
     encodedTx[TxDetailIdx.EthAddr2] = tx.ethAddr;
     encodedTx[TxDetailIdx.Sign2] = Scalar.e(tx.sign);
     encodedTx[TxDetailIdx.Ay2] = tx.ay;
+
     let rawTx: RawTx = {
       txType: TxType.DepositToNew,
       payload: encodedTx,

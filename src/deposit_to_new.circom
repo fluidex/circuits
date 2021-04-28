@@ -7,6 +7,73 @@ include "./lib/binary_merkle_tree.circom";
  * Process a deposit_and_create_account transaction, also support create 0 balance account
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
+ * @input amount - {Uint192} - amount to deposit from L1 to L2
+ */
+template DepositToNew(balanceLevels, accountLevels) {
+    signal input enabled;
+
+    // should only be calculated from the main circuit itself
+    signal input genesisOrderRoot;
+
+    // check old account is empty
+    signal input orderRoot1;
+
+    signal input nonce1;
+    signal input sign1;
+    signal input ay1;
+    signal input ethAddr1;
+    signal input balance1;
+
+    signal input balance2;
+    signal input amount;
+
+    component checkEqOldOrderRoot = ForceEqualIfEnabled();
+    checkEqOldOrderRoot.enabled <== enabled;
+    checkEqOldOrderRoot.in[0] <== genesisOrderRoot;
+    checkEqOldOrderRoot.in[1] <== orderRoot1;
+
+    component checkEqOldNonce = ForceEqualIfEnabled();
+    checkEqOldNonce.enabled <== enabled;
+    checkEqOldNonce.in[0] <== nonce1;
+    checkEqOldNonce.in[1] <== 0;
+
+    component checkEqOldAy = ForceEqualIfEnabled();
+    checkEqOldAy.enabled <== enabled;
+    checkEqOldAy.in[0] <== ay1;
+    checkEqOldAy.in[1] <== 0;
+
+    component checkEqOldSign = ForceEqualIfEnabled();
+    checkEqOldSign.enabled <== enabled;
+    checkEqOldSign.in[0] <== sign1;
+    checkEqOldSign.in[1] <== 0;
+
+    component checkEqOldEthAddr = ForceEqualIfEnabled();
+    checkEqOldEthAddr.enabled <== enabled;
+    checkEqOldEthAddr.in[0] <== ethAddr1;
+    checkEqOldEthAddr.in[1] <== 0;
+
+    component checkEqOldBalance = ForceEqualIfEnabled();
+    checkEqOldBalance.enabled <== enabled;
+    checkEqOldBalance.in[0] <== balance1;
+    checkEqOldBalance.in[1] <== 0;
+
+    component checkEqNewBalance = ForceEqualIfEnabled();
+    checkEqNewBalance.enabled <== enabled;
+    checkEqNewBalance.in[0] <== balance2;
+    checkEqNewBalance.in[1] <== amount;
+
+
+    // TODO: underflow check
+
+    // TODO: overflow check
+
+    // TODO: fee
+}
+
+/**
+ * Process a deposit_and_create_account transaction, also support create 0 balance account
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
  * @input accountID - {Uint48} - auxiliary index to create accounts
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input ethAddr - {Uint160} - L1 sender ethereum address
@@ -18,7 +85,7 @@ include "./lib/binary_merkle_tree.circom";
  * @input oldAccountRoot - {Field} - initial account state root
  * @input newAccountRoot - {Field} - final account state root
  */
-template DepositToNew(balanceLevels, accountLevels) {
+template DepositToNewLegacy(balanceLevels, accountLevels) {
     signal input enabled;
 
     // should only be calculated from the main circuit itself

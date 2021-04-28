@@ -9,7 +9,6 @@ template BalanceChecker(balanceLevels, accountLevels) {
     signal input ay;
     signal input nonce;
     signal input balance;
-    
     signal input orderRoot;
     signal input accountRoot;
 
