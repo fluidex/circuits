@@ -5,7 +5,7 @@ include "./deposit_to_new.circom";
 include "./deposit_to_old.circom";
 include "./transfer.circom";
 include "./withdraw.circom";
-include "./place_order.circom";
+//include "./place_order.circom";
 include "./spot_trade.circom";
 include "./base_tx.circom";
 
@@ -95,7 +95,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     component processDepositToOld[nTxs];
     component processTransfer[nTxs];
     component processWithdraw[nTxs];
-    component processPlaceOrder[nTxs];
+    //component processPlaceOrder[nTxs];
     component processSpotTrade[nTxs];
 
     for (var i = 0; i < nTxs; i++) {
@@ -185,7 +185,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processWithdraw[i].newAccountRoot <== newAccountRoots[i];
 
         // try place_order
-        
+        /*
         processPlaceOrder[i] = PlaceOrder(balanceLevels, orderLevels, accountLevels);
         processPlaceOrder[i].enabled <== enablePlaceOrder[i].out;
         for (var j = 0; j < TxLength(); j++) {
@@ -205,42 +205,36 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processPlaceOrder[i].newOrderRoot <== orderRoots[i][1];
         processPlaceOrder[i].oldAccountRoot <== oldAccountRoots[i];
         processPlaceOrder[i].newAccountRoot <== newAccountRoots[i];
-
+*/
         // try spot_trade
         processSpotTrade[i] = SpotTrade(balanceLevels, orderLevels, accountLevels);
         processSpotTrade[i].enabled <== enableSpotTrade[i].out;
-        processSpotTrade[i].order1_pos <== decodedTx[i].tokenID3;
-        processSpotTrade[i].order1_id <== decodedTx[i].order1_id;
-        processSpotTrade[i].order1_tokensell <== decodedTx[i].tokenID1;
-        processSpotTrade[i].order1_amountsell <== decodedTx[i].order1_amountsell;
-        processSpotTrade[i].order1_tokenbuy <== decodedTx[i].tokenID2;
-        processSpotTrade[i].order1_amountbuy <== decodedTx[i].order1_amountbuy;
-        processSpotTrade[i].order2_pos <== decodedTx[i].tokenID4;
-        processSpotTrade[i].order2_id <== decodedTx[i].order2_id;
-        processSpotTrade[i].order2_tokensell <== decodedTx[i].tokenID2;
-        processSpotTrade[i].order2_amountsell <== decodedTx[i].order2_amountsell;
-        processSpotTrade[i].order2_tokenbuy <== decodedTx[i].tokenID1;
-        processSpotTrade[i].order2_amountbuy <== decodedTx[i].order2_amountbuy;
-        processSpotTrade[i].amount_2to1 <== decodedTx[i].amount2;
+
+        <%- codegen.generateMultiFieldsAssign('processSpotTrade[i]', 
+            codegen.config.orderLeafs, 'decodedTx[i].') %>   
+
+        processSpotTrade[i].order1Pos <== decodedTx[i].order1Pos;
+        processSpotTrade[i].order1AccountID <== decodedTx[i].accountID1;
+        processSpotTrade[i].order1AccountNonce <== decodedTx[i].nonce1;
+        processSpotTrade[i].order1AccountSign <== decodedTx[i].sign1;
+        processSpotTrade[i].order1AccountAy <== decodedTx[i].ay1;
+        processSpotTrade[i].order1AccountEthAddr <== decodedTx[i].ethAddr1;
+
+        processSpotTrade[i].order2Pos <== decodedTx[i].order2Pos;
+        processSpotTrade[i].order2AccountID <== decodedTx[i].accountID2;
+        processSpotTrade[i].order2AccountNonce <== decodedTx[i].nonce2;
+        processSpotTrade[i].order2AccountSign <== decodedTx[i].sign2;
+        processSpotTrade[i].order2AccountAy <== decodedTx[i].ay2;
+        processSpotTrade[i].order2AccountEthAddr <== decodedTx[i].ethAddr2;
+
         processSpotTrade[i].amount_1to2 <== decodedTx[i].amount;
-        processSpotTrade[i].order1_filledsell <== decodedTx[i].order1_filledsell;
-        processSpotTrade[i].order1_filledbuy <== decodedTx[i].order1_filledbuy;
-        processSpotTrade[i].order2_filledsell <== decodedTx[i].order2_filledsell;
-        processSpotTrade[i].order2_filledbuy <== decodedTx[i].order2_filledbuy;
-        processSpotTrade[i].order1_accountID <== decodedTx[i].accountID1;
-        processSpotTrade[i].order2_accountID <== decodedTx[i].accountID2;
-        processSpotTrade[i].order1_account_nonce <== decodedTx[i].nonce1;
-        processSpotTrade[i].order2_account_nonce <== decodedTx[i].nonce2;
-        processSpotTrade[i].order1_account_sign <== decodedTx[i].sign1;
-        processSpotTrade[i].order2_account_sign <== decodedTx[i].sign2;
-        processSpotTrade[i].order1_account_ay <== decodedTx[i].ay1;
-        processSpotTrade[i].order2_account_ay <== decodedTx[i].ay2;
-        processSpotTrade[i].order1_account_ethAddr <== decodedTx[i].ethAddr1;
-        processSpotTrade[i].order2_account_ethAddr <== decodedTx[i].ethAddr2;
-        processSpotTrade[i].order1_token_sell_balance <== decodedTx[i].balance1;
-        processSpotTrade[i].order1_token_buy_balance <== decodedTx[i].balance4;
-        processSpotTrade[i].order2_token_sell_balance <== decodedTx[i].balance3;
-        processSpotTrade[i].order2_token_buy_balance <== decodedTx[i].balance2;
+        processSpotTrade[i].amount_2to1 <== decodedTx[i].amount2;
+
+        processSpotTrade[i].order1TokenSellBalance <== decodedTx[i].balance1;
+        processSpotTrade[i].order2TokenBuyBalance <== decodedTx[i].balance2;
+        processSpotTrade[i].order2TokenSellBalance <== decodedTx[i].balance3;
+        processSpotTrade[i].order1TokenBuyBalance <== decodedTx[i].balance4;
+
         for (var j = 0; j < orderLevels; j++) {
             processSpotTrade[i].order_path_elements[0][j][0] <== order_path_elements[i][0][j][0];
             processSpotTrade[i].order_path_elements[1][j][0] <== order_path_elements[i][1][j][0];

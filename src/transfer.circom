@@ -41,7 +41,7 @@ template Transfer(balanceLevels, accountLevels) {
 
     // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
 
-        signal input in[36];
+        signal input in[TxLength()];
     signal fromAccountID;
     signal toAccountID;
     signal amount;

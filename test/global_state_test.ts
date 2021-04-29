@@ -139,7 +139,9 @@ function handleTrade(state, trade, placedOrder) {
   ]);
 
   // first, we check the related two orders are already known to 'GlobalState'
+  
   for (const orderId of [...orderStateBefore.keys()].sort()) {
+    
     if (!placedOrder.has(orderId)) {
       const order = orderStateBefore.get(orderId);
       // check this is a new order
@@ -147,18 +149,20 @@ function handleTrade(state, trade, placedOrder) {
       let orderToPut = {
         orderID: orderId,
         accountID: order.accountID,
+        /*
         previous_tokenID_sell: 0n,
         previous_tokenID_buy: 0n,
         previous_amount_sell: 0n,
         previous_amount_buy: 0n,
         previous_filled_sell: 0n,
         previous_filled_buy: 0n,
+        */
         tokenID_sell: order.tokensell,
         tokenID_buy: order.tokenbuy,
         amount_sell: order.total_sell,
         amount_buy: order.total_buy,
       };
-      let newOrderID = state.PlaceOrder(orderToPut);
+      let newOrderID = state.createNewOrder(orderToPut);
       placedOrder.set(orderId, [orderToPut.accountID, newOrderID]);
       if (verbose) {
         console.log('global order id to user order id', orderId, orderToPut.accountID, newOrderID);
@@ -169,6 +173,8 @@ function handleTrade(state, trade, placedOrder) {
       }
     }
   }
+  
+  
 
   // second check order states are same as 'GlobalState'
   function checkState(balanceState, askOrder, bidOrder) {

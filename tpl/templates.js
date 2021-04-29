@@ -53,10 +53,10 @@ const CheckEqTpl = `component checkEq__ = ForceEqualIfEnabled();
 
 const MultiCheckEqTpl = `
 <% for (let i in items) { %>
-    component checkEq<%= i %> = ForceEqualIfEnabled();
-    checkEq<%= i %>.enabled <== enabled;
-    checkEq<%= i %>.in[0] <== <%= items[i][0] %>;
-    checkEq<%= i %>.in[1] <== <%= items[i][1] %>;
+    component checkEq__<%= i %> = ForceEqualIfEnabled();
+    checkEq__<%= i %>.enabled <== enabled;
+    checkEq__<%= i %>.in[0] <== <%= items[i][0] %>;
+    checkEq__<%= i %>.in[1] <== <%= items[i][1] %>;
 <% } %>
 `;
 
@@ -86,13 +86,13 @@ const CheckBalanceTreeTpl = `
 
 const CalcOrderTreeTpl = `
     component orderHash__ = HashOrder();
-    orderHash__.tokensell <== order_tokensell;
-    orderHash__.tokenbuy <== order_tokenbuy;
-    orderHash__.filled_sell <== order_filledsell;
-    orderHash__.filled_buy <== order_filledbuy;
-    orderHash__.total_sell <== order_amountsell;
-    orderHash__.total_buy <== order_amountbuy;
-    orderHash__.order_id <== order_id;
+    orderHash__.tokensell <== orderTokenSell;
+    orderHash__.tokenbuy <== orderTokenBuy;
+    orderHash__.filled_sell <== orderFilledSell;
+    orderHash__.filled_buy <== orderFilledBuy;
+    orderHash__.total_sell <== orderAmountSell;
+    orderHash__.total_buy <== orderAmountBuy;
+    orderHash__.order_id <== orderID;
 
     // - check order tree update
     component orderTree__ = CalculateRootFromMerklePath(orderLevels);
@@ -193,10 +193,11 @@ export {
   RsInputEncoderTpl,
   CheckBalanceTreeTpl,
   CheckOrderTreeTpl,
+  CalcOrderTreeTpl,
+  CalcAccountTreeFromBalanceTpl,
   CheckAccountTreeFromBalanceTpl,
   CheckAccountTreeFromOrderTpl,
   CheckSameTreeRootTpl,
-  CalcAccountTreeFromBalanceTpl,
   LoopAssignTpl,
   CheckEqTpl,
   MultiCheckEqTpl,

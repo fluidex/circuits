@@ -23,7 +23,7 @@ class TransferTxData {
   midAccountRoot: bigint;
   encode(): Array<bigint> {
     // double check template config is consistent
-    assert(TxLength == 36, 'invalid length, check your template config');
+    assert(TxLength == 54, 'invalid length, check your template config');
     let results = [];
     results.push(this.fromAccountID);
     results.push(this.toAccountID);

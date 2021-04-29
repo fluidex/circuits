@@ -43,7 +43,7 @@ function generateUniversalBalanceCheck(compName, prefix, suffix, { ctx, replacer
   return generateFromTpl(tpl, { ctx, replacers });
 }
 function generateOrderCheckCircom({ ctx, replacers }) {
-  return generateFromTpl(tpls.CheckFullOrderTreeTpl, { ctx, replacers });
+  return generateFromTpl(tpls.CheckAccountTreeFromOrderTpl, { ctx, replacers });
 }
 function generateBalanceCheckCircom({ ctx, replacers }) {
   return generateFromTpl(tpls.CheckAccountTreeFromBalanceTpl, { ctx, replacers });
@@ -61,6 +61,9 @@ function generateMultiCheckEq(items, { ctx, replacers }) {
 
 // replace '__' with ctx, for all {k:v} in replacers, replace ` ${k}` with ` ${v}`
 function generateFromTpl(tpl, { ctx, replacers }) {
+  if (!tpl) {
+    //throw new Error('valid tpl ' + ctx.toString() + ' ' + replacers.toString())
+  }
   let output = tpl.replaceAll('__', ctx);
   for (let k of Object.keys(replacers)) {
     // only replace signals
@@ -79,7 +82,7 @@ function renderInputDecoderCircom(inputSignals, indent = 4) {
   function addLine(text) {
     code += ' '.repeat(indent) + text + '\n';
   }
-  addLine(`signal input ${encodedSignalsName}[${config.txLength}];`);
+  addLine(`signal input ${encodedSignalsName}[TxLength()];`);
   for (let i = 0; i < inputSignals.length; i++) {
     addLine(`signal ${inputSignals[i]};`);
   }

@@ -19,20 +19,20 @@ template amountCheck() {
     check.in[1] <== 1;
 }
 
-// (this_sell/this_buy) * 1000 <= (total_sell/total_buy) * 1001
-// (this_sell * total_buy * 1000) <= (this_buy * total_sell * 1001)
+// (thisSell/thisBuy) * 1000 <= (totalSell/totalBuy) * 1001
+// (thisSell * totalBuy * 1000) <= (thisBuy * totalSell * 1001)
 template priceCheck() {
     signal input enabled;
 
-    signal input this_sell;
-    signal input this_buy;
-    signal input total_sell;
-    signal input total_buy;
+    signal input thisSell;
+    signal input thisBuy;
+    signal input totalSell;
+    signal input totalBuy;
 
     // TODO: overflow check
     component valid = LessEqThan(252);
-    valid.in[0] <== this_sell * total_buy * 1000;
-    valid.in[1] <== this_buy * total_sell * 1001;
+    valid.in[0] <== thisSell * totalBuy * 1000;
+    valid.in[1] <== thisBuy * totalSell * 1001;
 
     component check = ForceEqualIfEnabled();
     check.enabled <== enabled;
@@ -42,23 +42,23 @@ template priceCheck() {
 
 // TODO: use sell for filled or use buy for filled?
 // for now we have both. but usually for bz we only have one filled, according to types. 
-// (filled_sell + this_sell <= total_sell) || (filled_buy + this_buy <= total_buy)
+// (FilledSell + thisSell <= totalSell) || (FilledBuy + thisBuy <= totalBuy)
 template fillLimitCheck() {
     signal input enabled;
 
-    signal input filled_sell;
-    signal input this_sell;
-    signal input total_sell;
-    signal input filled_buy;
-    signal input this_buy;
-    signal input total_buy;
+    signal input FilledSell;
+    signal input thisSell;
+    signal input totalSell;
+    signal input FilledBuy;
+    signal input thisBuy;
+    signal input totalBuy;
 
     component sellLimit = LessEqThan(192);
-    sellLimit.in[0] <== filled_sell + this_sell;
-    sellLimit.in[1] <== total_sell;
+    sellLimit.in[0] <== FilledSell + thisSell;
+    sellLimit.in[1] <== totalSell;
     component buyLimit = LessEqThan(192);
-    buyLimit.in[0] <== filled_buy + this_buy;
-    buyLimit.in[1] <== total_buy;
+    buyLimit.in[0] <== FilledBuy + thisBuy;
+    buyLimit.in[1] <== totalBuy;
 
     component limitCheck = OR();
     limitCheck.a <== sellLimit.out;
@@ -70,79 +70,167 @@ template fillLimitCheck() {
     check.in[1] <== 1;
 }
 
-// TODO: delete order if fullfilled
+// orderUpdater:
+// (1) checks old order state
+// (2) check new order state
+// (3) check order detail:
+//  (a) oldOrderID: m, newOrderID: n, m < n, replace old order, check new_filled_amount === this_amount
+//  (b) oldOrderID: n, newOrderID: n, same order, check new_filled_amount === old_filled_amount + this_mount
+//  (c) oldOrderID: 0, newOrderID: n, new order, checking either constraint works, since them are same actually
+//     (a) and (c) can be checked similarly
 template orderUpdater(orderLevels) {
     // order pos is the order location/index inside the tree, less than 2**n
     // order id is the incremental order id, like a nouce.
+
     signal input enabled;
-    signal input order_pos;
-    signal input order_id;
-    signal input tokensell;
-    signal input tokenbuy;
-    signal input filled_sell;
-    signal input this_sell;
-    signal input total_sell;
-    signal input filled_buy;
-    signal input this_buy;
-    signal input total_buy;
+    signal input orderPos;
+    signal input thisSell;
+    signal input thisBuy;
+
+
+    signal input oldOrderID;
+    signal input oldOrderTokenSell;
+    signal input oldOrderFilledSell;
+    signal input oldOrderAmountSell;
+    signal input oldOrderTokenBuy;
+    signal input oldOrderFilledBuy;
+    signal input oldOrderAmountBuy;
+
+    signal input newOrderID;
+    signal input newOrderTokenSell;
+    signal input newOrderFilledSell;
+    signal input newOrderAmountSell;
+    signal input newOrderTokenBuy;
+    signal input newOrderFilledBuy;
+    signal input newOrderAmountBuy;
 
     signal input order_path_elements[orderLevels][1];
+    signal order_path_index[orderLevels];
 
     signal output oldOrderRoot;
     signal output newOrderRoot;
 
-    signal order_path_index[orderLevels];
-
-   // decode order_path_index
-    component border_pos = Num2BitsIfEnabled(orderLevels);
-    border_pos.enabled <== enabled;
-    border_pos.in <== order_pos;
+    // decode order_path_index
+    component borderPos = Num2BitsIfEnabled(orderLevels);
+    borderPos.enabled <== enabled;
+    borderPos.in <== orderPos;
     for (var i = 0; i < orderLevels; i++) {
-        order_path_index[i] <== border_pos.out[i];
+        order_path_index[i] <== borderPos.out[i];
     }
 
-    // TODO: we can just update old order with new order like PlaceOrder here
-    // so we can use less txs to finish a SpotTrade
-    component oldOrderHash = HashOrder();
-    oldOrderHash.tokensell <== tokensell;
-    oldOrderHash.tokenbuy <== tokenbuy;
-    oldOrderHash.filled_sell <== filled_sell;
-    oldOrderHash.filled_buy <== filled_buy;
-    oldOrderHash.total_sell <== total_sell;
-    oldOrderHash.total_buy <== total_buy;
-    oldOrderHash.order_id <== order_id;
 
     // TODO: underflow check
 
     // TODO: overflow check
 
-    component newOrderHash = HashOrder();
-    newOrderHash.tokensell <== tokensell;
-    newOrderHash.tokenbuy <== tokenbuy;
-    newOrderHash.filled_sell <== filled_sell + this_sell;
-    newOrderHash.filled_buy <== filled_buy + this_buy;
-    newOrderHash.total_sell <== total_sell;
-    newOrderHash.total_buy <== total_buy;
-    newOrderHash.order_id <== order_id;
+    
+    component orderHashOld = HashOrder();
+    orderHashOld.tokensell <== oldOrderTokenSell;
+    orderHashOld.tokenbuy <== oldOrderTokenBuy;
+    orderHashOld.filled_sell <== oldOrderFilledSell;
+    orderHashOld.filled_buy <== oldOrderFilledBuy;
+    orderHashOld.total_sell <== oldOrderAmountSell;
+    orderHashOld.total_buy <== oldOrderAmountBuy;
+    orderHashOld.order_id <== oldOrderID;
 
-    // - order tree
-    ////////
-    component old_order_tree = CalculateRootFromMerklePath(orderLevels);
-    component new_order_tree = CalculateRootFromMerklePath(orderLevels);
-    old_order_tree.leaf <== oldOrderHash.out;
-    new_order_tree.leaf <== newOrderHash.out;
-    
+    // - check order tree update
+    component orderTreeOld = CalculateRootFromMerklePath(orderLevels);
+    orderTreeOld.leaf <== orderHashOld.out;
     for (var i = 0; i < orderLevels; i++) {
-        old_order_tree.path_index[i] <== order_path_index[i];
-        new_order_tree.path_index[i] <== order_path_index[i];
+        orderTreeOld.path_index[i] <== order_path_index[i];
+        orderTreeOld.path_elements[i][0] <== order_path_elements[i][0];
     }
-    for (var i = 0; i < orderLevels; i++) {
-        old_order_tree.path_elements[i][0] <== order_path_elements[i][0];
-        new_order_tree.path_elements[i][0] <== order_path_elements[i][0];
-    }
+    oldOrderRoot <== orderTreeOld.root;
+
     
-    old_order_tree.root ==> oldOrderRoot;
-    new_order_tree.root ==> newOrderRoot;
+    component orderHashNew = HashOrder();
+    orderHashNew.tokensell <== newOrderTokenSell;
+    orderHashNew.tokenbuy <== newOrderTokenBuy;
+    orderHashNew.filled_sell <== newOrderFilledSell;
+    orderHashNew.filled_buy <== newOrderFilledBuy;
+    orderHashNew.total_sell <== newOrderAmountSell;
+    orderHashNew.total_buy <== newOrderAmountBuy;
+    orderHashNew.order_id <== newOrderID;
+
+    // - check order tree update
+    component orderTreeNew = CalculateRootFromMerklePath(orderLevels);
+    orderTreeNew.leaf <== orderHashNew.out;
+    for (var i = 0; i < orderLevels; i++) {
+        orderTreeNew.path_index[i] <== order_path_index[i];
+        orderTreeNew.path_elements[i][0] <== order_path_elements[i][0];
+    }
+    newOrderRoot <== orderTreeNew.root;
+
+
+    // for the below two checks, we'd better let isnewOrder = isnewOrder || enabled,
+    // and isSameOrder = isSameOrder || enabled
+    // For now, we set all inputs as 0s, so when enabled is false, the two checks can pass even without 'or'
+
+    component isnewOrder = LessThan(192);
+    isnewOrder.in[0] <== oldOrderID;
+    isnewOrder.in[1] <== newOrderID;
+
+    
+
+    component checkEqWhennewOrder0 = ForceEqualIfEnabled();
+    checkEqWhennewOrder0.enabled <== isnewOrder.out;
+    checkEqWhennewOrder0.in[0] <== newOrderFilledSell;
+    checkEqWhennewOrder0.in[1] <== thisSell;
+
+    component checkEqWhennewOrder1 = ForceEqualIfEnabled();
+    checkEqWhennewOrder1.enabled <== isnewOrder.out;
+    checkEqWhennewOrder1.in[0] <== newOrderFilledBuy;
+    checkEqWhennewOrder1.in[1] <== thisBuy;
+
+
+
+
+    component isSameOrder = IsEqual();
+    isSameOrder.in[0] <== oldOrderID;
+    isSameOrder.in[1] <== newOrderID;
+    
+
+    component checkEqWhenSameOrder0 = ForceEqualIfEnabled();
+    checkEqWhenSameOrder0.enabled <== isSameOrder.out;
+    checkEqWhenSameOrder0.in[0] <== newOrderFilledSell;
+    checkEqWhenSameOrder0.in[1] <== oldOrderFilledSell + thisSell;
+
+    component checkEqWhenSameOrder1 = ForceEqualIfEnabled();
+    checkEqWhenSameOrder1.enabled <== isSameOrder.out;
+    checkEqWhenSameOrder1.in[0] <== newOrderFilledBuy;
+    checkEqWhenSameOrder1.in[1] <== oldOrderFilledBuy + thisBuy;
+
+    component checkEqWhenSameOrder2 = ForceEqualIfEnabled();
+    checkEqWhenSameOrder2.enabled <== isSameOrder.out;
+    checkEqWhenSameOrder2.in[0] <== newOrderAmountSell;
+    checkEqWhenSameOrder2.in[1] <== oldOrderAmountSell;
+
+    component checkEqWhenSameOrder3 = ForceEqualIfEnabled();
+    checkEqWhenSameOrder3.enabled <== isSameOrder.out;
+    checkEqWhenSameOrder3.in[0] <== newOrderAmountBuy;
+    checkEqWhenSameOrder3.in[1] <== oldOrderAmountBuy;
+
+    component checkEqWhenSameOrder4 = ForceEqualIfEnabled();
+    checkEqWhenSameOrder4.enabled <== isSameOrder.out;
+    checkEqWhenSameOrder4.in[0] <== newOrderTokenSell;
+    checkEqWhenSameOrder4.in[1] <== oldOrderTokenSell;
+
+    component checkEqWhenSameOrder5 = ForceEqualIfEnabled();
+    checkEqWhenSameOrder5.enabled <== isSameOrder.out;
+    checkEqWhenSameOrder5.in[0] <== newOrderTokenBuy;
+    checkEqWhenSameOrder5.in[1] <== oldOrderTokenBuy;
+
+
+
+
+    // check oldOrderID <= newOrderID
+    component isValid = OR();
+    isValid.a <== isnewOrder.out;
+    isValid.b <== isSameOrder.out;  
+    component checkValid = ForceEqualIfEnabled();
+    checkValid.enabled <== enabled;
+    checkValid.in[0] <== isValid.out;
+    checkValid.in[1] <== 1;  
 }
 
 // TODO: maker taker (related to fee), according to timestamp: order1 maker, order2 taker
@@ -150,77 +238,97 @@ template orderUpdater(orderLevels) {
 template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
 
-    signal input order1_pos;
-    signal input order1_id;
-    signal input order1_tokensell;
-    signal input order1_amountsell;
-    signal input order1_tokenbuy;
-    signal input order1_amountbuy;
-    signal input order2_pos;
-    signal input order2_id;
-    signal input order2_tokensell;
-    signal input order2_amountsell;
-    signal input order2_tokenbuy;
-    signal input order2_amountbuy;
+    signal input order1Pos;
+    signal input order2Pos;
+
+
+    
+
+    
+    signal input oldOrder1ID;
+    signal input oldOrder1TokenSell;
+    signal input oldOrder1FilledSell;
+    signal input oldOrder1AmountSell;
+    signal input oldOrder1TokenBuy;
+    signal input oldOrder1FilledBuy;
+    signal input oldOrder1AmountBuy;
+    signal input newOrder1ID;
+    signal input newOrder1TokenSell;
+    signal input newOrder1FilledSell;
+    signal input newOrder1AmountSell;
+    signal input newOrder1TokenBuy;
+    signal input newOrder1FilledBuy;
+    signal input newOrder1AmountBuy;
+    signal input oldOrder2ID;
+    signal input oldOrder2TokenSell;
+    signal input oldOrder2FilledSell;
+    signal input oldOrder2AmountSell;
+    signal input oldOrder2TokenBuy;
+    signal input oldOrder2FilledBuy;
+    signal input oldOrder2AmountBuy;
+    signal input newOrder2ID;
+    signal input newOrder2TokenSell;
+    signal input newOrder2FilledSell;
+    signal input newOrder2AmountSell;
+    signal input newOrder2TokenBuy;
+    signal input newOrder2FilledBuy;
+    signal input newOrder2AmountBuy;
+
     component check1 = ForceEqualIfEnabled();
     check1.enabled <== enabled;
-    check1.in[0] <== order1_tokensell
-    check1.in[1] <== order2_tokenbuy;
+    check1.in[0] <== newOrder1TokenSell;
+    check1.in[1] <== newOrder2TokenBuy;
     component check2 = ForceEqualIfEnabled();
     check2.enabled <== enabled;
-    check2.in[0] <== order1_tokenbuy;
-    check2.in[1] <== order2_tokensell;
+    check2.in[0] <== newOrder1TokenBuy;
+    check2.in[1] <== newOrder2TokenSell;
 
     signal input amount_2to1;
     signal input amount_1to2;
     // amount_2to1 > 0;
-    component order1_thisget_check = amountCheck();
-    order1_thisget_check.enabled <== enabled;
-    order1_thisget_check.amount <== amount_2to1;
+    component order1Thisget_check = amountCheck();
+    order1Thisget_check.enabled <== enabled;
+    order1Thisget_check.amount <== amount_2to1;
     // amount_1to2 > 0;
-    component order2_thisget_check = amountCheck();
-    order2_thisget_check.enabled <== enabled;
-    order2_thisget_check.amount <== amount_1to2;
+    component order2Thisget_check = amountCheck();
+    order2Thisget_check.enabled <== enabled;
+    order2Thisget_check.amount <== amount_1to2;
 
     /// order1 price check
     component order1_pricecheck = priceCheck();
     order1_pricecheck.enabled <== enabled;
-    order1_pricecheck.this_sell <== amount_1to2;
-    order1_pricecheck.this_buy <== amount_2to1;
-    order1_pricecheck.total_sell <== order1_amountsell;
-    order1_pricecheck.total_buy <== order1_amountbuy;
+    order1_pricecheck.thisSell <== amount_1to2;
+    order1_pricecheck.thisBuy <== amount_2to1;
+    order1_pricecheck.totalSell <== newOrder1AmountSell;
+    order1_pricecheck.totalBuy <== newOrder1AmountBuy;
 
     /// order2 price check
     component order2_pricecheck = priceCheck();
     order2_pricecheck.enabled <== enabled;
-    order2_pricecheck.this_sell <== amount_2to1;
-    order2_pricecheck.this_buy <== amount_1to2;
-    order2_pricecheck.total_sell <== order2_amountsell;
-    order2_pricecheck.total_buy <== order2_amountbuy;
+    order2_pricecheck.thisSell <== amount_2to1;
+    order2_pricecheck.thisBuy <== amount_1to2;
+    order2_pricecheck.totalSell <== newOrder2AmountSell;
+    order2_pricecheck.totalBuy <== newOrder2AmountBuy;
 
     // /// order1 fill_limit check
-    signal input order1_filledsell;
-    signal input order1_filledbuy;
     component order1_filledcheck = fillLimitCheck();
     order1_filledcheck.enabled <== enabled;
-    order1_filledcheck.filled_sell <== order1_filledsell;
-    order1_filledcheck.this_sell <== amount_1to2;
-    order1_filledcheck.total_sell <== order1_amountsell;
-    order1_filledcheck.filled_buy <== order1_filledbuy;
-    order1_filledcheck.this_buy <== amount_2to1;
-    order1_filledcheck.total_buy <== order1_amountbuy;
+    order1_filledcheck.FilledSell <== newOrder1FilledSell;
+    order1_filledcheck.thisSell <== amount_1to2;
+    order1_filledcheck.totalSell <== newOrder1AmountSell;
+    order1_filledcheck.FilledBuy <== newOrder1FilledBuy;
+    order1_filledcheck.thisBuy <== amount_2to1;
+    order1_filledcheck.totalBuy <== newOrder1AmountBuy;
 
     // /// order2 fill_limit check
-    signal input order2_filledsell;
-    signal input order2_filledbuy;
     component order2_filledcheck = fillLimitCheck();
     order2_filledcheck.enabled <== enabled;
-    order2_filledcheck.filled_sell <== order2_filledsell;
-    order2_filledcheck.this_sell <== amount_2to1;
-    order2_filledcheck.total_sell <== order2_amountsell;
-    order2_filledcheck.filled_buy <== order2_filledbuy;
-    order2_filledcheck.this_buy <== amount_1to2;
-    order2_filledcheck.total_buy <== order2_amountbuy;
+    order2_filledcheck.FilledSell <== newOrder2FilledSell;
+    order2_filledcheck.thisSell <== amount_2to1;
+    order2_filledcheck.totalSell <== newOrder2AmountSell;
+    order2_filledcheck.FilledBuy <== newOrder2FilledBuy;
+    order2_filledcheck.thisBuy <== amount_1to2;
+    order2_filledcheck.totalBuy <== newOrder2AmountBuy;
 
 
     // TODO: check timestamp & 2 orders' validUntil
@@ -229,18 +337,28 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
 
     signal input order_path_elements[2][orderLevels][1];
     /// update order 1
+
     component order1_updater = orderUpdater(orderLevels);
     order1_updater.enabled <== enabled;
-    order1_updater.order_pos <== order1_pos;
-    order1_updater.order_id <== order1_id;
-    order1_updater.tokensell <== order1_tokensell;
-    order1_updater.tokenbuy <== order1_tokenbuy;
-    order1_updater.filled_sell <== order1_filledsell;
-    order1_updater.this_sell <== amount_1to2;
-    order1_updater.total_sell <== order1_amountsell;
-    order1_updater.filled_buy <== order1_filledbuy;
-    order1_updater.this_buy <== amount_2to1;
-    order1_updater.total_buy <== order1_amountbuy;
+    order1_updater.orderPos <== order1Pos;
+    order1_updater.thisSell <== amount_1to2;
+    order1_updater.thisBuy <== amount_2to1;
+    
+    order1_updater.oldOrderID <== oldOrder1ID;
+    order1_updater.oldOrderTokenSell <== oldOrder1TokenSell;
+    order1_updater.oldOrderFilledSell <== oldOrder1FilledSell;
+    order1_updater.oldOrderAmountSell <== oldOrder1AmountSell;
+    order1_updater.oldOrderTokenBuy <== oldOrder1TokenBuy;
+    order1_updater.oldOrderFilledBuy <== oldOrder1FilledBuy;
+    order1_updater.oldOrderAmountBuy <== oldOrder1AmountBuy;
+    order1_updater.newOrderID <== newOrder1ID;
+    order1_updater.newOrderTokenSell <== newOrder1TokenSell;
+    order1_updater.newOrderFilledSell <== newOrder1FilledSell;
+    order1_updater.newOrderAmountSell <== newOrder1AmountSell;
+    order1_updater.newOrderTokenBuy <== newOrder1TokenBuy;
+    order1_updater.newOrderFilledBuy <== newOrder1FilledBuy;
+    order1_updater.newOrderAmountBuy <== newOrder1AmountBuy;
+
     for (var i = 0; i < orderLevels; i++) {
         order1_updater.order_path_elements[i][0] <== order_path_elements[0][i][0];
     }
@@ -248,34 +366,46 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     /// update order 2
     component order2_updater = orderUpdater(orderLevels);
     order2_updater.enabled <== enabled;
-    order2_updater.order_pos <== order2_pos;
-    order2_updater.order_id <== order2_id;
-    order2_updater.tokensell <== order2_tokensell;
-    order2_updater.tokenbuy <== order2_tokenbuy;
-    order2_updater.filled_sell <== order2_filledsell;
-    order2_updater.this_sell <== amount_2to1;
-    order2_updater.total_sell <== order2_amountsell;
-    order2_updater.filled_buy <== order2_filledbuy;
-    order2_updater.this_buy <== amount_1to2;
-    order2_updater.total_buy <== order2_amountbuy;
+    order2_updater.orderPos <== order2Pos;
+    order2_updater.thisSell <== amount_2to1;
+    order2_updater.thisBuy <== amount_1to2;
+    
+    order2_updater.oldOrderID <== oldOrder2ID;
+    order2_updater.oldOrderTokenSell <== oldOrder2TokenSell;
+    order2_updater.oldOrderFilledSell <== oldOrder2FilledSell;
+    order2_updater.oldOrderAmountSell <== oldOrder2AmountSell;
+    order2_updater.oldOrderTokenBuy <== oldOrder2TokenBuy;
+    order2_updater.oldOrderFilledBuy <== oldOrder2FilledBuy;
+    order2_updater.oldOrderAmountBuy <== oldOrder2AmountBuy;
+    order2_updater.newOrderID <== newOrder2ID;
+    order2_updater.newOrderTokenSell <== newOrder2TokenSell;
+    order2_updater.newOrderFilledSell <== newOrder2FilledSell;
+    order2_updater.newOrderAmountSell <== newOrder2AmountSell;
+    order2_updater.newOrderTokenBuy <== newOrder2TokenBuy;
+    order2_updater.newOrderFilledBuy <== newOrder2FilledBuy;
+    order2_updater.newOrderAmountBuy <== newOrder2AmountBuy;
+
     for (var i = 0; i < orderLevels; i++) {
         order2_updater.order_path_elements[i][0] <== order_path_elements[1][i][0];
     }
 
-    signal input order1_accountID;
-    signal input order2_accountID;
-    signal input order1_account_nonce;
-    signal input order2_account_nonce;
-    signal input order1_account_sign;
-    signal input order2_account_sign;
-    signal input order1_account_ay;
-    signal input order2_account_ay;
-    signal input order1_account_ethAddr;
-    signal input order2_account_ethAddr;
-    signal input order1_token_sell_balance;
-    signal input order1_token_buy_balance;
-    signal input order2_token_sell_balance;
-    signal input order2_token_buy_balance;
+
+    signal input order1AccountID;
+    signal input order2AccountID;
+    signal input order1AccountNonce;
+    signal input order2AccountNonce;
+    signal input order1AccountSign;
+    signal input order2AccountSign;
+    signal input order1AccountAy;
+    signal input order2AccountAy;
+    signal input order1AccountEthAddr;
+    signal input order2AccountEthAddr;
+
+    signal input order1TokenSellBalance;
+    signal input order1TokenBuyBalance;
+    signal input order2TokenSellBalance;
+    signal input order2TokenBuyBalance;
+
     signal input old_account_root;
     signal input new_account_root;
     signal input old_account1_balance_path_elements[balanceLevels][1];
@@ -284,20 +414,21 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input old_account2_balance_path_elements[balanceLevels][1];
     signal input tmp_account2_balance_path_elements[balanceLevels][1];
     signal input tmp_account2_path_elements[accountLevels][1];
+    
     component transfer = tradeTransfer(balanceLevels, accountLevels);
     transfer.enabled <== enabled;
-    transfer.accountID1 <== order1_accountID;
-    transfer.accountID2 <== order2_accountID;
+    transfer.accountID1 <== order1AccountID;
+    transfer.accountID2 <== order2AccountID;
     transfer.amount_1to2 <== amount_1to2;
     transfer.amount_2to1 <== amount_2to1;
-    transfer.tokenID_1to2 <== order1_tokensell;
-    transfer.tokenID_2to1 <== order2_tokensell;
-    transfer.nonce1 <== order1_account_nonce;
-    transfer.sign1 <== order1_account_sign;
-    transfer.account1_balance_sell <== order1_token_sell_balance;
-    transfer.account1_balance_buy <== order1_token_buy_balance;
-    transfer.ay1 <== order1_account_ay;
-    transfer.ethAddr1 <== order1_account_ethAddr;
+    transfer.tokenID_1to2 <== newOrder1TokenSell;
+    transfer.tokenID_2to1 <== newOrder2TokenSell;
+    transfer.nonce1 <== order1AccountNonce;
+    transfer.sign1 <== order1AccountSign;
+    transfer.account1BalanceSell <== order1TokenSellBalance;
+    transfer.account1BalanceBuy <== order1TokenBuyBalance;
+    transfer.ay1 <== order1AccountAy;
+    transfer.ethAddr1 <== order1AccountEthAddr;
     transfer.oldOrder1Root <== order1_updater.oldOrderRoot;
     transfer.newOrder1Root <== order1_updater.newOrderRoot;
     for (var i = 0; i < balanceLevels; i++) {
@@ -307,12 +438,12 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     for (var i = 0; i < accountLevels; i++) {
         transfer.old_account1_path_elements[i][0] <== old_account1_path_elements[i][0];
     }
-    transfer.nonce2 <== order2_account_nonce;
-    transfer.sign2 <== order2_account_sign;
-    transfer.account2_balance_sell <== order2_token_sell_balance;
-    transfer.account2_balance_buy <== order2_token_buy_balance;
-    transfer.ay2 <== order2_account_ay;
-    transfer.ethAddr2 <== order2_account_ethAddr;
+    transfer.nonce2 <== order2AccountNonce;
+    transfer.sign2 <== order2AccountSign;
+    transfer.account2BalanceSell <== order2TokenSellBalance;
+    transfer.account2BalanceBuy <== order2TokenBuyBalance;
+    transfer.ay2 <== order2AccountAy;
+    transfer.ethAddr2 <== order2AccountEthAddr;
     transfer.oldOrder2Root <== order2_updater.oldOrderRoot;
     transfer.newOrder2Root <== order2_updater.newOrderRoot;
     transfer.oldAccountRoot <== old_account_root;
@@ -340,8 +471,8 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // order1 account state
     signal input nonce1;
     signal input sign1;
-    signal input account1_balance_sell;
-    signal input account1_balance_buy;
+    signal input account1BalanceSell;
+    signal input account1BalanceBuy;
     signal input ay1;
     signal input ethAddr1;
     signal input old_account1_balance_path_elements[balanceLevels][1];
@@ -351,8 +482,8 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // order2 account state
     signal input nonce2;
     signal input sign2;
-    signal input account2_balance_sell;
-    signal input account2_balance_buy;
+    signal input account2BalanceSell;
+    signal input account2BalanceBuy;
     signal input ay2;
     signal input ethAddr2;
     signal input old_account2_balance_path_elements[balanceLevels][1];
@@ -417,7 +548,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     
     
     component balanceTreeAccount1Old = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeAccount1Old.leaf <== account1_balance_sell;
+    balanceTreeAccount1Old.leaf <== account1BalanceSell;
     for (var i = 0; i < balanceLevels; i++) {
         balanceTreeAccount1Old.path_index[i] <== balance_1to2_path_index[i];
         balanceTreeAccount1Old.path_elements[i][0] <== old_account1_balance_path_elements[i][0];
@@ -447,14 +578,14 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // Step2: update sender balance
     
     component tree1Account1Update = CalculateRootFromMerklePath( balanceLevels);
-    tree1Account1Update.leaf <== account1_balance_sell - amount_1to2;
+    tree1Account1Update.leaf <== account1BalanceSell - amount_1to2;
     for (var i = 0; i < balanceLevels; i++) {
         tree1Account1Update.path_index[i] <== balance_1to2_path_index[i];
         tree1Account1Update.path_elements[i][0] <== old_account1_balance_path_elements[i][0];
     }
 
     component tree2Account1Update = CalculateRootFromMerklePath( balanceLevels);
-    tree2Account1Update.leaf <== account1_balance_buy;
+    tree2Account1Update.leaf <== account1BalanceBuy;
     for (var i = 0; i < balanceLevels; i++) {
         tree2Account1Update.path_index[i] <== balance_2to1_path_index[i];
         tree2Account1Update.path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
@@ -469,7 +600,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     
     
     component balanceTreeMidAccount1 = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeMidAccount1.leaf <== account1_balance_buy + amount_2to1;
+    balanceTreeMidAccount1.leaf <== account1BalanceBuy + amount_2to1;
     for (var i = 0; i < balanceLevels; i++) {
         balanceTreeMidAccount1.path_index[i] <== balance_2to1_path_index[i];
         balanceTreeMidAccount1.path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
@@ -493,7 +624,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     
     
     component balanceTreeMidAccount2 = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeMidAccount2.leaf <== account2_balance_sell;
+    balanceTreeMidAccount2.leaf <== account2BalanceSell;
     for (var i = 0; i < balanceLevels; i++) {
         balanceTreeMidAccount2.path_index[i] <== balance_2to1_path_index[i];
         balanceTreeMidAccount2.path_elements[i][0] <== old_account2_balance_path_elements[i][0];
@@ -522,14 +653,14 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // Step4: update account 2 balance
     
     component tree1Account2Update = CalculateRootFromMerklePath( balanceLevels);
-    tree1Account2Update.leaf <== account2_balance_sell - amount_2to1;
+    tree1Account2Update.leaf <== account2BalanceSell - amount_2to1;
     for (var i = 0; i < balanceLevels; i++) {
         tree1Account2Update.path_index[i] <== balance_2to1_path_index[i];
         tree1Account2Update.path_elements[i][0] <== old_account2_balance_path_elements[i][0];
     }
 
     component tree2Account2Update = CalculateRootFromMerklePath( balanceLevels);
-    tree2Account2Update.leaf <== account2_balance_buy;
+    tree2Account2Update.leaf <== account2BalanceBuy;
     for (var i = 0; i < balanceLevels; i++) {
         tree2Account2Update.path_index[i] <== balance_1to2_path_index[i];
         tree2Account2Update.path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
@@ -545,7 +676,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     
     
     component balanceTreeAccount2New = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeAccount2New.leaf <== account2_balance_buy + amount_1to2;
+    balanceTreeAccount2New.leaf <== account2BalanceBuy + amount_1to2;
     for (var i = 0; i < balanceLevels; i++) {
         balanceTreeAccount2New.path_index[i] <== balance_1to2_path_index[i];
         balanceTreeAccount2New.path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];

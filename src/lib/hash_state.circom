@@ -80,10 +80,8 @@ template HashOrder() {
 
     hash.out ==> out;
 }
-
-template CalculateGenesisOrderRoot(orderLevels) {
-    signal output root;
-
+template CalculateGenesisOrderHash() {
+    signal output out;
     component emptyOrderHash = HashOrder();
     emptyOrderHash.tokensell <== 0;
     emptyOrderHash.tokenbuy <== 0;
@@ -92,7 +90,12 @@ template CalculateGenesisOrderRoot(orderLevels) {
     emptyOrderHash.total_sell <== 0;
     emptyOrderHash.total_buy <== 0;
     emptyOrderHash.order_id <== 0;
+    out <== emptyOrderHash.out;    
+}
+template CalculateGenesisOrderRoot(orderLevels) {
+    signal output root;
 
+    component emptyOrderHash = CalculateGenesisOrderHash();
     component orderTree = CalculateRootFromRepeatedLeaves(orderLevels);
     orderTree.leaf <== emptyOrderHash.out;
 

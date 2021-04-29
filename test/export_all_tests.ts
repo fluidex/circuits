@@ -6,8 +6,8 @@ import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './hash_sta
 import { TestDepositToNew, TestDepositToOld } from './deposit';
 import { TestTransfer } from './transfer';
 import { TestWithdraw } from './withdraw';
-import { TestPlaceOrder } from './place_order';
-import { TestSpotTrade } from './spot_trade';
+//import { TestPlaceOrder } from './place_order';
+//import { TestSpotTrade } from './spot_trade';
 import { TestBlock } from './block';
 import { SimpleTest } from './interface';
 
@@ -26,8 +26,8 @@ function getAllTests(): Array<SimpleTest> {
   result.push(new TestDepositToOld());
   result.push(new TestTransfer());
   result.push(new TestWithdraw());
-  result.push(new TestPlaceOrder());
-  result.push(new TestSpotTrade());
+  //result.push(new TestPlaceOrder());
+  //result.push(new TestSpotTrade());
   result.push(new TestBlock());
   return result;
 }
