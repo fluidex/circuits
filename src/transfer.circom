@@ -41,8 +41,7 @@ template Transfer(balanceLevels, accountLevels) {
 
     // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
 
-        // **************** CODEGEN START **************
-    signal input in[36];
+        signal input in[36];
     signal fromAccountID;
     signal toAccountID;
     signal amount;
@@ -81,7 +80,6 @@ template Transfer(balanceLevels, accountLevels) {
     balance2 <== in[16];
     ethAddr2 <== in[17];
     midAccountRoot <== in[18];
-    // **************** CODEGEN END **************
 
     
     signal input orderRoot1;
@@ -127,6 +125,8 @@ template Transfer(balanceLevels, accountLevels) {
     ////////////////////////// Step 2: check old state: check old sender state ////////////////////////////
 
     
+    
+    
     component balanceTreeSenderOld = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeSenderOld.leaf <== balance1;
     for (var i = 0; i < balanceLevels; i++) {
@@ -149,13 +149,11 @@ template Transfer(balanceLevels, accountLevels) {
         accountTreeSenderOld.path_index[i] <== sender_account_path_index[i];
         accountTreeSenderOld.path_elements[i][0] <== sender_account_path_elements[i][0];
     }
+    component checkEqSenderOld = ForceEqualIfEnabled();
+    checkEqSenderOld.enabled <== enabled;
+    checkEqSenderOld.in[0] <== accountTreeSenderOld.root;
+    checkEqSenderOld.in[1] <== oldAccountRoot;
 
-    component checkSenderOld = ForceEqualIfEnabled();
-    checkSenderOld.enabled <== enabled;
-    checkSenderOld.in[0] <== accountTreeSenderOld.root;
-    checkSenderOld.in[1] <== oldAccountRoot;
-
-    
 
     ////////////////////////// Step 3: check state transition ////////////////////////////
     // - check state fields
@@ -202,6 +200,8 @@ template Transfer(balanceLevels, accountLevels) {
 
 
     
+    
+    
     component balanceTreeSenderNew = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeSenderNew.leaf <== balance1 - amount;
     for (var i = 0; i < balanceLevels; i++) {
@@ -224,14 +224,14 @@ template Transfer(balanceLevels, accountLevels) {
         accountTreeSenderNew.path_index[i] <== sender_account_path_index[i];
         accountTreeSenderNew.path_elements[i][0] <== sender_account_path_elements[i][0];
     }
+    component checkEqSenderNew = ForceEqualIfEnabled();
+    checkEqSenderNew.enabled <== enabled;
+    checkEqSenderNew.in[0] <== accountTreeSenderNew.root;
+    checkEqSenderNew.in[1] <== midAccountRoot;
 
-    component checkSenderNew = ForceEqualIfEnabled();
-    checkSenderNew.enabled <== enabled;
-    checkSenderNew.in[0] <== accountTreeSenderNew.root;
-    checkSenderNew.in[1] <== midAccountRoot;
 
     
-
+    
     
     component balanceTreeReceiverOld = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeReceiverOld.leaf <== balance2;
@@ -255,14 +255,14 @@ template Transfer(balanceLevels, accountLevels) {
         accountTreeReceiverOld.path_index[i] <== receiver_account_path_index[i];
         accountTreeReceiverOld.path_elements[i][0] <== receiver_account_path_elements[i][0];
     }
+    component checkEqReceiverOld = ForceEqualIfEnabled();
+    checkEqReceiverOld.enabled <== enabled;
+    checkEqReceiverOld.in[0] <== accountTreeReceiverOld.root;
+    checkEqReceiverOld.in[1] <== midAccountRoot;
 
-    component checkReceiverOld = ForceEqualIfEnabled();
-    checkReceiverOld.enabled <== enabled;
-    checkReceiverOld.in[0] <== accountTreeReceiverOld.root;
-    checkReceiverOld.in[1] <== midAccountRoot;
 
     
-
+    
     
     component balanceTreeReceiverNew = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeReceiverNew.leaf <== balance2 + amount;
@@ -286,12 +286,10 @@ template Transfer(balanceLevels, accountLevels) {
         accountTreeReceiverNew.path_index[i] <== receiver_account_path_index[i];
         accountTreeReceiverNew.path_elements[i][0] <== receiver_account_path_elements[i][0];
     }
+    component checkEqReceiverNew = ForceEqualIfEnabled();
+    checkEqReceiverNew.enabled <== enabled;
+    checkEqReceiverNew.in[0] <== accountTreeReceiverNew.root;
+    checkEqReceiverNew.in[1] <== newAccountRoot;
 
-    component checkReceiverNew = ForceEqualIfEnabled();
-    checkReceiverNew.enabled <== enabled;
-    checkReceiverNew.in[0] <== accountTreeReceiverNew.root;
-    checkReceiverNew.in[1] <== newAccountRoot;
-
-    
 
 }

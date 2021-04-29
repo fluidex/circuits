@@ -414,6 +414,8 @@ template tradeTransfer(balanceLevels, accountLevels) {
 
     // Step1: check old sender state
     
+    
+    
     component balanceTreeAccount1Old = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeAccount1Old.leaf <== account1_balance_sell;
     for (var i = 0; i < balanceLevels; i++) {
@@ -436,13 +438,11 @@ template tradeTransfer(balanceLevels, accountLevels) {
         accountTreeAccount1Old.path_index[i] <== account1_path_index[i];
         accountTreeAccount1Old.path_elements[i][0] <== old_account1_path_elements[i][0];
     }
+    component checkEqAccount1Old = ForceEqualIfEnabled();
+    checkEqAccount1Old.enabled <== enabled;
+    checkEqAccount1Old.in[0] <== accountTreeAccount1Old.root;
+    checkEqAccount1Old.in[1] <== oldAccountRoot;
 
-    component checkAccount1Old = ForceEqualIfEnabled();
-    checkAccount1Old.enabled <== enabled;
-    checkAccount1Old.in[0] <== accountTreeAccount1Old.root;
-    checkAccount1Old.in[1] <== oldAccountRoot;
-
-    
 
     // Step2: update sender balance
     
@@ -466,6 +466,8 @@ template tradeTransfer(balanceLevels, accountLevels) {
 
 
     // Step3: after update account1, before update account2
+    
+    
     component balanceTreeMidAccount1 = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeMidAccount1.leaf <== account1_balance_buy + amount_2to1;
     for (var i = 0; i < balanceLevels; i++) {
@@ -488,7 +490,8 @@ template tradeTransfer(balanceLevels, accountLevels) {
         accountTreeMidAccount1.path_index[i] <== account1_path_index[i];
         accountTreeMidAccount1.path_elements[i][0] <== old_account1_path_elements[i][0];
     }
-
+    
+    
     component balanceTreeMidAccount2 = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeMidAccount2.leaf <== account2_balance_sell;
     for (var i = 0; i < balanceLevels; i++) {
@@ -511,7 +514,6 @@ template tradeTransfer(balanceLevels, accountLevels) {
         accountTreeMidAccount2.path_index[i] <== account2_path_index[i];
         accountTreeMidAccount2.path_elements[i][0] <== tmp_account2_path_elements[i][0];
     }
-
     component checkMid = ForceEqualIfEnabled();
     checkMid.enabled <== enabled;
     checkMid.in[0] <== accountTreeMidAccount1.root;
@@ -540,6 +542,8 @@ template tradeTransfer(balanceLevels, accountLevels) {
 
     // Step5: check new state root
     
+    
+    
     component balanceTreeAccount2New = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeAccount2New.leaf <== account2_balance_buy + amount_1to2;
     for (var i = 0; i < balanceLevels; i++) {
@@ -562,11 +566,9 @@ template tradeTransfer(balanceLevels, accountLevels) {
         accountTreeAccount2New.path_index[i] <== account2_path_index[i];
         accountTreeAccount2New.path_elements[i][0] <== tmp_account2_path_elements[i][0];
     }
+    component checkEqAccount2New = ForceEqualIfEnabled();
+    checkEqAccount2New.enabled <== enabled;
+    checkEqAccount2New.in[0] <== accountTreeAccount2New.root;
+    checkEqAccount2New.in[1] <== newAccountRoot;
 
-    component checkAccount2New = ForceEqualIfEnabled();
-    checkAccount2New.enabled <== enabled;
-    checkAccount2New.in[0] <== accountTreeAccount2New.root;
-    checkAccount2New.in[1] <== newAccountRoot;
-
-    
 }

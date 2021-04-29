@@ -103,6 +103,8 @@ template Withdraw(balanceLevels, accountLevels) {
     // - check balance tree update
     ////////
     
+    
+    
     component balanceTreeOld = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeOld.leaf <== balance;
     for (var i = 0; i < balanceLevels; i++) {
@@ -125,14 +127,14 @@ template Withdraw(balanceLevels, accountLevels) {
         accountTreeOld.path_index[i] <== account_path_index[i];
         accountTreeOld.path_elements[i][0] <== account_path_elements[i][0];
     }
+    component checkEqOld = ForceEqualIfEnabled();
+    checkEqOld.enabled <== enabled;
+    checkEqOld.in[0] <== accountTreeOld.root;
+    checkEqOld.in[1] <== oldAccountRoot;
 
-    component checkOld = ForceEqualIfEnabled();
-    checkOld.enabled <== enabled;
-    checkOld.in[0] <== accountTreeOld.root;
-    checkOld.in[1] <== oldAccountRoot;
 
     
-
+    
     
     component balanceTreeNew = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeNew.leaf <== balance - amount;
@@ -156,12 +158,10 @@ template Withdraw(balanceLevels, accountLevels) {
         accountTreeNew.path_index[i] <== account_path_index[i];
         accountTreeNew.path_elements[i][0] <== account_path_elements[i][0];
     }
+    component checkEqNew = ForceEqualIfEnabled();
+    checkEqNew.enabled <== enabled;
+    checkEqNew.in[0] <== accountTreeNew.root;
+    checkEqNew.in[1] <== newAccountRoot;
 
-    component checkNew = ForceEqualIfEnabled();
-    checkNew.enabled <== enabled;
-    checkNew.in[0] <== accountTreeNew.root;
-    checkNew.in[1] <== newAccountRoot;
-
-    
 
 }

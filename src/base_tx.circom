@@ -38,6 +38,8 @@ template BalanceChecker(balanceLevels, accountLevels) {
     }
 
     
+    
+    
     component balanceTree = CalculateRootFromMerklePath(balanceLevels);
     balanceTree.leaf <== balance;
     for (var i = 0; i < balanceLevels; i++) {
@@ -60,12 +62,10 @@ template BalanceChecker(balanceLevels, accountLevels) {
         accountTree.path_index[i] <== account_path_index[i];
         accountTree.path_elements[i][0] <== account_path_elements[i][0];
     }
+    component checkEq = ForceEqualIfEnabled();
+    checkEq.enabled <== enabled;
+    checkEq.in[0] <== accountTree.root;
+    checkEq.in[1] <== accountRoot;
 
-    component check = ForceEqualIfEnabled();
-    check.enabled <== enabled;
-    check.in[0] <== accountTree.root;
-    check.in[1] <== accountRoot;
-
-    
 
 }
