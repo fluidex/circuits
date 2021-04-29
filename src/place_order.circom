@@ -7,7 +7,7 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
 
     // **************** CODEGEN START **************
-    signal input in[34];
+    signal input in[36];
     signal order_pos;
     signal old_order_id;
     signal new_order_id;

@@ -101,9 +101,9 @@ template Withdraw(balanceLevels, accountLevels) {
 
     // - check balance tree update
     ////////
-    <%- codegen.generateBalanceCheckCircom({ctx: 'Old', vars: { accountRoot: 'oldAccountRoot'}}) %>
+    <%- codegen.generateBalanceCheckCircom({ctx: 'Old', replacers: { accountRoot: 'oldAccountRoot'}}) %>
 
-    <%- codegen.generateBalanceCheckCircom({ctx: 'New', vars: { balance: 'balance - amount', 
+    <%- codegen.generateBalanceCheckCircom({ctx: 'New', replacers: { balance: 'balance - amount', 
         accountRoot: 'newAccountRoot', nonce: 'nonce + 1'}}) %>
 
 }

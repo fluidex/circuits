@@ -22,37 +22,59 @@ const codegen = {
   renderInputEncoderJs,
   renderInputEncoderRs,
   renderInputDecoderCircom,
+  renderLoopAssign,
+  generateUniversalBalanceCheck,
   // generateXXX uses simple str.replace
   generateBalanceCheckCircom,
   generateOrderCheckCircom,
   generateSameRootCircom,
+  generateCheckEq,
   generateFromTpl,
+  generateMultiFieldsAssign,
+  generateMultiCheckEq,
 };
 
 function renderInputEncoderJs(encoderName, inputSignals, config) {
   return ejs.render(circuitInputEncoderJsTpl, { encoderName, inputSignals, config });
 }
+function renderLoopAssign(assignItems, loopVar, loopCount) {
+  return ejs.render(tpls.LoopAssignTpl, { assignItems, loopVar, loopCount });
+}
 
 function renderInputEncoderRs(encoderName, inputSignals, config) {
   return ejs.render(circuitInputEncoderRsTpl, { encoderName, inputSignals, config });
 }
-function generateOrderCheckCircom({ ctx, vars }) {
-  return generateFromTpl(CheckFullOrderTreeTpl, { ctx, vars });
+function generateMultiFieldsAssign(comp, fields, prefix, suffix = '', indent = 8) {
+  return tpls.genAssign(comp, fields, prefix, suffix, indent);
 }
-function generateBalanceCheckCircom({ ctx, vars }) {
-  return generateFromTpl(CheckFullBalanceTreeTpl, { ctx, vars });
+function generateUniversalBalanceCheck(compName, prefix, suffix, { ctx, replacers }) {
+  const tpl = tpls.UniversalBalanceCheckTplFn(compName, prefix, suffix);
+  return generateFromTpl(tpl, { ctx, replacers });
 }
-function generateSameRootCircom({ ctx, vars }) {
-  return generateFromTpl(CheckSameTreeRootTpl, { ctx, vars });
+function generateOrderCheckCircom({ ctx, replacers }) {
+  return generateFromTpl(CheckFullOrderTreeTpl, { ctx, replacers });
 }
-function generateFromTpl(tpl, { ctx, vars }) {
+function generateBalanceCheckCircom({ ctx, replacers }) {
+  return generateFromTpl(CheckFullBalanceTreeTpl, { ctx, replacers });
+}
+function generateSameRootCircom({ ctx, replacers }) {
+  return generateFromTpl(CheckSameTreeRootTpl, { ctx, replacers });
+}
+function generateCheckEq({ ctx, replacers }) {
+  return generateFromTpl(tpls.CheckEqTpl, { ctx, replacers });
+}
+function generateMultiCheckEq(items, { ctx, replacers }) {
+  const tpl = ejs.render(tpls.MultiCheckEqTpl, { items });
+  return generateFromTpl(tpl, { ctx, replacers });
+}
+function generateFromTpl(tpl, { ctx, replacers }) {
   let output = tpl.replaceAll('__', ctx);
-  for (let k of Object.keys(vars)) {
+  for (let k of Object.keys(replacers)) {
     // only replace signals
     // currently we use str.replace(' old', ' new') to avoid replace component member
     // TODO: using correct semantic/grammer analysis
     const r = ` ${k}\\b`;
-    output = output.replaceAll(new RegExp(r, 'g'), ' ' + vars[k]);
+    output = output.replaceAll(new RegExp(r, 'g'), ' ' + replacers[k]);
   }
   return output;
 }
@@ -81,7 +103,7 @@ function main() {
   if (!tplFile || !outputFile) {
     throw new Error('invalid argv' + process.argv);
   }
-  console.log(`generate ${outputFile} from ${tplFile}`);
+  //console.log(`generate ${outputFile} from ${tplFile}`);
   let tpl = fs.readFileSync(tplFile, 'utf-8');
   let output = `// Generated from ${tplFile}. Don't modify this file manually\n`;
   output += ejs.render(tpl, { codegen });

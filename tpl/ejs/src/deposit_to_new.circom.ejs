@@ -6,6 +6,51 @@ include "./lib/binary_merkle_tree.circom";
  * Process a deposit_and_create_account transaction, also support create 0 balance account
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
+ * @input amount - {Uint192} - amount to deposit from L1 to L2
+ */
+template DepositToNew(balanceLevels, accountLevels) {
+    signal input enabled;
+    signal input enableBalanceCheck1;
+    signal input enableBalanceCheck2;
+
+    // should only be calculated from the main circuit itself
+    signal input genesisOrderRoot;
+
+    // check old account is empty
+    signal input orderRoot1;
+
+    signal input nonce1;
+    signal input sign1;
+    signal input ay1;
+    signal input ethAddr1;
+    signal input balance1;
+
+    signal input balance2;
+    signal input amount;
+
+    <%- codegen.generateMultiCheckEq([
+        ['orderRoot1', 'genesisOrderRoot'],
+        ['enableBalanceCheck1', '1'],
+        ['enableBalanceCheck2', '1'],
+        ['nonce1', '0'],
+        ['ay1', '0'],
+        ['sign1', '0'],
+        ['ethAddr1', '0'],
+        ['balance1', '0'],
+        ['balance2', 'amount']
+    ], {ctx: '', replacers: {}}) %>
+
+    // TODO: underflow check
+
+    // TODO: overflow check
+
+    // TODO: fee
+}
+
+/**
+ * Process a deposit_and_create_account transaction, also support create 0 balance account
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
  * @input accountID - {Uint48} - auxiliary index to create accounts
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input ethAddr - {Uint160} - L1 sender ethereum address
@@ -17,7 +62,7 @@ include "./lib/binary_merkle_tree.circom";
  * @input oldAccountRoot - {Field} - initial account state root
  * @input newAccountRoot - {Field} - final account state root
  */
-template DepositToNew(balanceLevels, accountLevels) {
+template DepositToNewLegacy(balanceLevels, accountLevels) {
     signal input enabled;
 
     // should only be calculated from the main circuit itself
@@ -73,9 +118,9 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal orderRoot <== genesisOrderRoot;
     signal nonce <== 0;
 
-    <%- codegen.generateBalanceCheckCircom({ctx: 'Old', vars: { balance: '0', accountRoot: 'oldAccountRoot', sign: '0', ay: '0', 'ethAddr': '0'}}) %>
+    <%- codegen.generateBalanceCheckCircom({ctx: 'Old', replacers: { balance: '0', accountRoot: 'oldAccountRoot', sign: '0', ay: '0', 'ethAddr': '0'}}) %>
 
 
-    <%- codegen.generateBalanceCheckCircom({ctx: 'New', vars: { balance: 'amount', accountRoot: 'newAccountRoot'}}) %>
+    <%- codegen.generateBalanceCheckCircom({ctx: 'New', replacers: { balance: 'amount', accountRoot: 'newAccountRoot'}}) %>
 
 }

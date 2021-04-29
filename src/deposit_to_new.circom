@@ -7,6 +7,88 @@ include "./lib/binary_merkle_tree.circom";
  * Process a deposit_and_create_account transaction, also support create 0 balance account
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
+ * @input amount - {Uint192} - amount to deposit from L1 to L2
+ */
+template DepositToNew(balanceLevels, accountLevels) {
+    signal input enabled;
+    signal input enableBalanceCheck1;
+    signal input enableBalanceCheck2;
+
+    // should only be calculated from the main circuit itself
+    signal input genesisOrderRoot;
+
+    // check old account is empty
+    signal input orderRoot1;
+
+    signal input nonce1;
+    signal input sign1;
+    signal input ay1;
+    signal input ethAddr1;
+    signal input balance1;
+
+    signal input balance2;
+    signal input amount;
+
+    
+
+    component checkEq0 = ForceEqualIfEnabled();
+    checkEq0.enabled <== enabled;
+    checkEq0.in[0] <== orderRoot1;
+    checkEq0.in[1] <== genesisOrderRoot;
+
+    component checkEq1 = ForceEqualIfEnabled();
+    checkEq1.enabled <== enabled;
+    checkEq1.in[0] <== enableBalanceCheck1;
+    checkEq1.in[1] <== 1;
+
+    component checkEq2 = ForceEqualIfEnabled();
+    checkEq2.enabled <== enabled;
+    checkEq2.in[0] <== enableBalanceCheck2;
+    checkEq2.in[1] <== 1;
+
+    component checkEq3 = ForceEqualIfEnabled();
+    checkEq3.enabled <== enabled;
+    checkEq3.in[0] <== nonce1;
+    checkEq3.in[1] <== 0;
+
+    component checkEq4 = ForceEqualIfEnabled();
+    checkEq4.enabled <== enabled;
+    checkEq4.in[0] <== ay1;
+    checkEq4.in[1] <== 0;
+
+    component checkEq5 = ForceEqualIfEnabled();
+    checkEq5.enabled <== enabled;
+    checkEq5.in[0] <== sign1;
+    checkEq5.in[1] <== 0;
+
+    component checkEq6 = ForceEqualIfEnabled();
+    checkEq6.enabled <== enabled;
+    checkEq6.in[0] <== ethAddr1;
+    checkEq6.in[1] <== 0;
+
+    component checkEq7 = ForceEqualIfEnabled();
+    checkEq7.enabled <== enabled;
+    checkEq7.in[0] <== balance1;
+    checkEq7.in[1] <== 0;
+
+    component checkEq8 = ForceEqualIfEnabled();
+    checkEq8.enabled <== enabled;
+    checkEq8.in[0] <== balance2;
+    checkEq8.in[1] <== amount;
+
+
+
+    // TODO: underflow check
+
+    // TODO: overflow check
+
+    // TODO: fee
+}
+
+/**
+ * Process a deposit_and_create_account transaction, also support create 0 balance account
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
  * @input accountID - {Uint48} - auxiliary index to create accounts
  * @input tokenID - {Uint32} - tokenID signed in the transaction
  * @input ethAddr - {Uint160} - L1 sender ethereum address
@@ -18,7 +100,7 @@ include "./lib/binary_merkle_tree.circom";
  * @input oldAccountRoot - {Field} - initial account state root
  * @input newAccountRoot - {Field} - final account state root
  */
-template DepositToNew(balanceLevels, accountLevels) {
+template DepositToNewLegacy(balanceLevels, accountLevels) {
     signal input enabled;
 
     // should only be calculated from the main circuit itself

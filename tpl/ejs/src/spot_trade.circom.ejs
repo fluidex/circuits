@@ -130,12 +130,16 @@ template orderUpdater(orderLevels) {
     component new_order_tree = CalculateRootFromMerklePath(orderLevels);
     old_order_tree.leaf <== oldOrderHash.out;
     new_order_tree.leaf <== newOrderHash.out;
+    
     for (var i = 0; i < orderLevels; i++) {
         old_order_tree.path_index[i] <== order_path_index[i];
-        old_order_tree.path_elements[i][0] <== order_path_elements[i][0];
         new_order_tree.path_index[i] <== order_path_index[i];
+    }
+    for (var i = 0; i < orderLevels; i++) {
+        old_order_tree.path_elements[i][0] <== order_path_elements[i][0];
         new_order_tree.path_elements[i][0] <== order_path_elements[i][0];
     }
+    
     old_order_tree.root ==> oldOrderRoot;
     new_order_tree.root ==> newOrderRoot;
 }
@@ -408,7 +412,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // we need make 4 updates to the tree here {sender,receiver}x{token1,token2}
 
     // Step1: check old sender state
-    <%- codegen.generateBalanceCheckCircom({ctx: 'Account1Old', vars: {
+    <%- codegen.generateBalanceCheckCircom({ctx: 'Account1Old', replacers: {
         balance: 'account1_balance_sell',
         balance_path_index: 'balance_1to2_path_index',
         balance_path_elements: 'old_account1_balance_path_elements',
@@ -423,7 +427,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     }}) %>
 
     // Step2: update sender balance
-    <%- codegen.generateSameRootCircom({ctx: 'Account1Update', vars: {
+    <%- codegen.generateSameRootCircom({ctx: 'Account1Update', replacers: {
         leaf1: 'account1_balance_sell - amount_1to2',
         path_elements1: 'old_account1_balance_path_elements',
         path_index1: 'balance_1to2_path_index',
@@ -434,7 +438,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     }}) %>
 
     // Step3: after update account1, before update account2
-    <%- codegen.generateFromTpl(codegen.tpls.CalcAccountTreeFromBalanceTpl, {ctx: 'MidAccount1', vars: {
+    <%- codegen.generateFromTpl(codegen.tpls.CalcAccountTreeFromBalanceTpl, {ctx: 'MidAccount1', replacers: {
         balance: 'account1_balance_buy + amount_2to1',
         balance_path_index: 'balance_2to1_path_index',
         balance_path_elements: 'tmp_account1_balance_path_elements',
@@ -446,7 +450,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
         ethAddr: 'ethAddr1',
         orderRoot: 'newOrder1Root'
     }}) %>
-    <%- codegen.generateFromTpl(codegen.tpls.CalcAccountTreeFromBalanceTpl, {ctx: 'MidAccount2', vars: {
+    <%- codegen.generateFromTpl(codegen.tpls.CalcAccountTreeFromBalanceTpl, {ctx: 'MidAccount2', replacers: {
         balance: 'account2_balance_sell',
         balance_path_index: 'balance_2to1_path_index',
         balance_path_elements: 'old_account2_balance_path_elements',
@@ -464,7 +468,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     checkMid.in[1] <== accountTreeMidAccount2.root;
 
     // Step4: update account 2 balance
-    <%- codegen.generateSameRootCircom({ctx: 'Account2Update', vars: {
+    <%- codegen.generateSameRootCircom({ctx: 'Account2Update', replacers: {
         leaf1: 'account2_balance_sell - amount_2to1',
         path_elements1: 'old_account2_balance_path_elements',
         path_index1: 'balance_2to1_path_index',
@@ -475,7 +479,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     }}) %>
 
     // Step5: check new state root
-    <%- codegen.generateBalanceCheckCircom({ctx: 'Account2New', vars: {
+    <%- codegen.generateBalanceCheckCircom({ctx: 'Account2New', replacers: {
         balance: 'account2_balance_buy + amount_1to2',
         balance_path_index: 'balance_1to2_path_index',
         balance_path_elements: 'tmp_account2_balance_path_elements',

@@ -131,12 +131,16 @@ template orderUpdater(orderLevels) {
     component new_order_tree = CalculateRootFromMerklePath(orderLevels);
     old_order_tree.leaf <== oldOrderHash.out;
     new_order_tree.leaf <== newOrderHash.out;
+    
     for (var i = 0; i < orderLevels; i++) {
         old_order_tree.path_index[i] <== order_path_index[i];
-        old_order_tree.path_elements[i][0] <== order_path_elements[i][0];
         new_order_tree.path_index[i] <== order_path_index[i];
+    }
+    for (var i = 0; i < orderLevels; i++) {
+        old_order_tree.path_elements[i][0] <== order_path_elements[i][0];
         new_order_tree.path_elements[i][0] <== order_path_elements[i][0];
     }
+    
     old_order_tree.root ==> oldOrderRoot;
     new_order_tree.root ==> newOrderRoot;
 }

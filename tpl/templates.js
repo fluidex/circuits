@@ -61,6 +61,20 @@ const CalcAccountTreeTpl = `
         accountTree__.path_index[i] <== account_path_index[i];
         accountTree__.path_elements[i][0] <== account_path_elements[i][0];
     }`;
+const CheckEqTpl = `component checkEq__ = ForceEqualIfEnabled();
+    checkEq__.enabled <== enabled;
+    checkEq__.in[0] <== lhs;
+    checkEq__.in[1] <== rhs;
+`;
+
+const MultiCheckEqTpl = `
+<% for (let i in items) { %>
+    component checkEq<%= i %> = ForceEqualIfEnabled();
+    checkEq<%= i %>.enabled <== enabled;
+    checkEq<%= i %>.in[0] <== <%= items[i][0] %>;
+    checkEq<%= i %>.in[1] <== <%= items[i][1] %>;
+<% } %>
+`;
 
 const CheckAccountTreeRootTpl = `component check__ = ForceEqualIfEnabled();
     check__.enabled <== enabled;
@@ -128,8 +142,9 @@ const CheckBalanceTreeTpl = `
 
 const CheckOrderTreeTpl = `
 `;
-const CalcFullTreeTpl = `
-`;
+const LoopAssignTpl = `    for (var <%= loopVar %> = 0; <%= loopVar %> < <%= loopCount %>; <%= loopVar %>++) {
+<% for (const item of assignItems) { %>        <%= item[0] %>[<%= loopVar %>] <== <%= item[1] %>[<%= loopVar %>];
+<% } %>    }`;
 const CheckFullOrderTreeTpl = `
     component orderHash__ = HashOrder();
     orderHash__.tokensell <== order_tokensell;
@@ -153,6 +168,29 @@ const CheckFullOrderTreeTpl = `
     ${CheckAccountTreeTpl.replaceAll(' orderRoot', ' orderTree__.root')}
     `;
 
+function genAssign(comp, fields, prefix, suffix = '', indent = 8) {
+  let output = '\n';
+  for (const f of fields) {
+    output += ' '.repeat(indent) + `${comp}.${f} <== ${prefix}${f}${suffix};\n`;
+  }
+  return output;
+}
+
+const UniversalBalanceCheckTplFn = function (compName, prefix, suffix) {
+  return `${compName} = BalanceChecker(balanceLevels, accountLevels);
+        ${compName}.enabled <== enabled;
+        ${compName}.accountRoot <== accountRoot;
+        ${compName}.orderRoot <== orderRoot;
+        ${compName}.tokenID <== tokenID;
+${genAssign(compName, ['accountID', 'ethAddr', 'sign', 'ay', 'nonce', 'balance'], prefix, suffix, 8)}
+        for (var j = 0; j < balanceLevels; j++) {
+            ${compName}.balance_path_elements[j][0] <== balance_path_elements[j][0];
+        }
+        for (var j = 0; j < accountLevels; j++) {
+            ${compName}.account_path_elements[j][0] <== account_path_elements[j][0];
+        }
+`;
+};
 export {
   circuitInputEncoderJsTpl,
   circuitInputEncoderRsTpl,
@@ -162,4 +200,9 @@ export {
   CheckFullOrderTreeTpl,
   CheckSameTreeRootTpl,
   CalcAccountTreeFromBalanceTpl,
+  LoopAssignTpl,
+  CheckEqTpl,
+  UniversalBalanceCheckTplFn,
+  genAssign,
+  MultiCheckEqTpl,
 };
