@@ -100,18 +100,17 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
     for (var i = 0; i < nTxs; i++) {
 
-        // TODO: enableDepositToNew || enableDepositToOld
         // universal check
         <%- codegen.generateUniversalBalanceCheck('balanceChecker1[i]', 'decodedTx[i].', '1', {ctx: '1', replacers: {
-            'enabled': 'enableDepositToNew[i].out',
+            enabled: 'decodedTx[i].enableBalanceCheck1',
             accountRoot: 'oldAccountRoots[i]',
-            tokenID: 'decodedTx[i].tokenID',
+            tokenID: 'decodedTx[i].tokenID1',
             orderRoot: 'orderRoots[i][0]',
             balance_path_elements: 'balance_path_elements[i][0]',
             account_path_elements: 'account_path_elements[i][0]',
         }}) %>
         <%- codegen.generateUniversalBalanceCheck('balanceChecker2[i]', 'decodedTx[i].', '2', {ctx: '2', replacers: {
-            'enabled': 'enableDepositToNew[i].out',
+            enabled: 'decodedTx[i].enableBalanceCheck2',
             accountRoot: 'newAccountRoots[i]',
             tokenID: 'decodedTx[i].tokenID2',
             orderRoot:  'orderRoots[i][1]',
@@ -125,15 +124,19 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDepositToNew[i].genesisOrderRoot <== genesisOrderRoot.root;
         processDepositToNew[i].orderRoot1 <== orderRoots[i][0];
 
-        <%- codegen.generateMultiFieldsAssign('processDepositToNew[i]', ['amount', 'ethAddr1', 'ay1', 'balance1', 'sign1', 'nonce1', 'balance2'], 'decodedTx[i].') %>
+        <%- codegen.generateMultiFieldsAssign('processDepositToNew[i]', 
+            ['enableBalanceCheck1', 'enableBalanceCheck2', 'amount',  'balance1', 'balance2', 'ethAddr1', 'ay1', 'sign1', 'nonce1'], 
+            'decodedTx[i].') %>
 
 
         // try process deposit_to_old
         processDepositToOld[i] = DepositToOld(balanceLevels, accountLevels);
         processDepositToOld[i].enabled <== enableDepositToOld[i].out;
-        processDepositToOld[i].amount <== decodedTx[i].amount;
-        processDepositToOld[i].balance <== decodedTx[i].balance1;
-        processDepositToOld[i].balance2 <== decodedTx[i].balance2;
+
+        <%- codegen.generateMultiFieldsAssign('processDepositToOld[i]', 
+            ['enableBalanceCheck1', 'enableBalanceCheck2', 'amount', 'balance1', 'balance2'], 
+            'decodedTx[i].') %>        
+
 
         // try process transfer
         processTransfer[i] = Transfer(balanceLevels, accountLevels);
@@ -160,7 +163,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processWithdraw[i] = Withdraw(balanceLevels, accountLevels);
         processWithdraw[i].enabled <== enableWithdraw[i].out;
         processWithdraw[i].accountID <== decodedTx[i].accountID1;
-        processWithdraw[i].tokenID <== decodedTx[i].tokenID;
+        processWithdraw[i].tokenID <== decodedTx[i].tokenID1;
         processWithdraw[i].amount <== decodedTx[i].amount;
         processWithdraw[i].nonce <== decodedTx[i].nonce1;
         processWithdraw[i].sign <== decodedTx[i].sign1;
@@ -208,7 +211,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].enabled <== enableSpotTrade[i].out;
         processSpotTrade[i].order1_pos <== decodedTx[i].tokenID3;
         processSpotTrade[i].order1_id <== decodedTx[i].order1_id;
-        processSpotTrade[i].order1_tokensell <== decodedTx[i].tokenID;
+        processSpotTrade[i].order1_tokensell <== decodedTx[i].tokenID1;
         processSpotTrade[i].order1_amountsell <== decodedTx[i].order1_amountsell;
         processSpotTrade[i].order1_tokenbuy <== decodedTx[i].tokenID2;
         processSpotTrade[i].order1_amountbuy <== decodedTx[i].order1_amountbuy;
@@ -216,7 +219,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].order2_id <== decodedTx[i].order2_id;
         processSpotTrade[i].order2_tokensell <== decodedTx[i].tokenID2;
         processSpotTrade[i].order2_amountsell <== decodedTx[i].order2_amountsell;
-        processSpotTrade[i].order2_tokenbuy <== decodedTx[i].tokenID;
+        processSpotTrade[i].order2_tokenbuy <== decodedTx[i].tokenID1;
         processSpotTrade[i].order2_amountbuy <== decodedTx[i].order2_amountbuy;
         processSpotTrade[i].amount_2to1 <== decodedTx[i].amount2;
         processSpotTrade[i].amount_1to2 <== decodedTx[i].amount;

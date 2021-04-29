@@ -42,7 +42,7 @@ template Transfer(balanceLevels, accountLevels) {
     // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
 
         // **************** CODEGEN START **************
-    signal input in[34];
+    signal input in[36];
     signal fromAccountID;
     signal toAccountID;
     signal amount;

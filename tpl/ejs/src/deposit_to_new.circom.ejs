@@ -10,6 +10,8 @@ include "./lib/binary_merkle_tree.circom";
  */
 template DepositToNew(balanceLevels, accountLevels) {
     signal input enabled;
+    signal input enableBalanceCheck1;
+    signal input enableBalanceCheck2;
 
     // should only be calculated from the main circuit itself
     signal input genesisOrderRoot;
@@ -26,34 +28,17 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal input balance2;
     signal input amount;
 
-    <%- codegen.generateCheckEq({ctx: 'OldOrderRoot', replacers: {
-        lhs: 'genesisOrderRoot',
-        rhs: 'orderRoot1',
-    }}) %>
-    <%- codegen.generateCheckEq({ctx: 'OldNonce', replacers: {
-        lhs: 'nonce1',
-        rhs: '0',
-    }}) %>
-    <%- codegen.generateCheckEq({ctx: 'OldAy', replacers: {
-        lhs: 'ay1',
-        rhs: '0',
-    }}) %>
-    <%- codegen.generateCheckEq({ctx: 'OldSign', replacers: {
-        lhs: 'sign1',
-        rhs: '0',
-    }}) %>
-    <%- codegen.generateCheckEq({ctx: 'OldEthAddr', replacers: {
-        lhs: 'ethAddr1',
-        rhs: '0',
-    }}) %>
-    <%- codegen.generateCheckEq({ctx: 'OldBalance', replacers: {
-        lhs: 'balance1',
-        rhs: '0',
-    }}) %>
-    <%- codegen.generateCheckEq({ctx: 'NewBalance', replacers: {
-        lhs: 'balance2',
-        rhs: 'amount',
-    }}) %>
+    <%- codegen.generateMultiCheckEq([
+        ['orderRoot1', 'genesisOrderRoot'],
+        ['enableBalanceCheck1', '1'],
+        ['enableBalanceCheck2', '1'],
+        ['nonce1', '0'],
+        ['ay1', '0'],
+        ['sign1', '0'],
+        ['ethAddr1', '0'],
+        ['balance1', '0'],
+        ['balance2', 'amount']
+    ], {ctx: '', replacers: {}}) %>
 
     // TODO: underflow check
 

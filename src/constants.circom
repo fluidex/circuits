@@ -6,4 +6,4 @@ function TxTypePlaceOrder() { return 4; }
 function TxTypeSpotTrade() { return 5; }
 function TxTypeNop() { return 6; }
 
-function TxLength() { return 34; }
+function TxLength() { return 36; }

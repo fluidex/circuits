@@ -2,7 +2,7 @@ function splitAndTrim(s) {
   return s.split(/\s+/).filter(item => item != '');
 }
 const config = {
-  txLength: 34,
+  txLength: 36,
   placeOrder: {
     inputSignals: splitAndTrim(`
         order_pos

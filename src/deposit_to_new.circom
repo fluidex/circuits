@@ -11,6 +11,8 @@ include "./lib/binary_merkle_tree.circom";
  */
 template DepositToNew(balanceLevels, accountLevels) {
     signal input enabled;
+    signal input enableBalanceCheck1;
+    signal input enableBalanceCheck2;
 
     // should only be calculated from the main circuit itself
     signal input genesisOrderRoot;
@@ -27,40 +29,53 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal input balance2;
     signal input amount;
 
-    component checkEqOldOrderRoot = ForceEqualIfEnabled();
-    checkEqOldOrderRoot.enabled <== enabled;
-    checkEqOldOrderRoot.in[0] <== genesisOrderRoot;
-    checkEqOldOrderRoot.in[1] <== orderRoot1;
+    
 
-    component checkEqOldNonce = ForceEqualIfEnabled();
-    checkEqOldNonce.enabled <== enabled;
-    checkEqOldNonce.in[0] <== nonce1;
-    checkEqOldNonce.in[1] <== 0;
+    component checkEq0 = ForceEqualIfEnabled();
+    checkEq0.enabled <== enabled;
+    checkEq0.in[0] <== orderRoot1;
+    checkEq0.in[1] <== genesisOrderRoot;
 
-    component checkEqOldAy = ForceEqualIfEnabled();
-    checkEqOldAy.enabled <== enabled;
-    checkEqOldAy.in[0] <== ay1;
-    checkEqOldAy.in[1] <== 0;
+    component checkEq1 = ForceEqualIfEnabled();
+    checkEq1.enabled <== enabled;
+    checkEq1.in[0] <== enableBalanceCheck1;
+    checkEq1.in[1] <== 1;
 
-    component checkEqOldSign = ForceEqualIfEnabled();
-    checkEqOldSign.enabled <== enabled;
-    checkEqOldSign.in[0] <== sign1;
-    checkEqOldSign.in[1] <== 0;
+    component checkEq2 = ForceEqualIfEnabled();
+    checkEq2.enabled <== enabled;
+    checkEq2.in[0] <== enableBalanceCheck2;
+    checkEq2.in[1] <== 1;
 
-    component checkEqOldEthAddr = ForceEqualIfEnabled();
-    checkEqOldEthAddr.enabled <== enabled;
-    checkEqOldEthAddr.in[0] <== ethAddr1;
-    checkEqOldEthAddr.in[1] <== 0;
+    component checkEq3 = ForceEqualIfEnabled();
+    checkEq3.enabled <== enabled;
+    checkEq3.in[0] <== nonce1;
+    checkEq3.in[1] <== 0;
 
-    component checkEqOldBalance = ForceEqualIfEnabled();
-    checkEqOldBalance.enabled <== enabled;
-    checkEqOldBalance.in[0] <== balance1;
-    checkEqOldBalance.in[1] <== 0;
+    component checkEq4 = ForceEqualIfEnabled();
+    checkEq4.enabled <== enabled;
+    checkEq4.in[0] <== ay1;
+    checkEq4.in[1] <== 0;
 
-    component checkEqNewBalance = ForceEqualIfEnabled();
-    checkEqNewBalance.enabled <== enabled;
-    checkEqNewBalance.in[0] <== balance2;
-    checkEqNewBalance.in[1] <== amount;
+    component checkEq5 = ForceEqualIfEnabled();
+    checkEq5.enabled <== enabled;
+    checkEq5.in[0] <== sign1;
+    checkEq5.in[1] <== 0;
+
+    component checkEq6 = ForceEqualIfEnabled();
+    checkEq6.enabled <== enabled;
+    checkEq6.in[0] <== ethAddr1;
+    checkEq6.in[1] <== 0;
+
+    component checkEq7 = ForceEqualIfEnabled();
+    checkEq7.enabled <== enabled;
+    checkEq7.in[0] <== balance1;
+    checkEq7.in[1] <== 0;
+
+    component checkEq8 = ForceEqualIfEnabled();
+    checkEq8.enabled <== enabled;
+    checkEq8.in[0] <== balance2;
+    checkEq8.in[1] <== amount;
+
 
 
     // TODO: underflow check

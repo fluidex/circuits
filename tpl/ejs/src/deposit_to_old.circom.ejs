@@ -12,9 +12,12 @@ include "./lib/binary_merkle_tree.circom";
  */
 template DepositToOld(balanceLevels, accountLevels) {
     signal input enabled;
+    signal input enableBalanceCheck1;
+    signal input enableBalanceCheck2;
+
     // For L1 TX
     signal input amount;
-    signal input balance;
+    signal input balance1;
     signal input balance2;
 
     // TODO: underflow check
@@ -23,10 +26,11 @@ template DepositToOld(balanceLevels, accountLevels) {
 
     // TODO: fee
 
-    component checker = ForceEqualIfEnabled();
-    checker.enabled <== enabled;
-    checker.in[0] <== balance + amount;
-    checker.in[1] <== balance2;
+    <%- codegen.generateMultiCheckEq([
+        ['enableBalanceCheck1', '1'],
+        ['enableBalanceCheck2', '1'],
+        ['balance2', 'balance1 + amount']
+    ], {ctx: '', replacers: {}}) %>
 }
 
 /**

@@ -66,6 +66,16 @@ const CheckEqTpl = `component checkEq__ = ForceEqualIfEnabled();
     checkEq__.in[0] <== lhs;
     checkEq__.in[1] <== rhs;
 `;
+
+const MultiCheckEqTpl = `
+<% for (let i in items) { %>
+    component checkEq<%= i %> = ForceEqualIfEnabled();
+    checkEq<%= i %>.enabled <== enabled;
+    checkEq<%= i %>.in[0] <== <%= items[i][0] %>;
+    checkEq<%= i %>.in[1] <== <%= items[i][1] %>;
+<% } %>
+`;
+
 const CheckAccountTreeRootTpl = `component check__ = ForceEqualIfEnabled();
     check__.enabled <== enabled;
     check__.in[0] <== accountTree__.root;
@@ -194,4 +204,5 @@ export {
   CheckEqTpl,
   UniversalBalanceCheckTplFn,
   genAssign,
+  MultiCheckEqTpl,
 };

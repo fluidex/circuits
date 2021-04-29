@@ -223,7 +223,7 @@ class GlobalState {
     encodedTx.fill(0n, 0, TxLength);
     encodedTx[TxDetailIdx.Amount] = tx.amount;
 
-    encodedTx[TxDetailIdx.TokenID] = Scalar.e(tx.tokenID);
+    encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
     encodedTx[TxDetailIdx.Balance1] = 0n;
     encodedTx[TxDetailIdx.Nonce1] = 0n;
@@ -238,6 +238,9 @@ class GlobalState {
     encodedTx[TxDetailIdx.EthAddr2] = tx.ethAddr;
     encodedTx[TxDetailIdx.Sign2] = Scalar.e(tx.sign);
     encodedTx[TxDetailIdx.Ay2] = tx.ay;
+
+    encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
+    encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
 
     let rawTx: RawTx = {
       txType: TxType.DepositToNew,
@@ -275,7 +278,7 @@ class GlobalState {
 
     encodedTx[TxDetailIdx.Amount] = tx.amount;
 
-    encodedTx[TxDetailIdx.TokenID] = Scalar.e(tx.tokenID);
+    encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
     encodedTx[TxDetailIdx.Balance1] = oldBalance;
     encodedTx[TxDetailIdx.Nonce1] = nonce;
@@ -291,6 +294,9 @@ class GlobalState {
     encodedTx[TxDetailIdx.EthAddr2] = acc.ethAddr;
     encodedTx[TxDetailIdx.Sign2] = acc.sign;
     encodedTx[TxDetailIdx.Ay2] = acc.ay;
+
+    encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
+    encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
 
     let rawTx: RawTx = {
       txType: TxType.DepositToOld,
@@ -415,7 +421,7 @@ class GlobalState {
     let balanceBefore = this.getTokenBalance(tx.accountID, tx.tokenID);
     assert(balanceBefore > tx.amount, 'Withdraw balance');
     encodedTx[TxDetailIdx.AccountID1] = tx.accountID;
-    encodedTx[TxDetailIdx.TokenID] = tx.tokenID;
+    encodedTx[TxDetailIdx.TokenID1] = tx.tokenID;
     encodedTx[TxDetailIdx.Amount] = tx.amount;
     encodedTx[TxDetailIdx.Nonce1] = acc.nonce;
     encodedTx[TxDetailIdx.Sign1] = acc.sign;
@@ -564,7 +570,7 @@ class GlobalState {
     let account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.tokenID_2to1);
     assert(account1_balance_sell > tx.amount_1to2, 'balance_1to2');
     assert(account2_balance_sell > tx.amount_2to1, 'balance_2to1');
-    encodedTx[TxDetailIdx.TokenID] = tx.tokenID_1to2;
+    encodedTx[TxDetailIdx.TokenID1] = tx.tokenID_1to2;
     encodedTx[TxDetailIdx.Amount] = tx.amount_1to2;
     encodedTx[TxDetailIdx.Balance1] = account1_balance_sell;
     encodedTx[TxDetailIdx.Balance2] = account2_balance_buy;

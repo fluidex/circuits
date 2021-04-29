@@ -23,6 +23,7 @@ function generateTestCases() {
 }
 
 function testAll() {
+	#for d in Block_2_2_2_2
 	for d in `ls testdata`;
 	do
 		#npx snarkit test --backend wasm --witness_type bin testdata/$d &

@@ -28,6 +28,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     signal input encodedTxs[nTxs][TxLength()];
 
     // State
+
     signal input balance_path_elements[nTxs][4][balanceLevels][1]; // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
     signal input order_path_elements[nTxs][2][orderLevels][1]; // index meanings: [tx idx][order_account1, order_account2][levels][siblings]
     signal input account_path_elements[nTxs][2][accountLevels][1]; // index meanings: [tx idx][sender, receiver][levels][siblings]
@@ -101,13 +102,12 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
     for (var i = 0; i < nTxs; i++) {
 
-        // TODO: enableDepositToNew || enableDepositToOld
         // universal check
         balanceChecker1[i] = BalanceChecker(balanceLevels, accountLevels);
-        balanceChecker1[i].enabled <== enableDepositToNew[i].out;
+        balanceChecker1[i].enabled <== decodedTx[i].enableBalanceCheck1;
         balanceChecker1[i].accountRoot <== oldAccountRoots[i];
         balanceChecker1[i].orderRoot <== orderRoots[i][0];
-        balanceChecker1[i].tokenID <== decodedTx[i].tokenID;
+        balanceChecker1[i].tokenID <== decodedTx[i].tokenID1;
 
         balanceChecker1[i].accountID <== decodedTx[i].accountID1;
         balanceChecker1[i].ethAddr <== decodedTx[i].ethAddr1;
@@ -124,7 +124,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         }
 
         balanceChecker2[i] = BalanceChecker(balanceLevels, accountLevels);
-        balanceChecker2[i].enabled <== enableDepositToNew[i].out;
+        balanceChecker2[i].enabled <== decodedTx[i].enableBalanceCheck2;
         balanceChecker2[i].accountRoot <== newAccountRoots[i];
         balanceChecker2[i].orderRoot <== orderRoots[i][1];
         balanceChecker2[i].tokenID <== decodedTx[i].tokenID2;
@@ -151,22 +151,30 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDepositToNew[i].orderRoot1 <== orderRoots[i][0];
 
         
+        processDepositToNew[i].enableBalanceCheck1 <== decodedTx[i].enableBalanceCheck1;
+        processDepositToNew[i].enableBalanceCheck2 <== decodedTx[i].enableBalanceCheck2;
         processDepositToNew[i].amount <== decodedTx[i].amount;
+        processDepositToNew[i].balance1 <== decodedTx[i].balance1;
+        processDepositToNew[i].balance2 <== decodedTx[i].balance2;
         processDepositToNew[i].ethAddr1 <== decodedTx[i].ethAddr1;
         processDepositToNew[i].ay1 <== decodedTx[i].ay1;
-        processDepositToNew[i].balance1 <== decodedTx[i].balance1;
         processDepositToNew[i].sign1 <== decodedTx[i].sign1;
         processDepositToNew[i].nonce1 <== decodedTx[i].nonce1;
-        processDepositToNew[i].balance2 <== decodedTx[i].balance2;
 
 
 
         // try process deposit_to_old
         processDepositToOld[i] = DepositToOld(balanceLevels, accountLevels);
         processDepositToOld[i].enabled <== enableDepositToOld[i].out;
+
+        
+        processDepositToOld[i].enableBalanceCheck1 <== decodedTx[i].enableBalanceCheck1;
+        processDepositToOld[i].enableBalanceCheck2 <== decodedTx[i].enableBalanceCheck2;
         processDepositToOld[i].amount <== decodedTx[i].amount;
-        processDepositToOld[i].balance <== decodedTx[i].balance1;
+        processDepositToOld[i].balance1 <== decodedTx[i].balance1;
         processDepositToOld[i].balance2 <== decodedTx[i].balance2;
+        
+
 
         // try process transfer
         processTransfer[i] = Transfer(balanceLevels, accountLevels);
@@ -193,7 +201,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processWithdraw[i] = Withdraw(balanceLevels, accountLevels);
         processWithdraw[i].enabled <== enableWithdraw[i].out;
         processWithdraw[i].accountID <== decodedTx[i].accountID1;
-        processWithdraw[i].tokenID <== decodedTx[i].tokenID;
+        processWithdraw[i].tokenID <== decodedTx[i].tokenID1;
         processWithdraw[i].amount <== decodedTx[i].amount;
         processWithdraw[i].nonce <== decodedTx[i].nonce1;
         processWithdraw[i].sign <== decodedTx[i].sign1;
@@ -241,7 +249,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].enabled <== enableSpotTrade[i].out;
         processSpotTrade[i].order1_pos <== decodedTx[i].tokenID3;
         processSpotTrade[i].order1_id <== decodedTx[i].order1_id;
-        processSpotTrade[i].order1_tokensell <== decodedTx[i].tokenID;
+        processSpotTrade[i].order1_tokensell <== decodedTx[i].tokenID1;
         processSpotTrade[i].order1_amountsell <== decodedTx[i].order1_amountsell;
         processSpotTrade[i].order1_tokenbuy <== decodedTx[i].tokenID2;
         processSpotTrade[i].order1_amountbuy <== decodedTx[i].order1_amountbuy;
@@ -249,7 +257,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].order2_id <== decodedTx[i].order2_id;
         processSpotTrade[i].order2_tokensell <== decodedTx[i].tokenID2;
         processSpotTrade[i].order2_amountsell <== decodedTx[i].order2_amountsell;
-        processSpotTrade[i].order2_tokenbuy <== decodedTx[i].tokenID;
+        processSpotTrade[i].order2_tokenbuy <== decodedTx[i].tokenID1;
         processSpotTrade[i].order2_amountbuy <== decodedTx[i].order2_amountbuy;
         processSpotTrade[i].amount_2to1 <== decodedTx[i].amount2;
         processSpotTrade[i].amount_1to2 <== decodedTx[i].amount;

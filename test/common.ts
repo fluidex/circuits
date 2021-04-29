@@ -17,9 +17,9 @@ enum TxType {
   Nop,
 }
 
-const TxLength = 34;
+const TxLength = 36;
 enum TxDetailIdx {
-  TokenID,
+  TokenID1,
   Amount,
   AccountID1,
   AccountID2,
@@ -57,6 +57,10 @@ enum TxDetailIdx {
   // only used in place_order
   TokenID3,
   TokenID4,
+
+  // control universal checker
+  EnableBalanceCheck1,
+  EnableBalanceCheck2,
 }
 
 class TxSignature {

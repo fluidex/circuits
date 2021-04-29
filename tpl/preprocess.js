@@ -31,6 +31,7 @@ const codegen = {
   generateCheckEq,
   generateFromTpl,
   generateMultiFieldsAssign,
+  generateMultiCheckEq,
 };
 
 function renderInputEncoderJs(encoderName, inputSignals, config) {
@@ -62,6 +63,10 @@ function generateSameRootCircom({ ctx, replacers }) {
 function generateCheckEq({ ctx, replacers }) {
   return generateFromTpl(tpls.CheckEqTpl, { ctx, replacers });
 }
+function generateMultiCheckEq(items, { ctx, replacers }) {
+  const tpl = ejs.render(tpls.MultiCheckEqTpl, { items });
+  return generateFromTpl(tpl, { ctx, replacers });
+}
 function generateFromTpl(tpl, { ctx, replacers }) {
   let output = tpl.replaceAll('__', ctx);
   for (let k of Object.keys(replacers)) {
@@ -91,10 +96,6 @@ function renderInputDecoderCircom(inputSignals, indent = 4) {
   }
   addLine('// **************** CODEGEN END **************');
   return code;
-}
-function post_process(content) {
-  // codegen_loop
-  //function gen_loop(dst, src, loop_count, loop_var)
 }
 function main() {
   const tplFile = process.argv[2];

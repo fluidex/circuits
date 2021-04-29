@@ -7,48 +7,80 @@ include "./constants.circom"
 template DecodeTx() {
     signal input in[TxLength()];
 
-    signal output tokenID; // "tokenID" is "tokenID_1to2" in spot_trade
-    signal output amount; // "amount" is "amount_1to2" in spot_trade
+    // universal checker:
+    // TODO: universal checker inputs should be moved out of this byte array payload
+    // 
+
+    // first universal checker: balance1 
+    signal output enableBalanceCheck1;
+    signal output tokenID1; // "tokenID" is "tokenID_1to2" in spot_trade
+    signal output balance1; // default token sender balance
+    //signal output balanceRoot1;
+
+    signal output enableBalanceCheck2;
+    signal output tokenID2; // "tokenID2" is "tokenID_2to1" in spot_trade
+    signal output balance2; // default token receiver balance
+    //signal output balanceRoot1;
+
+   
+
+
+    //signal output enabledAccountCheck1;
 
     signal output accountID1;
-    signal output accountID2;
     signal output ethAddr1;
-    signal output ethAddr2;
     signal output sign1;
-    signal output sign2;
     signal output ay1;
-    signal output ay2;
     signal output nonce1;
-    signal output nonce2;
-    signal output balance1; // default token sender balance
-    signal output balance2; // default token receiver balance
-    signal output balance3; // counter token (in spot_trade) sender balance
-    signal output balance4; // counter token (in spot_trade) receiver balance
 
+    // second universal checker: balance2 
+    
+    signal output accountID2;
+    signal output ethAddr2;
+    signal output sign2;
+    signal output ay2;
+    signal output nonce2;
+    //signal output balance2; 
+
+    // 3rd universal checker: l2 sig 
+    //signal output enabled3;
     signal output sigL2Hash;
     signal output s;
     signal output r8x;
     signal output r8y;
 
+    // below are some operation specific signals
+
     /// only used in spot_trade
-    signal output tokenID2; // "tokenID2" is "tokenID_2to1" in spot_trade
+    signal output amount; // "amount" is "amount_1to2" in spot_trade
     signal output amount2; // "amount2" is "amount_2to1" in spot_trade.
+    signal output balance3; // counter token (in spot_trade) sender balance
+    signal output balance4; // counter token (in spot_trade) receiver balance
+
+
+
+     // 
+    //signal output enabledOrderCheck1;
     signal output order1_id;
     signal output order1_amountsell;
     signal output order1_amountbuy;
     signal output order1_filledsell;
     signal output order1_filledbuy;
+    //signal output order1_tokensell;
+    //signal output order1_tokenbuy;
+    //signal output order1_tokenbuy;
     signal output order2_id;
     signal output order2_amountsell;
     signal output order2_amountbuy;
     signal output order2_filledsell;
     signal output order2_filledbuy;
+    
 
     /// only used in place_order
     signal output tokenID3;
     signal output tokenID4;
 
-    tokenID <== in[0];
+    tokenID1 <== in[0];
     amount <== in[1];
 
     accountID1 <== in[2];
@@ -93,4 +125,9 @@ template DecodeTx() {
     /// only used in place_order
     tokenID3 <== in[32];
     tokenID4 <== in[33];
+
+    enableBalanceCheck1 <== in[34];
+    enableBalanceCheck2 <== in[35];
+    //enabled3 <== in[36];
+    
 }
