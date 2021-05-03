@@ -146,26 +146,21 @@ function handleTrade(state, trade, placedOrder) {
       const order = orderStateBefore.get(orderId);
       // check this is a new order
       assert(order.finishedBase == '0' && order.finishedQuote == '0', 'invalid new order', order);
+
       let orderToPut = {
-        orderID: orderId,
-        accountID: order.accountID,
-        /*
-        previous_tokenID_sell: 0n,
-        previous_tokenID_buy: 0n,
-        previous_amount_sell: 0n,
-        previous_amount_buy: 0n,
-        previous_filled_sell: 0n,
-        previous_filled_buy: 0n,
-        */
-        tokenID_sell: order.tokensell,
-        tokenID_buy: order.tokenbuy,
-        amount_sell: order.total_sell,
-        amount_buy: order.total_buy,
+        order_id: orderId,
+        tokensell: order.tokensell,
+        tokenbuy: order.tokenbuy,
+        filled_sell: 0n,
+        filled_buy: 0n,
+        total_sell: order.total_sell,
+        total_buy: order.total_buy,
       };
-      let newOrderID = state.createNewOrder(orderToPut);
-      placedOrder.set(orderId, [orderToPut.accountID, newOrderID]);
+      state.addOrder(order.accountID, orderToPut);
+      //let newOrderID = 
+      //placedOrder.set(orderId, [orderToPut.accountID, newOrderID]);
       if (verbose) {
-        console.log('global order id to user order id', orderId, orderToPut.accountID, newOrderID);
+        //console.log('global order id to user order id', orderId, orderToPut.accountID, newOrderID);
       }
     } else {
       if (verbose) {

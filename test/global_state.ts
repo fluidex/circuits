@@ -32,10 +32,16 @@ class GlobalState {
   accountTree: Tree<bigint>;
   // idx to balanceTree
   balanceTrees: Map<bigint, Tree<bigint>>;
+
+  // user -> order_pos -> order_hash
   orderTrees: Map<bigint, Tree<bigint>>;
+  // user -> order_id -> order
   orderMap: Map<bigint, Map<bigint, Order>>;
-  // (user, order_id) -> order_pos
+  // user -> order_id -> order_pos
   orderIdToPos: Map<bigint, Map<bigint, bigint>>;
+  // user -> order_pos -> order_id
+  orderPosToId: Map<bigint, Map<bigint, bigint>>;
+
   accounts: Map<bigint, AccountState>;
   bufferedTxs: Array<RawTx>;
   bufferedBlocks: Array<any>;
@@ -65,6 +71,7 @@ class GlobalState {
     this.orderTrees = new Map(); // map[account_id]order_tree
     this.orderMap = new Map();
     this.orderIdToPos = new Map();
+    this.orderPosToId = new Map();
     this.accounts = new Map(); // map[account_id]acount_state
     this.bufferedTxs = new Array();
     this.bufferedBlocks = new Array();
@@ -133,17 +140,20 @@ class GlobalState {
     this.orderTrees.set(accountID, new Tree<bigint>(this.orderLevels, this.defaultOrderLeaf));
     this.orderMap.set(accountID, new Map<bigint, Order>());
     this.orderIdToPos.set(accountID, new Map<bigint, bigint>());
+    this.orderPosToId.set(accountID, new Map<bigint, bigint>());
     this.accountTree.setValue(accountID, this.defaultAccountLeaf);
     this.nextOrderPositions.set(accountID, next_order_id);
     //console.log("add account", accountID);
     return accountID;
   }
-  /*
+  
   // TODO: better name
-  addOrder(order): bigint {
-    const orderPos = this.getNextOrderPosForUser(tx.accountID);
+  addOrder(accountID, order) {
+    //const candidateOrderPos = this.getNextOrderPosForUser(accountID); // no throw, so the order can be inserted
+    this.orderMap.get(accountID).set(order.order_id, order);
+    //return candidateOrderPos;
   }
-  */
+  
   createNewOrder(tx: PlaceOrderTx): bigint {
     const orderPos = this.getNextOrderPosForUser(tx.accountID);
     if (orderPos >= 2 ** this.orderLevels) {
@@ -192,11 +202,16 @@ class GlobalState {
       throw new Error(`orderPos ${orderPos} invalid for orderLevels ${this.orderLevels}`);
     }
     this.orderTrees.get(accountID).setValue(orderPos, hashOrderState(order));
-    this.orderMap.get(accountID).set(orderPos, order);
+    this.orderMap.get(accountID).set(order.order_id, order);
     this.orderIdToPos.get(accountID).set(order.order_id, orderPos);
+    this.orderPosToId.get(accountID).set(orderPos, order.order_id);
     this.recalculateFromOrderTree(accountID);
   }
-  getAccountOrder(accountID: bigint, orderID: bigint): Order {
+  getAccountOrderByOrderId(accountID: bigint, orderID: bigint): Order {
+    return this.orderMap.get(accountID).get(orderID);
+  }
+  getAccountOrderByOrderPos(accountID: bigint, orderPos: bigint): Order {
+    const orderID = this.orderPosToId.get(accountID).get(orderPos);
     return this.orderMap.get(accountID).get(orderID);
   }
 
@@ -536,6 +551,9 @@ class GlobalState {
   }
   
   // TODO: replace order is not implemented and tested here
+    // case1: old order is empty
+    // case2: old order is valid old order with different order id, but we will replace it. We will handle this case in Rust code, not here
+    // case3: old order has same order id, we will modify it
   SpotTrade(tx: SpotTradeTx) {
     //assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
     //assert(this.accounts.get(tx.order2_accountID).ethAddr != 0n, 'SpotTrade account2');
@@ -554,9 +572,7 @@ class GlobalState {
     const oldOrder1: Order = Object.assign({}, this.orderMap.get(tx.order1_accountID).get(order1_pos));
     const oldOrder2: Order = Object.assign({}, this.orderMap.get(tx.order2_accountID).get(order2_pos));
 
-    // case1: old order is empty
-    // case2: old order is valid old order with different order id, but we will replace it. We will handle this case in Rust code, not here
-    // case3: old order has same order id, we will modify it
+    /*
     // the below two checks are invalid for case2
     if (oldOrder1.tokenbuy == tx.tokenID_2to1) {
       console.log({oldOrder1, tx})
@@ -564,7 +580,7 @@ class GlobalState {
     }
     assert(oldOrder1.tokenbuy == tx.tokenID_2to1, `invalid token ${oldOrder1.tokenbuy} ${tx.tokenID_2to1}`);
     assert(oldOrder2.tokensell == tx.tokenID_1to2, `invalid token ${oldOrder2.tokensell} ${tx.tokenID_1to2}`);
-
+    */
     /*
 
       order_id: tx.orderID,
