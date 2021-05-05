@@ -4,9 +4,9 @@ import { TestCheckLeafExists, TestCheckLeafUpdate } from './binary_merkle_tree';
 import { TestRescueHash } from './rescue';
 import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './hash_state';
 import { TestDepositToNew, TestDepositToOld } from './deposit';
-import { TestTransfer } from './transfer';
+// already tested within the `block` test case
+//import { TestTransfer } from './transfer';
 import { TestWithdraw } from './withdraw';
-// SpotTrade is tested within the `block` test case
 //import { TestPlaceOrder } from './place_order';
 //import { TestSpotTrade } from './spot_trade';
 import { TestBlock } from './block';
@@ -25,7 +25,7 @@ function getAllTests(): Array<SimpleTest> {
   result.push(new TestGenesisOrderRoot());
   result.push(new TestDepositToNew());
   result.push(new TestDepositToOld());
-  result.push(new TestTransfer());
+  //result.push(new TestTransfer());
   result.push(new TestWithdraw());
   //result.push(new TestPlaceOrder());
   //result.push(new TestSpotTrade());

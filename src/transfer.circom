@@ -38,6 +38,8 @@ include "./lib/binary_merkle_tree.circom";
  */
 template Transfer(balanceLevels, accountLevels) {
     signal input enabled;
+    signal input enableBalanceCheck1;
+    signal input enableBalanceCheck2;
 
     // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
 
@@ -100,9 +102,22 @@ template Transfer(balanceLevels, accountLevels) {
         receiver_account_path_index[i] <== bTo.out[i];
     }
 
+    
+
+    component checkEq0 = ForceEqualIfEnabled();
+    checkEq0.enabled <== enabled;
+    checkEq0.in[0] <== enableBalanceCheck1;
+    checkEq0.in[1] <== 1;
+
+    component checkEq1 = ForceEqualIfEnabled();
+    checkEq1.enabled <== enabled;
+    checkEq1.in[0] <== enableBalanceCheck2;
+    checkEq1.in[1] <== 1;
+
+
 
     ////////////////////////// Step 2: check old state: check old sender state ////////////////////////////
-
+/*
     
     
     
@@ -133,7 +148,7 @@ template Transfer(balanceLevels, accountLevels) {
     checkEqSenderOld.in[0] <== accountTreeSenderOld.root;
     checkEqSenderOld.in[1] <== oldAccountRoot;
 
-
+*/
     ////////////////////////// Step 3: check state transition ////////////////////////////
     // - check state fields
     ////////
@@ -207,7 +222,7 @@ template Transfer(balanceLevels, accountLevels) {
     
     
     component balanceTreeReceiverOld = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeReceiverOld.leaf <== balance2;
+    balanceTreeReceiverOld.leaf <== balance2 - amount;
     for (var i = 0; i < balanceLevels; i++) {
         balanceTreeReceiverOld.path_index[i] <== balance_path_index[i];
         balanceTreeReceiverOld.path_elements[i][0] <== receiver_balance_path_elements[i][0];
@@ -234,7 +249,7 @@ template Transfer(balanceLevels, accountLevels) {
     checkEqMid.in[0] <== accountTreeSenderNew.root;
     checkEqMid.in[1] <== accountTreeReceiverOld.root;
   
-
+/*
     
     
     
@@ -265,5 +280,5 @@ template Transfer(balanceLevels, accountLevels) {
     checkEqReceiverNew.in[0] <== accountTreeReceiverNew.root;
     checkEqReceiverNew.in[1] <== newAccountRoot;
 
-
+*/
 }
