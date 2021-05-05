@@ -2,8 +2,6 @@ import { assert } from 'console';
 import { hash } from '../helper.ts/hash';
 import { Account } from '../helper.ts/account';
 import { Tree } from '../helper.ts/binary_merkle_tree';
-import { PlaceOrderTxData } from './codec/place_order_tx_data';
-import { TransferTxData } from './codec/transfer_tx_data';
 import { hashAccountState, hashOrderState, calculateGenesisOrderRoot, emptyOrder, emptyOrderHash } from '../helper.ts/state-utils';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
@@ -127,8 +125,6 @@ class GlobalState {
       throw Error('account_id overflow');
     }
   }
-  // TODO: find a position range 0..2**n where the slot is either empty or occupied by a close order
-  // so we can place the new order here
   getNextOrderPosForUser(accountID): bigint {
     return this.nextOrderPositions.get(accountID);
   }
@@ -153,10 +149,10 @@ class GlobalState {
 
   updateOrderState(accountID: bigint, order: Order) {
     //console.log('updateOrderState', accountID, order);
-    //const candidateOrderPos = this.getNextOrderPosForUser(accountID); // no throw, so the order can be inserted
     this.orderMap.get(accountID).set(order.order_id, order);
-    //return candidateOrderPos;
   }
+  // find a position range 0..2**n where the slot is either empty or occupied by a close order
+  // so we can place the new order here
   updateNextOrderPos(accountID: bigint, startPos: bigint) {
     for (let i = 0; i < 2 ** this.orderLevels; i++) {
       const candidatePos = (startPos + BigInt(i)) % BigInt(2 ** this.orderLevels);
@@ -166,7 +162,6 @@ class GlobalState {
       if (isEmptyOrFilled) {
         this.nextOrderPositions.set(accountID, candidatePos);
         return;
-        //return candidatePos;
       }
     }
     throw new Error('cannot find order pos');
@@ -191,32 +186,11 @@ class GlobalState {
       return oldOrder;
     }
   }
-  // debug only?
+  // debug only
   setAccountOrder(accountID: bigint, order: Order) {
     this.updateOrderState(accountID, order);
     this.placeOrderIntoTree(accountID, order.order_id);
   }
-  /*
-  createNewOrder(tx: PlaceOrderTx): bigint {
-    const orderPos = this.getNextOrderPosForUser(tx.accountID);
-    if (orderPos >= 2 ** this.orderLevels) {
-      throw new Error(`invalid orderPos ${orderPos} for orderLevels ${this.orderLevels}`);
-    }
-
-    let order = {
-      order_id: tx.orderID,
-      tokenbuy: tx.tokenID_buy,
-      tokensell: tx.tokenID_sell,
-      filled_sell: 0n,
-      filled_buy: 0n,
-      total_sell: tx.amount_sell,
-      total_buy: tx.amount_buy,
-    };
-    this.setAccountOrderByPos(tx.accountID, orderPos, order);
-    this.updateNextOrderPos(tx.accountID, orderPos + 1n);
-    return orderPos;
-  }
-  */
   getOrderPosByID(accountID: bigint, orderID: bigint): bigint {
     const pos = this.orderIdToPos.get(accountID).get(orderID);
     if (pos == null) {
@@ -224,7 +198,6 @@ class GlobalState {
     }
     return pos;
   }
-
   recalculateFromAccountState(accountID: bigint) {
     this.accountTree.setValue(accountID, this.accounts.get(accountID).hash());
   }
@@ -254,8 +227,6 @@ class GlobalState {
 
     const order = this.orderMap.get(accountID).get(orderID);
     this.orderTrees.get(accountID).setValue(orderPos, hashOrderState(order));
-    // orderMap set seems redundant here?
-    //this.orderMap.get(accountID).set(order.order_id, order);
     this.orderIdToPos.get(accountID).set(order.order_id, orderPos);
     this.orderPosToId.get(accountID).set(orderPos, order.order_id);
     this.recalculateFromOrderTree(accountID);
@@ -607,16 +578,12 @@ class GlobalState {
   }
   */
 
-  // TODO: replace order is not implemented and tested here
   // case1: old order is empty
   // case2: old order is valid old order with different order id, but we will replace it.
   // case3: old order has same order id, we will modify it
   SpotTrade(tx: SpotTradeTx) {
     //assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
     //assert(this.accounts.get(tx.order2_accountID).ethAddr != 0n, 'SpotTrade account2');
-
-    //assert(tx.order1_id < 2 ** this.orderLevels, 'order1 id overflows');
-    //assert(tx.order2_id < 2 ** this.orderLevels, 'order2 id overflows');
 
     assert(this.hasOrder(tx.order1_accountID, tx.order1_id), 'unknown order1');
     assert(this.hasOrder(tx.order2_accountID, tx.order2_id), 'unknown order2');
@@ -710,7 +677,6 @@ class GlobalState {
     this.balanceTrees.get(tx.order2_accountID).setValue(tx.tokenID_2to1, account2_balance_sell - tx.amount_2to1);
     rawTx.balancePath1 = this.balanceTrees.get(tx.order2_accountID).getProof(tx.tokenID_1to2).path_elements;
 
-    // here is not correct for 'case2' above
     let newOrder1: Order = {
       order_id: tx.order1_id,
       tokenbuy: tx.tokenID_2to1,
@@ -722,7 +688,7 @@ class GlobalState {
     };
     this.updateOrderState(tx.order1_accountID, newOrder1);
     this.updateOrderLeaf(tx.order1_accountID, order1_pos, newOrder1.order_id);
-    // TODO: self trade is enabled here now. recheck it later
+    // we disabled self-trade
     // TODO: is self trade correctly handled inside circuits?
     //if (this.options.enable_self_trade) {
     //  account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.tokenID_2to1);

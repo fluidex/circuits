@@ -59,18 +59,6 @@ function initBlockTestCase() {
     state.setTokenBalance(accountID1, BigInt(i), 10n + BigInt(i));
   }
   state.setAccountNonce(accountID1, 19n);
-  // // order1. (Removed. Now we use placeOrderTx to set this order.)
-  // const order1_id = 1n;
-  // const order1 = {
-  //   status: 0, // open
-  //   tokenbuy: tokenID_2to1,
-  //   tokensell: tokenID_1to2,
-  //   filled_sell: 0n,
-  //   filled_buy: 0n,
-  //   total_sell: 1000n,
-  //   total_buy: 10000n,
-  // };
-  // state.setAccountOrder(accountID1, order1_id, order1);
 
   /// mock existing account2 data
   state.setAccountKey(accountID2, account2);
@@ -151,7 +139,6 @@ function initBlockTestCase() {
   const order1_id = 1n;
   const order1: Order = {
     order_id: order1_id,
-    //accountID: accountID1,
     tokensell: tokenID_1to2,
     tokenbuy: tokenID_2to1,
     total_sell: 1000n,
@@ -174,16 +161,6 @@ function initBlockTestCase() {
     amount_2to1: amount_2to1,
     order1_id: order1_id,
     order2_id: order2_id,
-    /*
-    order1_amountsell: order1.total_sell,
-    order1_amountbuy: order1.total_buy,
-    order1_filledsell: 0n,
-    order1_filledbuy: 0n,x
-    order2_amountsell: order2.total_sell,
-    order2_amountbuy: order2.total_buy,
-    order2_filledsell: order2.filled_sell,
-    order2_filledbuy: order2.filled_buy,
-    */
   };
   state.SpotTrade(spotTradeTx);
 

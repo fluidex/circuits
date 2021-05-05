@@ -161,38 +161,6 @@ function handleTrade(state: GlobalState, trade) {
   checkGlobalStateKnowsOrder(askOrderStateBefore);
   checkGlobalStateKnowsOrder(bidOrderStateBefore);
 
-  /*
-  // self-trade is not allowed, so sorting here seems unnecessary?
-  for (const orderId of [...orderStateBefore.keys()].sort()) {
-    
-    if (!placedOrder.has(orderId)) {
-      const order = orderStateBefore.get(orderId);
-      // check this is a new order
-      assert(order.finishedBase == '0' && order.finishedQuote == '0', 'invalid new order', order);
-
-      let orderToPut = {
-        order_id: orderId,
-        tokensell: order.tokensell,
-        tokenbuy: order.tokenbuy,
-        filled_sell: 0n,
-        filled_buy: 0n,
-        total_sell: order.total_sell,
-        total_buy: order.total_buy,
-      };
-      state.addOrder(order.accountID, orderToPut);
-      //let newOrderID = 
-      //placedOrder.set(orderId, [orderToPut.accountID, newOrderID]);
-      if (verbose) {
-        //console.log('global order id to user order id', orderId, orderToPut.accountID, newOrderID);
-      }
-    } else {
-      if (verbose) {
-        console.log('skip put order', orderId);
-      }
-    }
-  }
-  */
-
   // second check order states are same as 'GlobalState'
   function checkState(balanceState, askOrder, bidOrder) {
     let balanceStateLocal = {

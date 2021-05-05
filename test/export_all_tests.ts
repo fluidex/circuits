@@ -6,6 +6,7 @@ import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './hash_sta
 import { TestDepositToNew, TestDepositToOld } from './deposit';
 import { TestTransfer } from './transfer';
 import { TestWithdraw } from './withdraw';
+// SpotTrade is tested within the `block` test case
 //import { TestPlaceOrder } from './place_order';
 //import { TestSpotTrade } from './spot_trade';
 import { TestBlock } from './block';

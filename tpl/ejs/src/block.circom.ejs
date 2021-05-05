@@ -201,28 +201,6 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processWithdraw[i].oldAccountRoot <== oldAccountRoots[i];
         processWithdraw[i].newAccountRoot <== newAccountRoots[i];
 
-        // try place_order
-        /*
-        processPlaceOrder[i] = PlaceOrder(balanceLevels, orderLevels, accountLevels);
-        processPlaceOrder[i].enabled <== enablePlaceOrder[i].out;
-        for (var j = 0; j < TxLength(); j++) {
-            processPlaceOrder[i].in[j] <== encodedTxs[i][j];
-        }
-        
-        for (var j = 0; j < balanceLevels; j++) {
-            processPlaceOrder[i].balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
-        }
-        for (var j = 0; j < orderLevels; j++) {
-            processPlaceOrder[i].order_path_elements[j][0] <== order_path_elements[i][0][j][0];
-        }
-        for (var j = 0; j < accountLevels; j++) {
-            processPlaceOrder[i].account_path_elements[j][0] <== account_path_elements[i][0][j][0];
-        }
-        processPlaceOrder[i].oldOrderRoot <== orderRoots[i][0];
-        processPlaceOrder[i].newOrderRoot <== orderRoots[i][1];
-        processPlaceOrder[i].oldAccountRoot <== oldAccountRoots[i];
-        processPlaceOrder[i].newAccountRoot <== newAccountRoots[i];
-*/
         // try spot_trade
         processSpotTrade[i] = SpotTrade(balanceLevels, orderLevels, accountLevels);
         processSpotTrade[i].enabled <== enableSpotTrade[i].out;

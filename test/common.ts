@@ -70,19 +70,7 @@ class PlaceOrderTx {
   amount_sell: bigint;
   amount_buy: bigint;
 }
-/*
 
-class Order {
-  order_id: bigint;
-  tokenbuy: bigint;
-  tokensell: bigint;
-  filled_sell: bigint;
-  filled_buy: bigint;
-  total_sell: bigint;
-  total_buy: bigint;
-}*/
-
-// TODO: matain many of these in state
 class SpotTradeTx {
   order1_accountID: bigint;
   order2_accountID: bigint;
