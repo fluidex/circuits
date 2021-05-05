@@ -9,12 +9,11 @@ function upCaseFirstLetter(item) {
 }
 // TODO: a better name?
 function getOrderLeafs() {
-  //<% for(const idx of ['1', '2']) { for(const prefix of ['old', 'new']) { for (const f of ['id', 'tokensell', 'filledsell', 'amountsell', 'tokenbuy', 'filledbuy', 'amountbuy']) { %>
-  //  signal input <%= prefix %>_order<%= idx %>_<%= f %>;<% }}} %>
   let output = [];
+  let fields = ['ID', 'tokenSell', 'filledSell', 'amountSell', 'tokenBuy', 'filledBuy', 'amountBuy'];
   for (const idx of ['1', '2']) {
     for (const prefix of ['old', 'new']) {
-      for (const f of ['ID', 'tokenSell', 'filledSell', 'amountSell', 'tokenBuy', 'filledBuy', 'amountBuy']) {
+      for (const f of fields) {
         output.push(`${prefix}Order${idx}${upCaseFirstLetter(f)}`);
       }
     }

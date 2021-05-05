@@ -192,22 +192,32 @@ template orderUpdater(orderLevels) {
 // TODO: is tradeHistory_storage_leaf necessary?
 template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
+    
+    signal input enableBalanceCheck1;
+    signal input enableBalanceCheck2;
+
+    // is it a better idea to reuse 'newOrder1TokenSell'?
+    signal input tokenID1;
+    signal input tokenID2;
+    
 
     signal input order1Pos;
     signal input order2Pos;
 
-
-    <% /* %>
-    <% for (const f of ['id', 'TokenSell', 'FilledSell', 'AmountSell', 'TokenBuy', 'FilledBuy', 'AmountBuy']) { %>
-    signal input order_<%= f %>s[4];
-    <% ['old', 'new'].forEach(function(prefix, i) { ['1', '2'].forEach(function(mid, j){ %>
-    signal <%= prefix %>_order<%= mid %>_<%= f %>;
-    <%= prefix %>_order<%= mid %>_<%= f %> <== order_<%= f %>s<%= i*2+j %>;<% })}) %>
-    <% } %>
-    <% */ %>
+    // orderRoot1 and orderRoot2 are from universal checker inputs
+    // they are account1OldOrderRoot and account2NewOrderRoot in fact
+    signal input orderRoot1;
+    signal input orderRoot2;
 
     <% for(const item of codegen.config.orderLeafs) { %>
     signal input <%= item %>;<% } %>
+
+    <%- codegen.generateMultiCheckEq([
+        ['enableBalanceCheck1', '1'],
+        ['enableBalanceCheck2', '1'],
+        ['tokenID1', 'newOrder1TokenSell'],
+        ['tokenID2', 'newOrder2TokenBuy']
+    ], {ctx: '', replacers: {}}) %>
 
     component check1 = ForceEqualIfEnabled();
     check1.enabled <== enabled;
@@ -300,6 +310,10 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
         order2_updater.order_path_elements[i][0] <== order_path_elements[1][i][0];
     }
 
+    <%- codegen.generateMultiCheckEq([
+        ['order1_updater.oldOrderRoot', 'orderRoot1'],
+        ['order2_updater.newOrderRoot', 'orderRoot2']
+    ], {ctx: 'OrderRoot', replacers: {}}) %>
 
     signal input order1AccountID;
     signal input order2AccountID;
@@ -455,19 +469,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // we need make 4 updates to the tree here {sender,receiver}x{token1,token2}
 
     // Step1: check old sender state
-    <%- codegen.generateBalanceCheckCircom({ctx: 'Account1Old', replacers: {
-        balance: 'account1BalanceSell',
-        balance_path_index: 'balance_1to2_path_index',
-        balance_path_elements: 'old_account1_balance_path_elements',
-        account_path_index: 'account1_path_index',
-        account_path_elements: 'old_account1_path_elements',
-        sign: "sign1",
-        ay: 'ay1',
-        nonce: 'nonce1',
-        ethAddr: 'ethAddr1',
-        accountRoot: 'oldAccountRoot',
-        orderRoot: 'oldOrder1Root'
-    }}) %>
+    // already done in block.circom using universal checker
 
     // Step2: update sender balance
     <%- codegen.generateSameRootCircom({ctx: 'Account1Update', replacers: {
@@ -522,17 +524,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     }}) %>
 
     // Step5: check new state root
-    <%- codegen.generateBalanceCheckCircom({ctx: 'Account2New', replacers: {
-        balance: 'account2BalanceBuy + amount_1to2',
-        balance_path_index: 'balance_1to2_path_index',
-        balance_path_elements: 'tmp_account2_balance_path_elements',
-        account_path_index: 'account2_path_index',
-        account_path_elements: 'tmp_account2_path_elements',
-        nonce: 'nonce2',
-        sign: "sign2",
-        ay: 'ay2',
-        ethAddr: 'ethAddr2',
-        accountRoot: 'newAccountRoot',
-        orderRoot: 'newOrder2Root'
-    }}) %>
+
+    // already done in block.circom using universal checker
+    
 }

@@ -271,6 +271,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].newOrder2TokenBuy <== decodedTx[i].newOrder2TokenBuy;
         processSpotTrade[i].newOrder2FilledBuy <== decodedTx[i].newOrder2FilledBuy;
         processSpotTrade[i].newOrder2AmountBuy <== decodedTx[i].newOrder2AmountBuy;
+        processSpotTrade[i].enableBalanceCheck1 <== decodedTx[i].enableBalanceCheck1;
+        processSpotTrade[i].enableBalanceCheck2 <== decodedTx[i].enableBalanceCheck2;
+        processSpotTrade[i].tokenID1 <== decodedTx[i].tokenID1;
+        processSpotTrade[i].tokenID2 <== decodedTx[i].tokenID2;
    
 
         processSpotTrade[i].order1Pos <== decodedTx[i].order1Pos;
@@ -290,10 +294,14 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].amount_1to2 <== decodedTx[i].amount;
         processSpotTrade[i].amount_2to1 <== decodedTx[i].amount2;
 
+        processSpotTrade[i].orderRoot1 <== orderRoots[i][0];
+        processSpotTrade[i].orderRoot2 <== orderRoots[i][1];
+
         processSpotTrade[i].order1TokenSellBalance <== decodedTx[i].balance1;
-        processSpotTrade[i].order2TokenBuyBalance <== decodedTx[i].balance2;
+        // for reusing universal checker, balance2 here must be a leaf of the final merkle tree
+        processSpotTrade[i].order2TokenBuyBalance <== decodedTx[i].balance2 - decodedTx[i].amount;
         processSpotTrade[i].order2TokenSellBalance <== decodedTx[i].balance3;
-        processSpotTrade[i].order1TokenBuyBalance <== decodedTx[i].balance4;
+        processSpotTrade[i].order1TokenBuyBalance <== decodedTx[i].balance4 - decodedTx[i].amount2;
 
         for (var j = 0; j < orderLevels; j++) {
             processSpotTrade[i].order_path_elements[0][j][0] <== order_path_elements[i][0][j][0];
