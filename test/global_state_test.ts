@@ -155,7 +155,7 @@ function handleTrade(state: GlobalState, trade) {
       };
       state.updateOrderState(order.accountID, orderToPut);
     } else {
-      assert(state.hasOrder(order.accountID, orderId), 'invalid old order');
+      assert(state.hasOrder(order.accountID, orderId), 'invalid old order, too many open orders?');
     }
   }
   checkGlobalStateKnowsOrder(askOrderStateBefore);

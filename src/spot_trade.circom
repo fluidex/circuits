@@ -243,12 +243,22 @@ template orderUpdater(orderLevels) {
 // TODO: is tradeHistory_storage_leaf necessary?
 template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
+    
+    signal input enableBalanceCheck1;
+    signal input enableBalanceCheck2;
+
+    // is it a better idea to reuse 'newOrder1TokenSell'?
+    signal input tokenID1;
+    signal input tokenID2;
+    
 
     signal input order1Pos;
     signal input order2Pos;
 
-
-    
+    // orderRoot1 and orderRoot2 are from universal checker inputs
+    // they are account1OldOrderRoot and account2NewOrderRoot in fact
+    signal input orderRoot1;
+    signal input orderRoot2;
 
     
     signal input oldOrder1ID;
@@ -279,6 +289,30 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input newOrder2TokenBuy;
     signal input newOrder2FilledBuy;
     signal input newOrder2AmountBuy;
+
+    
+
+    component checkEq0 = ForceEqualIfEnabled();
+    checkEq0.enabled <== enabled;
+    checkEq0.in[0] <== enableBalanceCheck1;
+    checkEq0.in[1] <== 1;
+
+    component checkEq1 = ForceEqualIfEnabled();
+    checkEq1.enabled <== enabled;
+    checkEq1.in[0] <== enableBalanceCheck2;
+    checkEq1.in[1] <== 1;
+
+    component checkEq2 = ForceEqualIfEnabled();
+    checkEq2.enabled <== enabled;
+    checkEq2.in[0] <== tokenID1;
+    checkEq2.in[1] <== newOrder1TokenSell;
+
+    component checkEq3 = ForceEqualIfEnabled();
+    checkEq3.enabled <== enabled;
+    checkEq3.in[0] <== tokenID2;
+    checkEq3.in[1] <== newOrder2TokenBuy;
+
+
 
     component check1 = ForceEqualIfEnabled();
     check1.enabled <== enabled;
@@ -394,6 +428,19 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     for (var i = 0; i < orderLevels; i++) {
         order2_updater.order_path_elements[i][0] <== order_path_elements[1][i][0];
     }
+
+    
+
+    component checkEqOrderRoot0 = ForceEqualIfEnabled();
+    checkEqOrderRoot0.enabled <== enabled;
+    checkEqOrderRoot0.in[0] <== order1_updater.oldOrderRoot;
+    checkEqOrderRoot0.in[1] <== orderRoot1;
+
+    component checkEqOrderRoot1 = ForceEqualIfEnabled();
+    checkEqOrderRoot1.enabled <== enabled;
+    checkEqOrderRoot1.in[0] <== order2_updater.newOrderRoot;
+    checkEqOrderRoot1.in[1] <== orderRoot2;
+
 
 
     signal input order1AccountID;
@@ -550,36 +597,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // we need make 4 updates to the tree here {sender,receiver}x{token1,token2}
 
     // Step1: check old sender state
-    
-    
-    
-    component balanceTreeAccount1Old = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeAccount1Old.leaf <== account1BalanceSell;
-    for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeAccount1Old.path_index[i] <== balance_1to2_path_index[i];
-        balanceTreeAccount1Old.path_elements[i][0] <== old_account1_balance_path_elements[i][0];
-    }
-    
-    // account state hash
-    component accountHashAccount1Old = HashAccount();
-    accountHashAccount1Old.nonce <== nonce1;
-    accountHashAccount1Old.sign <== sign1;
-    accountHashAccount1Old.balanceRoot <== balanceTreeAccount1Old.root;
-    accountHashAccount1Old.ay <== ay1;
-    accountHashAccount1Old.ethAddr <== ethAddr1;
-    accountHashAccount1Old.orderRoot <== oldOrder1Root;
-    // check account tree
-    component accountTreeAccount1Old = CalculateRootFromMerklePath(accountLevels);
-    accountTreeAccount1Old.leaf <== accountHashAccount1Old.out;
-    for (var i = 0; i < accountLevels; i++) {
-        accountTreeAccount1Old.path_index[i] <== account1_path_index[i];
-        accountTreeAccount1Old.path_elements[i][0] <== old_account1_path_elements[i][0];
-    }
-    component checkEqAccount1Old = ForceEqualIfEnabled();
-    checkEqAccount1Old.enabled <== enabled;
-    checkEqAccount1Old.in[0] <== accountTreeAccount1Old.root;
-    checkEqAccount1Old.in[1] <== oldAccountRoot;
-
+    // already done in block.circom using universal checker
 
     // Step2: update sender balance
     
@@ -678,34 +696,7 @@ template tradeTransfer(balanceLevels, accountLevels) {
 
 
     // Step5: check new state root
-    
-    
-    
-    component balanceTreeAccount2New = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeAccount2New.leaf <== account2BalanceBuy + amount_1to2;
-    for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeAccount2New.path_index[i] <== balance_1to2_path_index[i];
-        balanceTreeAccount2New.path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
-    }
-    
-    // account state hash
-    component accountHashAccount2New = HashAccount();
-    accountHashAccount2New.nonce <== nonce2;
-    accountHashAccount2New.sign <== sign2;
-    accountHashAccount2New.balanceRoot <== balanceTreeAccount2New.root;
-    accountHashAccount2New.ay <== ay2;
-    accountHashAccount2New.ethAddr <== ethAddr2;
-    accountHashAccount2New.orderRoot <== newOrder2Root;
-    // check account tree
-    component accountTreeAccount2New = CalculateRootFromMerklePath(accountLevels);
-    accountTreeAccount2New.leaf <== accountHashAccount2New.out;
-    for (var i = 0; i < accountLevels; i++) {
-        accountTreeAccount2New.path_index[i] <== account2_path_index[i];
-        accountTreeAccount2New.path_elements[i][0] <== tmp_account2_path_elements[i][0];
-    }
-    component checkEqAccount2New = ForceEqualIfEnabled();
-    checkEqAccount2New.enabled <== enabled;
-    checkEqAccount2New.in[0] <== accountTreeAccount2New.root;
-    checkEqAccount2New.in[1] <== newAccountRoot;
 
+    // already done in block.circom using universal checker
+    
 }

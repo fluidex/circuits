@@ -25,7 +25,9 @@ import {
 function shallowClone(o) {
   return Object.assign({}, o);
 }
-
+// TODO: 
+// 1. how to handle order cancel? it it needed to implement order cancel inside circuits?
+// 2. what will happen when num of open orders > 2**orderLevel?
 class GlobalState {
   nTx: number;
   balanceLevels: number;
@@ -165,6 +167,11 @@ class GlobalState {
       }
     }
     throw new Error('cannot find order pos');
+    // force replace
+    // TODO: replace the order with least orderid?
+    //const candidatePos = startPos % BigInt(2 ** this.orderLevels);
+    //this.nextOrderPositions.set(accountID, candidatePos);
+    //console.log('WARN: cannot replace filled/empty order, force replace an open order', accountID, candidatePos);
   }
   // place an order into the tree, return the placed old state
   placeOrderIntoTree(accountID: bigint, orderID: bigint): Order {
@@ -528,12 +535,16 @@ class GlobalState {
   SpotTrade(tx: SpotTradeTx) {
     //assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
     //assert(this.accounts.get(tx.order2_accountID).ethAddr != 0n, 'SpotTrade account2');
+    if (tx.order1_accountID == tx.order2_accountID) {
+      throw new Error('self trade not allowed');
+    }
 
     assert(this.hasOrder(tx.order1_accountID, tx.order1_id), 'unknown order1');
     assert(this.hasOrder(tx.order2_accountID, tx.order2_id), 'unknown order2');
     const oldRoot = this.root();
 
     let account1 = this.accounts.get(tx.order1_accountID);
+    let orderRoot0 = account1.orderRoot;
     let account2 = this.accounts.get(tx.order2_accountID);
     let proof_order1_seller = this.stateProof(tx.order1_accountID, tx.tokenID_1to2);
     let proof_order2_seller = this.stateProof(tx.order2_accountID, tx.tokenID_2to1);
@@ -592,21 +603,24 @@ class GlobalState {
     encodedTx[TxDetailIdx.Order2Pos] = order2_pos;
 
     encodedTx[TxDetailIdx.Balance1] = account1_balance_sell;
-    encodedTx[TxDetailIdx.Balance2] = account2_balance_buy;
+    encodedTx[TxDetailIdx.Balance2] = account2_balance_buy + tx.amount_1to2;
     encodedTx[TxDetailIdx.Balance3] = account2_balance_sell;
-    encodedTx[TxDetailIdx.Balance4] = account1_balance_buy;
+    encodedTx[TxDetailIdx.Balance4] = account1_balance_buy + tx.amount_2to1;
+
+    encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
+    encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
 
     let rawTx: RawTx = {
       txType: TxType.SpotTrade,
       payload: encodedTx,
-      balancePath0: proof_order1_seller.balancePath,
-      balancePath1: null,
-      balancePath2: proof_order2_seller.balancePath,
-      balancePath3: null,
+      balancePath0: proof_order1_seller.balancePath, // sender old
+      balancePath1: null, // receiver new
+      balancePath2: proof_order2_seller.balancePath, // receiver old
+      balancePath3: null, // sender new
       orderPath0: this.orderTrees.get(tx.order1_accountID).getProof(order1_pos).path_elements,
       orderPath1: this.orderTrees.get(tx.order2_accountID).getProof(order2_pos).path_elements,
-      orderRoot0: account1.orderRoot, // not really used in the circuit
-      orderRoot1: account2.orderRoot, // not really used in the circuit
+      orderRoot0: orderRoot0,
+      orderRoot1: null,
       accountPath0: proof_order1_seller.accountPath,
       accountPath1: null,
       rootBefore: oldRoot,
@@ -616,10 +630,10 @@ class GlobalState {
     /// do not update state root
     // account1 after sending, before receiving
     this.balanceTrees.get(tx.order1_accountID).setValue(tx.tokenID_1to2, account1_balance_sell - tx.amount_1to2);
-    rawTx.balancePath3 = this.balanceTrees.get(tx.order1_accountID).getProof(tx.tokenID_2to1).path_elements;
+    //rawTx.balancePath3 = this.balanceTrees.get(tx.order1_accountID).getProof(tx.tokenID_2to1).path_elements;
     // account2 after sending, before receiving
     this.balanceTrees.get(tx.order2_accountID).setValue(tx.tokenID_2to1, account2_balance_sell - tx.amount_2to1);
-    rawTx.balancePath1 = this.balanceTrees.get(tx.order2_accountID).getProof(tx.tokenID_1to2).path_elements;
+    //rawTx.balancePath1 = this.balanceTrees.get(tx.order2_accountID).getProof(tx.tokenID_1to2).path_elements;
 
     let newOrder1: Order = {
       order_id: tx.order1_id,
@@ -638,7 +652,7 @@ class GlobalState {
     //  account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.tokenID_2to1);
     //}
     this.setTokenBalance(tx.order1_accountID, tx.tokenID_2to1, account1_balance_buy + tx.amount_2to1);
-    rawTx.accountPath1 = this.accountTree.getProof(tx.order2_accountID).path_elements;
+    //rawTx.accountPath1 = this.accountTree.getProof(tx.order2_accountID).path_elements;
 
     let newOrder2: Order = {
       order_id: tx.order2_id,
@@ -656,6 +670,11 @@ class GlobalState {
     //}
     this.setTokenBalance(tx.order2_accountID, tx.tokenID_1to2, account2_balance_buy + tx.amount_1to2);
 
+    rawTx.balancePath3 = this.balanceTrees.get(tx.order1_accountID).getProof(tx.tokenID_2to1).path_elements;
+    rawTx.balancePath1 = this.balanceTrees.get(tx.order2_accountID).getProof(tx.tokenID_1to2).path_elements;
+    rawTx.accountPath1 = this.accountTree.getProof(tx.order2_accountID).path_elements;
+    rawTx.orderRoot1 = this.accounts.get(tx.order2_accountID).orderRoot;
+
     encodedTx[TxDetailIdx.NewOrder1ID] = newOrder1.order_id;
     encodedTx[TxDetailIdx.NewOrder1TokenSell] = newOrder1.tokensell;
     encodedTx[TxDetailIdx.NewOrder1FilledSell] = newOrder1.filled_sell;
@@ -671,6 +690,9 @@ class GlobalState {
     encodedTx[TxDetailIdx.NewOrder2TokenBuy] = newOrder2.tokenbuy;
     encodedTx[TxDetailIdx.NewOrder2FilledBuy] = newOrder2.filled_buy;
     encodedTx[TxDetailIdx.NewOrder2AmountBuy] = newOrder2.total_buy;
+
+    encodedTx[TxDetailIdx.TokenID1] = newOrder1.tokensell;
+    encodedTx[TxDetailIdx.TokenID2] = newOrder2.tokenbuy;
 
     rawTx.rootAfter = this.root();
     this.addRawTx(rawTx);

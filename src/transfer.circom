@@ -116,40 +116,7 @@ template Transfer(balanceLevels, accountLevels) {
 
 
 
-    ////////////////////////// Step 2: check old state: check old sender state ////////////////////////////
-/*
-    
-    
-    
-    component balanceTreeSenderOld = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeSenderOld.leaf <== balance1;
-    for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeSenderOld.path_index[i] <== balance_path_index[i];
-        balanceTreeSenderOld.path_elements[i][0] <== sender_balance_path_elements[i][0];
-    }
-    
-    // account state hash
-    component accountHashSenderOld = HashAccount();
-    accountHashSenderOld.nonce <== nonce1;
-    accountHashSenderOld.sign <== sign1;
-    accountHashSenderOld.balanceRoot <== balanceTreeSenderOld.root;
-    accountHashSenderOld.ay <== ay1;
-    accountHashSenderOld.ethAddr <== ethAddr1;
-    accountHashSenderOld.orderRoot <== orderRoot1;
-    // check account tree
-    component accountTreeSenderOld = CalculateRootFromMerklePath(accountLevels);
-    accountTreeSenderOld.leaf <== accountHashSenderOld.out;
-    for (var i = 0; i < accountLevels; i++) {
-        accountTreeSenderOld.path_index[i] <== sender_account_path_index[i];
-        accountTreeSenderOld.path_elements[i][0] <== sender_account_path_elements[i][0];
-    }
-    component checkEqSenderOld = ForceEqualIfEnabled();
-    checkEqSenderOld.enabled <== enabled;
-    checkEqSenderOld.in[0] <== accountTreeSenderOld.root;
-    checkEqSenderOld.in[1] <== oldAccountRoot;
-
-*/
-    ////////////////////////// Step 3: check state transition ////////////////////////////
+    ////////////////////////// Step 2: check signatures ////////////////////////////
     // - check state fields
     ////////
     // sender nonce check on L2
@@ -191,7 +158,7 @@ template Transfer(balanceLevels, accountLevels) {
     // sender balance
 
 
-    ////////////////////////// Step 4: check state: check sender and receiver state after sending but before receiving ////////////////////////////
+    ////////////////////////// Step 3: check state: check sender and receiver state after sending but before receiving ////////////////////////////
 
     
     
@@ -249,36 +216,4 @@ template Transfer(balanceLevels, accountLevels) {
     checkEqMid.in[0] <== accountTreeSenderNew.root;
     checkEqMid.in[1] <== accountTreeReceiverOld.root;
   
-/*
-    
-    
-    
-    component balanceTreeReceiverNew = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeReceiverNew.leaf <== balance2 + amount;
-    for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeReceiverNew.path_index[i] <== balance_path_index[i];
-        balanceTreeReceiverNew.path_elements[i][0] <== receiver_balance_path_elements[i][0];
-    }
-    
-    // account state hash
-    component accountHashReceiverNew = HashAccount();
-    accountHashReceiverNew.nonce <== nonce2;
-    accountHashReceiverNew.sign <== sign2;
-    accountHashReceiverNew.balanceRoot <== balanceTreeReceiverNew.root;
-    accountHashReceiverNew.ay <== ay2;
-    accountHashReceiverNew.ethAddr <== ethAddr2;
-    accountHashReceiverNew.orderRoot <== orderRoot2;
-    // check account tree
-    component accountTreeReceiverNew = CalculateRootFromMerklePath(accountLevels);
-    accountTreeReceiverNew.leaf <== accountHashReceiverNew.out;
-    for (var i = 0; i < accountLevels; i++) {
-        accountTreeReceiverNew.path_index[i] <== receiver_account_path_index[i];
-        accountTreeReceiverNew.path_elements[i][0] <== receiver_account_path_elements[i][0];
-    }
-    component checkEqReceiverNew = ForceEqualIfEnabled();
-    checkEqReceiverNew.enabled <== enabled;
-    checkEqReceiverNew.in[0] <== accountTreeReceiverNew.root;
-    checkEqReceiverNew.in[1] <== newAccountRoot;
-
-*/
 }
