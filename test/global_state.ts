@@ -422,11 +422,13 @@ class GlobalState {
     encodedTx[TxDetailIdx.EthAddr1] = fromAccount.ethAddr;
     encodedTx[TxDetailIdx.EthAddr2] = toAccount.ethAddr;
     encodedTx[TxDetailIdx.Balance1] = fromOldBalance;
-    encodedTx[TxDetailIdx.Balance2] = toOldBalance;
+    encodedTx[TxDetailIdx.Balance2] = toOldBalance + tx.amount;
     encodedTx[TxDetailIdx.SigL2Hash] = tx.signature.hash;
     encodedTx[TxDetailIdx.S] = tx.signature.S;
     encodedTx[TxDetailIdx.R8x] = tx.signature.R8x;
     encodedTx[TxDetailIdx.R8y] = tx.signature.R8y;
+    encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
+    encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
 
     this.setTokenBalance(tx.from, tx.tokenID, fromOldBalance - tx.amount);
     this.increaseNonce(tx.from);
