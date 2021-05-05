@@ -42,22 +42,22 @@ template priceCheck() {
 
 // TODO: use sell for filled or use buy for filled?
 // for now we have both. but usually for bz we only have one filled, according to types. 
-// (FilledSell + thisSell <= totalSell) || (FilledBuy + thisBuy <= totalBuy)
+// (filledSell + thisSell <= totalSell) || (filledBuy + thisBuy <= totalBuy)
 template fillLimitCheck() {
     signal input enabled;
 
-    signal input FilledSell;
+    signal input filledSell;
     signal input thisSell;
     signal input totalSell;
-    signal input FilledBuy;
+    signal input filledBuy;
     signal input thisBuy;
     signal input totalBuy;
 
     component sellLimit = LessEqThan(192);
-    sellLimit.in[0] <== FilledSell + thisSell;
+    sellLimit.in[0] <== filledSell;// + thisSell;
     sellLimit.in[1] <== totalSell;
     component buyLimit = LessEqThan(192);
-    buyLimit.in[0] <== FilledBuy + thisBuy;
+    buyLimit.in[0] <== filledBuy;// + thisBuy;
     buyLimit.in[1] <== totalBuy;
 
     component limitCheck = OR();
@@ -166,21 +166,24 @@ template orderUpdater(orderLevels) {
     // and isSameOrder = isSameOrder || enabled
     // For now, we set all inputs as 0s, so when enabled is false, the two checks can pass even without 'or'
 
-    component isnewOrder = LessThan(192);
-    isnewOrder.in[0] <== oldOrderID;
-    isnewOrder.in[1] <== newOrderID;
+    component isNewOrder = LessThan(192);
+    isNewOrder.in[0] <== oldOrderID;
+    isNewOrder.in[1] <== newOrderID;
+    component isNewOrderAndEnabled = AND();
+    isNewOrderAndEnabled.a <== isNewOrder.out;
+    isNewOrderAndEnabled.b <== enabled;
 
     
 
-    component checkEqWhennewOrder0 = ForceEqualIfEnabled();
-    checkEqWhennewOrder0.enabled <== isnewOrder.out;
-    checkEqWhennewOrder0.in[0] <== newOrderFilledSell;
-    checkEqWhennewOrder0.in[1] <== thisSell;
+    component checkEqWhenNewOrder0 = ForceEqualIfEnabled();
+    checkEqWhenNewOrder0.enabled <== isNewOrderAndEnabled.out;
+    checkEqWhenNewOrder0.in[0] <== newOrderFilledSell;
+    checkEqWhenNewOrder0.in[1] <== thisSell;
 
-    component checkEqWhennewOrder1 = ForceEqualIfEnabled();
-    checkEqWhennewOrder1.enabled <== isnewOrder.out;
-    checkEqWhennewOrder1.in[0] <== newOrderFilledBuy;
-    checkEqWhennewOrder1.in[1] <== thisBuy;
+    component checkEqWhenNewOrder1 = ForceEqualIfEnabled();
+    checkEqWhenNewOrder1.enabled <== isNewOrderAndEnabled.out;
+    checkEqWhenNewOrder1.in[0] <== newOrderFilledBuy;
+    checkEqWhenNewOrder1.in[1] <== thisBuy;
 
 
 
@@ -188,35 +191,38 @@ template orderUpdater(orderLevels) {
     component isSameOrder = IsEqual();
     isSameOrder.in[0] <== oldOrderID;
     isSameOrder.in[1] <== newOrderID;
+    component isSameOrderAndEnabled = AND();
+    isSameOrderAndEnabled.a <== isSameOrder.out;
+    isSameOrderAndEnabled.b <== enabled;
     
 
     component checkEqWhenSameOrder0 = ForceEqualIfEnabled();
-    checkEqWhenSameOrder0.enabled <== isSameOrder.out;
+    checkEqWhenSameOrder0.enabled <== isSameOrderAndEnabled.out;
     checkEqWhenSameOrder0.in[0] <== newOrderFilledSell;
     checkEqWhenSameOrder0.in[1] <== oldOrderFilledSell + thisSell;
 
     component checkEqWhenSameOrder1 = ForceEqualIfEnabled();
-    checkEqWhenSameOrder1.enabled <== isSameOrder.out;
+    checkEqWhenSameOrder1.enabled <== isSameOrderAndEnabled.out;
     checkEqWhenSameOrder1.in[0] <== newOrderFilledBuy;
     checkEqWhenSameOrder1.in[1] <== oldOrderFilledBuy + thisBuy;
 
     component checkEqWhenSameOrder2 = ForceEqualIfEnabled();
-    checkEqWhenSameOrder2.enabled <== isSameOrder.out;
+    checkEqWhenSameOrder2.enabled <== isSameOrderAndEnabled.out;
     checkEqWhenSameOrder2.in[0] <== newOrderAmountSell;
     checkEqWhenSameOrder2.in[1] <== oldOrderAmountSell;
 
     component checkEqWhenSameOrder3 = ForceEqualIfEnabled();
-    checkEqWhenSameOrder3.enabled <== isSameOrder.out;
+    checkEqWhenSameOrder3.enabled <== isSameOrderAndEnabled.out;
     checkEqWhenSameOrder3.in[0] <== newOrderAmountBuy;
     checkEqWhenSameOrder3.in[1] <== oldOrderAmountBuy;
 
     component checkEqWhenSameOrder4 = ForceEqualIfEnabled();
-    checkEqWhenSameOrder4.enabled <== isSameOrder.out;
+    checkEqWhenSameOrder4.enabled <== isSameOrderAndEnabled.out;
     checkEqWhenSameOrder4.in[0] <== newOrderTokenSell;
     checkEqWhenSameOrder4.in[1] <== oldOrderTokenSell;
 
     component checkEqWhenSameOrder5 = ForceEqualIfEnabled();
-    checkEqWhenSameOrder5.enabled <== isSameOrder.out;
+    checkEqWhenSameOrder5.enabled <== isSameOrderAndEnabled.out;
     checkEqWhenSameOrder5.in[0] <== newOrderTokenBuy;
     checkEqWhenSameOrder5.in[1] <== oldOrderTokenBuy;
 
@@ -225,7 +231,7 @@ template orderUpdater(orderLevels) {
 
     // check oldOrderID <= newOrderID
     component isValid = OR();
-    isValid.a <== isnewOrder.out;
+    isValid.a <== isNewOrder.out;
     isValid.b <== isSameOrder.out;  
     component checkValid = ForceEqualIfEnabled();
     checkValid.enabled <== enabled;
@@ -313,20 +319,20 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     // /// order1 fill_limit check
     component order1_filledcheck = fillLimitCheck();
     order1_filledcheck.enabled <== enabled;
-    order1_filledcheck.FilledSell <== newOrder1FilledSell;
+    order1_filledcheck.filledSell <== newOrder1FilledSell;
     order1_filledcheck.thisSell <== amount_1to2;
     order1_filledcheck.totalSell <== newOrder1AmountSell;
-    order1_filledcheck.FilledBuy <== newOrder1FilledBuy;
+    order1_filledcheck.filledBuy <== newOrder1FilledBuy;
     order1_filledcheck.thisBuy <== amount_2to1;
     order1_filledcheck.totalBuy <== newOrder1AmountBuy;
 
     // /// order2 fill_limit check
     component order2_filledcheck = fillLimitCheck();
     order2_filledcheck.enabled <== enabled;
-    order2_filledcheck.FilledSell <== newOrder2FilledSell;
+    order2_filledcheck.filledSell <== newOrder2FilledSell;
     order2_filledcheck.thisSell <== amount_2to1;
     order2_filledcheck.totalSell <== newOrder2AmountSell;
-    order2_filledcheck.FilledBuy <== newOrder2FilledBuy;
+    order2_filledcheck.filledBuy <== newOrder2FilledBuy;
     order2_filledcheck.thisBuy <== amount_1to2;
     order2_filledcheck.totalBuy <== newOrder2AmountBuy;
 

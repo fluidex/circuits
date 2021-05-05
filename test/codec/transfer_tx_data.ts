@@ -7,10 +7,10 @@ class TransferTxData {
   amount: bigint;
   tokenID: bigint;
   sigL2Hash: bigint;
-  s: bigint;
   sign1: bigint;
-  sign2: bigint;
   ay1: bigint;
+  s: bigint;
+  sign2: bigint;
   ay2: bigint;
   r8x: bigint;
   r8y: bigint;
@@ -30,10 +30,10 @@ class TransferTxData {
     results.push(this.amount);
     results.push(this.tokenID);
     results.push(this.sigL2Hash);
-    results.push(this.s);
     results.push(this.sign1);
-    results.push(this.sign2);
     results.push(this.ay1);
+    results.push(this.s);
+    results.push(this.sign2);
     results.push(this.ay2);
     results.push(this.r8x);
     results.push(this.r8y);

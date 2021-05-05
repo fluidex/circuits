@@ -4,7 +4,7 @@ import { Account } from '../helper.ts/account';
 import { Tree } from '../helper.ts/binary_merkle_tree';
 import { PlaceOrderTxData } from './codec/place_order_tx_data';
 import { TransferTxData } from './codec/transfer_tx_data';
-import { hashAccountState, hashOrderState, calculateGenesisOrderRoot, emptyOrderHash } from '../helper.ts/state-utils';
+import { hashAccountState, hashOrderState, calculateGenesisOrderRoot, emptyOrder, emptyOrderHash } from '../helper.ts/state-utils';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 
@@ -24,6 +24,10 @@ import {
   L2Block,
 } from './common';
 
+function shallowClone(o) {
+  return Object.assign({}, o);
+}
+
 class GlobalState {
   nTx: number;
   balanceLevels: number;
@@ -33,14 +37,14 @@ class GlobalState {
   // idx to balanceTree
   balanceTrees: Map<bigint, Tree<bigint>>;
 
-  // user -> order_pos -> order_hash
-  orderTrees: Map<bigint, Tree<bigint>>;
   // user -> order_id -> order
   orderMap: Map<bigint, Map<bigint, Order>>;
   // user -> order_id -> order_pos
   orderIdToPos: Map<bigint, Map<bigint, bigint>>;
   // user -> order_pos -> order_id
   orderPosToId: Map<bigint, Map<bigint, bigint>>;
+  // user -> order_pos -> order_hash
+  orderTrees: Map<bigint, Tree<bigint>>;
 
   accounts: Map<bigint, AccountState>;
   bufferedTxs: Array<RawTx>;
@@ -128,7 +132,7 @@ class GlobalState {
   getNextOrderPosForUser(accountID): bigint {
     return this.nextOrderPositions.get(accountID);
   }
-  createNewAccount({ next_order_id = 1n } = {}): bigint {
+  createNewAccount({ next_order_id = 0n } = {}): bigint {
     const accountID = BigInt(this.balanceTrees.size);
     if (accountID >= 2 ** this.accountLevels) {
       throw new Error(`account_id ${accountID} overflows for accountLevels ${this.accountLevels}`);
@@ -146,14 +150,53 @@ class GlobalState {
     //console.log("add account", accountID);
     return accountID;
   }
-  
-  // TODO: better name
-  addOrder(accountID, order) {
+
+  updateOrderState(accountID: bigint, order: Order) {
+    //console.log('updateOrderState', accountID, order);
     //const candidateOrderPos = this.getNextOrderPosForUser(accountID); // no throw, so the order can be inserted
     this.orderMap.get(accountID).set(order.order_id, order);
     //return candidateOrderPos;
   }
-  
+  updateNextOrderPos(accountID: bigint, startPos: bigint) {
+    for (let i = 0; i < 2 ** this.orderLevels; i++) {
+      const candidatePos = (startPos + BigInt(i)) % BigInt(2 ** this.orderLevels);
+      const order = this.getAccountOrderByOrderPos(accountID, candidatePos);
+      // TODO: is this correct?
+      const isEmptyOrFilled = order.filled_buy >= order.total_buy && order.filled_sell >= order.total_sell;
+      if (isEmptyOrFilled) {
+        this.nextOrderPositions.set(accountID, candidatePos);
+        return;
+        //return candidatePos;
+      }
+    }
+    throw new Error('cannot find order pos');
+  }
+  // place an order into the tree, return the placed old state
+  placeOrderIntoTree(accountID: bigint, orderID: bigint): Order {
+    if (!this.hasOrder(accountID, orderID)) {
+      throw new Error('invalid order ' + accountID + ' ' + orderID);
+    }
+    let pos = this.orderIdToPos.get(accountID).get(orderID);
+    if (pos == null) {
+      // this order_id not in the tree
+      pos = this.getNextOrderPosForUser(accountID);
+
+      const oldOrder = shallowClone(this.getAccountOrderByOrderPos(accountID, pos));
+      this.updateOrderLeaf(accountID, pos, orderID);
+      this.updateNextOrderPos(accountID, pos + 1n);
+      return oldOrder;
+    } else {
+      // this order_id already in the tree
+      const oldOrder = shallowClone(this.getAccountOrderByOrderId(accountID, orderID));
+      return oldOrder;
+    }
+  }
+  // debug only?
+  setAccountOrder(accountID: bigint, order: Order) {
+    this.updateOrderState(accountID, order);
+    this.placeOrderIntoTree(accountID, order.order_id);
+  }
+  /*
   createNewOrder(tx: PlaceOrderTx): bigint {
     const orderPos = this.getNextOrderPosForUser(tx.accountID);
     if (orderPos >= 2 ** this.orderLevels) {
@@ -169,12 +212,17 @@ class GlobalState {
       total_sell: tx.amount_sell,
       total_buy: tx.amount_buy,
     };
-    this.setAccountOrder(tx.accountID, orderPos, order);
-    this.nextOrderPositions.set(tx.accountID, orderPos + 1n);
+    this.setAccountOrderByPos(tx.accountID, orderPos, order);
+    this.updateNextOrderPos(tx.accountID, orderPos + 1n);
     return orderPos;
   }
+  */
   getOrderPosByID(accountID: bigint, orderID: bigint): bigint {
-    return this.orderIdToPos.get(accountID).get(orderID);
+    const pos = this.orderIdToPos.get(accountID).get(orderID);
+    if (pos == null) {
+      throw new Error('unknow order id ' + accountID + ' ' + orderID);
+    }
+    return pos;
   }
 
   recalculateFromAccountState(accountID: bigint) {
@@ -196,23 +244,36 @@ class GlobalState {
     this.balanceTrees.get(accountID).setValue(tokenID, balance);
     this.recalculateFromBalanceTree(accountID);
   }
-  setAccountOrder(accountID: bigint, orderPos: bigint, order: Order) {
+  // we should never expose 'orderPos' to outside
+  // so this function should be private
+  private updateOrderLeaf(accountID: bigint, orderPos: bigint, orderID: bigint) {
     assert(this.orderTrees.has(accountID), 'setAccountOrder');
     if (orderPos >= 2 ** this.orderLevels) {
       throw new Error(`orderPos ${orderPos} invalid for orderLevels ${this.orderLevels}`);
     }
+
+    const order = this.orderMap.get(accountID).get(orderID);
     this.orderTrees.get(accountID).setValue(orderPos, hashOrderState(order));
-    this.orderMap.get(accountID).set(order.order_id, order);
+    // orderMap set seems redundant here?
+    //this.orderMap.get(accountID).set(order.order_id, order);
     this.orderIdToPos.get(accountID).set(order.order_id, orderPos);
     this.orderPosToId.get(accountID).set(orderPos, order.order_id);
     this.recalculateFromOrderTree(accountID);
+  }
+  hasOrder(accountID: bigint, orderID: bigint): boolean {
+    return this.orderMap.has(accountID) && this.orderMap.get(accountID).has(orderID);
   }
   getAccountOrderByOrderId(accountID: bigint, orderID: bigint): Order {
     return this.orderMap.get(accountID).get(orderID);
   }
   getAccountOrderByOrderPos(accountID: bigint, orderPos: bigint): Order {
     const orderID = this.orderPosToId.get(accountID).get(orderPos);
-    return this.orderMap.get(accountID).get(orderID);
+    if (orderID == null) {
+      // orderPos: empty
+      return emptyOrder();
+    } else {
+      return this.orderMap.get(accountID).get(orderID);
+    }
   }
 
   trivialOrderPathElements() {
@@ -376,34 +437,29 @@ class GlobalState {
     let toOldBalance = this.getTokenBalance(tx.to, tx.tokenID);
     assert(fromOldBalance > tx.amount, 'Transfer balance not enough');
 
-    let txData = new TransferTxData();
-    txData.fromAccountID = tx.from;
-    txData.toAccountID = tx.to;
-    txData.amount = tx.amount;
-    txData.tokenID = tx.tokenID;
-    txData.sigL2Hash = tx.signature.hash;
-    txData.s = tx.signature.S;
-
-    txData.r8x = tx.signature.R8x;
-    txData.r8y = tx.signature.R8y;
-    txData.nonce1 = fromAccount.nonce;
-    txData.sign1 = fromAccount.sign;
-    txData.balance1 = fromOldBalance;
-    txData.ay1 = fromAccount.ay;
-    txData.ethAddr1 = fromAccount.ethAddr;
-
-    txData.nonce2 = toAccount.nonce;
-    txData.sign2 = toAccount.sign;
-    txData.balance2 = toOldBalance;
-    txData.ay2 = toAccount.ay;
-    txData.ethAddr2 = toAccount.ethAddr;
+    let encodedTx: Array<bigint> = new Array(TxLength);
+    encodedTx.fill(0n, 0, TxLength);
+    encodedTx[TxDetailIdx.AccountID1] = tx.from;
+    encodedTx[TxDetailIdx.AccountID2] = tx.to;
+    encodedTx[TxDetailIdx.TokenID1] = tx.tokenID;
+    encodedTx[TxDetailIdx.Amount] = tx.amount;
+    encodedTx[TxDetailIdx.Nonce1] = fromAccount.nonce;
+    encodedTx[TxDetailIdx.Nonce2] = toAccount.nonce;
+    encodedTx[TxDetailIdx.Sign1] = fromAccount.sign;
+    encodedTx[TxDetailIdx.Sign2] = toAccount.sign;
+    encodedTx[TxDetailIdx.Ay1] = fromAccount.ay;
+    encodedTx[TxDetailIdx.Ay2] = toAccount.ay;
+    encodedTx[TxDetailIdx.EthAddr1] = fromAccount.ethAddr;
+    encodedTx[TxDetailIdx.EthAddr2] = toAccount.ethAddr;
+    encodedTx[TxDetailIdx.Balance1] = fromOldBalance;
+    encodedTx[TxDetailIdx.Balance2] = toOldBalance;
+    encodedTx[TxDetailIdx.SigL2Hash] = tx.signature.hash;
+    encodedTx[TxDetailIdx.S] = tx.signature.S;
+    encodedTx[TxDetailIdx.R8x] = tx.signature.R8x;
+    encodedTx[TxDetailIdx.R8y] = tx.signature.R8y;
 
     this.setTokenBalance(tx.from, tx.tokenID, fromOldBalance - tx.amount);
     this.increaseNonce(tx.from);
-
-    txData.midAccountRoot = this.root();
-
-    let encodedTx = txData.encode();
 
     let rawTx: RawTx = {
       txType: TxType.Transfer,
@@ -478,15 +534,15 @@ class GlobalState {
     rawTx.rootAfter = this.root();
     this.addRawTx(rawTx);
   }
+  /*
   // PlaceOrder not create L2 tx now
   PlaceOrder(tx: PlaceOrderTx): bigint {
-
     if (this.options.verbose) {
       console.log('PlaceOrder', tx);
     }
     // TODO: check order signature
     //assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'PlaceOrder account: accountID' + tx.accountID);
-/*
+    
     let account = this.accounts.get(tx.accountID);
     let proof = this.stateProof(tx.accountID, tx.tokenID_sell);
 
@@ -506,11 +562,11 @@ class GlobalState {
       rootBefore: this.root(),
       rootAfter: 0n,
     };
-    */
+    
     //console.log("orderRoo0", rawTx.orderRoot0);
     let order_pos = this.createNewOrder(tx);
 
-    /*
+    
     // fill in the tx
     let txData = new PlaceOrderTxData();
 
@@ -546,51 +602,43 @@ class GlobalState {
     if (this.options.verbose) {
       //console.log('create order ', order_id, tx);
     }
-    */
+    
     return order_pos;
   }
-  
+  */
+
   // TODO: replace order is not implemented and tested here
-    // case1: old order is empty
-    // case2: old order is valid old order with different order id, but we will replace it. We will handle this case in Rust code, not here
-    // case3: old order has same order id, we will modify it
+  // case1: old order is empty
+  // case2: old order is valid old order with different order id, but we will replace it.
+  // case3: old order has same order id, we will modify it
   SpotTrade(tx: SpotTradeTx) {
     //assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
     //assert(this.accounts.get(tx.order2_accountID).ethAddr != 0n, 'SpotTrade account2');
 
-    assert(tx.order1_id < 2 ** this.orderLevels, 'order1 id overflows');
-    assert(tx.order2_id < 2 ** this.orderLevels, 'order2 id overflows');
+    //assert(tx.order1_id < 2 ** this.orderLevels, 'order1 id overflows');
+    //assert(tx.order2_id < 2 ** this.orderLevels, 'order2 id overflows');
+
+    assert(this.hasOrder(tx.order1_accountID, tx.order1_id), 'unknown order1');
+    assert(this.hasOrder(tx.order2_accountID, tx.order2_id), 'unknown order2');
+    const oldRoot = this.root();
 
     let account1 = this.accounts.get(tx.order1_accountID);
     let account2 = this.accounts.get(tx.order2_accountID);
     let proof_order1_seller = this.stateProof(tx.order1_accountID, tx.tokenID_1to2);
     let proof_order2_seller = this.stateProof(tx.order2_accountID, tx.tokenID_2to1);
+
+    // oldOrder1 is same as oldOrder1InTree when case3
+    // not same when case1 and case2
+    const oldOrder1: Order = shallowClone(this.getAccountOrderByOrderId(tx.order1_accountID, tx.order1_id));
+    const oldOrder2: Order = shallowClone(this.getAccountOrderByOrderId(tx.order2_accountID, tx.order2_id));
+    const oldOrder1InTree: Order = this.placeOrderIntoTree(tx.order1_accountID, tx.order1_id);
+    const oldOrder2InTree: Order = this.placeOrderIntoTree(tx.order2_accountID, tx.order2_id);
+
+    //console.log({ oldOrder1InTree, oldOrder1, oldOrder2InTree, oldOrder2 });
+
     let order1_pos = this.getOrderPosByID(tx.order1_accountID, tx.order1_id);
     let order2_pos = this.getOrderPosByID(tx.order2_accountID, tx.order2_id);
 
-    // shallow copy is ok
-    const oldOrder1: Order = Object.assign({}, this.orderMap.get(tx.order1_accountID).get(order1_pos));
-    const oldOrder2: Order = Object.assign({}, this.orderMap.get(tx.order2_accountID).get(order2_pos));
-
-    /*
-    // the below two checks are invalid for case2
-    if (oldOrder1.tokenbuy == tx.tokenID_2to1) {
-      console.log({oldOrder1, tx})
-      throw new Error('invalid assert');
-    }
-    assert(oldOrder1.tokenbuy == tx.tokenID_2to1, `invalid token ${oldOrder1.tokenbuy} ${tx.tokenID_2to1}`);
-    assert(oldOrder2.tokensell == tx.tokenID_1to2, `invalid token ${oldOrder2.tokensell} ${tx.tokenID_1to2}`);
-    */
-    /*
-
-      order_id: tx.orderID,
-      tokenbuy: tx.tokenID_buy,
-      tokensell: tx.tokenID_sell,
-      filled_sell: 0n,
-      filled_buy: 0n,
-      total_sell: tx.amount_sell,
-      total_buy: tx.amount_buy,
-      */
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
@@ -610,51 +658,33 @@ class GlobalState {
     let account1_balance_buy = this.getTokenBalance(tx.order1_accountID, tx.tokenID_2to1);
     assert(account1_balance_sell > tx.amount_1to2, 'balance_1to2');
     assert(account2_balance_sell > tx.amount_2to1, 'balance_2to1');
-    
-    encodedTx[TxDetailIdx.OldOrder1ID] = oldOrder1.order_id;
-      encodedTx[TxDetailIdx.OldOrder1TokenSell] = oldOrder1.tokensell;
-        encodedTx[TxDetailIdx.OldOrder1FilledSell] = oldOrder1.filled_sell;
-          encodedTx[TxDetailIdx.OldOrder1AmountSell] = oldOrder1.total_sell;
-            encodedTx[TxDetailIdx.OldOrder1TokenBuy] = oldOrder1.tokenbuy;
-              encodedTx[TxDetailIdx.OldOrder1FilledBuy] = oldOrder1.filled_buy;
-                encodedTx[TxDetailIdx.OldOrder1AmountBuy] = oldOrder1.total_buy;
 
+    encodedTx[TxDetailIdx.OldOrder1ID] = oldOrder1InTree.order_id;
+    encodedTx[TxDetailIdx.OldOrder1TokenSell] = oldOrder1InTree.tokensell;
+    encodedTx[TxDetailIdx.OldOrder1FilledSell] = oldOrder1InTree.filled_sell;
+    encodedTx[TxDetailIdx.OldOrder1AmountSell] = oldOrder1InTree.total_sell;
+    encodedTx[TxDetailIdx.OldOrder1TokenBuy] = oldOrder1InTree.tokenbuy;
+    encodedTx[TxDetailIdx.OldOrder1FilledBuy] = oldOrder1InTree.filled_buy;
+    encodedTx[TxDetailIdx.OldOrder1AmountBuy] = oldOrder1InTree.total_buy;
 
-    encodedTx[TxDetailIdx.OldOrder2ID] = oldOrder2.order_id;
-    encodedTx[TxDetailIdx.OldOrder2TokenSell] = oldOrder2.tokensell;
-      encodedTx[TxDetailIdx.OldOrder2FilledSell] = oldOrder2.filled_sell;
-        encodedTx[TxDetailIdx.OldOrder2AmountSell] = oldOrder2.total_sell;
-          encodedTx[TxDetailIdx.OldOrder2TokenBuy] = oldOrder2.tokenbuy;
-            encodedTx[TxDetailIdx.OldOrder2FilledBuy] = oldOrder2.filled_buy;
-              encodedTx[TxDetailIdx.OldOrder2AmountBuy] = oldOrder2.total_buy;
-
-
+    encodedTx[TxDetailIdx.OldOrder2ID] = oldOrder2InTree.order_id;
+    encodedTx[TxDetailIdx.OldOrder2TokenSell] = oldOrder2InTree.tokensell;
+    encodedTx[TxDetailIdx.OldOrder2FilledSell] = oldOrder2InTree.filled_sell;
+    encodedTx[TxDetailIdx.OldOrder2AmountSell] = oldOrder2InTree.total_sell;
+    encodedTx[TxDetailIdx.OldOrder2TokenBuy] = oldOrder2InTree.tokenbuy;
+    encodedTx[TxDetailIdx.OldOrder2FilledBuy] = oldOrder2InTree.filled_buy;
+    encodedTx[TxDetailIdx.OldOrder2AmountBuy] = oldOrder2InTree.total_buy;
 
     encodedTx[TxDetailIdx.Amount] = tx.amount_1to2;
     encodedTx[TxDetailIdx.Amount2] = tx.amount_2to1;
     encodedTx[TxDetailIdx.Order1Pos] = order1_pos;
     encodedTx[TxDetailIdx.Order2Pos] = order2_pos;
 
-
     encodedTx[TxDetailIdx.Balance1] = account1_balance_sell;
     encodedTx[TxDetailIdx.Balance2] = account2_balance_buy;
     encodedTx[TxDetailIdx.Balance3] = account2_balance_sell;
     encodedTx[TxDetailIdx.Balance4] = account1_balance_buy;
-/*
-    encodedTx[TxDetailIdx.TokenID1] = tx.tokenID_1to2;
-    encodedTx[TxDetailIdx.TokenID2] = tx.tokenID_2to1;
-    encodedTx[TxDetailIdx.OldOrder1ID] = tx.order1_id;
-    encodedTx[TxDetailIdx.Order1AmountSell] = .order1_amountsell;
-    encodedTx[TxDetailIdx.Order1AmountBuy] = old_order_state.order1_amountbuy;
-    encodedTx[TxDetailIdx.Order1FilledSell] = old_order_state.order1_filledsell;
-    encodedTx[TxDetailIdx.Order1FilledBuy] = old_order_state.order1_filledbuy;
 
-    encodedTx[TxDetailIdx.Order2ID] = tx.order2_id;
-    encodedTx[TxDetailIdx.Order2AmountSell] = old_order_state.order2_amountsell;
-    encodedTx[TxDetailIdx.Order2AmountBuy] = old_order_state.order2_amountbuy;
-    encodedTx[TxDetailIdx.Order2FilledSell] = old_order_state.order2_filledsell;
-    encodedTx[TxDetailIdx.Order2FilledBuy] = old_order_state.order2_filledbuy;
-*/
     let rawTx: RawTx = {
       txType: TxType.SpotTrade,
       payload: encodedTx,
@@ -668,7 +698,7 @@ class GlobalState {
       orderRoot1: account2.orderRoot, // not really used in the circuit
       accountPath0: proof_order1_seller.accountPath,
       accountPath1: null,
-      rootBefore: this.root(),
+      rootBefore: oldRoot,
       rootAfter: 0n,
     };
 
@@ -682,7 +712,7 @@ class GlobalState {
 
     // here is not correct for 'case2' above
     let newOrder1: Order = {
-      order_id: oldOrder1.order_id,
+      order_id: tx.order1_id,
       tokenbuy: tx.tokenID_2to1,
       tokensell: tx.tokenID_1to2,
       filled_sell: oldOrder1.filled_sell + tx.amount_1to2,
@@ -690,7 +720,8 @@ class GlobalState {
       total_sell: oldOrder1.total_sell,
       total_buy: oldOrder1.total_buy,
     };
-    this.setAccountOrder(tx.order1_accountID, order1_pos, newOrder1);
+    this.updateOrderState(tx.order1_accountID, newOrder1);
+    this.updateOrderLeaf(tx.order1_accountID, order1_pos, newOrder1.order_id);
     // TODO: self trade is enabled here now. recheck it later
     // TODO: is self trade correctly handled inside circuits?
     //if (this.options.enable_self_trade) {
@@ -699,9 +730,8 @@ class GlobalState {
     this.setTokenBalance(tx.order1_accountID, tx.tokenID_2to1, account1_balance_buy + tx.amount_2to1);
     rawTx.accountPath1 = this.accountTree.getProof(tx.order2_accountID).path_elements;
 
-
     let newOrder2: Order = {
-      order_id: oldOrder2.order_id,
+      order_id: tx.order2_id,
       tokenbuy: tx.tokenID_1to2,
       tokensell: tx.tokenID_2to1,
       filled_sell: oldOrder2.filled_sell + tx.amount_2to1,
@@ -709,29 +739,28 @@ class GlobalState {
       total_sell: oldOrder2.total_sell,
       total_buy: oldOrder2.total_buy,
     };
-    this.setAccountOrder(tx.order2_accountID, order2_pos, newOrder2);
+    this.updateOrderState(tx.order2_accountID, newOrder2);
+    this.updateOrderLeaf(tx.order2_accountID, order2_pos, newOrder2.order_id);
     //if (this.options.enable_self_trade) {
     //  account2_balance_buy = this.getTokenBalance(tx.order2_accountID, tx.tokenID_1to2);
     //}
     this.setTokenBalance(tx.order2_accountID, tx.tokenID_1to2, account2_balance_buy + tx.amount_1to2);
 
-
     encodedTx[TxDetailIdx.NewOrder1ID] = newOrder1.order_id;
-      encodedTx[TxDetailIdx.NewOrder1TokenSell] = newOrder1.tokensell;
-        encodedTx[TxDetailIdx.NewOrder1FilledSell] = newOrder1.filled_sell;
-          encodedTx[TxDetailIdx.NewOrder1AmountSell] = newOrder1.total_sell;
-            encodedTx[TxDetailIdx.NewOrder1TokenBuy] = newOrder1.tokenbuy;
-              encodedTx[TxDetailIdx.NewOrder1FilledBuy] = newOrder1.filled_buy;
-                encodedTx[TxDetailIdx.NewOrder1AmountBuy] = newOrder1.total_buy;
-
+    encodedTx[TxDetailIdx.NewOrder1TokenSell] = newOrder1.tokensell;
+    encodedTx[TxDetailIdx.NewOrder1FilledSell] = newOrder1.filled_sell;
+    encodedTx[TxDetailIdx.NewOrder1AmountSell] = newOrder1.total_sell;
+    encodedTx[TxDetailIdx.NewOrder1TokenBuy] = newOrder1.tokenbuy;
+    encodedTx[TxDetailIdx.NewOrder1FilledBuy] = newOrder1.filled_buy;
+    encodedTx[TxDetailIdx.NewOrder1AmountBuy] = newOrder1.total_buy;
 
     encodedTx[TxDetailIdx.NewOrder2ID] = newOrder2.order_id;
     encodedTx[TxDetailIdx.NewOrder2TokenSell] = newOrder2.tokensell;
-      encodedTx[TxDetailIdx.NewOrder2FilledSell] = newOrder2.filled_sell;
-        encodedTx[TxDetailIdx.NewOrder2AmountSell] = newOrder2.total_sell;
-          encodedTx[TxDetailIdx.NewOrder2TokenBuy] = newOrder2.tokenbuy;
-            encodedTx[TxDetailIdx.NewOrder2FilledBuy] = newOrder2.filled_buy;
-              encodedTx[TxDetailIdx.NewOrder2AmountBuy] = newOrder2.total_buy;
+    encodedTx[TxDetailIdx.NewOrder2FilledSell] = newOrder2.filled_sell;
+    encodedTx[TxDetailIdx.NewOrder2AmountSell] = newOrder2.total_sell;
+    encodedTx[TxDetailIdx.NewOrder2TokenBuy] = newOrder2.tokenbuy;
+    encodedTx[TxDetailIdx.NewOrder2FilledBuy] = newOrder2.filled_buy;
+    encodedTx[TxDetailIdx.NewOrder2AmountBuy] = newOrder2.total_buy;
 
     rawTx.rootAfter = this.root();
     this.addRawTx(rawTx);

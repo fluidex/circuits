@@ -5,7 +5,7 @@ import { Tree } from '../helper.ts/binary_merkle_tree';
 import { hashAccountState, hashOrderState, emptyOrderHash, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
-import {TxLength, TxDetailIdx} from "./codec/tx_data";
+import { TxLength, TxDetailIdx } from './codec/tx_data';
 
 // this sequence'd better consistent with defined in circuits and smart constracts
 enum TxType {

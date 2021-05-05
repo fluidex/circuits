@@ -43,7 +43,7 @@ function initTestCase(nTxsn, balanceLevels, orderLevels, accountLevels) {
     total_sell: amount_1to2 * nTxs * 100n,
     total_buy: amount_2to1 * nTxs * 100n,
   };
-  state.setAccountOrder(accountID1, order1_id, order1);
+  state.setAccountOrder(accountID1, order1);
 
   /// mock existing account2 data, ensure balance to trade
   state.setAccountKey(accountID2, account2);
@@ -60,7 +60,7 @@ function initTestCase(nTxsn, balanceLevels, orderLevels, accountLevels) {
     total_sell: amount_2to1 * nTxs * 100n,
     total_buy: amount_1to2 * nTxs * 100n,
   };
-  state.setAccountOrder(accountID2, order2_id, order2);
+  state.setAccountOrder(accountID2, order2);
 
   /// start txs
 

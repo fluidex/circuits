@@ -7,6 +7,7 @@ import { Account } from '../helper.ts/account';
 import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
+import { Order } from './common';
 import { GlobalState } from './global_state';
 //import { assert } from 'console';
 const assert = require('assert').strict;
@@ -79,7 +80,7 @@ function initBlockTestCase() {
   state.setAccountNonce(accountID2, 29n);
   // order2
   const order2_id = 1n;
-  const order2 = {
+  const order2: Order = {
     order_id: order2_id,
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
@@ -88,7 +89,7 @@ function initBlockTestCase() {
     total_sell: 10000n,
     total_buy: 1000n,
   };
-  state.setAccountOrder(accountID2, order2_id, order2);
+  state.setAccountOrder(accountID2, order2);
 
   /// start txs
 
@@ -148,25 +149,21 @@ function initBlockTestCase() {
     amount: 1990n,
   });
   const order1_id = 1n;
-  const placeOrderTx = {
-    orderID: order1_id,
-    accountID: accountID1,
-    previous_tokenID_sell: 0n,
-    previous_tokenID_buy: 0n,
-    previous_amount_sell: 0n,
-    previous_amount_buy: 0n,
-    previous_filled_sell: 0n,
-    previous_filled_buy: 0n,
-    tokenID_sell: tokenID_1to2,
-    tokenID_buy: tokenID_2to1,
-    amount_sell: 1000n,
-    amount_buy: 10000n,
+  const order1: Order = {
+    order_id: order1_id,
+    //accountID: accountID1,
+    tokensell: tokenID_1to2,
+    tokenbuy: tokenID_2to1,
+    total_sell: 1000n,
+    total_buy: 10000n,
+    filled_buy: 0n,
+    filled_sell: 0n,
   };
   // order_id is known to the user, user should sign this order_id
   // while order_idx(or order_pos) is maintained by the global state keeper. User dont need to know anything about order_pos
-  const order1_pos = state.nextOrderIds.get(accountID1);
-  assert(order1_pos === 1n, 'unexpected order pos');
-  state.PlaceOrder(placeOrderTx);
+  //const order1_pos = state.nextOrderIds.get(accountID1);
+  //assert(order1_pos === 1n, 'unexpected order pos');
+  state.setAccountOrder(accountID1, order1);
 
   let spotTradeTx = {
     order1_accountID: accountID1,
@@ -176,15 +173,17 @@ function initBlockTestCase() {
     amount_1to2: amount_1to2,
     amount_2to1: amount_2to1,
     order1_id: order1_id,
-    order1_amountsell: placeOrderTx.amount_sell,
-    order1_amountbuy: placeOrderTx.amount_buy,
-    order1_filledsell: 0n,
-    order1_filledbuy: 0n,
     order2_id: order2_id,
+    /*
+    order1_amountsell: order1.total_sell,
+    order1_amountbuy: order1.total_buy,
+    order1_filledsell: 0n,
+    order1_filledbuy: 0n,x
     order2_amountsell: order2.total_sell,
     order2_amountbuy: order2.total_buy,
     order2_filledsell: order2.filled_sell,
     order2_filledbuy: order2.filled_buy,
+    */
   };
   state.SpotTrade(spotTradeTx);
 

@@ -1,16 +1,19 @@
 function splitAndTrim(s) {
-  return s.replaceAll(/\/\/[^\n]*/g, '').split(/\s+/).filter(item => item != '');
+  return s
+    .replaceAll(/\/\/[^\n]*/g, '')
+    .split(/\s+/)
+    .filter(item => item != '');
 }
 function upCaseFirstLetter(item) {
-  return item.charAt(0).toUpperCase() + item.slice(1)
+  return item.charAt(0).toUpperCase() + item.slice(1);
 }
 // TODO: a better name?
 function getOrderLeafs() {
   //<% for(const idx of ['1', '2']) { for(const prefix of ['old', 'new']) { for (const f of ['id', 'tokensell', 'filledsell', 'amountsell', 'tokenbuy', 'filledbuy', 'amountbuy']) { %>
   //  signal input <%= prefix %>_order<%= idx %>_<%= f %>;<% }}} %>
   let output = [];
-  for(const idx of ['1', '2']) { 
-    for(const prefix of ['old', 'new']) { 
+  for (const idx of ['1', '2']) {
+    for (const prefix of ['old', 'new']) {
       for (const f of ['ID', 'tokenSell', 'filledSell', 'amountSell', 'tokenBuy', 'filledBuy', 'amountBuy']) {
         output.push(`${prefix}Order${idx}${upCaseFirstLetter(f)}`);
       }
@@ -88,10 +91,10 @@ const config = {
         amount
         tokenID
         sigL2Hash
-        s
         sign1
-        sign2
         ay1
+        s
+        sign2
         ay2
         r8x
         r8y

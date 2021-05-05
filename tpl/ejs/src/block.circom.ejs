@@ -142,9 +142,26 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processTransfer[i] = Transfer(balanceLevels, accountLevels);
         processTransfer[i].enabled <== enableTransfer[i].out;
 
-        for (var j = 0; j < TxLength(); j++) {
-            processTransfer[i].in[j] <== encodedTxs[i][j];
-        }
+        processTransfer[i].fromAccountID <== decodedTx[i].accountID1;
+        processTransfer[i].toAccountID <== decodedTx[i].accountID2;
+        processTransfer[i].tokenID <== decodedTx[i].tokenID1;
+        processTransfer[i].amount <== decodedTx[i].amount;
+        //processTransfer[i].nonce <== decodedTx[i].nonce1;
+        processTransfer[i].nonce1 <== decodedTx[i].nonce1;
+        processTransfer[i].nonce2 <== decodedTx[i].nonce2;
+        processTransfer[i].sign1 <== decodedTx[i].sign1;
+        processTransfer[i].sign2 <== decodedTx[i].sign2;
+        processTransfer[i].ay1 <== decodedTx[i].ay1;
+        processTransfer[i].ay2 <== decodedTx[i].ay2;
+        processTransfer[i].ethAddr1 <== decodedTx[i].ethAddr1;
+        processTransfer[i].ethAddr2 <== decodedTx[i].ethAddr2;
+
+        processTransfer[i].balance1 <== decodedTx[i].balance1;
+        processTransfer[i].balance2 <== decodedTx[i].balance2;
+        processTransfer[i].sigL2Hash <== decodedTx[i].sigL2Hash;
+        processTransfer[i].s <== decodedTx[i].s;
+        processTransfer[i].r8x <== decodedTx[i].r8x;
+        processTransfer[i].r8y <== decodedTx[i].r8y;
 
         processTransfer[i].orderRoot1 <== orderRoots[i][0];
         processTransfer[i].orderRoot2 <== orderRoots[i][1];
