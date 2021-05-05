@@ -75,7 +75,7 @@ function initTestCase() {
     total_sell: order1_amountsell,
     total_buy: order1_amountbuy,
   };
-  state.setAccountOrder(accountID1, order1_id, order1);
+  state.setAccountOrder(accountID1, order1);
 
   // order2
   const order2_id = 1n;
@@ -90,7 +90,7 @@ function initTestCase() {
     total_sell: order2_amountsell,
     total_buy: order2_amountbuy,
   };
-  state.setAccountOrder(accountID2, order2_id, order2);
+  state.setAccountOrder(accountID2, order2);
 
   let spotTradeTx = {
     order1_accountID: accountID1,

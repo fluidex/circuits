@@ -5,6 +5,7 @@ import { Tree } from '../helper.ts/binary_merkle_tree';
 import { hashAccountState, hashOrderState, emptyOrderHash, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
+import { TxLength, TxDetailIdx } from './codec/tx_data';
 
 // this sequence'd better consistent with defined in circuits and smart constracts
 enum TxType {
@@ -15,52 +16,6 @@ enum TxType {
   PlaceOrder,
   SpotTrade,
   Nop,
-}
-
-const TxLength = 36;
-enum TxDetailIdx {
-  TokenID1,
-  Amount,
-  AccountID1,
-  AccountID2,
-  EthAddr1,
-  EthAddr2,
-  Sign1,
-  Sign2,
-  Ay1,
-  Ay2,
-  Nonce1,
-  Nonce2,
-  Balance1,
-  Balance2,
-  Balance3,
-  Balance4,
-  SigL2Hash,
-  S,
-  R8x,
-  R8y,
-
-  // only used in spot_trade
-  TokenID2,
-  Amount2,
-  Order1ID,
-  Order1AmountSell,
-  Order1AmountBuy,
-  Order1FilledSell,
-  Order1FilledBuy,
-  Order2ID,
-  Order2AmountSell,
-  Order2AmountBuy,
-  Order2FilledSell,
-  Order2FilledBuy,
-
-  // only used in place_order
-  TokenID3,
-  TokenID4,
-
-  // control universal checker
-  EnableBalanceCheck1,
-  EnableBalanceCheck2,
 }
 
 class TxSignature {
@@ -116,7 +71,6 @@ class PlaceOrderTx {
   amount_buy: bigint;
 }
 
-// TODO: matain many of these in state
 class SpotTradeTx {
   order1_accountID: bigint;
   order2_accountID: bigint;

@@ -1,0 +1,21 @@
+include "./constants.circom"
+
+// TODO: i suggest remove this component and let each child op component to do its own decoding
+/**
+ * @input in - {Array(Field)} - encoded transaction
+ */
+
+function TxLength() { return <%= codegen.config.commonPayload.length %>; }
+
+template DecodeTx() {
+    signal input in[TxLength()];
+
+    // TODO: should new_order1_tokensell reuse tokenID1?
+
+    <% for(const item of codegen.config.commonPayload) { %>
+    signal output <%= item %>;<% } %>
+
+    <% for(const idx in codegen.config.commonPayload) { %>
+    <%= codegen.config.commonPayload[idx] %> <== in[<%= idx %>];<% } %>
+
+}

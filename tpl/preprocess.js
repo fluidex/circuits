@@ -4,15 +4,6 @@ const ejs = require('ejs');
 const printDiff = require('print-diff');
 const { config } = require('./config');
 const tpls = require('./templates');
-const {
-  circuitInputEncoderJsTpl,
-  circuitInputEncoderRsTpl,
-  CheckOrderTreeTpl,
-  CheckBalanceTreeTpl,
-  CheckFullOrderTreeTpl,
-  CheckFullBalanceTreeTpl,
-  CheckSameTreeRootTpl,
-} = tpls;
 
 // codegen is the module to inject inside the ejs template system
 const codegen = {
@@ -35,30 +26,30 @@ const codegen = {
 };
 
 function renderInputEncoderJs(encoderName, inputSignals, config) {
-  return ejs.render(circuitInputEncoderJsTpl, { encoderName, inputSignals, config });
+  return ejs.render(tpls.JsInputEncoderTpl, { encoderName, inputSignals, config });
 }
 function renderLoopAssign(assignItems, loopVar, loopCount) {
   return ejs.render(tpls.LoopAssignTpl, { assignItems, loopVar, loopCount });
 }
 
 function renderInputEncoderRs(encoderName, inputSignals, config) {
-  return ejs.render(circuitInputEncoderRsTpl, { encoderName, inputSignals, config });
+  return ejs.render(tpls.RsInputEncoderTpl, { encoderName, inputSignals, config });
 }
 function generateMultiFieldsAssign(comp, fields, prefix, suffix = '', indent = 8) {
-  return tpls.genAssign(comp, fields, prefix, suffix, indent);
+  return tpls.generateMultiAssign(comp, fields, prefix, suffix, indent);
 }
 function generateUniversalBalanceCheck(compName, prefix, suffix, { ctx, replacers }) {
-  const tpl = tpls.UniversalBalanceCheckTplFn(compName, prefix, suffix);
+  const tpl = tpls.universalBalanceCheckTplFn(compName, prefix, suffix);
   return generateFromTpl(tpl, { ctx, replacers });
 }
 function generateOrderCheckCircom({ ctx, replacers }) {
-  return generateFromTpl(CheckFullOrderTreeTpl, { ctx, replacers });
+  return generateFromTpl(tpls.CheckAccountTreeFromOrderTpl, { ctx, replacers });
 }
 function generateBalanceCheckCircom({ ctx, replacers }) {
-  return generateFromTpl(CheckFullBalanceTreeTpl, { ctx, replacers });
+  return generateFromTpl(tpls.CheckAccountTreeFromBalanceTpl, { ctx, replacers });
 }
 function generateSameRootCircom({ ctx, replacers }) {
-  return generateFromTpl(CheckSameTreeRootTpl, { ctx, replacers });
+  return generateFromTpl(tpls.CheckSameTreeRootTpl, { ctx, replacers });
 }
 function generateCheckEq({ ctx, replacers }) {
   return generateFromTpl(tpls.CheckEqTpl, { ctx, replacers });
@@ -67,7 +58,12 @@ function generateMultiCheckEq(items, { ctx, replacers }) {
   const tpl = ejs.render(tpls.MultiCheckEqTpl, { items });
   return generateFromTpl(tpl, { ctx, replacers });
 }
+
+// replace '__' with ctx, for all {k:v} in replacers, replace ` ${k}` with ` ${v}`
 function generateFromTpl(tpl, { ctx, replacers }) {
+  if (!tpl) {
+    //throw new Error('valid tpl ' + ctx.toString() + ' ' + replacers.toString())
+  }
   let output = tpl.replaceAll('__', ctx);
   for (let k of Object.keys(replacers)) {
     // only replace signals
@@ -86,15 +82,13 @@ function renderInputDecoderCircom(inputSignals, indent = 4) {
   function addLine(text) {
     code += ' '.repeat(indent) + text + '\n';
   }
-  addLine('// **************** CODEGEN START **************');
-  addLine(`signal input ${encodedSignalsName}[${config.txLength}];`);
+  addLine(`signal input ${encodedSignalsName}[TxLength()];`);
   for (let i = 0; i < inputSignals.length; i++) {
     addLine(`signal ${inputSignals[i]};`);
   }
   for (let i = 0; i < inputSignals.length; i++) {
     addLine(`${inputSignals[i]} <== ${encodedSignalsName}[${i}];`);
   }
-  addLine('// **************** CODEGEN END **************');
   return code;
 }
 function main() {

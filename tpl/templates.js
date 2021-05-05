@@ -1,4 +1,4 @@
-const circuitInputEncoderJsTpl = `import { TxLength } from '../common';
+const JsInputEncoderTpl = `import { TxLength } from '../common';
 import { assert } from 'console';
 class <%= encoderName %> {<% for (const s of inputSignals) { %>
   <%= s %>: bigint;<% } %>
@@ -21,7 +21,7 @@ class <%= encoderName %> {<% for (const s of inputSignals) { %>
 export { <%= encoderName %> };
 `;
 
-const circuitInputEncoderRsTpl = `#![allow(non_snake_case)]
+const RsInputEncoderTpl = `#![allow(non_snake_case)]
 #![allow(clippy::assertions_on_constants)]
 use crate::state::common::TX_LENGTH;
 use crate::state::types::Fr;
@@ -45,6 +45,67 @@ impl <%= encoderName %> {
     }
 }`;
 
+const CheckEqTpl = `component checkEq__ = ForceEqualIfEnabled();
+    checkEq__.enabled <== enabled;
+    checkEq__.in[0] <== lhs;
+    checkEq__.in[1] <== rhs;
+`;
+
+const MultiCheckEqTpl = `
+<% for (let i in items) { %>
+    component checkEq__<%= i %> = ForceEqualIfEnabled();
+    checkEq__<%= i %>.enabled <== enabled;
+    checkEq__<%= i %>.in[0] <== <%= items[i][0] %>;
+    checkEq__<%= i %>.in[1] <== <%= items[i][1] %>;
+<% } %>
+`;
+
+const LoopAssignTpl = `    for (var <%= loopVar %> = 0; <%= loopVar %> < <%= loopCount %>; <%= loopVar %>++) {
+    <% for (const item of assignItems) { %>        <%= item[0] %>[<%= loopVar %>] <== <%= item[1] %>[<%= loopVar %>];
+    <% } %>    }`;
+
+function generateMultiAssign(comp, fields, prefix, suffix = '', indent = 8) {
+  let output = '\n';
+  for (const f of fields) {
+    output += ' '.repeat(indent) + `${comp}.${f} <== ${prefix}${f}${suffix};\n`;
+  }
+  return output;
+}
+
+const CalcBalanceTreeTpl = `
+    component balanceTree__ = CalculateRootFromMerklePath(balanceLevels);
+    balanceTree__.leaf <== balance;
+    for (var i = 0; i < balanceLevels; i++) {
+        balanceTree__.path_index[i] <== balance_path_index[i];
+        balanceTree__.path_elements[i][0] <== balance_path_elements[i][0];
+    }`;
+
+const CheckBalanceTreeTpl = `
+    ${CalcBalanceTreeTpl}
+    ${CheckEqTpl.replace('lhs', 'balanceTree__.root').replace('rhs', 'balanceRoot')}`;
+
+const CalcOrderTreeTpl = `
+    component orderHash__ = HashOrder();
+    orderHash__.tokensell <== orderTokenSell;
+    orderHash__.tokenbuy <== orderTokenBuy;
+    orderHash__.filled_sell <== orderFilledSell;
+    orderHash__.filled_buy <== orderFilledBuy;
+    orderHash__.total_sell <== orderAmountSell;
+    orderHash__.total_buy <== orderAmountBuy;
+    orderHash__.order_id <== orderID;
+
+    // - check order tree update
+    component orderTree__ = CalculateRootFromMerklePath(orderLevels);
+    orderTree__.leaf <== orderHash__.out;
+    for (var i = 0; i < orderLevels; i++) {
+        orderTree__.path_index[i] <== order_path_index[i];
+        orderTree__.path_elements[i][0] <== order_path_elements[i][0];
+    }`;
+
+const CheckOrderTreeTpl = `
+    ${CalcOrderTreeTpl}
+    ${CheckEqTpl.replace('lhs', 'orderTree__.root').replace('rhs', 'orderRoot')}`;
+
 const CalcAccountTreeTpl = `
     // account state hash
     component accountHash__ = HashAccount();
@@ -61,55 +122,37 @@ const CalcAccountTreeTpl = `
         accountTree__.path_index[i] <== account_path_index[i];
         accountTree__.path_elements[i][0] <== account_path_elements[i][0];
     }`;
-const CheckEqTpl = `component checkEq__ = ForceEqualIfEnabled();
-    checkEq__.enabled <== enabled;
-    checkEq__.in[0] <== lhs;
-    checkEq__.in[1] <== rhs;
-`;
 
-const MultiCheckEqTpl = `
-<% for (let i in items) { %>
-    component checkEq<%= i %> = ForceEqualIfEnabled();
-    checkEq<%= i %>.enabled <== enabled;
-    checkEq<%= i %>.in[0] <== <%= items[i][0] %>;
-    checkEq<%= i %>.in[1] <== <%= items[i][1] %>;
-<% } %>
-`;
+const CheckAccountTreeRootTpl = CheckEqTpl.replace('lhs', 'accountTree__.root').replace('rhs', 'accountRoot');
 
-const CheckAccountTreeRootTpl = `component check__ = ForceEqualIfEnabled();
-    check__.enabled <== enabled;
-    check__.in[0] <== accountTree__.root;
-    check__.in[1] <== accountRoot;
-`;
-
-// name__ is component name, this can be randomly named like tmpAFSdfewd.
-// here we transform name__ uniformly to name${suffix} like nameNew nameOld name0 name1 name2
-// we also assume some global vars like enabled / balanceLevels / accountLevels
 const CheckAccountTreeTpl = `
     ${CalcAccountTreeTpl}
-    ${CheckAccountTreeRootTpl}
-`;
+    ${CheckAccountTreeRootTpl}`;
 
-const CalcAccountTreeFromBalanceTpl = `component balanceTree__ = CalculateRootFromMerklePath(balanceLevels);
-    balanceTree__.leaf <== balance;
-    for (var i = 0; i < balanceLevels; i++) {
-        balanceTree__.path_index[i] <== balance_path_index[i];
-        balanceTree__.path_elements[i][0] <== balance_path_elements[i][0];
-    }
-    ${CalcAccountTreeTpl.replaceAll(' balanceRoot', ' balanceTree__.root')}
-`;
+const CalcAccountTreeFromBalanceTpl = `
+    ${CalcBalanceTreeTpl}
+    ${CalcAccountTreeTpl.replaceAll(' balanceRoot', ' balanceTree__.root')}`;
 
-const CheckFullBalanceTreeTpl = `
+const CheckAccountTreeFromBalanceTpl = `
     ${CalcAccountTreeFromBalanceTpl}
-    ${CheckAccountTreeRootTpl}
-    `;
+    ${CheckAccountTreeRootTpl}`;
 
+const CalcAccountTreeFromOrderTpl = `
+    ${CalcOrderTreeTpl}
+    ${CalcAccountTreeTpl.replaceAll(' orderRoot', ' orderTree__.root')}`;
+
+const CheckAccountTreeFromOrderTpl = `
+    ${CalcAccountTreeFromOrderTpl}
+    ${CheckAccountTreeRootTpl}`;
+
+/*
+// SameRoot is just another name for
 const CheckSameStateRootTpl = `
-    ${CheckFullBalanceTreeTpl.replace()}
-
+    ${CheckAccountTreeFromBalanceTpl.replace()}
     ${CalcAccountTreeTpl}
     `;
-// SameRoot is just another name for
+*/
+
 const CheckSameTreeRootTpl = `
     component tree1__ = CalculateRootFromMerklePath( levels);
     tree1__.leaf <== leaf1;
@@ -129,60 +172,14 @@ const CheckSameTreeRootTpl = `
     check__.in[0] <== tree1__.root;
     check__.in[1] <== tree2__.root;
 `;
-const CheckBalanceTreeTpl = `
-    component balanceChecker__ = CheckLeafExists(balanceLevels);
-    balanceChecker__.enabled <== enabled;
-    balanceChecker__.leaf <== leaf;
-    for (var i = 0; i < balanceLevels; i++) {
-        balanceChecker__.path_index[i] <== balance_path_index[i];
-        balanceChecker__.path_elements[i][0] <== balance_path_elements[i][0];
-    }
-    balanceChecker__.root <== root;
-    `;
 
-const CheckOrderTreeTpl = `
-`;
-const LoopAssignTpl = `    for (var <%= loopVar %> = 0; <%= loopVar %> < <%= loopCount %>; <%= loopVar %>++) {
-<% for (const item of assignItems) { %>        <%= item[0] %>[<%= loopVar %>] <== <%= item[1] %>[<%= loopVar %>];
-<% } %>    }`;
-const CheckFullOrderTreeTpl = `
-    component orderHash__ = HashOrder();
-    orderHash__.tokensell <== order_tokensell;
-    orderHash__.tokenbuy <== order_tokenbuy;
-    orderHash__.filled_sell <== order_filledsell;
-    orderHash__.filled_buy <== order_filledbuy;
-    orderHash__.total_sell <== order_amountsell;
-    orderHash__.total_buy <== order_amountbuy;
-    orderHash__.order_id <== order_id;
-
-    // - check order tree update
-    component orderTree__ = CheckLeafExists(orderLevels);
-    orderTree__.enabled <== enabled;
-    orderTree__.leaf <== orderHash__.out;
-    for (var i = 0; i < orderLevels; i++) {
-        orderTree__.path_index[i] <== order_path_index[i];
-        orderTree__.path_elements[i][0] <== order_path_elements[i][0];
-    }
-    orderTree__.root <== orderRoot;
-
-    ${CheckAccountTreeTpl.replaceAll(' orderRoot', ' orderTree__.root')}
-    `;
-
-function genAssign(comp, fields, prefix, suffix = '', indent = 8) {
-  let output = '\n';
-  for (const f of fields) {
-    output += ' '.repeat(indent) + `${comp}.${f} <== ${prefix}${f}${suffix};\n`;
-  }
-  return output;
-}
-
-const UniversalBalanceCheckTplFn = function (compName, prefix, suffix) {
+const universalBalanceCheckTplFn = function (compName, prefix, suffix) {
   return `${compName} = BalanceChecker(balanceLevels, accountLevels);
         ${compName}.enabled <== enabled;
         ${compName}.accountRoot <== accountRoot;
         ${compName}.orderRoot <== orderRoot;
         ${compName}.tokenID <== tokenID;
-${genAssign(compName, ['accountID', 'ethAddr', 'sign', 'ay', 'nonce', 'balance'], prefix, suffix, 8)}
+${generateMultiAssign(compName, ['accountID', 'ethAddr', 'sign', 'ay', 'nonce', 'balance'], prefix, suffix, 8)}
         for (var j = 0; j < balanceLevels; j++) {
             ${compName}.balance_path_elements[j][0] <== balance_path_elements[j][0];
         }
@@ -192,17 +189,18 @@ ${genAssign(compName, ['accountID', 'ethAddr', 'sign', 'ay', 'nonce', 'balance']
 `;
 };
 export {
-  circuitInputEncoderJsTpl,
-  circuitInputEncoderRsTpl,
+  JsInputEncoderTpl,
+  RsInputEncoderTpl,
   CheckBalanceTreeTpl,
   CheckOrderTreeTpl,
-  CheckFullBalanceTreeTpl,
-  CheckFullOrderTreeTpl,
-  CheckSameTreeRootTpl,
+  CalcOrderTreeTpl,
   CalcAccountTreeFromBalanceTpl,
+  CheckAccountTreeFromBalanceTpl,
+  CheckAccountTreeFromOrderTpl,
+  CheckSameTreeRootTpl,
   LoopAssignTpl,
   CheckEqTpl,
-  UniversalBalanceCheckTplFn,
-  genAssign,
   MultiCheckEqTpl,
+  universalBalanceCheckTplFn,
+  generateMultiAssign,
 };

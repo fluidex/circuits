@@ -77,7 +77,7 @@ function parseOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quot
   return obj;
 }
 
-function handleTrade(state, trade, placedOrder) {
+function handleTrade(state: GlobalState, trade) {
   const askIsTaker = trade.ask_role == 'TAKER';
   const bidIsTaker = !askIsTaker;
   const askUserID = BigInt(trade.ask_user_id);
@@ -139,36 +139,27 @@ function handleTrade(state, trade, placedOrder) {
   ]);
 
   // first, we check the related two orders are already known to 'GlobalState'
-  for (const orderId of [...orderStateBefore.keys()].sort()) {
-    if (!placedOrder.has(orderId)) {
-      const order = orderStateBefore.get(orderId);
-      // check this is a new order
-      assert(order.finishedBase == '0' && order.finishedQuote == '0', 'invalid new order', order);
+  function checkGlobalStateKnowsOrder(order) {
+    const isNewOrder = order.finishedBase == '0' && order.finishedQuote == '0';
+    const orderId = order.order_id;
+    if (isNewOrder) {
+      assert(!state.hasOrder(order.accountID, orderId), 'invalid new order');
       let orderToPut = {
-        orderID: orderId,
-        accountID: order.accountID,
-        previous_tokenID_sell: 0n,
-        previous_tokenID_buy: 0n,
-        previous_amount_sell: 0n,
-        previous_amount_buy: 0n,
-        previous_filled_sell: 0n,
-        previous_filled_buy: 0n,
-        tokenID_sell: order.tokensell,
-        tokenID_buy: order.tokenbuy,
-        amount_sell: order.total_sell,
-        amount_buy: order.total_buy,
+        order_id: orderId,
+        tokensell: order.tokensell,
+        tokenbuy: order.tokenbuy,
+        filled_sell: 0n,
+        filled_buy: 0n,
+        total_sell: order.total_sell,
+        total_buy: order.total_buy,
       };
-      let newOrderID = state.PlaceOrder(orderToPut);
-      placedOrder.set(orderId, [orderToPut.accountID, newOrderID]);
-      if (verbose) {
-        console.log('global order id to user order id', orderId, orderToPut.accountID, newOrderID);
-      }
+      state.updateOrderState(order.accountID, orderToPut);
     } else {
-      if (verbose) {
-        console.log('skip put order', orderId);
-      }
+      assert(state.hasOrder(order.accountID, orderId), 'invalid old order');
     }
   }
+  checkGlobalStateKnowsOrder(askOrderStateBefore);
+  checkGlobalStateKnowsOrder(bidOrderStateBefore);
 
   // second check order states are same as 'GlobalState'
   function checkState(balanceState, askOrder, bidOrder) {
@@ -179,8 +170,8 @@ function handleTrade(state, trade, placedOrder) {
       ask_user_quote: state.getTokenBalance(askUserID, quoteTokenID),
     };
     checkEqByKeys(balanceStateLocal, balanceState);
-    let askOrderLocal = state.getAccountOrder(askUserID, placedOrder.get(askOrderID)[1]);
-    let bidOrderLocal = state.getAccountOrder(bidUserID, placedOrder.get(bidOrderID)[1]);
+    let askOrderLocal = state.getAccountOrderByOrderId(askUserID, askOrderID);
+    let bidOrderLocal = state.getAccountOrderByOrderId(bidUserID, bidOrderID);
     checkEqByKeys(askOrderLocal, askOrder);
     checkEqByKeys(bidOrderLocal, bidOrder);
   }
@@ -249,8 +240,6 @@ function replayMsgs() {
   // `enable_self_trade` test purpose only
   let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs, { verbose });
   console.log('genesis root', state.root());
-  // external id to <user_id, order_id_of_user>
-  let placedOrder = new Map<bigint, [bigint, bigint]>();
   //const maxUserID = Math.max(...trades.map(trade => [trade.ask_user_id, trade.bid_user_id]).flat());
   //console.log('maxUserID', maxUserID);
   //assert(maxUserID < maxAccountNum);
@@ -272,7 +261,7 @@ function replayMsgs() {
     } else if (msg.type == 'TradeMessage') {
       // handle trades
       const trade = msg.value;
-      handleTrade(state, trade, placedOrder);
+      handleTrade(state, trade);
     } else {
       //console.log('skip msg', msg.type);
     }

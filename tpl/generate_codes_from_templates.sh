@@ -10,5 +10,7 @@ do
     mkdir -p `dirname $to`
     cmd="npx ts-node tpl/preprocess.js $from $to"
     echo $cmd
-    $cmd
+    $cmd &
 done;
+wait
+echo 'generate from templates done'

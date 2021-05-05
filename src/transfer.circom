@@ -41,48 +41,25 @@ template Transfer(balanceLevels, accountLevels) {
 
     // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
 
-        // **************** CODEGEN START **************
-    signal input in[36];
-    signal fromAccountID;
-    signal toAccountID;
-    signal amount;
-    signal tokenID;
-    signal sigL2Hash;
-    signal s;
-    signal sign1;
-    signal sign2;
-    signal ay1;
-    signal ay2;
-    signal r8x;
-    signal r8y;
-    signal nonce1;
-    signal balance1;
-    signal ethAddr1;
-    signal nonce2;
-    signal balance2;
-    signal ethAddr2;
-    signal midAccountRoot;
-    fromAccountID <== in[0];
-    toAccountID <== in[1];
-    amount <== in[2];
-    tokenID <== in[3];
-    sigL2Hash <== in[4];
-    s <== in[5];
-    sign1 <== in[6];
-    sign2 <== in[7];
-    ay1 <== in[8];
-    ay2 <== in[9];
-    r8x <== in[10];
-    r8y <== in[11];
-    nonce1 <== in[12];
-    balance1 <== in[13];
-    ethAddr1 <== in[14];
-    nonce2 <== in[15];
-    balance2 <== in[16];
-    ethAddr2 <== in[17];
-    midAccountRoot <== in[18];
-    // **************** CODEGEN END **************
+    signal input fromAccountID;
+    signal input toAccountID;
+    signal input amount;
+    signal input tokenID;
 
+    signal input sigL2Hash;
+    signal input s;
+    signal input sign1;
+    signal input sign2;
+    signal input ay1;
+    signal input ay2;
+    signal input r8x;
+    signal input r8y;
+    signal input nonce1;
+    signal input balance1;
+    signal input ethAddr1;
+    signal input nonce2;
+    signal input balance2;
+    signal input ethAddr2;
     
     signal input orderRoot1;
     signal input orderRoot2;
@@ -127,6 +104,8 @@ template Transfer(balanceLevels, accountLevels) {
     ////////////////////////// Step 2: check old state: check old sender state ////////////////////////////
 
     
+    
+    
     component balanceTreeSenderOld = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeSenderOld.leaf <== balance1;
     for (var i = 0; i < balanceLevels; i++) {
@@ -149,13 +128,11 @@ template Transfer(balanceLevels, accountLevels) {
         accountTreeSenderOld.path_index[i] <== sender_account_path_index[i];
         accountTreeSenderOld.path_elements[i][0] <== sender_account_path_elements[i][0];
     }
+    component checkEqSenderOld = ForceEqualIfEnabled();
+    checkEqSenderOld.enabled <== enabled;
+    checkEqSenderOld.in[0] <== accountTreeSenderOld.root;
+    checkEqSenderOld.in[1] <== oldAccountRoot;
 
-    component checkSenderOld = ForceEqualIfEnabled();
-    checkSenderOld.enabled <== enabled;
-    checkSenderOld.in[0] <== accountTreeSenderOld.root;
-    checkSenderOld.in[1] <== oldAccountRoot;
-
-    
 
     ////////////////////////// Step 3: check state transition ////////////////////////////
     // - check state fields
@@ -170,6 +147,7 @@ template Transfer(balanceLevels, accountLevels) {
     // - verify eddsa signature
     ////////
     // computes babyjubjub X coordinate
+    // TODO: seems we have to align all the getAx of all operations
     component getAx = AySign2Ax();
     getAx.ay <== ay1;
     getAx.sign <== sign1;
@@ -200,7 +178,8 @@ template Transfer(balanceLevels, accountLevels) {
 
     ////////////////////////// Step 4: check state: check sender and receiver state after sending but before receiving ////////////////////////////
 
-
+    
+    
     
     component balanceTreeSenderNew = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeSenderNew.leaf <== balance1 - amount;
@@ -225,13 +204,7 @@ template Transfer(balanceLevels, accountLevels) {
         accountTreeSenderNew.path_elements[i][0] <== sender_account_path_elements[i][0];
     }
 
-    component checkSenderNew = ForceEqualIfEnabled();
-    checkSenderNew.enabled <== enabled;
-    checkSenderNew.in[0] <== accountTreeSenderNew.root;
-    checkSenderNew.in[1] <== midAccountRoot;
-
     
-
     
     component balanceTreeReceiverOld = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeReceiverOld.leaf <== balance2;
@@ -256,13 +229,14 @@ template Transfer(balanceLevels, accountLevels) {
         accountTreeReceiverOld.path_elements[i][0] <== receiver_account_path_elements[i][0];
     }
 
-    component checkReceiverOld = ForceEqualIfEnabled();
-    checkReceiverOld.enabled <== enabled;
-    checkReceiverOld.in[0] <== accountTreeReceiverOld.root;
-    checkReceiverOld.in[1] <== midAccountRoot;
+    component checkEqMid = ForceEqualIfEnabled();
+    checkEqMid.enabled <== enabled;
+    checkEqMid.in[0] <== accountTreeSenderNew.root;
+    checkEqMid.in[1] <== accountTreeReceiverOld.root;
+  
 
     
-
+    
     
     component balanceTreeReceiverNew = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeReceiverNew.leaf <== balance2 + amount;
@@ -286,12 +260,10 @@ template Transfer(balanceLevels, accountLevels) {
         accountTreeReceiverNew.path_index[i] <== receiver_account_path_index[i];
         accountTreeReceiverNew.path_elements[i][0] <== receiver_account_path_elements[i][0];
     }
+    component checkEqReceiverNew = ForceEqualIfEnabled();
+    checkEqReceiverNew.enabled <== enabled;
+    checkEqReceiverNew.in[0] <== accountTreeReceiverNew.root;
+    checkEqReceiverNew.in[1] <== newAccountRoot;
 
-    component checkReceiverNew = ForceEqualIfEnabled();
-    checkReceiverNew.enabled <== enabled;
-    checkReceiverNew.in[0] <== accountTreeReceiverNew.root;
-    checkReceiverNew.in[1] <== newAccountRoot;
-
-    
 
 }

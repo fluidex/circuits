@@ -1,0 +1,5 @@
+const TxLength = <%= codegen.config.commonPayload.length %>;
+enum TxDetailIdx {<% for(const item of codegen.config.commonPayload) { %>
+  <%= item.charAt(0).toUpperCase() + item.slice(1) %>,<% } %>
+}
+export { TxLength, TxDetailIdx };
