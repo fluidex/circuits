@@ -183,7 +183,6 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processTransfer[i].toAccountID <== decodedTx[i].accountID2;
         processTransfer[i].tokenID <== decodedTx[i].tokenID1;
         processTransfer[i].amount <== decodedTx[i].amount;
-        //processTransfer[i].nonce <== decodedTx[i].nonce1;
         processTransfer[i].nonce1 <== decodedTx[i].nonce1;
         processTransfer[i].nonce2 <== decodedTx[i].nonce2;
         processTransfer[i].sign1 <== decodedTx[i].sign1;
@@ -216,27 +215,24 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         // try process withdraw
         processWithdraw[i] = Withdraw(balanceLevels, accountLevels);
         processWithdraw[i].enabled <== enableWithdraw[i].out;
-        processWithdraw[i].accountID <== decodedTx[i].accountID1;
-        processWithdraw[i].tokenID <== decodedTx[i].tokenID1;
+
+        
+        processWithdraw[i].enableBalanceCheck1 <== decodedTx[i].enableBalanceCheck1;
+        processWithdraw[i].enableBalanceCheck2 <== decodedTx[i].enableBalanceCheck2;
         processWithdraw[i].amount <== decodedTx[i].amount;
-        processWithdraw[i].nonce <== decodedTx[i].nonce1;
-        processWithdraw[i].sign <== decodedTx[i].sign1;
-        processWithdraw[i].ay <== decodedTx[i].ay1;
-        processWithdraw[i].ethAddr <== decodedTx[i].ethAddr1;
-        processWithdraw[i].orderRoot <== orderRoots[i][0];
-        processWithdraw[i].balance <== decodedTx[i].balance1;
+        processWithdraw[i].balance1 <== decodedTx[i].balance1;
+        processWithdraw[i].balance2 <== decodedTx[i].balance2;
+        processWithdraw[i].nonce1 <== decodedTx[i].nonce1;
+        processWithdraw[i].nonce2 <== decodedTx[i].nonce2;
         processWithdraw[i].sigL2Hash <== decodedTx[i].sigL2Hash;
         processWithdraw[i].s <== decodedTx[i].s;
         processWithdraw[i].r8x <== decodedTx[i].r8x;
         processWithdraw[i].r8y <== decodedTx[i].r8y;
-        for (var j = 0; j < balanceLevels; j++) {
-            processWithdraw[i].balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
-        }
-        for (var j = 0; j < accountLevels; j++) {
-            processWithdraw[i].account_path_elements[j][0] <== account_path_elements[i][0][j][0];
-        }
-        processWithdraw[i].oldAccountRoot <== oldAccountRoots[i];
-        processWithdraw[i].newAccountRoot <== newAccountRoots[i];
+  
+
+
+        processWithdraw[i].sign <== decodedTx[i].sign1;
+        processWithdraw[i].ay <== decodedTx[i].ay1;
 
         // try spot_trade
         processSpotTrade[i] = SpotTrade(balanceLevels, orderLevels, accountLevels);

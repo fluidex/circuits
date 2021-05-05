@@ -8,6 +8,67 @@ include "./lib/binary_merkle_tree.circom";
  * Process a rollup withdrawal transaction
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
+ * @input amount - {Uint192} - amount to withdraw from L2
+ * @input balance1 - {Uint192} - old balance of the account leaf
+ * @input balance2 - {Uint192} - new balance of the account leaf
+ */
+template Withdraw(balanceLevels, accountLevels) {
+    signal input enabled;
+    signal input enableBalanceCheck1;
+    signal input enableBalanceCheck2;
+
+    signal input amount;
+    signal input balance1;
+    signal input nonce1;
+    signal input balance2;
+    signal input nonce2;
+
+
+    signal input sign;
+    signal input ay;
+    signal input sigL2Hash; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
+    signal input s;
+    signal input r8x;
+    signal input r8y;
+
+    // - verify eddsa signature
+    ////////
+    // computes babyjubjub X coordinate
+    component getAx = AySign2Ax();
+    getAx.ay <== ay;
+    getAx.sign <== sign;
+
+    // signature L2 verifier
+    component sigVerifier = EdDSAPoseidonVerifier();
+    sigVerifier.enabled <== enabled;
+
+    sigVerifier.Ax <== getAx.ax;
+    sigVerifier.Ay <== ay;
+
+    sigVerifier.S <== s;
+    sigVerifier.R8x <== r8x;
+    sigVerifier.R8y <== r8y;
+
+    sigVerifier.M <== sigL2Hash;
+
+    // TODO: underflow check
+
+    // TODO: overflow check
+
+    // TODO: fee
+
+    <%- codegen.generateMultiCheckEq([
+        ['enableBalanceCheck1', '1'],
+        ['enableBalanceCheck2', '1'],
+        ['balance2', 'balance1 - amount'],
+        ['nonce2', 'nonce1 + 1']
+    ], {ctx: '', replacers: {}}) %>
+}
+
+/**
+ * Process a rollup withdrawal transaction
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
  * @input accountID - {Uint48} - account index
  * @input amount - {Uint192} - amount to withdraw from L2
  * @input tokenID - {Uint32} - tokenID signed in the transaction
@@ -26,7 +87,7 @@ include "./lib/binary_merkle_tree.circom";
  * @input oldAccountRoot - {Field} - initial acount state root
  * @input newAccountRoot - {Field} - final acount state root
  */
-template Withdraw(balanceLevels, accountLevels) {
+template WithdrawLegacy(balanceLevels, accountLevels) {
     signal input enabled;
 
     // Tx
