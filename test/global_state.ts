@@ -339,7 +339,6 @@ class GlobalState {
     encodedTx[TxDetailIdx.Sign1] = acc.sign;
     encodedTx[TxDetailIdx.Ay1] = acc.ay;
 
-    // TODO: we may disable 'balanceChecker2'?
     encodedTx[TxDetailIdx.TokenID2] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID2] = Scalar.e(tx.accountID);
     encodedTx[TxDetailIdx.Balance2] = oldBalance + tx.amount;
@@ -461,21 +460,36 @@ class GlobalState {
   Withdraw(tx: WithdrawTx) {
     assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'Withdraw');
     let proof = this.stateProof(tx.accountID, tx.tokenID);
+
+    let acc = this.accounts.get(tx.accountID);
+    let oldBalance = this.getTokenBalance(tx.accountID, tx.tokenID);
+    let nonce = acc.nonce;
+    assert(oldBalance > tx.amount, 'Withdraw balance');
+
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
 
-    let acc = this.accounts.get(tx.accountID);
-    let balanceBefore = this.getTokenBalance(tx.accountID, tx.tokenID);
-    assert(balanceBefore > tx.amount, 'Withdraw balance');
-    encodedTx[TxDetailIdx.AccountID1] = tx.accountID;
-    encodedTx[TxDetailIdx.TokenID1] = tx.tokenID;
     encodedTx[TxDetailIdx.Amount] = tx.amount;
-    encodedTx[TxDetailIdx.Nonce1] = acc.nonce;
+
+    encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tx.tokenID);
+    encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
+    encodedTx[TxDetailIdx.Balance1] = oldBalance;
+    encodedTx[TxDetailIdx.Nonce1] = nonce;
+    encodedTx[TxDetailIdx.EthAddr1] = acc.ethAddr;
     encodedTx[TxDetailIdx.Sign1] = acc.sign;
     encodedTx[TxDetailIdx.Ay1] = acc.ay;
-    encodedTx[TxDetailIdx.EthAddr1] = acc.ethAddr;
-    encodedTx[TxDetailIdx.Balance1] = balanceBefore;
+
+    encodedTx[TxDetailIdx.TokenID2] = Scalar.e(tx.tokenID);
+    encodedTx[TxDetailIdx.AccountID2] = Scalar.e(tx.accountID);
+    encodedTx[TxDetailIdx.Balance2] = oldBalance - tx.amount;
+    encodedTx[TxDetailIdx.Nonce2] = nonce + 1n;
+    encodedTx[TxDetailIdx.EthAddr2] = acc.ethAddr;
+    encodedTx[TxDetailIdx.Sign2] = acc.sign;
+    encodedTx[TxDetailIdx.Ay2] = acc.ay;
+
+    encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
+    encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
 
     encodedTx[TxDetailIdx.SigL2Hash] = tx.signature.hash;
     encodedTx[TxDetailIdx.S] = tx.signature.S;
@@ -499,84 +513,12 @@ class GlobalState {
       rootAfter: 0n,
     };
 
-    this.setTokenBalance(tx.accountID, tx.tokenID, balanceBefore - tx.amount);
+    this.setTokenBalance(tx.accountID, tx.tokenID, oldBalance - tx.amount);
     this.increaseNonce(tx.accountID);
 
     rawTx.rootAfter = this.root();
     this.addRawTx(rawTx);
   }
-  /*
-  // PlaceOrder not create L2 tx now
-  PlaceOrder(tx: PlaceOrderTx): bigint {
-    if (this.options.verbose) {
-      console.log('PlaceOrder', tx);
-    }
-    // TODO: check order signature
-    //assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'PlaceOrder account: accountID' + tx.accountID);
-    
-    let account = this.accounts.get(tx.accountID);
-    let proof = this.stateProof(tx.accountID, tx.tokenID_sell);
-
-    let rawTx: RawTx = {
-      txType: TxType.PlaceOrder,
-      payload: null,
-      balancePath0: proof.balancePath,
-      balancePath1: proof.balancePath,
-      balancePath2: proof.balancePath,
-      balancePath3: proof.balancePath,
-      orderPath0: null,
-      orderPath1: this.trivialOrderPathElements(),
-      orderRoot0: account.orderRoot,
-      orderRoot1: null,
-      accountPath0: proof.accountPath,
-      accountPath1: proof.accountPath,
-      rootBefore: this.root(),
-      rootAfter: 0n,
-    };
-    
-    //console.log("orderRoo0", rawTx.orderRoot0);
-    let order_pos = this.createNewOrder(tx);
-
-    
-    // fill in the tx
-    let txData = new PlaceOrderTxData();
-
-    txData.order_pos = order_pos;
-    txData.old_order_id = 0n;
-    txData.new_order_id = tx.orderID;
-    txData.old_order_tokensell = tx.previous_tokenID_sell;
-    txData.old_order_filledsell = tx.previous_filled_sell;
-    txData.old_order_amountsell = tx.previous_amount_sell;
-    txData.old_order_tokenbuy = tx.previous_tokenID_buy;
-    txData.old_order_filledbuy = tx.previous_filled_buy;
-    txData.old_order_amountbuy = tx.previous_amount_buy;
-    txData.new_order_tokensell = tx.tokenID_sell;
-    txData.new_order_amountsell = tx.amount_sell;
-    txData.new_order_tokenbuy = tx.tokenID_buy;
-    txData.new_order_amountbuy = tx.amount_buy;
-    txData.accountID = tx.accountID;
-    txData.balance = proof.leaf;
-    txData.nonce = account.nonce;
-    txData.sign = account.sign;
-    txData.ay = account.ay;
-    txData.ethAddr = account.ethAddr;
-
-    let encodedTx = txData.encode();
-
-    rawTx.payload = encodedTx;
-    rawTx.orderPath0 = this.orderTrees.get(tx.accountID).getProof(order_pos).path_elements;
-    //console.log('rawTx.orderPath0', rawTx.orderPath0)
-    rawTx.orderRoot1 = this.orderTrees.get(tx.accountID).getProof(order_pos).root;
-
-    rawTx.rootAfter = this.root();
-    this.addRawTx(rawTx);
-    if (this.options.verbose) {
-      //console.log('create order ', order_id, tx);
-    }
-    
-    return order_pos;
-  }
-  */
 
   // case1: old order is empty
   // case2: old order is valid old order with different order id, but we will replace it.

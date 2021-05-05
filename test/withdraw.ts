@@ -107,7 +107,7 @@ class TestWithdraw implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(__dirname, '..', 'src', 'withdraw.circom'),
-      main: `Withdraw(${balanceLevels}, ${accountLevels})`,
+      main: `WithdrawLegacy(${balanceLevels}, ${accountLevels})`,
     };
   }
 }

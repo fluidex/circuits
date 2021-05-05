@@ -22,11 +22,13 @@ function generateTestCases() {
 	npx ts-node test/export_all_tests.ts
 }
 
+function testBlock() {
+	npx snarkit test --backend native --witness_type bin testdata/Block_2_2_2_2
+}
+
 function testAll() {
-	#for d in Block_2_2_2_2
 	for d in `ls testdata`
 	do
-		#npx snarkit test --backend wasm --witness_type bin testdata/$d &
 		npx snarkit test --backend native --witness_type bin testdata/$d &
 	done
 	for job in `jobs -p`
@@ -40,7 +42,8 @@ function cleanOld() {
 }
 
 cleanOld
-#checkCPU
 generateTestCases
+
+#testBlock
 testAll
 

@@ -9,6 +9,84 @@ include "./lib/binary_merkle_tree.circom";
  * Process a rollup withdrawal transaction
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
+ * @input amount - {Uint192} - amount to withdraw from L2
+ * @input balance1 - {Uint192} - old balance of the account leaf
+ * @input balance2 - {Uint192} - new balance of the account leaf
+ */
+template Withdraw(balanceLevels, accountLevels) {
+    signal input enabled;
+    signal input enableBalanceCheck1;
+    signal input enableBalanceCheck2;
+
+    signal input amount;
+    signal input balance1;
+    signal input nonce1;
+    signal input balance2;
+    signal input nonce2;
+
+
+    signal input sign;
+    signal input ay;
+    signal input sigL2Hash; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
+    signal input s;
+    signal input r8x;
+    signal input r8y;
+
+    // - verify eddsa signature
+    ////////
+    // computes babyjubjub X coordinate
+    component getAx = AySign2Ax();
+    getAx.ay <== ay;
+    getAx.sign <== sign;
+
+    // signature L2 verifier
+    component sigVerifier = EdDSAPoseidonVerifier();
+    sigVerifier.enabled <== enabled;
+
+    sigVerifier.Ax <== getAx.ax;
+    sigVerifier.Ay <== ay;
+
+    sigVerifier.S <== s;
+    sigVerifier.R8x <== r8x;
+    sigVerifier.R8y <== r8y;
+
+    sigVerifier.M <== sigL2Hash;
+
+    // TODO: underflow check
+
+    // TODO: overflow check
+
+    // TODO: fee
+
+    
+
+    component checkEq0 = ForceEqualIfEnabled();
+    checkEq0.enabled <== enabled;
+    checkEq0.in[0] <== enableBalanceCheck1;
+    checkEq0.in[1] <== 1;
+
+    component checkEq1 = ForceEqualIfEnabled();
+    checkEq1.enabled <== enabled;
+    checkEq1.in[0] <== enableBalanceCheck2;
+    checkEq1.in[1] <== 1;
+
+    component checkEq2 = ForceEqualIfEnabled();
+    checkEq2.enabled <== enabled;
+    checkEq2.in[0] <== balance2;
+    checkEq2.in[1] <== balance1 - amount;
+
+    component checkEq3 = ForceEqualIfEnabled();
+    checkEq3.enabled <== enabled;
+    checkEq3.in[0] <== nonce2;
+    checkEq3.in[1] <== nonce1 + 1;
+
+
+}
+
+/**
+ * Process a rollup withdrawal transaction
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
  * @input accountID - {Uint48} - account index
  * @input amount - {Uint192} - amount to withdraw from L2
  * @input tokenID - {Uint32} - tokenID signed in the transaction
@@ -27,7 +105,7 @@ include "./lib/binary_merkle_tree.circom";
  * @input oldAccountRoot - {Field} - initial acount state root
  * @input newAccountRoot - {Field} - final acount state root
  */
-template Withdraw(balanceLevels, accountLevels) {
+template WithdrawLegacy(balanceLevels, accountLevels) {
     signal input enabled;
 
     // Tx
