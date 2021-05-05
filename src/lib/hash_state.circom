@@ -80,24 +80,36 @@ template HashOrder() {
 
     hash.out ==> out;
 }
+
 template CalculateGenesisOrderHash() {
     signal output out;
-    component emptyOrderHash = HashOrder();
-    emptyOrderHash.tokensell <== 0;
-    emptyOrderHash.tokenbuy <== 0;
-    emptyOrderHash.filled_sell <== 0;
-    emptyOrderHash.filled_buy <== 0;
-    emptyOrderHash.total_sell <== 0;
-    emptyOrderHash.total_buy <== 0;
-    emptyOrderHash.order_id <== 0;
-    out <== emptyOrderHash.out;    
+    component hashOrder = HashOrder();
+    hashOrder.tokensell <== 0;
+    hashOrder.tokenbuy <== 0;
+    hashOrder.filled_sell <== 0;
+    hashOrder.filled_buy <== 0;
+    hashOrder.total_sell <== 0;
+    hashOrder.total_buy <== 0;
+    hashOrder.order_id <== 0;
+    out <== hashOrder.out;
 }
 template CalculateGenesisOrderRoot(orderLevels) {
     signal output root;
 
-    component emptyOrderHash = CalculateGenesisOrderHash();
+    // There is a bug in circom native witness generator:
+    // component of input size 0 cannot has another component of input size 0
+    // so we cannot reuse `CalculateGenesisOrderHash` here...
+    component hashOrder = HashOrder();
+    hashOrder.tokensell <== 0;
+    hashOrder.tokenbuy <== 0;
+    hashOrder.filled_sell <== 0;
+    hashOrder.filled_buy <== 0;
+    hashOrder.total_sell <== 0;
+    hashOrder.total_buy <== 0;
+    hashOrder.order_id <== 0;
+
     component orderTree = CalculateRootFromRepeatedLeaves(orderLevels);
-    orderTree.leaf <== emptyOrderHash.out;
+    orderTree.leaf <== hashOrder.out;
 
     root <== orderTree.root;
 }
