@@ -48,7 +48,11 @@ function initTestCase() {
     tokenID_buy: tokenID_buy,
     amount_sell: amount_sell,
     amount_buy: amount_buy,
+    signature: null, 
   };
+  let fullPlaceOrderTx = state.fillPlaceOrderTx(placeOrderTx);
+  let txHash = common.hashPlaceOrder(fullPlaceOrderTx);
+  placeOrderTx.signature = common.accountSign(account, txHash);
   state.PlaceOrder(placeOrderTx);
 
   let block = state.forge();

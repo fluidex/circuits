@@ -2,6 +2,8 @@
 include "./lib/bitify.circom";
 include "./lib/binary_merkle_tree.circom";
 include "./lib/hash_state.circom";
+include "./lib/utils_bjj.circom";
+include "./lib/eddsaposeidon.circom";
 
 template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
@@ -63,6 +65,33 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     signal balance_path_index[balanceLevels];
     signal order_path_index[orderLevels];
     signal account_path_index[accountLevels];
+
+    // Signature
+    signal input sigL2Hash; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
+    signal input s;
+    signal input r8x;
+    signal input r8y;
+
+    // - verify eddsa signature
+    ////////
+    // computes babyjubjub X coordinate
+    component getAx = AySign2Ax();
+    getAx.ay <== ay;
+    getAx.sign <== sign;
+
+    // signature L2 verifier
+    component sigVerifier = EdDSAPoseidonVerifier();
+    sigVerifier.enabled <== enabled;
+
+    sigVerifier.Ax <== getAx.ax;
+    sigVerifier.Ay <== ay;
+
+    sigVerifier.S <== s;
+    sigVerifier.R8x <== r8x;
+    sigVerifier.R8y <== r8y;
+
+    sigVerifier.M <== sigL2Hash;
+
 
     signal tokenID <== new_order_tokensell;
     // decode balance_path_index

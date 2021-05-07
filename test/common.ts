@@ -114,6 +114,7 @@ class PlaceOrderTx {
   tokenID_buy: bigint;
   amount_sell: bigint;
   amount_buy: bigint;
+  signature: TxSignature;
 }
 
 // TODO: matain many of these in state
@@ -140,6 +141,12 @@ function hashWithdraw({ accountID, tokenID, amount, nonce, oldBalance }) {
   data = hash([data, accountID, nonce, oldBalance]);
   return data;
 }
+function hashPlaceOrder({accountID, orderID ,tokenID_sell,tokenID_buy,amount_sell,amount_buy,nonce}) {
+    let data = hash([TxType.PlaceOrder, orderID ,tokenID_sell,tokenID_buy,amount_sell,amount_buy]);
+    data = hash([data, accountID, nonce]);
+    return data;
+}
+
 function accountSign(acc, hash) {
   let sig = acc.signHash(hash);
   return {
@@ -239,6 +246,7 @@ export {
   TxDetailIdx,
   hashTransfer,
   hashWithdraw,
+  hashPlaceOrder,
   accountSign,
   circuitSrcToName,
   AccountState,

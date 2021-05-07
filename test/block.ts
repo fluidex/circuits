@@ -161,6 +161,7 @@ function initBlockTestCase() {
     tokenID_buy: tokenID_2to1,
     amount_sell: 1000n,
     amount_buy: 10000n,
+    signature: null,
   };
   // order_id is known to the user, user should sign this order_id
   // while order_idx(or order_pos) is maintained by the global state keeper. User dont need to know anything about order_pos

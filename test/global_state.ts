@@ -334,6 +334,7 @@ class GlobalState {
     };
     return fullTx;
   }
+
   fillWithdrawTx(tx: WithdrawTx) {
     let fullTx = {
       accountID: tx.accountID,
@@ -343,6 +344,25 @@ class GlobalState {
       oldBalance: this.getTokenBalance(tx.accountID, tx.tokenID),
     };
     return fullTx;
+  }
+
+  fillPlaceOrderTx(tx: PlaceOrderTx) {
+      let fullTx = {
+        accountID: tx.accountID,
+        orderID: tx.orderID,
+        previous_tokenID_sell: tx.previous_tokenID_sell,
+        previous_tokenID_buy: tx.previous_tokenID_buy,
+        previous_amount_sell: tx.previous_amount_sell,
+        previous_amount_buy: tx.previous_amount_buy,
+        previous_filled_sell: tx.previous_filled_sell,
+        previous_filled_buy: tx.previous_filled_buy,
+        tokenID_sell: tx.tokenID_sell,
+        tokenID_buy: tx.tokenID_buy,
+        amount_sell: tx.amount_sell,
+        amount_buy: tx.amount_buy,
+        nonce: this.accounts.get(tx.accountID).nonce,
+      };
+      return fullTx;
   }
   Transfer(tx: TranferTx) {
     assert(this.accounts.get(tx.from).ethAddr != 0n, 'TransferTx: empty fromAccount');
