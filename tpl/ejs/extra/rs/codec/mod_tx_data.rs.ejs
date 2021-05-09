@@ -1,0 +1,4 @@
+pub const TX_LENGTH: usize = <%= codegen.config.commonPayload.length %>;
+pub mod tx_detail_idx {<% for(var i = 0; i < codegen.config.commonPayload.length; i++) { %>
+    pub const <%= codegen.camelToAllCap(codegen.config.commonPayload[i]) %>: usize = <%=i%>;<%}%>
+}
