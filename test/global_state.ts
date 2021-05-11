@@ -528,6 +528,10 @@ class GlobalState {
     txData.sign = account.sign;
     txData.ay = account.ay;
     txData.ethAddr = account.ethAddr;
+    txData.sigL2Hash = tx.signature.hash;
+    txData.s = tx.signature.S;
+    txData.r8x = tx.signature.R8x;
+    txData.r8y = tx.signature.R8y;
 
     let encodedTx = txData.encode();
 

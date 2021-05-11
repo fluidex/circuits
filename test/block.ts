@@ -167,6 +167,10 @@ function initBlockTestCase() {
   // while order_idx(or order_pos) is maintained by the global state keeper. User dont need to know anything about order_pos
   const order1_pos = state.nextOrderIds.get(accountID1);
   assert(order1_pos === 1n, 'unexpected order pos');
+  let fullPlaceOrderTx = state.fillPlaceOrderTx(placeOrderTx);
+  let txHash = common.hashPlaceOrder(fullPlaceOrderTx);
+  let sign = common.accountSign(account0, txHash);
+  placeOrderTx.signature = sign;
   state.PlaceOrder(placeOrderTx);
 
   let spotTradeTx = {

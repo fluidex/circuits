@@ -21,6 +21,10 @@ class PlaceOrderTxData {
   sign: bigint;
   ay: bigint;
   ethAddr: bigint;
+  sigL2Hash:bigint;
+  s: bigint;
+  r8x: bigint;
+  r8y: bigint;
   encode(): Array<bigint> {
     // double check template config is consistent
     assert(TxLength == 36, 'invalid length, check your template config');
@@ -44,6 +48,10 @@ class PlaceOrderTxData {
     results.push(this.sign);
     results.push(this.ay);
     results.push(this.ethAddr);
+    results.push(this.sigL2Hash);
+    results.push(this.s);
+    results.push(this.r8x);
+    results.push(this.r8y);
     while (results.length < TxLength) {
       results.push(0n);
     }

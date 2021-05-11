@@ -35,7 +35,7 @@ function initTestCase() {
     }
   }
   state.setAccountNonce(accountID, nonce);
-  const placeOrderTx = {
+  let placeOrderTx = {
     orderID: 1n,
     accountID: accountID,
     previous_tokenID_sell: 0n,
@@ -52,7 +52,8 @@ function initTestCase() {
   };
   let fullPlaceOrderTx = state.fillPlaceOrderTx(placeOrderTx);
   let txHash = common.hashPlaceOrder(fullPlaceOrderTx);
-  placeOrderTx.signature = common.accountSign(account, txHash);
+  let sign = common.accountSign(account, txHash);
+  placeOrderTx.signature = sign;
   state.PlaceOrder(placeOrderTx);
 
   let block = state.forge();

@@ -24,6 +24,10 @@ const config = {
         sign
         ay
         ethAddr
+        sigL2Hash
+        s
+        r8x
+        r8y
     `),
     encoderName: 'PlaceOrderTxData',
   },
