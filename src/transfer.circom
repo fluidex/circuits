@@ -40,22 +40,19 @@ template Transfer(balanceLevels, accountLevels) {
     signal input enabled;
     signal input enableBalanceCheck1;
     signal input enableBalanceCheck2;
+    signal input enableSigCheck1;
 
-    // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
 
     signal input fromAccountID;
     signal input toAccountID;
     signal input amount;
     signal input tokenID;
 
-    signal input sigL2Hash;
-    signal input s;
+    signal input sigL2Hash1; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
     signal input sign1;
     signal input sign2;
     signal input ay1;
     signal input ay2;
-    signal input r8x;
-    signal input r8y;
     signal input nonce1;
     signal input balance1;
     signal input ethAddr1;
@@ -114,38 +111,12 @@ template Transfer(balanceLevels, accountLevels) {
     checkEq1.in[0] <== enableBalanceCheck2;
     checkEq1.in[1] <== 1;
 
+    component checkEq2 = ForceEqualIfEnabled();
+    checkEq2.enabled <== enabled;
+    checkEq2.in[0] <== enableSigCheck1;
+    checkEq2.in[1] <== 1;
 
 
-    ////////////////////////// Step 2: check signatures ////////////////////////////
-    // - check state fields
-    ////////
-    // sender nonce check on L2
-    // nonce signed by the user must match nonce of the sender account
-    //component check = ForceEqualIfEnabled();
-    //check.enabled <== enabled;
-    //check.in[0] <== nonce;
-    //check.in[1] <== nonce1;
-
-    // - verify eddsa signature
-    ////////
-    // computes babyjubjub X coordinate
-    // TODO: seems we have to align all the getAx of all operations
-    component getAx = AySign2Ax();
-    getAx.ay <== ay1;
-    getAx.sign <== sign1;
-
-    // signature L2 verifier
-    component sigVerifier = EdDSAPoseidonVerifier();
-    sigVerifier.enabled <== enabled;
-
-    sigVerifier.Ax <== getAx.ax;
-    sigVerifier.Ay <== ay1;
-
-    sigVerifier.S <== s;
-    sigVerifier.R8x <== r8x;
-    sigVerifier.R8y <== r8y;
-
-    sigVerifier.M <== sigL2Hash;
 
     // TODO: underflow check
 

@@ -4,10 +4,10 @@ const printf = require('printf');
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
-import { Order } from './common';
+import { OrderState, OrderInput } from './common';
 import { GlobalState } from './global_state';
 //import { assert } from 'console';
 const assert = require('assert').strict;
@@ -68,16 +68,19 @@ function initBlockTestCase() {
   state.setAccountNonce(accountID2, 29n);
   // order2
   const order2_id = 1n;
-  const order2: Order = {
+  const order2: OrderInput = new OrderInput({
+    accountID: accountID2,
     order_id: order2_id,
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
-    filled_sell: 10n,
-    filled_buy: 1n,
     total_sell: 10000n,
     total_buy: 1000n,
-  };
-  state.setAccountOrder(accountID2, order2);
+  });
+  order2.signWith(account2);
+  let order2State = OrderState.fromOrderInput(order2);
+  order2State.filled_buy = 1n;
+  order2State.filled_sell = 10n;
+  state.setAccountOrder(accountID2, order2State);
 
   /// start txs
 
@@ -88,7 +91,7 @@ function initBlockTestCase() {
     amount: 200n,
     ethAddr: Scalar.fromString(account0.ethAddr, 16),
     sign: BigInt(account0.sign),
-    ay: Scalar.fromString(account0.ay, 16),
+    ay: account0.ay,
   });
 
   assert(state.accounts.get(accountID1).ethAddr != 0n, 'account1 should not be empty');
@@ -108,7 +111,7 @@ function initBlockTestCase() {
   let fullTransferTx = state.fillTransferTx(transferTx);
   // user should check fullTransferTx is consistent with transferTx before signing
   let hash = common.hashTransfer(fullTransferTx);
-  transferTx.signature = common.accountSign(account1, hash);
+  transferTx.signature = account1.signHash(hash);
   state.Transfer(transferTx);
 
   let withdrawTx = {
@@ -119,7 +122,7 @@ function initBlockTestCase() {
   };
   let fullWithdrawTx = state.fillWithdrawTx(withdrawTx);
   hash = common.hashWithdraw(fullWithdrawTx);
-  withdrawTx.signature = common.accountSign(account0, hash);
+  withdrawTx.signature = account0.signHash(hash);
   state.Withdraw(withdrawTx);
 
   // trade amount
@@ -137,20 +140,20 @@ function initBlockTestCase() {
     amount: 1990n,
   });
   const order1_id = 1n;
-  const order1: Order = {
+  const order1: OrderInput = new OrderInput({
+    accountID: accountID1,
     order_id: order1_id,
     tokensell: tokenID_1to2,
     tokenbuy: tokenID_2to1,
     total_sell: 1000n,
     total_buy: 10000n,
-    filled_buy: 0n,
-    filled_sell: 0n,
-  };
+  });
+  order1.signWith(account1);
   // order_id is known to the user, user should sign this order_id
   // while order_idx(or order_pos) is maintained by the global state keeper. User dont need to know anything about order_pos
   //const order1_pos = state.nextOrderIds.get(accountID1);
   //assert(order1_pos === 1n, 'unexpected order pos');
-  state.setAccountOrder(accountID1, order1);
+  state.setAccountOrder(accountID1, OrderState.fromOrderInput(order1));
 
   let spotTradeTx = {
     order1_accountID: accountID1,

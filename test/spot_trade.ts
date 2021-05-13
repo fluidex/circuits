@@ -2,7 +2,7 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState, hashOrderState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { calculateGenesisOrderRoot, OrderInput, OrderState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 import { GlobalState } from './global_state';
@@ -66,31 +66,31 @@ function initTestCase() {
   const order1_id = 1n;
   const order1_amountsell = 1000n;
   const order1_amountbuy = 10000n;
-  const order1 = {
+  const order1 = new OrderInput({
     order_id: order1_id,
     tokenbuy: tokenID_2to1,
     tokensell: tokenID_1to2,
-    filled_sell: 0n,
-    filled_buy: 0n,
     total_sell: order1_amountsell,
     total_buy: order1_amountbuy,
-  };
-  state.setAccountOrder(accountID1, order1);
+  });
+  let orderState1 = OrderState.fromOrderInput(order1);
+  state.setAccountOrder(accountID1, orderState1);
 
   // order2
   const order2_id = 1n;
   const order2_amountsell = 10000n;
   const order2_amountbuy = 1000n;
-  const order2 = {
+  const order2 = new OrderInput({
     order_id: order2_id,
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
-    filled_sell: 10n,
-    filled_buy: 1n,
     total_sell: order2_amountsell,
     total_buy: order2_amountbuy,
-  };
-  state.setAccountOrder(accountID2, order2);
+  });
+  let orderState2 = OrderState.fromOrderInput(order2);
+  orderState2.filled_sell = 10n;
+  orderState2.filled_buy = 1n;
+  state.setAccountOrder(accountID2, orderState2);
 
   let spotTradeTx = {
     order1_accountID: accountID1,
@@ -122,10 +122,10 @@ function initTestCase() {
     order2_amountbuy: order2_amountbuy,
     amount_2to1: amount_2to1,
     amount_1to2: amount_1to2,
-    order1_filledsell: order1.filled_sell,
-    order1_filledbuy: order1.filled_buy,
-    order2_filledsell: order2.filled_sell,
-    order2_filledbuy: order2.filled_buy,
+    order1_filledsell: orderState1.filled_sell,
+    order1_filledbuy: orderState1.filled_buy,
+    order2_filledsell: orderState2.filled_sell,
+    order2_filledbuy: orderState2.filled_buy,
     order1_accountID: accountID1,
     order2_accountID: accountID2,
     order1_account_nonce: nonce1,

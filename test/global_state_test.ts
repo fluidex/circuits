@@ -1,11 +1,15 @@
 import { GlobalState } from './global_state';
 import * as snarkit from 'snarkit';
-import { circuitSrcToName } from './common';
+import { circuitSrcToName, OrderState } from './common';
 import { assert } from 'console';
 import * as fs from 'fs';
 import * as path from 'path';
 const printf = require('printf');
 import { inspect } from 'util';
+import { Account } from '../helper.ts/account';
+import { OrderInput } from '../helper.ts/state-utils';
+const ffjavascript = require('ffjavascript');
+const Scalar = ffjavascript.Scalar;
 inspect.defaultOptions.depth = null;
 
 const verbose = false;
@@ -77,7 +81,7 @@ function parseOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quot
   return obj;
 }
 
-function handleTrade(state: GlobalState, trade) {
+function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
   const askIsTaker = trade.ask_role == 'TAKER';
   const bidIsTaker = !askIsTaker;
   const askUserID = BigInt(trade.ask_user_id);
@@ -141,21 +145,21 @@ function handleTrade(state: GlobalState, trade) {
   // first, we check the related two orders are already known to 'GlobalState'
   function checkGlobalStateKnowsOrder(order) {
     const isNewOrder = order.finishedBase == '0' && order.finishedQuote == '0';
-    const orderId = order.order_id;
     if (isNewOrder) {
-      assert(!state.hasOrder(order.accountID, orderId), 'invalid new order');
-      let orderToPut = {
-        order_id: orderId,
+      assert(!state.hasOrder(order.accountID, order.order_id), 'invalid new order');
+      let orderToPut = new OrderInput({
+        accountID: order.accountID,
+        order_id: order.order_id,
         tokensell: order.tokensell,
         tokenbuy: order.tokenbuy,
-        filled_sell: 0n,
-        filled_buy: 0n,
         total_sell: order.total_sell,
         total_buy: order.total_buy,
-      };
-      state.updateOrderState(order.accountID, orderToPut);
+        sig: null,
+      });
+      orderToPut.signWith(accounts[Number(order.accountID)]);
+      state.updateOrderState(order.accountID, OrderState.fromOrderInput(orderToPut));
     } else {
-      assert(state.hasOrder(order.accountID, orderId), 'invalid old order, too many open orders?');
+      assert(state.hasOrder(order.accountID, order.order_id), 'invalid old order, too many open orders?');
     }
   }
   checkGlobalStateKnowsOrder(askOrderStateBefore);
@@ -172,8 +176,8 @@ function handleTrade(state: GlobalState, trade) {
     checkEqByKeys(balanceStateLocal, balanceState);
     let askOrderLocal = state.getAccountOrderByOrderId(askUserID, askOrderID);
     let bidOrderLocal = state.getAccountOrderByOrderId(bidUserID, bidOrderID);
-    checkEqByKeys(askOrderLocal, askOrder);
-    checkEqByKeys(bidOrderLocal, bidOrder);
+    checkEqByKeys(askOrderLocal, askOrder, ['filled_sell', 'filled_buy']);
+    checkEqByKeys(bidOrderLocal, bidOrder, ['filled_sell', 'filled_buy']);
   }
   checkState(parseBalance(trade.state_before.balance, [baseToken, quoteToken]), askOrderStateBefore, bidOrderStateBefore);
   // now we construct the trade and exec it
@@ -205,17 +209,29 @@ function handleTrade(state: GlobalState, trade) {
   console.log('trade', trade.id, 'test done');
 }
 
-function handleDeposit(state: GlobalState, deposit) {
+function handleDeposit(state: GlobalState, accounts: Array<Account>, deposit) {
   //{"timestamp":1616062584.0,"user_id":1,"asset":"ETH","business":"deposit","change":"1000000","balance":"1000000","detail":"{\"id\":3}"}}
   const tokenID = getTokenId(deposit.asset);
   const userID = BigInt(deposit.user_id);
   const balanceAfter = BigInt(convertNumber(deposit.balance, deposit.asset));
   const delta = BigInt(convertNumber(deposit.change, deposit.asset));
   const balanceBefore = balanceAfter - delta;
-  assert(balanceBefore >= 0, 'invalid balance' + deposit.toString());
+  assert(balanceBefore >= 0n, 'invalid balance ' + deposit.toString());
   const expectedBalanceBefore = state.getTokenBalance(userID, tokenID);
   assert(expectedBalanceBefore == balanceBefore, 'invalid balance before');
-  state.DepositToOld({ accountID: userID, tokenID, amount: delta });
+  let account = accounts[Number(userID)];
+  if (state.hasAccount(userID)) {
+    state.DepositToOld({ accountID: userID, tokenID, amount: delta });
+  } else {
+    state.DepositToNew({
+      accountID: userID,
+      tokenID,
+      amount: delta,
+      ethAddr: Scalar.fromString(account.ethAddr, 16),
+      sign: BigInt(account.sign),
+      ay: account.ay,
+    });
+  }
   // skip check balanceAfter here... the function is too simple to be wrong...
 }
 
@@ -243,9 +259,12 @@ function replayMsgs() {
   //const maxUserID = Math.max(...trades.map(trade => [trade.ask_user_id, trade.bid_user_id]).flat());
   //console.log('maxUserID', maxUserID);
   //assert(maxUserID < maxAccountNum);
+  let accounts: Array<Account> = [];
   for (let i = 0; i < maxAccountNum; i++) {
     // currently the matchengine generates order id from 1
     const accountID = state.createNewAccount({ next_order_id: 1n });
+    assert(accountID == BigInt(i), 'invalid account id');
+    accounts[i] = Account.random();
     //  for (let j = 0; j < maxTokenNum; j++) {
     //    state.setTokenBalance(accountID, BigInt(j), 1_000_000n); // default balance
     //  }
@@ -257,11 +276,11 @@ function replayMsgs() {
       if (change < 0n) {
         throw new Error('only support deposit now');
       }
-      handleDeposit(state, msg.value);
+      handleDeposit(state, accounts, msg.value);
     } else if (msg.type == 'TradeMessage') {
       // handle trades
       const trade = msg.value;
-      handleTrade(state, trade);
+      handleTrade(state, accounts, trade);
     } else {
       //console.log('skip msg', msg.type);
     }

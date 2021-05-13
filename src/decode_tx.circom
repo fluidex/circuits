@@ -6,7 +6,7 @@ include "./constants.circom"
  * @input in - {Array(Field)} - encoded transaction
  */
 
-function TxLength() { return 54; }
+function TxLength() { return 60; }
 
 template DecodeTx() {
     signal input in[TxLength()];
@@ -30,10 +30,16 @@ template DecodeTx() {
     signal output sign2;
     signal output ay2;
     signal output nonce2;
-    signal output sigL2Hash;
-    signal output s;
-    signal output r8x;
-    signal output r8y;
+    signal output enableSigCheck1;
+    signal output sigL2Hash1;
+    signal output s1;
+    signal output r8x1;
+    signal output r8y1;
+    signal output enableSigCheck2;
+    signal output sigL2Hash2;
+    signal output s2;
+    signal output r8x2;
+    signal output r8y2;
     signal output amount;
     signal output amount2;
     signal output balance3;
@@ -86,43 +92,49 @@ template DecodeTx() {
     sign2 <== in[13];
     ay2 <== in[14];
     nonce2 <== in[15];
-    sigL2Hash <== in[16];
-    s <== in[17];
-    r8x <== in[18];
-    r8y <== in[19];
-    amount <== in[20];
-    amount2 <== in[21];
-    balance3 <== in[22];
-    balance4 <== in[23];
-    order1Pos <== in[24];
-    order2Pos <== in[25];
-    oldOrder1ID <== in[26];
-    oldOrder1TokenSell <== in[27];
-    oldOrder1FilledSell <== in[28];
-    oldOrder1AmountSell <== in[29];
-    oldOrder1TokenBuy <== in[30];
-    oldOrder1FilledBuy <== in[31];
-    oldOrder1AmountBuy <== in[32];
-    newOrder1ID <== in[33];
-    newOrder1TokenSell <== in[34];
-    newOrder1FilledSell <== in[35];
-    newOrder1AmountSell <== in[36];
-    newOrder1TokenBuy <== in[37];
-    newOrder1FilledBuy <== in[38];
-    newOrder1AmountBuy <== in[39];
-    oldOrder2ID <== in[40];
-    oldOrder2TokenSell <== in[41];
-    oldOrder2FilledSell <== in[42];
-    oldOrder2AmountSell <== in[43];
-    oldOrder2TokenBuy <== in[44];
-    oldOrder2FilledBuy <== in[45];
-    oldOrder2AmountBuy <== in[46];
-    newOrder2ID <== in[47];
-    newOrder2TokenSell <== in[48];
-    newOrder2FilledSell <== in[49];
-    newOrder2AmountSell <== in[50];
-    newOrder2TokenBuy <== in[51];
-    newOrder2FilledBuy <== in[52];
-    newOrder2AmountBuy <== in[53];
+    enableSigCheck1 <== in[16];
+    sigL2Hash1 <== in[17];
+    s1 <== in[18];
+    r8x1 <== in[19];
+    r8y1 <== in[20];
+    enableSigCheck2 <== in[21];
+    sigL2Hash2 <== in[22];
+    s2 <== in[23];
+    r8x2 <== in[24];
+    r8y2 <== in[25];
+    amount <== in[26];
+    amount2 <== in[27];
+    balance3 <== in[28];
+    balance4 <== in[29];
+    order1Pos <== in[30];
+    order2Pos <== in[31];
+    oldOrder1ID <== in[32];
+    oldOrder1TokenSell <== in[33];
+    oldOrder1FilledSell <== in[34];
+    oldOrder1AmountSell <== in[35];
+    oldOrder1TokenBuy <== in[36];
+    oldOrder1FilledBuy <== in[37];
+    oldOrder1AmountBuy <== in[38];
+    newOrder1ID <== in[39];
+    newOrder1TokenSell <== in[40];
+    newOrder1FilledSell <== in[41];
+    newOrder1AmountSell <== in[42];
+    newOrder1TokenBuy <== in[43];
+    newOrder1FilledBuy <== in[44];
+    newOrder1AmountBuy <== in[45];
+    oldOrder2ID <== in[46];
+    oldOrder2TokenSell <== in[47];
+    oldOrder2FilledSell <== in[48];
+    oldOrder2AmountSell <== in[49];
+    oldOrder2TokenBuy <== in[50];
+    oldOrder2FilledBuy <== in[51];
+    oldOrder2AmountBuy <== in[52];
+    newOrder2ID <== in[53];
+    newOrder2TokenSell <== in[54];
+    newOrder2FilledSell <== in[55];
+    newOrder2AmountSell <== in[56];
+    newOrder2TokenBuy <== in[57];
+    newOrder2FilledBuy <== in[58];
+    newOrder2AmountBuy <== in[59];
 
 }

@@ -1,5 +1,5 @@
 // Generated from tpl/ejs/./test/codec/tx_data.ts.ejs. Don't modify this file manually
-const TxLength = 54;
+const TxLength = 60;
 enum TxDetailIdx {
   EnableBalanceCheck1,
   AccountID1,
@@ -17,10 +17,16 @@ enum TxDetailIdx {
   Sign2,
   Ay2,
   Nonce2,
-  SigL2Hash,
-  S,
-  R8x,
-  R8y,
+  EnableSigCheck1,
+  SigL2Hash1,
+  S1,
+  R8x1,
+  R8y1,
+  EnableSigCheck2,
+  SigL2Hash2,
+  S2,
+  R8x2,
+  R8y2,
   Amount,
   Amount2,
   Balance3,

@@ -49,7 +49,7 @@ function initTestCase() {
     amount_sell: amount_sell,
     amount_buy: amount_buy,
   };
-  state.PlaceOrder(placeOrderTx);
+  //state.PlaceOrder(placeOrderTx);
 
   let block = state.forge();
   // TODO: assert length

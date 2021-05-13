@@ -2,7 +2,7 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account, randomMnemonic } from '../helper.ts/account';
-import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 import { GlobalState } from './global_state';
@@ -66,7 +66,7 @@ function initTestCase() {
   let fullTransferTx = state.fillTransferTx(transferTx);
   // user should check fullTransferTx is consistent with transferTx before signing
   let txhash = common.hashTransfer(fullTransferTx);
-  transferTx.signature = common.accountSign(account1, txhash);
+  transferTx.signature = account1.signHash(txhash);
   state.Transfer(transferTx);
 
   let block = state.forge();

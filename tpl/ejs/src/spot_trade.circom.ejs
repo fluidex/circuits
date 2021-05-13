@@ -195,6 +195,8 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     
     signal input enableBalanceCheck1;
     signal input enableBalanceCheck2;
+    signal input enableSigCheck1;
+    signal input enableSigCheck2;
 
     // is it a better idea to reuse 'newOrder1TokenSell'?
     signal input tokenID1;
@@ -215,6 +217,8 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     <%- codegen.generateMultiCheckEq([
         ['enableBalanceCheck1', '1'],
         ['enableBalanceCheck2', '1'],
+        ['enableSigCheck1', '1'],
+        ['enableSigCheck2', '1'],
         ['tokenID1', 'newOrder1TokenSell'],
         ['tokenID2', 'newOrder2TokenBuy']
     ], {ctx: '', replacers: {}}) %>

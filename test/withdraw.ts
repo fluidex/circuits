@@ -2,7 +2,7 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 import { GlobalState } from './global_state';
@@ -46,7 +46,7 @@ function initTestCase() {
   };
   let fullWithdrawTx = state.fillWithdrawTx(withdrawTx);
   let txhash = common.hashWithdraw(fullWithdrawTx);
-  withdrawTx.signature = common.accountSign(account, txhash);
+  withdrawTx.signature = account.signHash(txhash);
   state.Withdraw(withdrawTx);
 
   let block = state.forge();
@@ -63,7 +63,7 @@ function initTestCase() {
     r8y: withdrawTx.signature.R8y,
     sign: account.sign,
     balance: balance,
-    ay: Scalar.fromString(account.ay, 16),
+    ay: account.ay,
     ethAddr: Scalar.fromString(account.ethAddr, 16),
     orderRoot: genesisOrderRoot,
     balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][0],

@@ -246,6 +246,8 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     
     signal input enableBalanceCheck1;
     signal input enableBalanceCheck2;
+    signal input enableSigCheck1;
+    signal input enableSigCheck2;
 
     // is it a better idea to reuse 'newOrder1TokenSell'?
     signal input tokenID1;
@@ -304,13 +306,23 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
 
     component checkEq2 = ForceEqualIfEnabled();
     checkEq2.enabled <== enabled;
-    checkEq2.in[0] <== tokenID1;
-    checkEq2.in[1] <== newOrder1TokenSell;
+    checkEq2.in[0] <== enableSigCheck1;
+    checkEq2.in[1] <== 1;
 
     component checkEq3 = ForceEqualIfEnabled();
     checkEq3.enabled <== enabled;
-    checkEq3.in[0] <== tokenID2;
-    checkEq3.in[1] <== newOrder2TokenBuy;
+    checkEq3.in[0] <== enableSigCheck2;
+    checkEq3.in[1] <== 1;
+
+    component checkEq4 = ForceEqualIfEnabled();
+    checkEq4.enabled <== enabled;
+    checkEq4.in[0] <== tokenID1;
+    checkEq4.in[1] <== newOrder1TokenSell;
+
+    component checkEq5 = ForceEqualIfEnabled();
+    checkEq5.enabled <== enabled;
+    checkEq5.in[0] <== tokenID2;
+    checkEq5.in[1] <== newOrder2TokenBuy;
 
 
 

@@ -1,4 +1,8 @@
 // Generated from tpl/ejs/./src/base_tx.circom.ejs. Don't modify this file manually
+
+include "lib/eddsaposeidon.circom";
+include "./lib/utils_bjj.circom";
+
 template BalanceChecker(balanceLevels, accountLevels) {
     signal input enabled;
 
@@ -68,4 +72,34 @@ template BalanceChecker(balanceLevels, accountLevels) {
     checkEq.in[1] <== accountRoot;
 
 
+}
+
+template SigChecker() {
+    signal input enabled;
+
+    signal input sigL2Hash;
+    signal input s;
+    signal input r8x;
+    signal input r8y;
+    signal input ay;
+    signal input sign;
+
+    // - verify eddsa signature
+    ////////
+    // computes babyjubjub X coordinate
+    component getAx = AySign2Ax();
+    getAx.ay <== ay;
+    getAx.sign <== sign;
+
+    // signature L2 verifier
+    component sigVerifier = EdDSAPoseidonVerifier();
+    sigVerifier.enabled <== enabled;
+
+    sigVerifier.Ax <== getAx.ax;
+    sigVerifier.Ay <== ay;
+
+    sigVerifier.S <== s;
+    sigVerifier.R8x <== r8x;
+    sigVerifier.R8y <== r8y;
+    sigVerifier.M <== sigL2Hash;
 }
