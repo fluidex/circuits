@@ -90,6 +90,8 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     // universal check
     component balanceChecker1[nTxs];
     component balanceChecker2[nTxs];
+    component sigChecker1[nTxs];
+    component sigChecker2[nTxs];
 
     // process each transaction
     component processDepositToNew[nTxs];
@@ -142,6 +144,28 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
             balanceChecker2[i].account_path_elements[j][0] <== account_path_elements[i][1][j][0];
         }
 
+        sigChecker1[i] = SigChecker();
+        sigChecker1[i].enabled <== decodedTx[i].enableSigCheck1;
+        
+        sigChecker1[i].sigL2Hash <== decodedTx[i].sigL2Hash1;
+        sigChecker1[i].s <== decodedTx[i].s1;
+        sigChecker1[i].r8x <== decodedTx[i].r8x1;
+        sigChecker1[i].r8y <== decodedTx[i].r8y1;
+        sigChecker1[i].ay <== decodedTx[i].ay1;
+        sigChecker1[i].sign <== decodedTx[i].sign1;
+
+        sigChecker2[i] = SigChecker();
+        sigChecker2[i].enabled <== decodedTx[i].enableSigCheck2;
+        
+        sigChecker2[i].sigL2Hash <== decodedTx[i].sigL2Hash2;
+        sigChecker2[i].s <== decodedTx[i].s2;
+        sigChecker2[i].r8x <== decodedTx[i].r8x2;
+        sigChecker2[i].r8y <== decodedTx[i].r8y2;
+        sigChecker2[i].ay <== decodedTx[i].ay2;
+        sigChecker2[i].sign <== decodedTx[i].sign2;
+
+
+
 
         // try process deposit_to_new
         processDepositToNew[i] = DepositToNew(balanceLevels, accountLevels);
@@ -182,6 +206,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         
         processTransfer[i].enableBalanceCheck1 <== decodedTx[i].enableBalanceCheck1;
         processTransfer[i].enableBalanceCheck2 <== decodedTx[i].enableBalanceCheck2;
+        processTransfer[i].enableSigCheck1 <== decodedTx[i].enableSigCheck1;
         processTransfer[i].amount <== decodedTx[i].amount;
         processTransfer[i].balance1 <== decodedTx[i].balance1;
         processTransfer[i].nonce1 <== decodedTx[i].nonce1;
@@ -193,10 +218,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processTransfer[i].sign2 <== decodedTx[i].sign2;
         processTransfer[i].ay2 <== decodedTx[i].ay2;
         processTransfer[i].ethAddr2 <== decodedTx[i].ethAddr2;
-        processTransfer[i].sigL2Hash <== decodedTx[i].sigL2Hash;
-        processTransfer[i].s <== decodedTx[i].s;
-        processTransfer[i].r8x <== decodedTx[i].r8x;
-        processTransfer[i].r8y <== decodedTx[i].r8y;
+        processTransfer[i].sigL2Hash1 <== decodedTx[i].sigL2Hash1;
 
 
         processTransfer[i].fromAccountID <== decodedTx[i].accountID1;
@@ -223,20 +245,14 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         
         processWithdraw[i].enableBalanceCheck1 <== decodedTx[i].enableBalanceCheck1;
         processWithdraw[i].enableBalanceCheck2 <== decodedTx[i].enableBalanceCheck2;
+        processWithdraw[i].enableSigCheck1 <== decodedTx[i].enableSigCheck1;
         processWithdraw[i].amount <== decodedTx[i].amount;
         processWithdraw[i].balance1 <== decodedTx[i].balance1;
         processWithdraw[i].balance2 <== decodedTx[i].balance2;
         processWithdraw[i].nonce1 <== decodedTx[i].nonce1;
         processWithdraw[i].nonce2 <== decodedTx[i].nonce2;
-        processWithdraw[i].sigL2Hash <== decodedTx[i].sigL2Hash;
-        processWithdraw[i].s <== decodedTx[i].s;
-        processWithdraw[i].r8x <== decodedTx[i].r8x;
-        processWithdraw[i].r8y <== decodedTx[i].r8y;
+        processWithdraw[i].sigL2Hash1 <== decodedTx[i].sigL2Hash1;
   
-
-
-        processWithdraw[i].sign <== decodedTx[i].sign1;
-        processWithdraw[i].ay <== decodedTx[i].ay1;
 
         // try spot_trade
         processSpotTrade[i] = SpotTrade(balanceLevels, orderLevels, accountLevels);
@@ -273,6 +289,8 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].newOrder2AmountBuy <== decodedTx[i].newOrder2AmountBuy;
         processSpotTrade[i].enableBalanceCheck1 <== decodedTx[i].enableBalanceCheck1;
         processSpotTrade[i].enableBalanceCheck2 <== decodedTx[i].enableBalanceCheck2;
+        processSpotTrade[i].enableSigCheck1 <== decodedTx[i].enableSigCheck1;
+        processSpotTrade[i].enableSigCheck2 <== decodedTx[i].enableSigCheck2;
         processSpotTrade[i].tokenID1 <== decodedTx[i].tokenID1;
         processSpotTrade[i].tokenID2 <== decodedTx[i].tokenID2;
    

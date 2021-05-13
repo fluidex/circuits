@@ -3,7 +3,7 @@ import { hash } from '../helper.ts/hash';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { calculateGenesisOrderRoot, OrderInput, OrderState } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 import { GlobalState } from './global_state';
@@ -34,16 +34,14 @@ function initTestCase(nTxsn, balanceLevels, orderLevels, accountLevels) {
   state.setAccountNonce(accountID1, 19n);
   // order1
   const order1_id = 1n;
-  const order1 = {
+  const order1 = new OrderInput({
     order_id: order1_id,
     tokenbuy: tokenID_2to1,
     tokensell: tokenID_1to2,
-    filled_sell: 0n,
-    filled_buy: 0n,
     total_sell: amount_1to2 * nTxs * 100n,
     total_buy: amount_2to1 * nTxs * 100n,
-  };
-  state.setAccountOrder(accountID1, order1);
+  });
+  state.setAccountOrder(accountID1, OrderState.fromOrderInput(order1));
 
   /// mock existing account2 data, ensure balance to trade
   state.setAccountKey(accountID2, account2);
@@ -51,16 +49,14 @@ function initTestCase(nTxsn, balanceLevels, orderLevels, accountLevels) {
   state.setAccountNonce(accountID2, 29n);
   // order2
   const order2_id = 1n;
-  const order2 = {
+  const order2 = new OrderInput({
     order_id: order2_id,
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
-    filled_sell: 0n,
-    filled_buy: 0n,
     total_sell: amount_2to1 * nTxs * 100n,
     total_buy: amount_1to2 * nTxs * 100n,
-  };
-  state.setAccountOrder(accountID2, order2);
+  });
+  state.setAccountOrder(accountID2, OrderState.fromOrderInput(order2));
 
   /// start txs
 

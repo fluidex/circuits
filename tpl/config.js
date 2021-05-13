@@ -28,7 +28,7 @@ function getCommonPayload() {
   tokenID1
   balance1
   ethAddr1
-  sign1
+  sign1 // sign and ay are used both in balance checker and sig checker
   ay1
   nonce1
   // second univeral balance checker
@@ -40,11 +40,18 @@ function getCommonPayload() {
   sign2
   ay2
   nonce2
-  // TODO: univeral sig checker
-  sigL2Hash
-  s
-  r8x
-  r8y
+  // first sig checker
+  enableSigCheck1
+  sigL2Hash1
+  s1
+  r8x1
+  r8y1
+  // second sig checker
+  enableSigCheck2
+  sigL2Hash2
+  s2
+  r8x2
+  r8y2
   // others
   amount
   amount2

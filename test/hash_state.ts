@@ -2,7 +2,7 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState, hashOrderState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { AccountState, calculateGenesisOrderRoot, OrderState, OrderInput } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 
 const orderLevels = 2;
@@ -10,14 +10,14 @@ const orderLevels = 2;
 const balanceRoot = hash([1n]);
 const account = Account.random();
 const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
-const account_state = {
-  nonce: 49,
+const account_state = new AccountState({
+  nonce: 49n,
   sign: account.sign,
   balanceRoot: balanceRoot,
   ay: account.ay,
-  ethAddr: ethAddrNoPrefix,
+  ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
   orderRoot: calculateGenesisOrderRoot(orderLevels),
-};
+});
 class TestHashAccount implements SimpleTest {
   getTestData() {
     return [
@@ -26,12 +26,12 @@ class TestHashAccount implements SimpleTest {
           nonce: account_state.nonce,
           sign: account_state.sign,
           balanceRoot: account_state.balanceRoot,
-          ay: Scalar.fromString(account_state.ay, 16),
-          ethAddr: Scalar.fromString(account_state.ethAddr, 16),
+          ay: account_state.ay,
+          ethAddr: account_state.ethAddr,
           orderRoot: account_state.orderRoot,
         },
         output: {
-          out: hashAccountState(account_state),
+          out: account_state.hash(),
         },
         name: 'TestHashAccount',
       },
@@ -45,30 +45,29 @@ class TestHashAccount implements SimpleTest {
   }
 }
 
-const order_state = {
-  tokensell: 1,
-  tokenbuy: 2,
-  filled_sell: 0,
-  filled_buy: 0,
-  total_sell: 100,
-  total_buy: 1000,
-  order_id: 0,
-};
+const orderInput = new OrderInput({
+  tokensell: 1n,
+  tokenbuy: 2n,
+  total_sell: 100n,
+  total_buy: 1000n,
+  order_id: 0n,
+});
+const orderState = OrderState.fromOrderInput(orderInput);
 class TestHashOrder implements SimpleTest {
   getTestData() {
     return [
       {
         input: {
-          tokensell: order_state.tokensell,
-          tokenbuy: order_state.tokenbuy,
-          filled_sell: order_state.filled_sell,
-          filled_buy: order_state.filled_buy,
-          total_sell: order_state.total_sell,
-          total_buy: order_state.total_buy,
-          order_id: order_state.order_id,
+          tokensell: orderState.tokensell,
+          tokenbuy: orderState.tokenbuy,
+          filled_sell: orderState.filled_sell,
+          filled_buy: orderState.filled_buy,
+          total_sell: orderState.total_sell,
+          total_buy: orderState.total_buy,
+          order_id: orderState.order_id,
         },
         output: {
-          out: hashOrderState(order_state),
+          out: orderState.hash(),
         },
         name: 'TestHashOrder',
       },

@@ -2,7 +2,7 @@ import * as path from 'path';
 import { hash } from '../helper.ts/hash';
 const Scalar = require('ffjavascript').Scalar;
 import { Account } from '../helper.ts/account';
-import { hashAccountState, calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { calculateGenesisOrderRoot } from '../helper.ts/state-utils';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from './common';
 import { GlobalState } from './global_state';
@@ -50,9 +50,9 @@ function initDepositToNew() {
     accountID: accountID,
     tokenID: tokenID,
     amount: amount,
-    ethAddr: Scalar.fromString(account.ethAddr, 16),
+    ethAddr: Scalar.fromString(account.ethAddr),
     sign: BigInt(account.sign),
-    ay: Scalar.fromString(account.ay, 16),
+    ay: account.ay,
   });
 
   let block = state.forge();
@@ -64,7 +64,7 @@ function initDepositToNew() {
     tokenID: tokenID,
     ethAddr: Scalar.fromString(account.ethAddr, 16),
     sign: account.sign,
-    ay: Scalar.fromString(account.ay, 16),
+    ay: account.ay,
     amount: amount,
     balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][1],
     account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][1],
@@ -111,7 +111,7 @@ function initDepositToOld() {
     amount: amount,
     nonce: nonce,
     sign: account.sign,
-    ay: Scalar.fromString(account.ay, 16),
+    ay: account.ay,
     balance: balance,
     balance2: balance + amount,
     ethAddr: Scalar.fromString(account.ethAddr, 16),

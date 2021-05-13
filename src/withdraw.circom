@@ -17,6 +17,7 @@ template Withdraw(balanceLevels, accountLevels) {
     signal input enabled;
     signal input enableBalanceCheck1;
     signal input enableBalanceCheck2;
+    signal input enableSigCheck1;
 
     signal input amount;
     signal input balance1;
@@ -24,33 +25,7 @@ template Withdraw(balanceLevels, accountLevels) {
     signal input balance2;
     signal input nonce2;
 
-
-    signal input sign;
-    signal input ay;
-    signal input sigL2Hash; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
-    signal input s;
-    signal input r8x;
-    signal input r8y;
-
-    // - verify eddsa signature
-    ////////
-    // computes babyjubjub X coordinate
-    component getAx = AySign2Ax();
-    getAx.ay <== ay;
-    getAx.sign <== sign;
-
-    // signature L2 verifier
-    component sigVerifier = EdDSAPoseidonVerifier();
-    sigVerifier.enabled <== enabled;
-
-    sigVerifier.Ax <== getAx.ax;
-    sigVerifier.Ay <== ay;
-
-    sigVerifier.S <== s;
-    sigVerifier.R8x <== r8x;
-    sigVerifier.R8y <== r8y;
-
-    sigVerifier.M <== sigL2Hash;
+    signal input sigL2Hash1; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
 
     // TODO: underflow check
 
@@ -72,13 +47,18 @@ template Withdraw(balanceLevels, accountLevels) {
 
     component checkEq2 = ForceEqualIfEnabled();
     checkEq2.enabled <== enabled;
-    checkEq2.in[0] <== balance2;
-    checkEq2.in[1] <== balance1 - amount;
+    checkEq2.in[0] <== enableSigCheck1;
+    checkEq2.in[1] <== 1;
 
     component checkEq3 = ForceEqualIfEnabled();
     checkEq3.enabled <== enabled;
-    checkEq3.in[0] <== nonce2;
-    checkEq3.in[1] <== nonce1 + 1;
+    checkEq3.in[0] <== balance2;
+    checkEq3.in[1] <== balance1 - amount;
+
+    component checkEq4 = ForceEqualIfEnabled();
+    checkEq4.enabled <== enabled;
+    checkEq4.in[0] <== nonce2;
+    checkEq4.in[1] <== nonce1 + 1;
 
 
 }
