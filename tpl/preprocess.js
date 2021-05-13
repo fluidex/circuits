@@ -23,6 +23,8 @@ const codegen = {
   generateFromTpl,
   generateMultiFieldsAssign,
   generateMultiCheckEq,
+  // helper function to convert camel case to all cap case
+  camelToAllCap,
 };
 
 function renderInputEncoderJs(encoderName, inputSignals, config) {
@@ -57,6 +59,11 @@ function generateCheckEq({ ctx, replacers }) {
 function generateMultiCheckEq(items, { ctx, replacers }) {
   const tpl = ejs.render(tpls.MultiCheckEqTpl, { items });
   return generateFromTpl(tpl, { ctx, replacers });
+}
+function camelToAllCap(str) {
+  // Split camel case str by capital letters except for 'D' in 'ID'.
+  const result = str.replace( /((?!(?<=I)D)[A-Z])/g, " $1" );
+  return result.split(' ').join('_').toUpperCase();
 }
 
 // replace '__' with ctx, for all {k:v} in replacers, replace ` ${k}` with ` ${v}`
