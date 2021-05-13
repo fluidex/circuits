@@ -21,6 +21,23 @@ async function TestRecoverPublicKeyAndAddress() {
   const addr = ethers.utils.computeAddress(pk);
   assert(addr == expectedAddress, 'Address mismatch');
 }
+const privKey = '0x0b22f852cd07386bce533f2038821fdcebd9c5ced9e3cd51e3a05d421dbfd785';
+function testL2Sign() {
+  const acc = Account.fromPrivkey(privKey);
+  // 0x7b70843a42114e88149e3961495c03f9a41292c8b97bd1e2026597d185478293
+  console.log(acc.bjjPubKey);
+}
+
+async function ethersSign() {
+  let signer = new ethers.Wallet(privKey);
+  const message = get_CREATE_L2_ACCOUNT_MSG(null);
+  const signature = await signer.signMessage(message);
+  // 0x9982364bf709fecdf830a71f417182e3a7f717a6363180ff33784e2823935f8b55932a5353fb128fc7e3d6c4aed57138adce772ce594338a8f4985d6668627b31c
+  console.log(signature);
+  const acc = Account.fromSignature(signature);
+  // 0x7b70843a42114e88149e3961495c03f9a41292c8b97bd1e2026597d185478293
+  console.log(acc.bjjPubKey);
+}
 
 function TestL2AccountKeyAndSign() {
   /*
@@ -45,6 +62,8 @@ function TestL2AccountKeyAndSign() {
 async function main() {
   await TestL2AccountKeyAndSign();
   await TestRecoverPublicKeyAndAddress();
+  await ethersSign();
+  await testL2Sign();
 }
 
 main();
