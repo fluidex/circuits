@@ -23,35 +23,27 @@ async function TestRecoverPublicKeyAndAddress() {
 }
 
 function TestL2AccountKeyAndSign() {
+  /*
   const wallet = ethers.Wallet.createRandom();
   const msgHash = ethers.utils.hashMessage(get_CREATE_L2_ACCOUNT_MSG(null));
   const signature = ethers.utils.joinSignature(wallet._signingKey().signDigest(msgHash));
   const seed = ethers.utils.arrayify(signature).slice(0, 32);
+  */
+  const seed = ethers.utils.arrayify('0x87b34b2b842db0cc945659366068053f325ff227fd9c6788b2504ac2c4c5dc2a');
   const account = new L2Account(seed);
-  const printDetail = false;
-  if (printDetail) {
-    //	87b34b2b842db0cc945659366068053f325ff227fd9c6788b2504ac2c4c5dc2a
-    //      console.log(account.rollupPrvKey.toString('hex'));
-    //4168145781671332788401281374517684700242591274637494106675223138867941841158n
-    //     console.log(eddsa.prv2bigint(account.rollupPrvKey));
-    // 1fce25ec2e7eeec94079ec7866a933a8b21f33e0ebd575f3001d62d19251d455 20a41ccb24e55dba4fc9ebc17ae9d4c9097d7fe3387d492155568db6be2692a5 1
-    console.log(account.ax, account.ay, account.sign);
-    // 80973695e34a9feb837f0b354c3d2f053f56eefddfa9d38ad012e4a13cc9233f
-    console.log(account.bjjCompressed);
-  }
-  /*
-	 {
-  R8: [
-    13923190062821654507944078437858080404617954995003858426997597954205162858880n,
-    10713745246156351076824752626276380545029458576966065611807855178712679030348n
-  ],
-  S: 1137435791465604549669320252257097038984721500663063497718328228401353844302n
-}
-*/
-  console.log(account.signHash(1357924680n));
+  assert(account.bjjPubKey == '0xa59226beb68d565521497d38e37f7d09c9d4e97ac1ebc94fba5de524cb1ca4a0');
+  assert(account.ax.toString(16) == '1fce25ec2e7eeec94079ec7866a933a8b21f33e0ebd575f3001d62d19251d455');
+  assert(account.ay.toString(16) == '20a41ccb24e55dba4fc9ebc17ae9d4c9097d7fe3387d492155568db6be2692a5');
+  assert(account.sign.toString(16) == '1');
+  const sig = account.signHash(1357924680n);
+  assert(sig.R8x.toString(10) == '15679698175365968671287592821268512384454163537665670071564984871581219397966');
+  assert(sig.R8y.toString(10) == '1705544521394286010135369499330220710333064238375605681220284175409544486013');
+  assert(sig.S.toString(10) == '2104729104368328243963691045555606467740179640947024714099030450797354625308');
+  //console.log(sig);
 }
 
 async function main() {
+  await TestL2AccountKeyAndSign();
   await TestRecoverPublicKeyAndAddress();
 }
 

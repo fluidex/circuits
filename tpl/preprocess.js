@@ -62,7 +62,7 @@ function generateMultiCheckEq(items, { ctx, replacers }) {
 }
 function camelToAllCap(str) {
   // Split camel case str by capital letters except for 'D' in 'ID'.
-  const result = str.replace( /((?!(?<=I)D)[A-Z])/g, " $1" );
+  const result = str.replace(/((?!(?<=I)D)[A-Z])/g, ' $1');
   return result.split(' ').join('_').toUpperCase();
 }
 

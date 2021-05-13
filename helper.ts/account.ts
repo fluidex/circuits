@@ -30,7 +30,7 @@ class L2Account {
   public ax: bigint;
   public ay: bigint;
   public sign: bigint;
-  public bjjCompressed: string;
+  public bjjPubKey: string;
   constructor(seed) {
     if (seed.length != 32) {
       throw new Error('invalid l2 key seed');
@@ -49,8 +49,8 @@ class L2Account {
     if (compressedBuff[31] & 0x80) {
       this.sign = 1n;
     }
-
-    this.bjjCompressed = utils.padZeros(utilsScalar.leBuff2int(compressedBuff).toString(16), 64);
+    this.bjjPubKey = '0x' + compressedBuff.toString('hex');
+    //this.bjjCompressed = utils.padZeros(utilsScalar.leBuff2int(compressedBuff).toString(16), 64);
   }
 
   signHash(h: bigint): TxSignature {
@@ -117,8 +117,8 @@ class Account {
   get sign(): bigint {
     return this.l2Account.sign;
   }
-  get bjjCompressed(): string {
-    return this.l2Account.bjjCompressed;
+  get bjjPubKey(): string {
+    return this.l2Account.bjjPubKey;
   }
 }
 export { L2Account, Account, get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature, randomMnemonic, TxSignature };
