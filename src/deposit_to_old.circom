@@ -21,6 +21,17 @@ template DepositToOld(balanceLevels, accountLevels) {
     signal input balance1;
     signal input balance2;
 
+    signal input nonce1;
+    signal input sign1;
+    signal input ay1;
+    signal input ethAddr1;
+    signal input orderRoot1;
+    signal input nonce2;
+    signal input sign2;
+    signal input ay2;
+    signal input ethAddr2;
+    signal input orderRoot2;
+
     // TODO: underflow check
 
     // TODO: overflow check
@@ -43,6 +54,31 @@ template DepositToOld(balanceLevels, accountLevels) {
     checkEq2.enabled <== enabled;
     checkEq2.in[0] <== balance2;
     checkEq2.in[1] <== balance1 + amount;
+
+    component checkEq3 = ForceEqualIfEnabled();
+    checkEq3.enabled <== enabled;
+    checkEq3.in[0] <== nonce1;
+    checkEq3.in[1] <== nonce2;
+
+    component checkEq4 = ForceEqualIfEnabled();
+    checkEq4.enabled <== enabled;
+    checkEq4.in[0] <== sign1;
+    checkEq4.in[1] <== sign2;
+
+    component checkEq5 = ForceEqualIfEnabled();
+    checkEq5.enabled <== enabled;
+    checkEq5.in[0] <== ay1;
+    checkEq5.in[1] <== ay2;
+
+    component checkEq6 = ForceEqualIfEnabled();
+    checkEq6.enabled <== enabled;
+    checkEq6.in[0] <== ethAddr1;
+    checkEq6.in[1] <== ethAddr2;
+
+    component checkEq7 = ForceEqualIfEnabled();
+    checkEq7.enabled <== enabled;
+    checkEq7.in[0] <== orderRoot1;
+    checkEq7.in[1] <== orderRoot2;
 
 
 }

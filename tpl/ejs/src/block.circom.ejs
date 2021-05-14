@@ -137,9 +137,13 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDepositToNew[i].enabled <== enableDepositToNew[i].out;
         processDepositToNew[i].genesisOrderRoot <== genesisOrderRoot.root;
         processDepositToNew[i].orderRoot1 <== orderRoots[i][0];
+        processDepositToNew[i].orderRoot2 <== orderRoots[i][1];
 
         <%- codegen.generateMultiFieldsAssign('processDepositToNew[i]', 
-            ['enableBalanceCheck1', 'enableBalanceCheck2', 'amount',  'balance1', 'balance2', 'ethAddr1', 'ay1', 'sign1', 'nonce1'], 
+            ['enableBalanceCheck1', 'enableBalanceCheck2', 'amount',  
+            'balance1', 'balance2', 
+            'ethAddr1', 'ay1', 'sign1', 
+            'nonce1', 'nonce2'], 
             'decodedTx[i].') %>
 
 
@@ -148,8 +152,14 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDepositToOld[i].enabled <== enableDepositToOld[i].out;
 
         <%- codegen.generateMultiFieldsAssign('processDepositToOld[i]', 
-            ['enableBalanceCheck1', 'enableBalanceCheck2', 'amount', 'balance1', 'balance2'], 
+            ['enableBalanceCheck1', 'enableBalanceCheck2', 'amount', 
+            'balance1', 'balance2',
+            'ethAddr1', 'ay1', 'sign1', 'nonce1',
+            'ethAddr2', 'ay2', 'sign2', 'nonce2'
+            ], 
             'decodedTx[i].') %>
+        processDepositToOld[i].orderRoot1 <== orderRoots[i][0];
+        processDepositToOld[i].orderRoot2 <== orderRoots[i][1];
 
 
         // try process transfer
@@ -187,9 +197,14 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
         <%- codegen.generateMultiFieldsAssign('processWithdraw[i]', 
             ['enableBalanceCheck1', 'enableBalanceCheck2', 'enableSigCheck1',
-            'amount', 'balance1', 'balance2',
-            'nonce1', 'nonce2', 'sigL2Hash1'], 
+            'amount',
+            'balance1', 'balance2',
+            'sigL2Hash1',
+            'ethAddr1', 'ay1', 'sign1', 'nonce1',
+            'ethAddr2', 'ay2', 'sign2', 'nonce2'], 
             'decodedTx[i].') %>  
+        processWithdraw[i].orderRoot1 <== orderRoots[i][0];
+        processWithdraw[i].orderRoot2 <== orderRoots[i][1];    
 
         // try spot_trade
         processSpotTrade[i] = SpotTrade(balanceLevels, orderLevels, accountLevels);

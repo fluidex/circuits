@@ -19,32 +19,35 @@ template DepositToNew(balanceLevels, accountLevels) {
 
     // check old account is empty
     signal input orderRoot1;
+    signal input orderRoot2;
 
+    signal input balance1;
     signal input nonce1;
     signal input sign1;
     signal input ay1;
     signal input ethAddr1;
-    signal input balance1;
 
     signal input balance2;
+    signal input nonce2;
+
     signal input amount;
 
     
 
     component checkEq0 = ForceEqualIfEnabled();
     checkEq0.enabled <== enabled;
-    checkEq0.in[0] <== orderRoot1;
-    checkEq0.in[1] <== genesisOrderRoot;
+    checkEq0.in[0] <== enableBalanceCheck1;
+    checkEq0.in[1] <== 1;
 
     component checkEq1 = ForceEqualIfEnabled();
     checkEq1.enabled <== enabled;
-    checkEq1.in[0] <== enableBalanceCheck1;
+    checkEq1.in[0] <== enableBalanceCheck2;
     checkEq1.in[1] <== 1;
 
     component checkEq2 = ForceEqualIfEnabled();
     checkEq2.enabled <== enabled;
-    checkEq2.in[0] <== enableBalanceCheck2;
-    checkEq2.in[1] <== 1;
+    checkEq2.in[0] <== balance1;
+    checkEq2.in[1] <== 0;
 
     component checkEq3 = ForceEqualIfEnabled();
     checkEq3.enabled <== enabled;
@@ -68,13 +71,23 @@ template DepositToNew(balanceLevels, accountLevels) {
 
     component checkEq7 = ForceEqualIfEnabled();
     checkEq7.enabled <== enabled;
-    checkEq7.in[0] <== balance1;
-    checkEq7.in[1] <== 0;
+    checkEq7.in[0] <== orderRoot1;
+    checkEq7.in[1] <== genesisOrderRoot;
 
     component checkEq8 = ForceEqualIfEnabled();
     checkEq8.enabled <== enabled;
     checkEq8.in[0] <== balance2;
     checkEq8.in[1] <== amount;
+
+    component checkEq9 = ForceEqualIfEnabled();
+    checkEq9.enabled <== enabled;
+    checkEq9.in[0] <== nonce1;
+    checkEq9.in[1] <== nonce2;
+
+    component checkEq10 = ForceEqualIfEnabled();
+    checkEq10.enabled <== enabled;
+    checkEq10.in[0] <== orderRoot1;
+    checkEq10.in[1] <== orderRoot2;
 
 
 
