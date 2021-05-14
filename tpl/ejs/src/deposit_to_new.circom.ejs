@@ -18,26 +18,34 @@ template DepositToNew(balanceLevels, accountLevels) {
 
     // check old account is empty
     signal input orderRoot1;
+    signal input orderRoot2;
 
+    signal input balance1;
     signal input nonce1;
     signal input sign1;
     signal input ay1;
     signal input ethAddr1;
-    signal input balance1;
 
     signal input balance2;
+    signal input nonce2;
+
     signal input amount;
 
     <%- codegen.generateMultiCheckEq([
-        ['orderRoot1', 'genesisOrderRoot'],
+        // univeral checker
         ['enableBalanceCheck1', '1'],
         ['enableBalanceCheck2', '1'],
+        // check old state is empty
+        ['balance1', '0'],
         ['nonce1', '0'],
         ['ay1', '0'],
         ['sign1', '0'],
         ['ethAddr1', '0'],
-        ['balance1', '0'],
-        ['balance2', 'amount']
+        ['orderRoot1', 'genesisOrderRoot'],
+        // check new state 
+        ['balance2', 'amount'],
+        ['nonce1', 'nonce2'],
+        ['orderRoot1', 'orderRoot2'],
     ], {ctx: '', replacers: {}}) %>
 
     // TODO: underflow check

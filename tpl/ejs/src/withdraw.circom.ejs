@@ -24,6 +24,16 @@ template Withdraw(balanceLevels, accountLevels) {
     signal input balance2;
     signal input nonce2;
 
+    signal input sign1;
+    signal input ay1;
+    signal input ethAddr1;
+    signal input orderRoot1;
+    
+    signal input sign2;
+    signal input ay2;
+    signal input ethAddr2;
+    signal input orderRoot2;
+
     signal input sigL2Hash1; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
 
     // TODO: underflow check
@@ -37,7 +47,11 @@ template Withdraw(balanceLevels, accountLevels) {
         ['enableBalanceCheck2', '1'],
         ['enableSigCheck1', '1'],
         ['balance2', 'balance1 - amount'],
-        ['nonce2', 'nonce1 + 1']
+        ['nonce2', 'nonce1 + 1'],
+        ['sign1', 'sign2'],
+        ['ay1', 'ay2'],
+        ['ethAddr1', 'ethAddr2'],
+        ['orderRoot1', 'orderRoot2'],
     ], {ctx: '', replacers: {}}) %>
 }
 

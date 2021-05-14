@@ -172,6 +172,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDepositToNew[i].enabled <== enableDepositToNew[i].out;
         processDepositToNew[i].genesisOrderRoot <== genesisOrderRoot.root;
         processDepositToNew[i].orderRoot1 <== orderRoots[i][0];
+        processDepositToNew[i].orderRoot2 <== orderRoots[i][1];
 
         
         processDepositToNew[i].enableBalanceCheck1 <== decodedTx[i].enableBalanceCheck1;
@@ -183,6 +184,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDepositToNew[i].ay1 <== decodedTx[i].ay1;
         processDepositToNew[i].sign1 <== decodedTx[i].sign1;
         processDepositToNew[i].nonce1 <== decodedTx[i].nonce1;
+        processDepositToNew[i].nonce2 <== decodedTx[i].nonce2;
 
 
 
@@ -196,7 +198,17 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDepositToOld[i].amount <== decodedTx[i].amount;
         processDepositToOld[i].balance1 <== decodedTx[i].balance1;
         processDepositToOld[i].balance2 <== decodedTx[i].balance2;
+        processDepositToOld[i].ethAddr1 <== decodedTx[i].ethAddr1;
+        processDepositToOld[i].ay1 <== decodedTx[i].ay1;
+        processDepositToOld[i].sign1 <== decodedTx[i].sign1;
+        processDepositToOld[i].nonce1 <== decodedTx[i].nonce1;
+        processDepositToOld[i].ethAddr2 <== decodedTx[i].ethAddr2;
+        processDepositToOld[i].ay2 <== decodedTx[i].ay2;
+        processDepositToOld[i].sign2 <== decodedTx[i].sign2;
+        processDepositToOld[i].nonce2 <== decodedTx[i].nonce2;
 
+        processDepositToOld[i].orderRoot1 <== orderRoots[i][0];
+        processDepositToOld[i].orderRoot2 <== orderRoots[i][1];
 
 
         // try process transfer
@@ -249,10 +261,18 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processWithdraw[i].amount <== decodedTx[i].amount;
         processWithdraw[i].balance1 <== decodedTx[i].balance1;
         processWithdraw[i].balance2 <== decodedTx[i].balance2;
-        processWithdraw[i].nonce1 <== decodedTx[i].nonce1;
-        processWithdraw[i].nonce2 <== decodedTx[i].nonce2;
         processWithdraw[i].sigL2Hash1 <== decodedTx[i].sigL2Hash1;
+        processWithdraw[i].ethAddr1 <== decodedTx[i].ethAddr1;
+        processWithdraw[i].ay1 <== decodedTx[i].ay1;
+        processWithdraw[i].sign1 <== decodedTx[i].sign1;
+        processWithdraw[i].nonce1 <== decodedTx[i].nonce1;
+        processWithdraw[i].ethAddr2 <== decodedTx[i].ethAddr2;
+        processWithdraw[i].ay2 <== decodedTx[i].ay2;
+        processWithdraw[i].sign2 <== decodedTx[i].sign2;
+        processWithdraw[i].nonce2 <== decodedTx[i].nonce2;
   
+        processWithdraw[i].orderRoot1 <== orderRoots[i][0];
+        processWithdraw[i].orderRoot2 <== orderRoots[i][1];    
 
         // try spot_trade
         processSpotTrade[i] = SpotTrade(balanceLevels, orderLevels, accountLevels);

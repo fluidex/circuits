@@ -20,6 +20,17 @@ template DepositToOld(balanceLevels, accountLevels) {
     signal input balance1;
     signal input balance2;
 
+    signal input nonce1;
+    signal input sign1;
+    signal input ay1;
+    signal input ethAddr1;
+    signal input orderRoot1;
+    signal input nonce2;
+    signal input sign2;
+    signal input ay2;
+    signal input ethAddr2;
+    signal input orderRoot2;
+
     // TODO: underflow check
 
     // TODO: overflow check
@@ -29,7 +40,12 @@ template DepositToOld(balanceLevels, accountLevels) {
     <%- codegen.generateMultiCheckEq([
         ['enableBalanceCheck1', '1'],
         ['enableBalanceCheck2', '1'],
-        ['balance2', 'balance1 + amount']
+        ['balance2', 'balance1 + amount'],
+        ['nonce1', 'nonce2'],
+        ['sign1', 'sign2'],
+        ['ay1', 'ay2'],
+        ['ethAddr1', 'ethAddr2'],
+        ['orderRoot1', 'orderRoot2'],
     ], {ctx: '', replacers: {}}) %>
 }
 
