@@ -14,6 +14,11 @@ enum TxType {
   Nop,
 }
 
+enum OrderSide {
+  Buy,
+  Sell,
+}
+
 class OrderInput {
   accountID: bigint = 0n;
   order_id: bigint = 0n;
@@ -22,6 +27,7 @@ class OrderInput {
   total_sell: bigint = 0n;
   total_buy: bigint = 0n;
   sig: TxSignature = null;
+  side: OrderSide;
   constructor(data: Partial<OrderInput> = {}) {
     Object.assign(this, data);
   }
@@ -62,6 +68,15 @@ class OrderState {
   }
   get total_buy(): bigint {
     return this.orderInput.total_buy;
+  }
+  get side(): OrderSide {
+    return this.orderInput.side;
+  }
+  isFilled(): boolean {
+    return (
+      (this.orderInput.side == OrderSide.Buy && this.filled_buy >= this.total_buy) ||
+      (this.orderInput.side == OrderSide.Sell && this.filled_sell >= this.total_sell)
+    );
   }
   static fromOrderInput(orderInput): OrderState {
     let result = new OrderState();
@@ -151,4 +166,4 @@ function calculateGenesisOrderRoot(orderLevels): bigint {
   return new Tree<bigint>(orderLevels, emptyOrderHash).getRoot();
 }
 
-export { AccountState, emptyOrderHash, calculateGenesisOrderRoot, TxSignature, TxType, OrderState, OrderInput };
+export { AccountState, emptyOrderHash, calculateGenesisOrderRoot, TxSignature, TxType, OrderState, OrderInput, OrderSide };

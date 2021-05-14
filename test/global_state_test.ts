@@ -7,7 +7,7 @@ import * as path from 'path';
 const printf = require('printf');
 import { inspect } from 'util';
 import { Account } from '../helper.ts/account';
-import { OrderInput } from '../helper.ts/state-utils';
+import { OrderInput, OrderSide } from '../helper.ts/state-utils';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 inspect.defaultOptions.depth = null;
@@ -48,7 +48,7 @@ function parseBalance(originalBalance, [baseToken, quoteToken]) {
   };
 }
 
-function parseOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quoteToken], side) {
+function parseOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quoteToken], side: OrderSide) {
   let obj: any = {
     baseAmount: BigInt(convertNumber(originalOrder.amount, baseToken)),
     price: BigInt(convertNumber(originalOrder.price, baseToken)),
@@ -60,14 +60,14 @@ function parseOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quot
     order_id: originalOrder.ID,
   };
   obj.quoteAmount = BigInt(convertNumber(originalOrder.amount * originalOrder.price, quoteToken));
-  if (side == 'ASK') {
+  if (side == OrderSide.Sell) {
     obj.tokensell = baseTokenID;
     obj.tokenbuy = quoteTokenID;
     obj.total_sell = obj.baseAmount;
     obj.total_buy = obj.quoteAmount;
     obj.filled_sell = obj.finishedBase;
     obj.filled_buy = obj.finishedQuote;
-  } else if (side == 'BID') {
+  } else if (side == OrderSide.Buy) {
     obj.tokensell = quoteTokenID;
     obj.tokenbuy = baseTokenID;
     obj.total_sell = obj.quoteAmount;
@@ -100,7 +100,7 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
     }),
     [baseTokenID, quoteTokenID],
     [baseToken, quoteToken],
-    'ASK',
+    OrderSide.Sell,
   );
   const bidOrderStateBefore = parseOrder(
     Object.assign(trade.state_before.bid_order_state, {
@@ -110,7 +110,7 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
     }),
     [baseTokenID, quoteTokenID],
     [baseToken, quoteToken],
-    'BID',
+    OrderSide.Buy,
   );
   const askOrderStateAfter = parseOrder(
     Object.assign(trade.state_after.ask_order_state, {
@@ -120,7 +120,7 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
     }),
     [baseTokenID, quoteTokenID],
     [baseToken, quoteToken],
-    'ASK',
+    OrderSide.Sell,
   );
   const bidOrderStateAfter = parseOrder(
     Object.assign(trade.state_after.bid_order_state, {
@@ -130,7 +130,7 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
     }),
     [baseTokenID, quoteTokenID],
     [baseToken, quoteToken],
-    'BID',
+    OrderSide.Buy,
   );
   //console.log({bidOrderStateAfter});
   let orderStateBefore = new Map([
@@ -154,6 +154,7 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
         tokenbuy: order.tokenbuy,
         total_sell: order.total_sell,
         total_buy: order.total_buy,
+        side: order.side,
         sig: null,
       });
       orderToPut.signWith(accounts[Number(order.accountID)]);
@@ -248,7 +249,7 @@ function replayMsgs() {
 
   const nTxs = 2;
   const balanceLevels = 2;
-  const orderLevels = 7;
+  const orderLevels = 3;
   const accountLevels = 2;
   const maxOrderNum = Math.pow(2, orderLevels);
   const maxAccountNum = Math.pow(2, accountLevels);

@@ -159,11 +159,16 @@ class GlobalState {
     for (let i = 0; i < 2 ** this.orderLevels; i++) {
       const candidatePos = (startPos + BigInt(i)) % BigInt(2 ** this.orderLevels);
       const order = this.getAccountOrderByOrderPos(accountID, candidatePos);
-      // TODO: is this correct?
-      const isEmptyOrFilled = order.filled_buy >= order.total_buy && order.filled_sell >= order.total_sell;
-      if (isEmptyOrFilled) {
+      if (order.side == null || order.isFilled()) {
         this.nextOrderPositions.set(accountID, candidatePos);
+        if (this.options.verbose && order.isFilled()) {
+          console.log('replace filled order', accountID, order.order_id, 'at', candidatePos);
+        }
         return;
+      } else {
+        if (this.options.verbose) {
+          console.log('updateNextOrderPos', accountID, candidatePos, order);
+        }
       }
     }
     throw new Error('cannot find order pos');
@@ -186,10 +191,23 @@ class GlobalState {
       const oldOrder = this.getAccountOrderByOrderPos(accountID, pos);
       this.updateOrderLeaf(accountID, pos, orderID);
       this.updateNextOrderPos(accountID, pos + 1n);
+      if (oldOrder.order_id > orderID) {
+        // https://github.com/Fluidex/circuits/issues/159
+        throw new Error('order tree full');
+      }
+
+      if (this.options.verbose) {
+        console.log('place order in tree at', pos, 'for account', accountID, 'order', orderID);
+      }
       return oldOrder;
     } else {
       // this order_id already in the tree
       const oldOrder = this.getAccountOrderByOrderId(accountID, orderID);
+      if (this.options.verbose) {
+        if (oldOrder.order_id != orderID) {
+          console.log('replace order in tree from', oldOrder.order_id, 'to', orderID);
+        }
+      }
       return oldOrder;
     }
   }
@@ -233,7 +251,7 @@ class GlobalState {
     }
 
     const order: OrderState = this.orderMap.get(accountID).get(orderID);
-    console.log({ order });
+    //console.log({ order });
     this.orderTrees.get(accountID).setValue(orderPos, order.hash());
     this.orderIdToPos.get(accountID).set(order.order_id, orderPos);
     this.orderPosToId.get(accountID).set(orderPos, order.order_id);
