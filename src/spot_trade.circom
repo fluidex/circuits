@@ -161,33 +161,6 @@ template orderUpdater(orderLevels) {
     }
     newOrderRoot <== orderTreeNew.root;
 
-
-    // for the below two checks, we'd better let isnewOrder = isnewOrder || enabled,
-    // and isSameOrder = isSameOrder || enabled
-    // For now, we set all inputs as 0s, so when enabled is false, the two checks can pass even without 'or'
-
-    component isNewOrder = LessThan(192);
-    isNewOrder.in[0] <== oldOrderID;
-    isNewOrder.in[1] <== newOrderID;
-    component isNewOrderAndEnabled = AND();
-    isNewOrderAndEnabled.a <== isNewOrder.out;
-    isNewOrderAndEnabled.b <== enabled;
-
-    
-
-    component checkEqWhenNewOrder0 = ForceEqualIfEnabled();
-    checkEqWhenNewOrder0.enabled <== isNewOrderAndEnabled.out;
-    checkEqWhenNewOrder0.in[0] <== newOrderFilledSell;
-    checkEqWhenNewOrder0.in[1] <== thisSell;
-
-    component checkEqWhenNewOrder1 = ForceEqualIfEnabled();
-    checkEqWhenNewOrder1.enabled <== isNewOrderAndEnabled.out;
-    checkEqWhenNewOrder1.in[0] <== newOrderFilledBuy;
-    checkEqWhenNewOrder1.in[1] <== thisBuy;
-
-
-
-
     component isSameOrder = IsEqual();
     isSameOrder.in[0] <== oldOrderID;
     isSameOrder.in[1] <== newOrderID;
@@ -228,7 +201,37 @@ template orderUpdater(orderLevels) {
 
 
 
+    // TODO: https://github.com/Fluidex/circuits/issues/159
+    // it is possible that the first trade of an old order happens later than the first trade of a new order
+    // eg. orders: 
+    // first, a sell order with price 10 amount 1 
+    // then, a sell order with price 9 amount 1
+    // then, a buy order with price 9 amount 1
+    // then, a buy order with price 10 amount 1
+    // In this senario, the order with larger order_id is replaced.
+    component isNewOrder = LessThan(192);
+    isNewOrder.in[0] <== oldOrderID;
+    isNewOrder.in[1] <== newOrderID;
+    component isNewOrderAndEnabled = AND();
+    isNewOrderAndEnabled.a <== isNewOrder.out;
+    isNewOrderAndEnabled.b <== enabled;
 
+    
+
+    component checkEqWhenNewOrder0 = ForceEqualIfEnabled();
+    checkEqWhenNewOrder0.enabled <== isNewOrderAndEnabled.out;
+    checkEqWhenNewOrder0.in[0] <== newOrderFilledSell;
+    checkEqWhenNewOrder0.in[1] <== thisSell;
+
+    component checkEqWhenNewOrder1 = ForceEqualIfEnabled();
+    checkEqWhenNewOrder1.enabled <== isNewOrderAndEnabled.out;
+    checkEqWhenNewOrder1.in[0] <== newOrderFilledBuy;
+    checkEqWhenNewOrder1.in[1] <== thisBuy;
+
+
+
+    
+    
     // check oldOrderID <= newOrderID
     component isValid = OR();
     isValid.a <== isNewOrder.out;
@@ -237,6 +240,7 @@ template orderUpdater(orderLevels) {
     checkValid.enabled <== enabled;
     checkValid.in[0] <== isValid.out;
     checkValid.in[1] <== 1;  
+    
 }
 
 // TODO: maker taker (related to fee), according to timestamp: order1 maker, order2 taker
