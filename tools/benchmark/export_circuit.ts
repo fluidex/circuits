@@ -34,7 +34,7 @@ function main() {
     exportCircuitAndData(circuitPath, new TestBlock());
   } else if (circuit.includes('massive')) {
     console.log('exporting massive circuit');
-    exportCircuitAndData(circuitPath, new TestMassive(100));
+    exportCircuitAndData(circuitPath, new TestMassive(100, 20, 20, 20));
   }
 }
 

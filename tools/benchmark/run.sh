@@ -11,11 +11,11 @@ export CIRCUIT=massive
 # source $DIR/compile_batched_node.sh
 
 
-export HASH=rescue
+#export HASH=rescue
 #pushd $DIR/..
 #source replace_hash.sh
 #popd
-source $DIR/bench_with_hash.sh
+source $DIR/bench.sh
 #export HASH=poseidon
 #pushd $DIR/..
 #source replace_hash.sh
@@ -23,6 +23,6 @@ source $DIR/bench_with_hash.sh
 #source $DIR/bench_with_hash.sh
 
 
-echo -e "\n\n =========== benchmark results: ================= \n"
-tail -n 3 `find ./ -name "*.time"` #data/*/massive/*time
-tail -n 3 `find ./ -name "circuit.circom"` #data/*/massive/*time
+#echo -e "\n\n =========== benchmark results: ================= \n"
+#tail -n 3 `find ./ -name "*.time"` #data/*/massive/*time
+#tail -n 3 `find ./ -name "circuit.circom"` #data/*/massive/*time
