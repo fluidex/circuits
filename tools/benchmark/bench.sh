@@ -80,7 +80,8 @@ function bench_groth16_zkutil() {
 function bench_plonk_plonkit() {
     echo benchmark plonkit with plonkit
     KEY=$DIR/keys/plonk/2pow${CIRCUIT_POW}.key
-    KEY_LAG=$DIR/keys/plonk/2pow${CIRCUIT_POW}_lagrange.key
+    # lagrange.key is circuit specific
+    KEY_LAG=$CIRCUIT_DIR/2pow${CIRCUIT_POW}_lagrange.key
     if [ ! -f $KEY ]; then
         mkdir -p keys/plonk
         $PLONKIT_BIN setup --power ${CIRCUIT_POW} --srs_monomial_form $KEY
@@ -88,9 +89,9 @@ function bench_plonk_plonkit() {
     #$PLONKIT_BIN analyse
     pushd $CIRCUIT_DIR
     $PLONKIT_BIN export-verification-key --srs_monomial_form $KEY --circuit circuit.r1cs --vk vk.bin
-    #$PLONKIT_BIN dump-lagrange -m $KEY -l $KEY_LAG -c circuit.r1cs
+    (time $PLONKIT_BIN dump-lagrange -m $KEY -l $KEY_LAG -c circuit.r1cs) 2>plonkit_lagrange_gen.time
     (time $PLONKIT_BIN prove --srs_monomial_form $KEY --circuit circuit.r1cs --witness witness.wtns --proof proof.bin) 2>plonkit.time
-    #(time $PLONKIT_BIN prove -m $KEY -l $KEY_LAG -c circuit.r1cs -w witness.wtns -p proof.bin) 2>plonkit_lagrange.time
+    (time $PLONKIT_BIN prove -m $KEY -l $KEY_LAG -c circuit.r1cs -w witness.wtns -p proof.bin) 2>plonkit_lagrange.time
     $PLONKIT_BIN verify --proof proof.bin --verification_key vk.bin
     popd
     # node $DIR/profile_circuit.js $CIRCUIT_DIR
@@ -104,15 +105,14 @@ function main() {
     npx ts-node $DIR/export_circuit.ts $CIRCUIT $CIRCUIT_DIR
     #prepare_tools
     prepare_circuit
-    #bench_groth16_zkutil
+    bench_groth16_zkutil
     #bench_groth16_rapidsnark
     bench_plonk_plonkit
 
     #chmod -R a-w $CIRCUIT_DIR # don't modify it anymore
     #output results
     echo -e "\n\n =========== benchmark results: ================= \n"
-    tail -n 3 `find $CIRCUIT_DIR -name "*.time"`
-    tail -n 3 `find $CIRCUIT_DIR -name "circuit.circom"` 
+    tail -n 3 `find $CIRCUIT_DIR -name "*.time"` `find $CIRCUIT_DIR -name "circuit.circom"` 
 }
 
 

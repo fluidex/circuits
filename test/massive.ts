@@ -35,12 +35,14 @@ function initTestCase(nTxsn, balanceLevels, orderLevels, accountLevels) {
   // order1
   const order1_id = 1n;
   const order1 = new OrderInput({
+    accountID: accountID1,
     order_id: order1_id,
     tokenbuy: tokenID_2to1,
     tokensell: tokenID_1to2,
     total_sell: amount_1to2 * nTxs * 100n,
     total_buy: amount_2to1 * nTxs * 100n,
   });
+  order1.signWith(account1);
   state.setAccountOrder(accountID1, OrderState.fromOrderInput(order1));
 
   /// mock existing account2 data, ensure balance to trade
@@ -50,12 +52,14 @@ function initTestCase(nTxsn, balanceLevels, orderLevels, accountLevels) {
   // order2
   const order2_id = 1n;
   const order2 = new OrderInput({
+    accountID: accountID2,
     order_id: order2_id,
     tokenbuy: tokenID_1to2,
     tokensell: tokenID_2to1,
     total_sell: amount_2to1 * nTxs * 100n,
     total_buy: amount_1to2 * nTxs * 100n,
   });
+  order2.signWith(account2);
   state.setAccountOrder(accountID2, OrderState.fromOrderInput(order2));
 
   /// start txs
