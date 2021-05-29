@@ -1,4 +1,4 @@
 **/node_modules
 dist/
-helper.ts/rescue_wasm/
+**/rescue_wasm
 

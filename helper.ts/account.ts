@@ -6,7 +6,6 @@ import { randomBytes } from '@ethersproject/random';
 import { defaultPath, HDNode, entropyToMnemonic, Mnemonic } from '@ethersproject/hdnode';
 import { SigningKey } from '@ethersproject/signing-key';
 import { hash } from '../helper.ts/hash';
-const utils = require('./utils');
 
 // TODO: get chainID from provider
 function get_CREATE_L2_ACCOUNT_MSG(chainID): string {
