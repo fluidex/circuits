@@ -295,6 +295,9 @@ class GlobalState {
     return this.accounts.get(accountID).ethAddr;
   }
   DepositToNew(tx: DepositToNewTx) {
+    if (this.options.verbose) {
+      console.log('DepositToNew', tx.accountID, tx.tokenID, tx.amount);
+    }
     assert(this.accounts.get(tx.accountID).ethAddr == 0n, 'DepositToNew');
     let proof = this.stateProof(tx.accountID, tx.tokenID);
     // first, generate the tx
@@ -345,6 +348,9 @@ class GlobalState {
     this.addRawTx(rawTx);
   }
   DepositToOld(tx: DepositToOldTx) {
+    if (this.options.verbose) {
+      console.log('DepositToOld', tx.accountID, tx.tokenID, tx.amount);
+    }
     //assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'DepositToOld');
     let proof = this.stateProof(tx.accountID, tx.tokenID);
     let oldBalance = this.getTokenBalance(tx.accountID, tx.tokenID);
@@ -375,9 +381,10 @@ class GlobalState {
 
     encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
     encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
+    encodedTx[TxDetailIdx.DstIsOld] = 1n;
 
     let rawTx: RawTx = {
-      txType: TxType.DepositToOld,
+      txType: TxType.DepositToNew,
       payload: encodedTx,
       balancePath0: proof.balancePath,
       balancePath1: proof.balancePath,

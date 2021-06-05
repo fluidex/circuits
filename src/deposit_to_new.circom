@@ -14,6 +14,9 @@ template DepositToNew(balanceLevels, accountLevels) {
     signal input enableBalanceCheck1;
     signal input enableBalanceCheck2;
 
+    signal input dstIsOld;
+    signal dstIsEmpty;
+
     // should only be calculated from the main circuit itself
     signal input genesisOrderRoot;
 
@@ -29,65 +32,116 @@ template DepositToNew(balanceLevels, accountLevels) {
 
     signal input balance2;
     signal input nonce2;
+    signal input sign2;
+    signal input ay2;
+    signal input ethAddr2;
 
     signal input amount;
 
+    component not = NOT();
+    not.in <== dstIsOld;
+    not.out ==> dstIsEmpty;
+
+    component depositToNewCheck = AND();
+    depositToNewCheck.a <== enabled;
+    depositToNewCheck.b <== dstIsEmpty;
+    component depositToOldCheck = AND();
+    depositToOldCheck.a <== enabled;
+    depositToOldCheck.b <== dstIsOld;
+
+    // universal checker
     
 
-    component checkEq0 = ForceEqualIfEnabled();
-    checkEq0.enabled <== enabled;
-    checkEq0.in[0] <== enableBalanceCheck1;
-    checkEq0.in[1] <== 1;
+    component checkEqCheckUniversal0 = ForceEqualIfEnabled();
+    checkEqCheckUniversal0.enabled <== enabled;
+    checkEqCheckUniversal0.in[0] <== enableBalanceCheck1;
+    checkEqCheckUniversal0.in[1] <== 1;
 
-    component checkEq1 = ForceEqualIfEnabled();
-    checkEq1.enabled <== enabled;
-    checkEq1.in[0] <== enableBalanceCheck2;
-    checkEq1.in[1] <== 1;
+    component checkEqCheckUniversal1 = ForceEqualIfEnabled();
+    checkEqCheckUniversal1.enabled <== enabled;
+    checkEqCheckUniversal1.in[0] <== enableBalanceCheck2;
+    checkEqCheckUniversal1.in[1] <== 1;
 
-    component checkEq2 = ForceEqualIfEnabled();
-    checkEq2.enabled <== enabled;
-    checkEq2.in[0] <== balance1;
-    checkEq2.in[1] <== 0;
+    component checkEqCheckUniversal2 = ForceEqualIfEnabled();
+    checkEqCheckUniversal2.enabled <== enabled;
+    checkEqCheckUniversal2.in[0] <== balance2;
+    checkEqCheckUniversal2.in[1] <== balance1 + amount;
 
-    component checkEq3 = ForceEqualIfEnabled();
-    checkEq3.enabled <== enabled;
-    checkEq3.in[0] <== nonce1;
-    checkEq3.in[1] <== 0;
+    component checkEqCheckUniversal3 = ForceEqualIfEnabled();
+    checkEqCheckUniversal3.enabled <== enabled;
+    checkEqCheckUniversal3.in[0] <== nonce1;
+    checkEqCheckUniversal3.in[1] <== nonce2;
 
-    component checkEq4 = ForceEqualIfEnabled();
-    checkEq4.enabled <== enabled;
-    checkEq4.in[0] <== ay1;
-    checkEq4.in[1] <== 0;
+    component checkEqCheckUniversal4 = ForceEqualIfEnabled();
+    checkEqCheckUniversal4.enabled <== enabled;
+    checkEqCheckUniversal4.in[0] <== orderRoot1;
+    checkEqCheckUniversal4.in[1] <== orderRoot2;
 
-    component checkEq5 = ForceEqualIfEnabled();
-    checkEq5.enabled <== enabled;
-    checkEq5.in[0] <== sign1;
-    checkEq5.in[1] <== 0;
 
-    component checkEq6 = ForceEqualIfEnabled();
-    checkEq6.enabled <== enabled;
-    checkEq6.in[0] <== ethAddr1;
-    checkEq6.in[1] <== 0;
 
-    component checkEq7 = ForceEqualIfEnabled();
-    checkEq7.enabled <== enabled;
-    checkEq7.in[0] <== orderRoot1;
-    checkEq7.in[1] <== genesisOrderRoot;
+    // check state when old state is empty
+    
 
-    component checkEq8 = ForceEqualIfEnabled();
-    checkEq8.enabled <== enabled;
-    checkEq8.in[0] <== balance2;
-    checkEq8.in[1] <== amount;
+    component checkEqCheckWhenEmpty0 = ForceEqualIfEnabled();
+    checkEqCheckWhenEmpty0.enabled <== depositToNewCheck.out;
+    checkEqCheckWhenEmpty0.in[0] <== balance1;
+    checkEqCheckWhenEmpty0.in[1] <== 0;
 
-    component checkEq9 = ForceEqualIfEnabled();
-    checkEq9.enabled <== enabled;
-    checkEq9.in[0] <== nonce1;
-    checkEq9.in[1] <== nonce2;
+    component checkEqCheckWhenEmpty1 = ForceEqualIfEnabled();
+    checkEqCheckWhenEmpty1.enabled <== depositToNewCheck.out;
+    checkEqCheckWhenEmpty1.in[0] <== nonce1;
+    checkEqCheckWhenEmpty1.in[1] <== 0;
 
-    component checkEq10 = ForceEqualIfEnabled();
-    checkEq10.enabled <== enabled;
-    checkEq10.in[0] <== orderRoot1;
-    checkEq10.in[1] <== orderRoot2;
+    component checkEqCheckWhenEmpty2 = ForceEqualIfEnabled();
+    checkEqCheckWhenEmpty2.enabled <== depositToNewCheck.out;
+    checkEqCheckWhenEmpty2.in[0] <== ay1;
+    checkEqCheckWhenEmpty2.in[1] <== 0;
+
+    component checkEqCheckWhenEmpty3 = ForceEqualIfEnabled();
+    checkEqCheckWhenEmpty3.enabled <== depositToNewCheck.out;
+    checkEqCheckWhenEmpty3.in[0] <== sign1;
+    checkEqCheckWhenEmpty3.in[1] <== 0;
+
+    component checkEqCheckWhenEmpty4 = ForceEqualIfEnabled();
+    checkEqCheckWhenEmpty4.enabled <== depositToNewCheck.out;
+    checkEqCheckWhenEmpty4.in[0] <== ethAddr1;
+    checkEqCheckWhenEmpty4.in[1] <== 0;
+
+    component checkEqCheckWhenEmpty5 = ForceEqualIfEnabled();
+    checkEqCheckWhenEmpty5.enabled <== depositToNewCheck.out;
+    checkEqCheckWhenEmpty5.in[0] <== orderRoot1;
+    checkEqCheckWhenEmpty5.in[1] <== genesisOrderRoot;
+
+
+
+
+    // check state when old state is not empty
+    
+
+    component checkEqCheckWhenNotEmpty0 = ForceEqualIfEnabled();
+    checkEqCheckWhenNotEmpty0.enabled <== depositToOldCheck.out;
+    checkEqCheckWhenNotEmpty0.in[0] <== nonce1;
+    checkEqCheckWhenNotEmpty0.in[1] <== nonce2;
+
+    component checkEqCheckWhenNotEmpty1 = ForceEqualIfEnabled();
+    checkEqCheckWhenNotEmpty1.enabled <== depositToOldCheck.out;
+    checkEqCheckWhenNotEmpty1.in[0] <== sign1;
+    checkEqCheckWhenNotEmpty1.in[1] <== sign2;
+
+    component checkEqCheckWhenNotEmpty2 = ForceEqualIfEnabled();
+    checkEqCheckWhenNotEmpty2.enabled <== depositToOldCheck.out;
+    checkEqCheckWhenNotEmpty2.in[0] <== ay1;
+    checkEqCheckWhenNotEmpty2.in[1] <== ay2;
+
+    component checkEqCheckWhenNotEmpty3 = ForceEqualIfEnabled();
+    checkEqCheckWhenNotEmpty3.enabled <== depositToOldCheck.out;
+    checkEqCheckWhenNotEmpty3.in[0] <== ethAddr1;
+    checkEqCheckWhenNotEmpty3.in[1] <== ethAddr2;
+
+    component checkEqCheckWhenNotEmpty4 = ForceEqualIfEnabled();
+    checkEqCheckWhenNotEmpty4.enabled <== depositToOldCheck.out;
+    checkEqCheckWhenNotEmpty4.in[0] <== orderRoot1;
+    checkEqCheckWhenNotEmpty4.in[1] <== orderRoot2;
 
 
 

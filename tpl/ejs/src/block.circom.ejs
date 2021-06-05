@@ -94,7 +94,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
     // process each transaction
     component processDepositToNew[nTxs];
-    component processDepositToOld[nTxs];
+    //component processDepositToOld[nTxs];
     component processTransfer[nTxs];
     component processWithdraw[nTxs];
     //component processPlaceOrder[nTxs];
@@ -143,10 +143,12 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
             ['enableBalanceCheck1', 'enableBalanceCheck2', 'amount',  
             'balance1', 'balance2', 
             'ethAddr1', 'ay1', 'sign1', 
-            'nonce1', 'nonce2'], 
+            'ethAddr2', 'ay2', 'sign2', 
+            'nonce1', 'nonce2',
+            'dstIsOld'], 
             'decodedTx[i].') %>
 
-
+/*
         // try process deposit_to_old
         processDepositToOld[i] = DepositToOld(balanceLevels, accountLevels);
         processDepositToOld[i].enabled <== enableDepositToOld[i].out;
@@ -160,7 +162,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
             'decodedTx[i].') %>
         processDepositToOld[i].orderRoot1 <== orderRoots[i][0];
         processDepositToOld[i].orderRoot2 <== orderRoots[i][1];
-
+*/
 
         // try process transfer
         processTransfer[i] = Transfer(balanceLevels, accountLevels);

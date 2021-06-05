@@ -317,7 +317,7 @@ async function mainTest() {
   // So we can ensure logics of matchengine VS GlobalState VS circuit are same!
   const circuitDir = await exportCircuitAndTestData(blocks, component);
   const testOptions = {
-    alwaysRecompile: false,
+    alwaysRecompile: true,
     verbose: true,
     backend: 'native',
     witnessFileType: 'wtns',
