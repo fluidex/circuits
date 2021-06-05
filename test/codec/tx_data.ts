@@ -1,5 +1,5 @@
 // Generated from tpl/ejs/./test/codec/tx_data.ts.ejs. Don't modify this file manually
-const TxLength = 60;
+const TxLength = 61;
 enum TxDetailIdx {
   EnableBalanceCheck1,
   AccountID1,
@@ -61,5 +61,6 @@ enum TxDetailIdx {
   NewOrder2TokenBuy,
   NewOrder2FilledBuy,
   NewOrder2AmountBuy,
+  DstIsOld,
 }
 export { TxLength, TxDetailIdx };

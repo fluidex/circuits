@@ -6,7 +6,7 @@ include "./constants.circom"
  * @input in - {Array(Field)} - encoded transaction
  */
 
-function TxLength() { return 60; }
+function TxLength() { return 61; }
 
 template DecodeTx() {
     signal input in[TxLength()];
@@ -74,6 +74,7 @@ template DecodeTx() {
     signal output newOrder2TokenBuy;
     signal output newOrder2FilledBuy;
     signal output newOrder2AmountBuy;
+    signal output dstIsOld;
 
     
     enableBalanceCheck1 <== in[0];
@@ -136,5 +137,6 @@ template DecodeTx() {
     newOrder2TokenBuy <== in[57];
     newOrder2FilledBuy <== in[58];
     newOrder2AmountBuy <== in[59];
+    dstIsOld <== in[60];
 
 }

@@ -59,7 +59,13 @@ function getCommonPayload() {
   balance4
   order1Pos
   order2Pos
-  `).concat(getOrderLeafs());
+  `)
+    .concat(getOrderLeafs())
+    .concat(
+      splitAndTrim(`
+  dstIsOld
+  `),
+    );
 }
 //console.log('commonPayload', getCommonPayload())
 const config = {
