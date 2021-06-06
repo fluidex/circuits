@@ -4,6 +4,7 @@ include "lib/eddsaposeidon.circom";
 include "./lib/utils_bjj.circom";
 include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
+include "../node_modules/circomlib/circuits/mux1.circom";
 
 /**
  * Process a L2 rollup transfer transaction
@@ -42,6 +43,11 @@ template Transfer(balanceLevels, accountLevels) {
     signal input enableBalanceCheck2;
     signal input enableSigCheck1;
 
+    signal input dstIsNew;
+    signal dstIsOld;
+
+    // should only be calculated from the main circuit itself
+    signal input genesisOrderRoot;
 
     signal input fromAccountID;
     signal input toAccountID;
@@ -49,15 +55,17 @@ template Transfer(balanceLevels, accountLevels) {
     signal input tokenID;
 
     signal input sigL2Hash1; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
-    signal input sign1;
-    signal input sign2;
-    signal input ay1;
-    signal input ay2;
-    signal input nonce1;
+    
     signal input balance1;
+    signal input nonce1;
+    signal input sign1;
+    signal input ay1;
     signal input ethAddr1;
-    signal input nonce2;
+
     signal input balance2;
+    signal input nonce2;
+    signal input sign2;
+    signal input ay2;
     signal input ethAddr2;
     
     signal input orderRoot1;
@@ -99,22 +107,33 @@ template Transfer(balanceLevels, accountLevels) {
         receiver_account_path_index[i] <== bTo.out[i];
     }
 
+    component not = NOT();
+    not.in <== dstIsNew;
+    not.out ==> dstIsOld;
+    component depositToNewCheck = AND();
+    depositToNewCheck.a <== enabled;
+    depositToNewCheck.b <== dstIsNew;
+    component depositToOldCheck = AND();
+    depositToOldCheck.a <== enabled;
+    depositToOldCheck.b <== dstIsOld;
+
     
 
-    component checkEq0 = ForceEqualIfEnabled();
-    checkEq0.enabled <== enabled;
-    checkEq0.in[0] <== enableBalanceCheck1;
-    checkEq0.in[1] <== 1;
+    component checkEqCheckUniversal0 = ForceEqualIfEnabled();
+    checkEqCheckUniversal0.enabled <== enabled;
+    checkEqCheckUniversal0.in[0] <== enableBalanceCheck1;
+    checkEqCheckUniversal0.in[1] <== 1;
 
-    component checkEq1 = ForceEqualIfEnabled();
-    checkEq1.enabled <== enabled;
-    checkEq1.in[0] <== enableBalanceCheck2;
-    checkEq1.in[1] <== 1;
+    component checkEqCheckUniversal1 = ForceEqualIfEnabled();
+    checkEqCheckUniversal1.enabled <== enabled;
+    checkEqCheckUniversal1.in[0] <== enableBalanceCheck2;
+    checkEqCheckUniversal1.in[1] <== 1;
 
-    component checkEq2 = ForceEqualIfEnabled();
-    checkEq2.enabled <== enabled;
-    checkEq2.in[0] <== enableSigCheck1;
-    checkEq2.in[1] <== 1;
+    component checkEqCheckUniversal2 = ForceEqualIfEnabled();
+    checkEqCheckUniversal2.enabled <== enabled;
+    checkEqCheckUniversal2.in[0] <== enableSigCheck1;
+    checkEqCheckUniversal2.in[1] <== 1;
+
 
 
 
@@ -157,10 +176,30 @@ template Transfer(balanceLevels, accountLevels) {
         accountTreeSenderNew.path_elements[i][0] <== sender_account_path_elements[i][0];
     }
 
+    // check when transfer to new 
+
+    // check when transfer to old
+
+    component multiMux = MultiMux1(6);
+    // if dstIsNew is true, output is multiMux[*][1]
+    multiMux.s <== dstIsNew;
+    multiMux.c[0][0] <== balance2 - amount;
+    multiMux.c[1][0] <== nonce2;
+    multiMux.c[2][0] <== sign2;
+    multiMux.c[3][0] <== ay2;
+    multiMux.c[4][0] <== ethAddr2;
+    multiMux.c[5][0] <== orderRoot2;
+    multiMux.c[0][1] <== balance2 - amount; // make sure balance2 - amount == 0
+    multiMux.c[1][1] <== 0;
+    multiMux.c[2][1] <== 0;
+    multiMux.c[3][1] <== 0;
+    multiMux.c[4][1] <== 0;
+    multiMux.c[5][1] <== genesisOrderRoot;
+      
     
     
     component balanceTreeReceiverOld = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeReceiverOld.leaf <== balance2 - amount;
+    balanceTreeReceiverOld.leaf <== multiMux.out[0];
     for (var i = 0; i < balanceLevels; i++) {
         balanceTreeReceiverOld.path_index[i] <== balance_path_index[i];
         balanceTreeReceiverOld.path_elements[i][0] <== receiver_balance_path_elements[i][0];
@@ -168,12 +207,12 @@ template Transfer(balanceLevels, accountLevels) {
     
     // account state hash
     component accountHashReceiverOld = HashAccount();
-    accountHashReceiverOld.nonce <== nonce2;
-    accountHashReceiverOld.sign <== sign2;
+    accountHashReceiverOld.nonce <== multiMux.out[1];
+    accountHashReceiverOld.sign <== multiMux.out[2];
     accountHashReceiverOld.balanceRoot <== balanceTreeReceiverOld.root;
-    accountHashReceiverOld.ay <== ay2;
-    accountHashReceiverOld.ethAddr <== ethAddr2;
-    accountHashReceiverOld.orderRoot <== orderRoot2;
+    accountHashReceiverOld.ay <== multiMux.out[3];
+    accountHashReceiverOld.ethAddr <== multiMux.out[4];
+    accountHashReceiverOld.orderRoot <== multiMux.out[5];
     // check account tree
     component accountTreeReceiverOld = CalculateRootFromMerklePath(accountLevels);
     accountTreeReceiverOld.leaf <== accountHashReceiverOld.out;

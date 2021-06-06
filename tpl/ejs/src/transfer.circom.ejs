@@ -3,6 +3,7 @@ include "lib/eddsaposeidon.circom";
 include "./lib/utils_bjj.circom";
 include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
+include "../node_modules/circomlib/circuits/mux1.circom";
 
 /**
  * Process a L2 rollup transfer transaction
@@ -41,6 +42,11 @@ template Transfer(balanceLevels, accountLevels) {
     signal input enableBalanceCheck2;
     signal input enableSigCheck1;
 
+    signal input dstIsNew;
+    signal dstIsOld;
+
+    // should only be calculated from the main circuit itself
+    signal input genesisOrderRoot;
 
     signal input fromAccountID;
     signal input toAccountID;
@@ -48,15 +54,17 @@ template Transfer(balanceLevels, accountLevels) {
     signal input tokenID;
 
     signal input sigL2Hash1; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
-    signal input sign1;
-    signal input sign2;
-    signal input ay1;
-    signal input ay2;
-    signal input nonce1;
+    
     signal input balance1;
+    signal input nonce1;
+    signal input sign1;
+    signal input ay1;
     signal input ethAddr1;
-    signal input nonce2;
+
     signal input balance2;
+    signal input nonce2;
+    signal input sign2;
+    signal input ay2;
     signal input ethAddr2;
     
     signal input orderRoot1;
@@ -98,11 +106,22 @@ template Transfer(balanceLevels, accountLevels) {
         receiver_account_path_index[i] <== bTo.out[i];
     }
 
+    component not = NOT();
+    not.in <== dstIsNew;
+    not.out ==> dstIsOld;
+    component depositToNewCheck = AND();
+    depositToNewCheck.a <== enabled;
+    depositToNewCheck.b <== dstIsNew;
+    component depositToOldCheck = AND();
+    depositToOldCheck.a <== enabled;
+    depositToOldCheck.b <== dstIsOld;
+
     <%- codegen.generateMultiCheckEq([
         ['enableBalanceCheck1', '1'],
         ['enableBalanceCheck2', '1'],
         ['enableSigCheck1', '1'],
-    ], {ctx: '', replacers: {}}) %>
+    ], {ctx: 'CheckUniversal', replacers: {enabled: 'enabled'}}) %>
+
 
     // TODO: underflow check
 
@@ -126,10 +145,33 @@ template Transfer(balanceLevels, accountLevels) {
         balance_path_elements: 'sender_balance_path_elements', 
         account_path_elements: 'sender_account_path_elements'}}) %>
 
+    // check when transfer to new 
+
+    // check when transfer to old
+
+    component multiMux = MultiMux1(6);
+    // if dstIsNew is true, output is multiMux[*][1]
+    multiMux.s <== dstIsNew;
+    multiMux.c[0][0] <== balance2 - amount;
+    multiMux.c[1][0] <== nonce2;
+    multiMux.c[2][0] <== sign2;
+    multiMux.c[3][0] <== ay2;
+    multiMux.c[4][0] <== ethAddr2;
+    multiMux.c[5][0] <== orderRoot2;
+    multiMux.c[0][1] <== balance2 - amount; // make sure balance2 - amount == 0
+    multiMux.c[1][1] <== 0;
+    multiMux.c[2][1] <== 0;
+    multiMux.c[3][1] <== 0;
+    multiMux.c[4][1] <== 0;
+    multiMux.c[5][1] <== genesisOrderRoot;
+      
     <%- codegen.generateFromTpl(codegen.tpls.CalcAccountTreeFromBalanceTpl, {ctx: 'ReceiverOld', replacers: { 
-        balance: 'balance2 - amount',
-        nonce: 'nonce2', sign: 'sign2', ay: 'ay2', ethAddr: 'ethAddr2', 
-        orderRoot: 'orderRoot2',
+        balance: 'multiMux.out[0]',
+        nonce: 'multiMux.out[1]', 
+        sign: 'multiMux.out[2]',
+        ay: 'multiMux.out[3]', 
+        ethAddr: 'multiMux.out[4]', 
+        orderRoot: 'multiMux.out[5]',
         account_path_index: 'receiver_account_path_index',
         balance_path_elements: 'receiver_balance_path_elements', 
         account_path_elements: 'receiver_account_path_elements'}}) %>

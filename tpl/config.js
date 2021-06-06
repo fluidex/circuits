@@ -63,7 +63,7 @@ function getCommonPayload() {
     .concat(getOrderLeafs())
     .concat(
       splitAndTrim(`
-  dstIsOld
+  dstIsNew
   `),
     );
 }

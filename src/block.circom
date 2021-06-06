@@ -165,21 +165,22 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDeposit[i].enableBalanceCheck2 <== decodedTx[i].enableBalanceCheck2;
         processDeposit[i].amount <== decodedTx[i].amount;
         processDeposit[i].balance1 <== decodedTx[i].balance1;
-        processDeposit[i].balance2 <== decodedTx[i].balance2;
-        processDeposit[i].ethAddr1 <== decodedTx[i].ethAddr1;
-        processDeposit[i].ay1 <== decodedTx[i].ay1;
-        processDeposit[i].sign1 <== decodedTx[i].sign1;
-        processDeposit[i].ethAddr2 <== decodedTx[i].ethAddr2;
-        processDeposit[i].ay2 <== decodedTx[i].ay2;
-        processDeposit[i].sign2 <== decodedTx[i].sign2;
         processDeposit[i].nonce1 <== decodedTx[i].nonce1;
+        processDeposit[i].sign1 <== decodedTx[i].sign1;
+        processDeposit[i].ay1 <== decodedTx[i].ay1;
+        processDeposit[i].ethAddr1 <== decodedTx[i].ethAddr1;
+        processDeposit[i].balance2 <== decodedTx[i].balance2;
         processDeposit[i].nonce2 <== decodedTx[i].nonce2;
-        processDeposit[i].dstIsOld <== decodedTx[i].dstIsOld;
+        processDeposit[i].sign2 <== decodedTx[i].sign2;
+        processDeposit[i].ay2 <== decodedTx[i].ay2;
+        processDeposit[i].ethAddr2 <== decodedTx[i].ethAddr2;
+        processDeposit[i].dstIsNew <== decodedTx[i].dstIsNew;
 
 
         // try process transfer
         processTransfer[i] = Transfer(balanceLevels, accountLevels);
         processTransfer[i].enabled <== enableTransfer[i].out;
+        processTransfer[i].genesisOrderRoot <== genesisOrderRoot.root;
 
         
         processTransfer[i].enableBalanceCheck1 <== decodedTx[i].enableBalanceCheck1;
@@ -197,6 +198,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processTransfer[i].ay2 <== decodedTx[i].ay2;
         processTransfer[i].ethAddr2 <== decodedTx[i].ethAddr2;
         processTransfer[i].sigL2Hash1 <== decodedTx[i].sigL2Hash1;
+        processTransfer[i].dstIsNew <== decodedTx[i].dstIsNew;
 
 
         processTransfer[i].fromAccountID <== decodedTx[i].accountID1;

@@ -14,8 +14,8 @@ template Deposit(balanceLevels, accountLevels) {
     signal input enableBalanceCheck1;
     signal input enableBalanceCheck2;
 
-    signal input dstIsOld;
-    signal dstIsEmpty;
+    signal input dstIsNew;
+    signal dstIsOld;
 
     // should only be calculated from the main circuit itself
     signal input genesisOrderRoot;
@@ -39,12 +39,12 @@ template Deposit(balanceLevels, accountLevels) {
     signal input amount;
 
     component not = NOT();
-    not.in <== dstIsOld;
-    not.out ==> dstIsEmpty;
+    not.in <== dstIsNew;
+    not.out ==> dstIsOld;
 
     component depositToNewCheck = AND();
     depositToNewCheck.a <== enabled;
-    depositToNewCheck.b <== dstIsEmpty;
+    depositToNewCheck.b <== dstIsNew;
     component depositToOldCheck = AND();
     depositToOldCheck.a <== enabled;
     depositToOldCheck.b <== dstIsOld;

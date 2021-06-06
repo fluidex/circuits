@@ -323,6 +323,7 @@ class GlobalState {
 
     encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
     encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
+    encodedTx[TxDetailIdx.DstIsNew] = 1n;
 
     let rawTx: RawTx = {
       txType: TxType.Deposit,
@@ -381,7 +382,7 @@ class GlobalState {
 
     encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
     encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
-    encodedTx[TxDetailIdx.DstIsOld] = 1n;
+    encodedTx[TxDetailIdx.DstIsNew] = 0n;
 
     let rawTx: RawTx = {
       txType: TxType.Deposit,
@@ -463,6 +464,7 @@ class GlobalState {
     encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
     encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
     encodedTx[TxDetailIdx.EnableSigCheck1] = 1n;
+    encodedTx[TxDetailIdx.DstIsNew] = 0n;
 
     this.setTokenBalance(tx.from, tx.tokenID, fromOldBalance - tx.amount);
     this.increaseNonce(tx.from);
