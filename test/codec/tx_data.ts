@@ -61,6 +61,6 @@ enum TxDetailIdx {
   NewOrder2TokenBuy,
   NewOrder2FilledBuy,
   NewOrder2AmountBuy,
-  DstIsOld,
+  DstIsNew,
 }
 export { TxLength, TxDetailIdx };

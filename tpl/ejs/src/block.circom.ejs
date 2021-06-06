@@ -127,23 +127,24 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
         <%- codegen.generateMultiFieldsAssign('processDeposit[i]', 
             ['enableBalanceCheck1', 'enableBalanceCheck2', 'amount',  
-            'balance1', 'balance2', 
-            'ethAddr1', 'ay1', 'sign1', 
-            'ethAddr2', 'ay2', 'sign2', 
-            'nonce1', 'nonce2',
-            'dstIsOld'], 
+            'balance1', 'nonce1', 'sign1', 'ay1', 'ethAddr1',
+            'balance2', 'nonce2', 'sign2', 'ay2', 'ethAddr2',
+            'dstIsNew'], 
             'decodedTx[i].') %>
 
         // try process transfer
         processTransfer[i] = Transfer(balanceLevels, accountLevels);
         processTransfer[i].enabled <== enableTransfer[i].out;
+        processTransfer[i].genesisOrderRoot <== genesisOrderRoot.root;
 
         <%- codegen.generateMultiFieldsAssign('processTransfer[i]', 
             ['enableBalanceCheck1', 'enableBalanceCheck2', 'enableSigCheck1',
             'amount', 
             'balance1', 'nonce1', 'sign1', 'ay1', 'ethAddr1',
             'balance2', 'nonce2', 'sign2', 'ay2', 'ethAddr2',
-            'sigL2Hash1',], 
+            'sigL2Hash1',
+            'dstIsNew', 
+            ], 
             'decodedTx[i].') %>
 
         processTransfer[i].fromAccountID <== decodedTx[i].accountID1;

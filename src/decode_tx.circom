@@ -74,7 +74,7 @@ template DecodeTx() {
     signal output newOrder2TokenBuy;
     signal output newOrder2FilledBuy;
     signal output newOrder2AmountBuy;
-    signal output dstIsOld;
+    signal output dstIsNew;
 
     
     enableBalanceCheck1 <== in[0];
@@ -137,6 +137,6 @@ template DecodeTx() {
     newOrder2TokenBuy <== in[57];
     newOrder2FilledBuy <== in[58];
     newOrder2AmountBuy <== in[59];
-    dstIsOld <== in[60];
+    dstIsNew <== in[60];
 
 }
