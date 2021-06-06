@@ -2,11 +2,9 @@
 include "../node_modules/circomlib/circuits/compconstant.circom";
 include "./lib/hash_state.circom";
 include "./decode_tx.circom";
-include "./deposit_to_new.circom";
-include "./deposit_to_old.circom";
+include "./deposit.circom";
 include "./transfer.circom";
 include "./withdraw.circom";
-//include "./place_order.circom";
 include "./spot_trade.circom";
 include "./base_tx.circom";
 
@@ -54,20 +52,14 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     component genesisOrderRoot = CalculateGenesisOrderRoot(orderLevels);
 
     // check transaction type
-    component enableDepositToNew[nTxs];
-    component enableDepositToOld[nTxs];
+    component enableDeposit[nTxs];
     component enableTransfer[nTxs];
     component enableWithdraw[nTxs];
-    component enablePlaceOrder[nTxs];
     component enableSpotTrade[nTxs];
     for (var i = 0; i < nTxs; i++) {
-        enableDepositToNew[i] = IsEqual();
-        enableDepositToNew[i].in[0] <== txsType[i];
-        enableDepositToNew[i].in[1] <== TxTypeDepositToNew();
-
-        enableDepositToOld[i] = IsEqual();
-        enableDepositToOld[i].in[0] <== txsType[i];
-        enableDepositToOld[i].in[1] <== TxTypeDepositToOld();
+        enableDeposit[i] = IsEqual();
+        enableDeposit[i].in[0] <== txsType[i];
+        enableDeposit[i].in[1] <== TxTypeDeposit();
 
         enableTransfer[i] = IsEqual();
         enableTransfer[i].in[0] <== txsType[i];
@@ -76,10 +68,6 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         enableWithdraw[i] = IsEqual();
         enableWithdraw[i].in[0] <== txsType[i];
         enableWithdraw[i].in[1] <== TxTypeWithdraw();
-
-        enablePlaceOrder[i] = IsEqual();
-        enablePlaceOrder[i].in[0] <== txsType[i];
-        enablePlaceOrder[i].in[1] <== TxTypePlaceOrder();
 
         enableSpotTrade[i] = IsEqual();
         enableSpotTrade[i].in[0] <== txsType[i];
@@ -94,11 +82,9 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     component sigChecker2[nTxs];
 
     // process each transaction
-    component processDepositToNew[nTxs];
-    //component processDepositToOld[nTxs];
+    component processDeposit[nTxs];
     component processTransfer[nTxs];
     component processWithdraw[nTxs];
-    //component processPlaceOrder[nTxs];
     component processSpotTrade[nTxs];
 
     for (var i = 0; i < nTxs; i++) {
@@ -167,53 +153,29 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
 
 
-        // try process deposit_to_new
-        processDepositToNew[i] = DepositToNew(balanceLevels, accountLevels);
-        processDepositToNew[i].enabled <== enableDepositToNew[i].out;
-        processDepositToNew[i].genesisOrderRoot <== genesisOrderRoot.root;
-        processDepositToNew[i].orderRoot1 <== orderRoots[i][0];
-        processDepositToNew[i].orderRoot2 <== orderRoots[i][1];
+        // try process deposit
+        processDeposit[i] = Deposit(balanceLevels, accountLevels);
+        processDeposit[i].enabled <== enableDeposit[i].out;
+        processDeposit[i].genesisOrderRoot <== genesisOrderRoot.root;
+        processDeposit[i].orderRoot1 <== orderRoots[i][0];
+        processDeposit[i].orderRoot2 <== orderRoots[i][1];
 
         
-        processDepositToNew[i].enableBalanceCheck1 <== decodedTx[i].enableBalanceCheck1;
-        processDepositToNew[i].enableBalanceCheck2 <== decodedTx[i].enableBalanceCheck2;
-        processDepositToNew[i].amount <== decodedTx[i].amount;
-        processDepositToNew[i].balance1 <== decodedTx[i].balance1;
-        processDepositToNew[i].balance2 <== decodedTx[i].balance2;
-        processDepositToNew[i].ethAddr1 <== decodedTx[i].ethAddr1;
-        processDepositToNew[i].ay1 <== decodedTx[i].ay1;
-        processDepositToNew[i].sign1 <== decodedTx[i].sign1;
-        processDepositToNew[i].ethAddr2 <== decodedTx[i].ethAddr2;
-        processDepositToNew[i].ay2 <== decodedTx[i].ay2;
-        processDepositToNew[i].sign2 <== decodedTx[i].sign2;
-        processDepositToNew[i].nonce1 <== decodedTx[i].nonce1;
-        processDepositToNew[i].nonce2 <== decodedTx[i].nonce2;
-        processDepositToNew[i].dstIsOld <== decodedTx[i].dstIsOld;
+        processDeposit[i].enableBalanceCheck1 <== decodedTx[i].enableBalanceCheck1;
+        processDeposit[i].enableBalanceCheck2 <== decodedTx[i].enableBalanceCheck2;
+        processDeposit[i].amount <== decodedTx[i].amount;
+        processDeposit[i].balance1 <== decodedTx[i].balance1;
+        processDeposit[i].balance2 <== decodedTx[i].balance2;
+        processDeposit[i].ethAddr1 <== decodedTx[i].ethAddr1;
+        processDeposit[i].ay1 <== decodedTx[i].ay1;
+        processDeposit[i].sign1 <== decodedTx[i].sign1;
+        processDeposit[i].ethAddr2 <== decodedTx[i].ethAddr2;
+        processDeposit[i].ay2 <== decodedTx[i].ay2;
+        processDeposit[i].sign2 <== decodedTx[i].sign2;
+        processDeposit[i].nonce1 <== decodedTx[i].nonce1;
+        processDeposit[i].nonce2 <== decodedTx[i].nonce2;
+        processDeposit[i].dstIsOld <== decodedTx[i].dstIsOld;
 
-
-/*
-        // try process deposit_to_old
-        processDepositToOld[i] = DepositToOld(balanceLevels, accountLevels);
-        processDepositToOld[i].enabled <== enableDepositToOld[i].out;
-
-        
-        processDepositToOld[i].enableBalanceCheck1 <== decodedTx[i].enableBalanceCheck1;
-        processDepositToOld[i].enableBalanceCheck2 <== decodedTx[i].enableBalanceCheck2;
-        processDepositToOld[i].amount <== decodedTx[i].amount;
-        processDepositToOld[i].balance1 <== decodedTx[i].balance1;
-        processDepositToOld[i].balance2 <== decodedTx[i].balance2;
-        processDepositToOld[i].ethAddr1 <== decodedTx[i].ethAddr1;
-        processDepositToOld[i].ay1 <== decodedTx[i].ay1;
-        processDepositToOld[i].sign1 <== decodedTx[i].sign1;
-        processDepositToOld[i].nonce1 <== decodedTx[i].nonce1;
-        processDepositToOld[i].ethAddr2 <== decodedTx[i].ethAddr2;
-        processDepositToOld[i].ay2 <== decodedTx[i].ay2;
-        processDepositToOld[i].sign2 <== decodedTx[i].sign2;
-        processDepositToOld[i].nonce2 <== decodedTx[i].nonce2;
-
-        processDepositToOld[i].orderRoot1 <== orderRoots[i][0];
-        processDepositToOld[i].orderRoot2 <== orderRoots[i][1];
-*/
 
         // try process transfer
         processTransfer[i] = Transfer(balanceLevels, accountLevels);
