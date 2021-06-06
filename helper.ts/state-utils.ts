@@ -5,13 +5,12 @@ import { Account, TxSignature } from './account';
 
 // this sequence'd better consistent with defined in circuits and smart constracts
 enum TxType {
-  DepositToNew,
-  DepositToOld,
+  Nop,
+  Deposit,
   Transfer,
   Withdraw,
   PlaceOrder,
   SpotTrade,
-  Nop,
 }
 
 enum OrderSide {

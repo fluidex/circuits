@@ -1,0 +1,86 @@
+include "./lib/bitify.circom";
+include "./lib/hash_state.circom";
+include "./lib/binary_merkle_tree.circom";
+
+/**
+ * Process a deposit_and_create_account transaction, also support create 0 balance account
+ * @param balanceLevels - balance tree depth
+ * @param accountLevels - account tree depth
+ * @input amount - {Uint192} - amount to deposit from L1 to L2
+ */
+template Deposit(balanceLevels, accountLevels) {
+    signal input enabled;
+    signal input enableBalanceCheck1;
+    signal input enableBalanceCheck2;
+
+    signal input dstIsOld;
+    signal dstIsEmpty;
+
+    // should only be calculated from the main circuit itself
+    signal input genesisOrderRoot;
+
+    // check old account is empty
+    signal input orderRoot1;
+    signal input orderRoot2;
+
+    signal input balance1;
+    signal input nonce1;
+    signal input sign1;
+    signal input ay1;
+    signal input ethAddr1;
+
+    signal input balance2;
+    signal input nonce2;
+    signal input sign2;
+    signal input ay2;
+    signal input ethAddr2;
+
+    signal input amount;
+
+    component not = NOT();
+    not.in <== dstIsOld;
+    not.out ==> dstIsEmpty;
+
+    component depositToNewCheck = AND();
+    depositToNewCheck.a <== enabled;
+    depositToNewCheck.b <== dstIsEmpty;
+    component depositToOldCheck = AND();
+    depositToOldCheck.a <== enabled;
+    depositToOldCheck.b <== dstIsOld;
+
+    // universal checker
+    <%- codegen.generateMultiCheckEq([
+        ['enableBalanceCheck1', '1'],
+        ['enableBalanceCheck2', '1'],
+        ['balance2', 'balance1 + amount'],
+        // deposit will not update nonce and orderRoot
+        ['nonce1', 'nonce2'],
+        ['orderRoot1', 'orderRoot2'],
+    ], {ctx: 'CheckUniversal', replacers: {enabled: 'enabled'}}) %>
+
+    // check state when old state is empty
+    <%- codegen.generateMultiCheckEq([
+        ['balance1', '0'],
+        ['nonce1', '0'],
+        ['ay1', '0'],
+        ['sign1', '0'],
+        ['ethAddr1', '0'],
+        ['orderRoot1', 'genesisOrderRoot'],
+    ], {ctx: 'CheckWhenEmpty', replacers: {enabled: 'depositToNewCheck.out'}}) %>
+
+
+    // check state when old state is not empty
+    <%- codegen.generateMultiCheckEq([
+        ['nonce1', 'nonce2'],
+        ['sign1', 'sign2'],
+        ['ay1', 'ay2'],
+        ['ethAddr1', 'ethAddr2'],
+        ['orderRoot1', 'orderRoot2'],
+    ], {ctx: 'CheckWhenNotEmpty', replacers: {enabled: 'depositToOldCheck.out'}}) %>
+
+    // TODO: underflow check
+
+    // TODO: overflow check
+
+    // TODO: fee
+}

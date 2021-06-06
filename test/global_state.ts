@@ -325,7 +325,7 @@ class GlobalState {
     encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
 
     let rawTx: RawTx = {
-      txType: TxType.DepositToNew,
+      txType: TxType.Deposit,
       payload: encodedTx,
       balancePath0: proof.balancePath,
       balancePath1: proof.balancePath,
@@ -384,7 +384,7 @@ class GlobalState {
     encodedTx[TxDetailIdx.DstIsOld] = 1n;
 
     let rawTx: RawTx = {
-      txType: TxType.DepositToNew,
+      txType: TxType.Deposit,
       payload: encodedTx,
       balancePath0: proof.balancePath,
       balancePath1: proof.balancePath,
