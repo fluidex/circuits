@@ -89,9 +89,9 @@ function bench_plonk_plonkit() {
     #$PLONKIT_BIN analyse
     pushd $CIRCUIT_DIR
     $PLONKIT_BIN export-verification-key --srs_monomial_form $KEY --circuit circuit.r1cs --vk vk.bin
-    (time $PLONKIT_BIN dump-lagrange -m $KEY -l $KEY_LAG -c circuit.r1cs) 2>plonkit_lagrange_gen.time
     (time $PLONKIT_BIN prove --srs_monomial_form $KEY --circuit circuit.r1cs --witness witness.wtns --proof proof.bin) 2>plonkit.time
-    (time $PLONKIT_BIN prove -m $KEY -l $KEY_LAG -c circuit.r1cs -w witness.wtns -p proof.bin) 2>plonkit_lagrange.time
+    #(time $PLONKIT_BIN dump-lagrange -m $KEY -l $KEY_LAG -c circuit.r1cs) 2>plonkit_lagrange_gen.time
+    #(time $PLONKIT_BIN prove -m $KEY -l $KEY_LAG -c circuit.r1cs -w witness.wtns -p proof.bin) 2>plonkit_lagrange.time
     $PLONKIT_BIN verify --proof proof.bin --verification_key vk.bin
     popd
     # node $DIR/profile_circuit.js $CIRCUIT_DIR
@@ -116,7 +116,7 @@ function main() {
 }
 
 
-[ -d $CIRCUIT_DIR ] && (echo "$CIRCUIT_DIR exists, exit"; exit 1)
+#[ -d $CIRCUIT_DIR ] && (echo "$CIRCUIT_DIR exists, exit"; exit 1)
 mkdir -p $CIRCUIT_DIR
 #check_ptau
 main 2>&1 | tee $CIRCUIT_DIR/all.log
