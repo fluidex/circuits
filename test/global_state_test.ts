@@ -318,8 +318,8 @@ async function mainTest() {
   const circuitDir = await exportCircuitAndTestData(blocks, component);
   const testOptions = {
     alwaysRecompile: true,
-    verbose: true,
-    backend: 'native',
+    verbose: false,
+    backend: 'auto',
     witnessFileType: 'wtns',
   };
   await snarkit.testCircuitDir(circuitDir, path.join(circuitDir, 'data'), testOptions);

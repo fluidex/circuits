@@ -29,7 +29,7 @@ function testBlock() {
 function testAll() {
 	for d in `ls testdata`
 	do
-		npx snarkit test --backend native --witness_type bin testdata/$d &
+		npx snarkit test --backend auto --witness_type bin testdata/$d &
 	done
 	for job in `jobs -p`
 	do
