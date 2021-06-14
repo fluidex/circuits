@@ -17,28 +17,28 @@ template BalanceChecker(balanceLevels, accountLevels) {
     signal input accountRoot;
 
 
-    signal input balance_path_elements[balanceLevels][1];
-    signal input account_path_elements[accountLevels][1];
+    signal input balancePathElements[balanceLevels][1];
+    signal input accountPathElements[accountLevels][1];
 
     // Path index
-    signal balance_path_index[balanceLevels];
-    signal account_path_index[accountLevels];
+    signal balancePathIndex[balanceLevels];
+    signal accountPathIndex[accountLevels];
 
 
-    // decode balance_path_index
+    // decode balancePathIndex
     component decodeBalancePath = Num2BitsIfEnabled(balanceLevels);
     decodeBalancePath.enabled <== enabled;
     decodeBalancePath.in <== tokenID;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_path_index[i] <== decodeBalancePath.out[i];
+        balancePathIndex[i] <== decodeBalancePath.out[i];
     }
 
-    // decode account_path_index
+    // decode accountPathIndex
     component decodeAccountPath = Num2BitsIfEnabled(accountLevels);
     decodeAccountPath.enabled <== enabled;
     decodeAccountPath.in <== accountID;
     for (var i = 0; i < accountLevels; i++) {
-        account_path_index[i] <== decodeAccountPath.out[i];
+        accountPathIndex[i] <== decodeAccountPath.out[i];
     }
 
     
@@ -47,8 +47,8 @@ template BalanceChecker(balanceLevels, accountLevels) {
     component balanceTree = CalculateRootFromMerklePath(balanceLevels);
     balanceTree.leaf <== balance;
     for (var i = 0; i < balanceLevels; i++) {
-        balanceTree.path_index[i] <== balance_path_index[i];
-        balanceTree.path_elements[i][0] <== balance_path_elements[i][0];
+        balanceTree.pathIndex[i] <== balancePathIndex[i];
+        balanceTree.pathElements[i][0] <== balancePathElements[i][0];
     }
     
     // account state hash
@@ -63,8 +63,8 @@ template BalanceChecker(balanceLevels, accountLevels) {
     component accountTree = CalculateRootFromMerklePath(accountLevels);
     accountTree.leaf <== accountHash.out;
     for (var i = 0; i < accountLevels; i++) {
-        accountTree.path_index[i] <== account_path_index[i];
-        accountTree.path_elements[i][0] <== account_path_elements[i][0];
+        accountTree.pathIndex[i] <== accountPathIndex[i];
+        accountTree.pathElements[i][0] <== accountPathElements[i][0];
     }
     component checkEq = ForceEqualIfEnabled();
     checkEq.enabled <== enabled;

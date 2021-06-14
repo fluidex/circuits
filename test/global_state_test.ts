@@ -149,11 +149,11 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
       assert(!state.hasOrder(order.accountID, order.order_id), 'invalid new order');
       let orderToPut = new OrderInput({
         accountID: order.accountID,
-        order_id: order.order_id,
-        tokensell: order.tokensell,
-        tokenbuy: order.tokenbuy,
-        total_sell: order.total_sell,
-        total_buy: order.total_buy,
+        orderId: order.order_id,
+        tokenSell: order.tokensell,
+        tokenBuy: order.tokenbuy,
+        totalSell: order.total_sell,
+        totalBuy: order.total_buy,
         side: order.side,
         sig: null,
       });
@@ -184,24 +184,24 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
   // now we construct the trade and exec it
   let spotTradeTx = bidIsTaker
     ? {
-        order1_accountID: askOrderStateBefore.accountID,
-        order2_accountID: bidOrderStateBefore.accountID,
-        tokenID_1to2: baseTokenID,
-        tokenID_2to1: quoteTokenID,
-        amount_1to2: BigInt(convertNumber(trade.amount, baseToken)),
-        amount_2to1: BigInt(convertNumber(trade.quote_amount, quoteToken)),
-        order1_id: askOrderStateBefore.order_id,
-        order2_id: bidOrderStateBefore.order_id,
+        order1AccountID: askOrderStateBefore.accountID,
+        order2AccountID: bidOrderStateBefore.accountID,
+        tokenID1to2: baseTokenID,
+        tokenID2to1: quoteTokenID,
+        amount1to2: BigInt(convertNumber(trade.amount, baseToken)),
+        amount2to1: BigInt(convertNumber(trade.quote_amount, quoteToken)),
+        order1Id: askOrderStateBefore.order_id,
+        order2Id: bidOrderStateBefore.order_id,
       }
     : {
-        order1_accountID: bidOrderStateBefore.accountID,
-        order2_accountID: askOrderStateBefore.accountID,
-        tokenID_1to2: quoteTokenID,
-        tokenID_2to1: baseTokenID,
-        amount_1to2: BigInt(convertNumber(trade.quote_amount, quoteToken)),
-        amount_2to1: BigInt(convertNumber(trade.amount, baseToken)),
-        order1_id: bidOrderStateBefore.order_id,
-        order2_id: askOrderStateBefore.order_id,
+        order1AccountID: bidOrderStateBefore.accountID,
+        order2AccountID: askOrderStateBefore.accountID,
+        tokenID1to2: quoteTokenID,
+        tokenID2to1: baseTokenID,
+        amount1to2: BigInt(convertNumber(trade.quote_amount, quoteToken)),
+        amount2to1: BigInt(convertNumber(trade.amount, baseToken)),
+        order1Id: bidOrderStateBefore.order_id,
+        order2Id: askOrderStateBefore.order_id,
       };
   state.SpotTrade(spotTradeTx);
   // finally we check the state after this trade

@@ -24,16 +24,16 @@ include "../node_modules/circomlib/circuits/mux1.circom";
  * @input ay1 - {Field} - ay of the sender leaf
  * @input ethAddr1 - {Uint160} - ethAddr of the sender leaf
  * @input orderRoot1 - {Field} - order root of the sender leaf
- * @input sender_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the sender leaf
- * @input sender_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the sender leaf
+ * @input senderBalancePathElements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the sender leaf
+ * @input senderAccountPathElements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the sender leaf
  * @input nonce2 - {Uint40} - nonce of the receiver leaf
  * @input sign2 - {Bool} - sign of the receiver leaf
  * @input balance2 - {Uint192} - balance of the receiver leaf
  * @input ay2 - {Field} - ay of the receiver leaf
  * @input ethAddr2 - {Uint160} - ethAddr of the receiver leaf
  * @input orderRoot2 - {Field} - order root of the receiver leaf
- * @input receiver_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the receiver leaf
- * @input receiver_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the receiver leaf
+ * @input receiverBalancePathElements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the receiver leaf
+ * @input receiverAccountPathElements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the receiver leaf
  * @input oldAccountRoot - {Field} - initial account state root
  * @input newAccountRoot - {Field} - final account state root
  */
@@ -72,39 +72,39 @@ template Transfer(balanceLevels, accountLevels) {
     signal input orderRoot2;
     signal input oldAccountRoot;
     signal input newAccountRoot;
-    signal input sender_balance_path_elements[balanceLevels][1];
-    signal input sender_account_path_elements[accountLevels][1];
-    signal input receiver_balance_path_elements[balanceLevels][1];
-    signal input receiver_account_path_elements[accountLevels][1];
+    signal input senderBalancePathElements[balanceLevels][1];
+    signal input senderAccountPathElements[accountLevels][1];
+    signal input receiverBalancePathElements[balanceLevels][1];
+    signal input receiverAccountPathElements[accountLevels][1];
 
 
     // Path index
-    signal balance_path_index[balanceLevels];
-    signal sender_account_path_index[accountLevels];
-    signal receiver_account_path_index[accountLevels];
+    signal balancePathIndex[balanceLevels];
+    signal senderAccountPathIndex[accountLevels];
+    signal receiverAccountPathIndex[accountLevels];
 
     ////////////////////////// Step 1: decode inputs: decode merkle path here ////////////////////////////
 
-    // decode balance_path_index
+    // decode balancePathIndex
     component bTokenID = Num2BitsIfEnabled(balanceLevels);
     bTokenID.enabled <== enabled;
     bTokenID.in <== tokenID;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_path_index[i] <== bTokenID.out[i];
+        balancePathIndex[i] <== bTokenID.out[i];
     }
 
-    // decode account_path_index
+    // decode accountPathIndex
     component bFrom = Num2BitsIfEnabled(accountLevels);
     bFrom.enabled <== enabled;
     bFrom.in <== fromAccountID;
     for (var i = 0; i < accountLevels; i++) {
-        sender_account_path_index[i] <== bFrom.out[i];
+        senderAccountPathIndex[i] <== bFrom.out[i];
     }
     component bTo = Num2BitsIfEnabled(accountLevels);
     bTo.enabled <== enabled;
     bTo.in <== toAccountID;
     for (var i = 0; i < accountLevels; i++) {
-        receiver_account_path_index[i] <== bTo.out[i];
+        receiverAccountPathIndex[i] <== bTo.out[i];
     }
 
     component not = NOT();
@@ -156,8 +156,8 @@ template Transfer(balanceLevels, accountLevels) {
     component balanceTreeSenderNew = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeSenderNew.leaf <== balance1 - amount;
     for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeSenderNew.path_index[i] <== balance_path_index[i];
-        balanceTreeSenderNew.path_elements[i][0] <== sender_balance_path_elements[i][0];
+        balanceTreeSenderNew.pathIndex[i] <== balancePathIndex[i];
+        balanceTreeSenderNew.pathElements[i][0] <== senderBalancePathElements[i][0];
     }
     
     // account state hash
@@ -172,8 +172,8 @@ template Transfer(balanceLevels, accountLevels) {
     component accountTreeSenderNew = CalculateRootFromMerklePath(accountLevels);
     accountTreeSenderNew.leaf <== accountHashSenderNew.out;
     for (var i = 0; i < accountLevels; i++) {
-        accountTreeSenderNew.path_index[i] <== sender_account_path_index[i];
-        accountTreeSenderNew.path_elements[i][0] <== sender_account_path_elements[i][0];
+        accountTreeSenderNew.pathIndex[i] <== senderAccountPathIndex[i];
+        accountTreeSenderNew.pathElements[i][0] <== senderAccountPathElements[i][0];
     }
 
     // check when transfer to new 
@@ -201,8 +201,8 @@ template Transfer(balanceLevels, accountLevels) {
     component balanceTreeReceiverOld = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeReceiverOld.leaf <== multiMux.out[0];
     for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeReceiverOld.path_index[i] <== balance_path_index[i];
-        balanceTreeReceiverOld.path_elements[i][0] <== receiver_balance_path_elements[i][0];
+        balanceTreeReceiverOld.pathIndex[i] <== balancePathIndex[i];
+        balanceTreeReceiverOld.pathElements[i][0] <== receiverBalancePathElements[i][0];
     }
     
     // account state hash
@@ -217,8 +217,8 @@ template Transfer(balanceLevels, accountLevels) {
     component accountTreeReceiverOld = CalculateRootFromMerklePath(accountLevels);
     accountTreeReceiverOld.leaf <== accountHashReceiverOld.out;
     for (var i = 0; i < accountLevels; i++) {
-        accountTreeReceiverOld.path_index[i] <== receiver_account_path_index[i];
-        accountTreeReceiverOld.path_elements[i][0] <== receiver_account_path_elements[i][0];
+        accountTreeReceiverOld.pathIndex[i] <== receiverAccountPathIndex[i];
+        accountTreeReceiverOld.pathElements[i][0] <== receiverAccountPathElements[i][0];
     }
 
     component checkEqMid = ForceEqualIfEnabled();

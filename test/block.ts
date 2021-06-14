@@ -70,16 +70,16 @@ function initBlockTestCase() {
   const order2_id = 1n;
   const order2: OrderInput = new OrderInput({
     accountID: accountID2,
-    order_id: order2_id,
-    tokenbuy: tokenID_1to2,
-    tokensell: tokenID_2to1,
-    total_sell: 10000n,
-    total_buy: 1000n,
+    orderId: order2_id,
+    tokenBuy: tokenID_1to2,
+    tokenSell: tokenID_2to1,
+    totalSell: 10000n,
+    totalBuy: 1000n,
   });
   order2.signWith(account2);
   let order2State = OrderState.fromOrderInput(order2);
-  order2State.filled_buy = 1n;
-  order2State.filled_sell = 10n;
+  order2State.filledBuy = 1n;
+  order2State.filledSell = 10n;
   state.setAccountOrder(accountID2, order2State);
 
   /// start txs
@@ -142,11 +142,11 @@ function initBlockTestCase() {
   const order1_id = 1n;
   const order1: OrderInput = new OrderInput({
     accountID: accountID1,
-    order_id: order1_id,
-    tokensell: tokenID_1to2,
-    tokenbuy: tokenID_2to1,
-    total_sell: 1000n,
-    total_buy: 10000n,
+    orderId: order1_id,
+    tokenSell: tokenID_1to2,
+    tokenBuy: tokenID_2to1,
+    totalSell: 1000n,
+    totalBuy: 10000n,
   });
   order1.signWith(account1);
   // order_id is known to the user, user should sign this order_id
@@ -156,14 +156,14 @@ function initBlockTestCase() {
   state.setAccountOrder(accountID1, OrderState.fromOrderInput(order1));
 
   let spotTradeTx = {
-    order1_accountID: accountID1,
-    order2_accountID: accountID2,
-    tokenID_1to2: tokenID_1to2,
-    tokenID_2to1: tokenID_2to1,
-    amount_1to2: amount_1to2,
-    amount_2to1: amount_2to1,
-    order1_id: order1_id,
-    order2_id: order2_id,
+    order1AccountID: accountID1,
+    order2AccountID: accountID2,
+    tokenID1to2: tokenID_1to2,
+    tokenID2to1: tokenID_2to1,
+    amount1to2: amount_1to2,
+    amount2to1: amount_2to1,
+    order1Id: order1_id,
+    order2Id: order2_id,
   };
   state.SpotTrade(spotTradeTx);
 

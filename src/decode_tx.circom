@@ -11,8 +11,6 @@ function TxLength() { return 61; }
 template DecodeTx() {
     signal input in[TxLength()];
 
-    // TODO: should new_order1_tokensell reuse tokenID1?
-
     
     signal output enableBalanceCheck1;
     signal output accountID1;

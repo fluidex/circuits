@@ -76,8 +76,8 @@ const CalcBalanceTreeTpl = `
     component balanceTree__ = CalculateRootFromMerklePath(balanceLevels);
     balanceTree__.leaf <== balance;
     for (var i = 0; i < balanceLevels; i++) {
-        balanceTree__.path_index[i] <== balance_path_index[i];
-        balanceTree__.path_elements[i][0] <== balance_path_elements[i][0];
+        balanceTree__.pathIndex[i] <== balancePathIndex[i];
+        balanceTree__.pathElements[i][0] <== balancePathElements[i][0];
     }`;
 
 const CheckBalanceTreeTpl = `
@@ -86,20 +86,20 @@ const CheckBalanceTreeTpl = `
 
 const CalcOrderTreeTpl = `
     component orderHash__ = HashOrder();
-    orderHash__.tokensell <== orderTokenSell;
-    orderHash__.tokenbuy <== orderTokenBuy;
-    orderHash__.filled_sell <== orderFilledSell;
-    orderHash__.filled_buy <== orderFilledBuy;
-    orderHash__.total_sell <== orderAmountSell;
-    orderHash__.total_buy <== orderAmountBuy;
-    orderHash__.order_id <== orderID;
+    orderHash__.tokenSell <== orderTokenSell;
+    orderHash__.tokenBuy <== orderTokenBuy;
+    orderHash__.filledSell <== orderFilledSell;
+    orderHash__.filledBuy <== orderFilledBuy;
+    orderHash__.totalSell <== orderAmountSell;
+    orderHash__.totalBuy <== orderAmountBuy;
+    orderHash__.orderId <== orderID;
 
     // - check order tree update
     component orderTree__ = CalculateRootFromMerklePath(orderLevels);
     orderTree__.leaf <== orderHash__.out;
     for (var i = 0; i < orderLevels; i++) {
-        orderTree__.path_index[i] <== order_path_index[i];
-        orderTree__.path_elements[i][0] <== order_path_elements[i][0];
+        orderTree__.pathIndex[i] <== orderPathIndex[i];
+        orderTree__.pathElements[i][0] <== orderPathElements[i][0];
     }`;
 
 const CheckOrderTreeTpl = `
@@ -119,8 +119,8 @@ const CalcAccountTreeTpl = `
     component accountTree__ = CalculateRootFromMerklePath(accountLevels);
     accountTree__.leaf <== accountHash__.out;
     for (var i = 0; i < accountLevels; i++) {
-        accountTree__.path_index[i] <== account_path_index[i];
-        accountTree__.path_elements[i][0] <== account_path_elements[i][0];
+        accountTree__.pathIndex[i] <== accountPathIndex[i];
+        accountTree__.pathElements[i][0] <== accountPathElements[i][0];
     }`;
 
 const CheckAccountTreeRootTpl = CheckEqTpl.replace('lhs', 'accountTree__.root').replace('rhs', 'accountRoot');
@@ -157,15 +157,15 @@ const CheckSameTreeRootTpl = `
     component tree1__ = CalculateRootFromMerklePath( levels);
     tree1__.leaf <== leaf1;
     for (var i = 0; i < levels; i++) {
-        tree1__.path_index[i] <== path_index1[i];
-        tree1__.path_elements[i][0] <== path_elements1[i][0];
+        tree1__.pathIndex[i] <== pathIndex1[i];
+        tree1__.pathElements[i][0] <== pathElements1[i][0];
     }
 
     component tree2__ = CalculateRootFromMerklePath( levels);
     tree2__.leaf <== leaf2;
     for (var i = 0; i < levels; i++) {
-        tree2__.path_index[i] <== path_index2[i];
-        tree2__.path_elements[i][0] <== path_elements2[i][0];
+        tree2__.pathIndex[i] <== pathIndex2[i];
+        tree2__.pathElements[i][0] <== pathElements2[i][0];
     }
     component check__ = ForceEqualIfEnabled();
     check__.enabled <== enabled;
@@ -181,10 +181,10 @@ const universalBalanceCheckTplFn = function (compName, prefix, suffix) {
         ${compName}.tokenID <== tokenID;
 ${generateMultiAssign(compName, ['accountID', 'ethAddr', 'sign', 'ay', 'nonce', 'balance'], prefix, suffix, 8)}
         for (var j = 0; j < balanceLevels; j++) {
-            ${compName}.balance_path_elements[j][0] <== balance_path_elements[j][0];
+            ${compName}.balancePathElements[j][0] <== balancePathElements[j][0];
         }
         for (var j = 0; j < accountLevels; j++) {
-            ${compName}.account_path_elements[j][0] <== account_path_elements[j][0];
+            ${compName}.accountPathElements[j][0] <== accountPathElements[j][0];
         }
 `;
 };

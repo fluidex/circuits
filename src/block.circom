@@ -14,26 +14,34 @@ include "./base_tx.circom";
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
  * @input encodedTxs[nTxs] - {Array(Field)} - encoded transactions
- * @input balance_path_elements[nTxs][2][balanceLevels][1] - {Array(Array(Array(Array(Field))))} - balance tree path elements for each transaction
- * @input account_path_elements[nTxs][2][balanceLevels][1] - {Array(Array(Array(Array(Field))))} - account tree path elements for each transaction
+ * @input balancePathElements[nTxs][2][balanceLevels][1] - {Array(Array(Array(Array(Field))))} - balance tree path elements for each transaction
+ * @input accountPathElements[nTxs][2][balanceLevels][1] - {Array(Array(Array(Array(Field))))} - account tree path elements for each transaction
  * @input orderRoots[nTxs][2] - {Array(Field)} - order roots for order maker taker account 
  * @input oldAccountRoots[nTxs] - {Array(Field)} - initial account state root for each transaction 
  * @input newAccountRoots[nTxs] - {Array(Field)} - final account state root for each transaction
  */
 template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
+    // public inputs
+    // TODO: replace all the public inputs with sha3 hash later
+    signal input oldRoot;
+    signal input newRoot;
+
     // transactions
-    signal input txsType[nTxs];
-    signal input encodedTxs[nTxs][TxLength()];
+    signal private input txsType[nTxs];
+    signal private input encodedTxs[nTxs][TxLength()];
 
     // State
-    signal input balance_path_elements[nTxs][4][balanceLevels][1]; // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
-    signal input order_path_elements[nTxs][2][orderLevels][1]; // index meanings: [tx idx][order_account1, order_account2][levels][siblings]
-    signal input account_path_elements[nTxs][2][accountLevels][1]; // index meanings: [tx idx][sender, receiver][levels][siblings]
+    signal private input balancePathElements[nTxs][4][balanceLevels][1]; // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
+    signal private input orderPathElements[nTxs][2][orderLevels][1]; // index meanings: [tx idx][orderAccount1, orderAccount2][levels][siblings]
+    signal private input accountPathElements[nTxs][2][accountLevels][1]; // index meanings: [tx idx][sender, receiver][levels][siblings]
 
     // roots
-    signal input orderRoots[nTxs][2];
-    signal input oldAccountRoots[nTxs];
-    signal input newAccountRoots[nTxs];
+    signal private input orderRoots[nTxs][2];
+    signal private input oldAccountRoots[nTxs];
+    signal private input newAccountRoots[nTxs];
+
+    oldAccountRoots[0] === oldRoot;
+    newAccountRoots[nTxs - 1] === newRoot;
 
     // thisOldRoot === lastNewRoot
     for (var i = 1; i < nTxs; i++) {
@@ -104,10 +112,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         balanceChecker1[i].balance <== decodedTx[i].balance1;
 
         for (var j = 0; j < balanceLevels; j++) {
-            balanceChecker1[i].balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
+            balanceChecker1[i].balancePathElements[j][0] <== balancePathElements[i][0][j][0];
         }
         for (var j = 0; j < accountLevels; j++) {
-            balanceChecker1[i].account_path_elements[j][0] <== account_path_elements[i][0][j][0];
+            balanceChecker1[i].accountPathElements[j][0] <== accountPathElements[i][0][j][0];
         }
 
         balanceChecker2[i] = BalanceChecker(balanceLevels, accountLevels);
@@ -124,10 +132,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         balanceChecker2[i].balance <== decodedTx[i].balance2;
 
         for (var j = 0; j < balanceLevels; j++) {
-            balanceChecker2[i].balance_path_elements[j][0] <== balance_path_elements[i][1][j][0];
+            balanceChecker2[i].balancePathElements[j][0] <== balancePathElements[i][1][j][0];
         }
         for (var j = 0; j < accountLevels; j++) {
-            balanceChecker2[i].account_path_elements[j][0] <== account_path_elements[i][1][j][0];
+            balanceChecker2[i].accountPathElements[j][0] <== accountPathElements[i][1][j][0];
         }
 
         sigChecker1[i] = SigChecker();
@@ -208,12 +216,12 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processTransfer[i].orderRoot1 <== orderRoots[i][0];
         processTransfer[i].orderRoot2 <== orderRoots[i][1];
         for (var j = 0; j < balanceLevels; j++) {
-            processTransfer[i].sender_balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
-            processTransfer[i].receiver_balance_path_elements[j][0] <== balance_path_elements[i][1][j][0];
+            processTransfer[i].senderBalancePathElements[j][0] <== balancePathElements[i][0][j][0];
+            processTransfer[i].receiverBalancePathElements[j][0] <== balancePathElements[i][1][j][0];
         }
         for (var j = 0; j < accountLevels; j++) {
-            processTransfer[i].sender_account_path_elements[j][0] <== account_path_elements[i][0][j][0];
-            processTransfer[i].receiver_account_path_elements[j][0] <== account_path_elements[i][1][j][0];
+            processTransfer[i].senderAccountPathElements[j][0] <== accountPathElements[i][0][j][0];
+            processTransfer[i].receiverAccountPathElements[j][0] <== accountPathElements[i][1][j][0];
         }
         processTransfer[i].oldAccountRoot <== oldAccountRoots[i];
         processTransfer[i].newAccountRoot <== newAccountRoots[i];
@@ -242,7 +250,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processWithdraw[i].orderRoot1 <== orderRoots[i][0];
         processWithdraw[i].orderRoot2 <== orderRoots[i][1];    
 
-        // try spot_trade
+        // try spot trade
         processSpotTrade[i] = SpotTrade(balanceLevels, orderLevels, accountLevels);
         processSpotTrade[i].enabled <== enableSpotTrade[i].out;
 
@@ -297,8 +305,8 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].order2AccountAy <== decodedTx[i].ay2;
         processSpotTrade[i].order2AccountEthAddr <== decodedTx[i].ethAddr2;
 
-        processSpotTrade[i].amount_1to2 <== decodedTx[i].amount;
-        processSpotTrade[i].amount_2to1 <== decodedTx[i].amount2;
+        processSpotTrade[i].amount1to2 <== decodedTx[i].amount;
+        processSpotTrade[i].amount2to1 <== decodedTx[i].amount2;
 
         processSpotTrade[i].orderRoot1 <== orderRoots[i][0];
         processSpotTrade[i].orderRoot2 <== orderRoots[i][1];
@@ -310,20 +318,20 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].order1TokenBuyBalance <== decodedTx[i].balance4 - decodedTx[i].amount2;
 
         for (var j = 0; j < orderLevels; j++) {
-            processSpotTrade[i].order_path_elements[0][j][0] <== order_path_elements[i][0][j][0];
-            processSpotTrade[i].order_path_elements[1][j][0] <== order_path_elements[i][1][j][0];
+            processSpotTrade[i].orderPathElements[0][j][0] <== orderPathElements[i][0][j][0];
+            processSpotTrade[i].orderPathElements[1][j][0] <== orderPathElements[i][1][j][0];
         }
         for (var j = 0; j < balanceLevels; j++) {
-            processSpotTrade[i].old_account1_balance_path_elements[j][0] <== balance_path_elements[i][0][j][0];
-            processSpotTrade[i].tmp_account1_balance_path_elements[j][0] <== balance_path_elements[i][3][j][0];
-            processSpotTrade[i].old_account2_balance_path_elements[j][0] <== balance_path_elements[i][2][j][0];
-            processSpotTrade[i].tmp_account2_balance_path_elements[j][0] <== balance_path_elements[i][1][j][0];
+            processSpotTrade[i].oldAccount1BalancePathElements[j][0] <== balancePathElements[i][0][j][0];
+            processSpotTrade[i].tmpAccount1BalancePathElements[j][0] <== balancePathElements[i][3][j][0];
+            processSpotTrade[i].oldAccount2BalancePathElements[j][0] <== balancePathElements[i][2][j][0];
+            processSpotTrade[i].tmpAccount2BalancePathElements[j][0] <== balancePathElements[i][1][j][0];
         }
         for (var j = 0; j < accountLevels; j++) {
-            processSpotTrade[i].old_account1_path_elements[j][0] <== account_path_elements[i][0][j][0];
-            processSpotTrade[i].tmp_account2_path_elements[j][0] <== account_path_elements[i][1][j][0];
+            processSpotTrade[i].oldAccount1PathElements[j][0] <== accountPathElements[i][0][j][0];
+            processSpotTrade[i].tmpAccount2PathElements[j][0] <== accountPathElements[i][1][j][0];
         }
-        processSpotTrade[i].old_account_root <== oldAccountRoots[i];
-        processSpotTrade[i].new_account_root <== newAccountRoots[i];
+        processSpotTrade[i].oldAccountRoot <== oldAccountRoots[i];
+        processSpotTrade[i].newAccountRoot <== newAccountRoots[i];
     }
 }

@@ -72,8 +72,8 @@ template Withdraw(balanceLevels, accountLevels) {
  * @input ay - {Field} - ay of the account leaf
  * @input ethAddr - {Uint160} - ethAddr of the account leaf
  * @input orderRoot - {Field} - order root of the account leaf
- * @input balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the account tree
- * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the account tree
+ * @input balancePathElements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the account tree
+ * @input accountPathElements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the account tree
  * @input oldAccountRoot - {Field} - initial acount state root
  * @input newAccountRoot - {Field} - final acount state root
  */
@@ -97,31 +97,31 @@ template WithdrawLegacy(balanceLevels, accountLevels) {
     signal input ay;
     signal input ethAddr;
     signal input orderRoot;
-    signal input balance_path_elements[balanceLevels][1];
-    signal input account_path_elements[accountLevels][1];
+    signal input balancePathElements[balanceLevels][1];
+    signal input accountPathElements[accountLevels][1];
 
     // Roots
     signal input oldAccountRoot;
     signal input newAccountRoot;
 
     // Path index
-    signal balance_path_index[balanceLevels];
-    signal account_path_index[accountLevels];
+    signal balancePathIndex[balanceLevels];
+    signal accountPathIndex[accountLevels];
 
-    // decode balance_path_index
+    // decode balancePathIndex
     component bTokenID = Num2BitsIfEnabled(balanceLevels);
     bTokenID.enabled <== enabled;
     bTokenID.in <== tokenID;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_path_index[i] <== bTokenID.out[i];
+        balancePathIndex[i] <== bTokenID.out[i];
     }
 
-    // decode account_path_index
+    // decode accountPathIndex
     component bFrom = Num2BitsIfEnabled(accountLevels);
     bFrom.enabled <== enabled;
     bFrom.in <== accountID;
     for (var i = 0; i < accountLevels; i++) {
-        account_path_index[i] <== bFrom.out[i];
+        accountPathIndex[i] <== bFrom.out[i];
     }
 
     // - verify eddsa signature

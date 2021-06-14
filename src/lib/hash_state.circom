@@ -47,9 +47,9 @@ template HashAccount() {
 /**
  * Computes the hash of an order state
  * Order Hash = Poseidon(e0, filled_sell, filled_buy, total_sell, total_buy)
- * e0: tokensell(32bits) | tokenbuy(32bits) | tokenbuy(2bits)
- * @input tokensell - {Uint32} - token to sell
- * @input tokenbuy - {Uint32} - token to buy
+ * e0: tokenSell(32bits) | tokenBuy(32bits) | tokenBuy(2bits)
+ * @input tokenSell - {Uint32} - token to sell
+ * @input tokenBuy - {Uint32} - token to buy
  * @input filled_sell - {Field} - token to sell
  * @input filled_buy - {Field} - token to sell
  * @input total_sell - {Field} - token to sell
@@ -58,25 +58,25 @@ template HashAccount() {
  * @output out - {Field} - resulting poseidon hash
  */
 template HashOrder() {
-    signal input tokensell;
-    signal input tokenbuy;
-    signal input filled_sell;
-    signal input filled_buy;
-    signal input total_sell;
-    signal input total_buy;
-    signal input order_id;
+    signal input tokenSell;
+    signal input tokenBuy;
+    signal input filledSell;
+    signal input filledBuy;
+    signal input totalSell;
+    signal input totalBuy;
+    signal input orderId;
 
     signal output out;
 
     signal e0; // build e0 element
-    e0 <== tokensell * (1 << 64) + tokenbuy * (1 << 32) + order_id;
+    e0 <== tokenSell * (1 << 64) + tokenBuy * (1 << 32) + orderId;
 
     component hash = Poseidon(5);
     hash.inputs[0] <== e0;
-    hash.inputs[1] <== filled_sell;
-    hash.inputs[2] <== filled_buy;
-    hash.inputs[3] <== total_sell;
-    hash.inputs[4] <== total_buy;
+    hash.inputs[1] <== filledSell;
+    hash.inputs[2] <== filledBuy;
+    hash.inputs[3] <== totalSell;
+    hash.inputs[4] <== totalBuy;
 
     hash.out ==> out;
 }
@@ -84,13 +84,13 @@ template HashOrder() {
 template CalculateGenesisOrderHash() {
     signal output out;
     component hashOrder = HashOrder();
-    hashOrder.tokensell <== 0;
-    hashOrder.tokenbuy <== 0;
-    hashOrder.filled_sell <== 0;
-    hashOrder.filled_buy <== 0;
-    hashOrder.total_sell <== 0;
-    hashOrder.total_buy <== 0;
-    hashOrder.order_id <== 0;
+    hashOrder.tokenSell <== 0;
+    hashOrder.tokenBuy <== 0;
+    hashOrder.filledSell <== 0;
+    hashOrder.filledBuy <== 0;
+    hashOrder.totalSell <== 0;
+    hashOrder.totalBuy <== 0;
+    hashOrder.orderId <== 0;
     out <== hashOrder.out;
 }
 template CalculateGenesisOrderRoot(orderLevels) {
@@ -100,13 +100,13 @@ template CalculateGenesisOrderRoot(orderLevels) {
     // component of input size 0 cannot has another component of input size 0
     // so we cannot reuse `CalculateGenesisOrderHash` here...
     component hashOrder = HashOrder();
-    hashOrder.tokensell <== 0;
-    hashOrder.tokenbuy <== 0;
-    hashOrder.filled_sell <== 0;
-    hashOrder.filled_buy <== 0;
-    hashOrder.total_sell <== 0;
-    hashOrder.total_buy <== 0;
-    hashOrder.order_id <== 0;
+    hashOrder.tokenSell <== 0;
+    hashOrder.tokenBuy <== 0;
+    hashOrder.filledSell <== 0;
+    hashOrder.filledBuy <== 0;
+    hashOrder.totalSell <== 0;
+    hashOrder.totalBuy <== 0;
+    hashOrder.orderId <== 0;
 
     component orderTree = CalculateRootFromRepeatedLeaves(orderLevels);
     orderTree.leaf <== hashOrder.out;

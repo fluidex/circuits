@@ -66,8 +66,8 @@ function initDepositToNew() {
     sign: account.sign,
     ay: account.ay,
     amount: amount,
-    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][1],
-    account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][1],
+    balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][1],
+    accountPathElements: block.accountPathElements[block.accountPathElements.length - 1][1],
     oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
     newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
   };
@@ -116,8 +116,8 @@ function initDepositToOld() {
     balance2: balance + amount,
     ethAddr: Scalar.fromString(account.ethAddr, 16),
     orderRoot: genesisOrderRoot,
-    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][1],
-    account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][1],
+    balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][1],
+    accountPathElements: block.accountPathElements[block.accountPathElements.length - 1][1],
     oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
     newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
   };

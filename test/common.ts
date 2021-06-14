@@ -37,7 +37,7 @@ class WithdrawTx {
   amount: bigint;
   signature: TxSignature;
 }
-
+/*
 class PlaceOrderTx {
   orderID: bigint;
   accountID: bigint;
@@ -52,16 +52,16 @@ class PlaceOrderTx {
   amount_sell: bigint;
   amount_buy: bigint;
 }
-
+*/
 class SpotTradeTx {
-  order1_accountID: bigint;
-  order2_accountID: bigint;
-  tokenID_1to2: bigint;
-  tokenID_2to1: bigint;
-  amount_1to2: bigint;
-  amount_2to1: bigint;
-  order1_id: bigint;
-  order2_id: bigint;
+  order1AccountID: bigint;
+  order2AccountID: bigint;
+  tokenID1to2: bigint;
+  tokenID2to1: bigint;
+  amount1to2: bigint;
+  amount2to1: bigint;
+  order1Id: bigint;
+  order2Id: bigint;
 }
 
 function hashTransfer({ from, to, tokenID, amount, fromNonce, toNonce, oldBalanceFrom, oldBalanceTo }) {
@@ -103,11 +103,13 @@ class RawTx {
 }
 
 class L2Block {
+  oldRoot: bigint;
+  newRoot: bigint;
   txsType: Array<any>;
   encodedTxs: Array<any>;
-  balance_path_elements: Array<any>;
-  order_path_elements: Array<any>;
-  account_path_elements: Array<any>;
+  balancePathElements: Array<any>;
+  orderPathElements: Array<any>;
+  accountPathElements: Array<any>;
   orderRoots: Array<any>;
   oldAccountRoots: Array<any>;
   newAccountRoots: Array<any>;
@@ -129,6 +131,5 @@ export {
   TranferTx,
   WithdrawTx,
   SpotTradeTx,
-  PlaceOrderTx,
   L2Block,
 };

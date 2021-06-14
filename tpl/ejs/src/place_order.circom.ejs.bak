@@ -13,22 +13,22 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     signal input oldAccountRoot;
     signal input newAccountRoot;
 
-    signal input balance_path_elements[balanceLevels][1];
-    signal input order_path_elements[orderLevels][1];
-    signal input account_path_elements[accountLevels][1];
+    signal input balancePathElements[balanceLevels][1];
+    signal input orderPathElements[orderLevels][1];
+    signal input accountPathElements[accountLevels][1];
 
     // Path index
-    signal balance_path_index[balanceLevels];
+    signal balancePathIndex[balanceLevels];
     signal order_path_index[orderLevels];
-    signal account_path_index[accountLevels];
+    signal accountPathIndex[accountLevels];
 
     signal tokenID <== new_order_tokensell;
-    // decode balance_path_index
+    // decode balancePathIndex
     component bTokenID = Num2BitsIfEnabled(balanceLevels);
     bTokenID.enabled <== enabled;
     bTokenID.in <== tokenID;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_path_index[i] <== bTokenID.out[i];
+        balancePathIndex[i] <== bTokenID.out[i];
     }
 
     // decode order_path_index
@@ -39,12 +39,12 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
         order_path_index[i] <== bOrderID.out[i];
     }
 
-    // decode account_path_index
+    // decode accountPathIndex
     component bAccountID = Num2BitsIfEnabled(accountLevels);
     bAccountID.enabled <== enabled;
     bAccountID.in <== accountID;
     for (var i = 0; i < accountLevels; i++) {
-        account_path_index[i] <== bAccountID.out[i];
+        accountPathIndex[i] <== bAccountID.out[i];
     }
 
     // check balance. (Removed. Since we don't have frozen_balance we cannot gurantee sufficient balance -- user may transfer/withraw after place_order.)
@@ -60,8 +60,8 @@ template PlaceOrder(balanceLevels, orderLevels, accountLevels) {
     component balance_tree = CalculateRootFromMerklePath(balanceLevels);
     balance_tree.leaf <== balance;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_tree.path_index[i] <== balance_path_index[i];
-        balance_tree.path_elements[i][0] <== balance_path_elements[i][0];
+        balance_tree.path_index[i] <== balancePathIndex[i];
+        balance_tree.path_elements[i][0] <== balancePathElements[i][0];
     }
 
     // make sure new order id is greater than old order id

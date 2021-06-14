@@ -31,10 +31,10 @@ function checkLeafExists() {
   let root = hash(midLevel);
   // check leaves[2] in this tree
   let leaf = leaves[2];
-  let path_elements = [[leaves[3]], [midLevel[0]]];
-  let path_index = [0, 1];
+  let pathElements = [[leaves[3]], [midLevel[0]]];
+  let pathIndex = [0, 1];
   let enabled = 1;
-  return { input: { enabled, leaf, path_elements, path_index, root }, output: {}, name: 'checkLeafExists' };
+  return { input: { enabled, leaf, pathElements, pathIndex, root }, output: {}, name: 'checkLeafExists' };
 }
 
 function checkLeafExistsDisable() {
@@ -43,11 +43,11 @@ function checkLeafExistsDisable() {
   let root = hash(midLevel) - 1n;
   // check leaves[2] in this tree
   let leaf = leaves[2];
-  let path_elements = [[leaves[3]], [midLevel[0]]];
-  let path_index = [0, 1];
+  let pathElements = [[leaves[3]], [midLevel[0]]];
+  let pathIndex = [0, 1];
   let enabled = 0;
   root = root - 1n;
-  return { input: { enabled, leaf, path_elements, path_index, root }, output: {}, name: 'checkLeafExistsDisable' };
+  return { input: { enabled, leaf, pathElements, pathIndex, root }, output: {}, name: 'checkLeafExistsDisable' };
 }
 
 function checkLeafUpdate() {
@@ -57,11 +57,11 @@ function checkLeafUpdate() {
     let root = hash(midLevel);
     // check leaves[2] in this tree
     let leaf = leaves[2];
-    let path_elements = [[leaves[3]], [midLevel[0]]];
-    let path_index = [0, 1];
-    return { leaf, path_elements, path_index, root };
+    let pathElements = [[leaves[3]], [midLevel[0]]];
+    let pathIndex = [0, 1];
+    return { leaf, pathElements, pathIndex, root };
   }
-  let { leaf: oldLeaf, path_elements, path_index, root: oldRoot } = getSampleMerklePath();
+  let { leaf: oldLeaf, pathElements, pathIndex, root: oldRoot } = getSampleMerklePath();
   leaves[2] = 19n;
   let { leaf: newLeaf, root: newRoot } = getSampleMerklePath();
   let enabled = 1;
@@ -71,8 +71,8 @@ function checkLeafUpdate() {
     oldRoot,
     newLeaf,
     newRoot,
-    path_elements,
-    path_index,
+    pathElements,
+    pathIndex,
   };
   return { input: result, name: 'checkLeafUpdate' };
 }
@@ -84,11 +84,11 @@ function checkLeafUpdateDisable() {
     let root = hash(midLevel);
     // check leaves[2] in this tree
     let leaf = leaves[2];
-    let path_elements = [[leaves[3]], [midLevel[0]]];
-    let path_index = [0, 1];
-    return { leaf, path_elements, path_index, root };
+    let pathElements = [[leaves[3]], [midLevel[0]]];
+    let pathIndex = [0, 1];
+    return { leaf, pathElements, pathIndex, root };
   }
-  let { leaf: oldLeaf, path_elements, path_index, root: oldRoot } = getSampleMerklePath();
+  let { leaf: oldLeaf, pathElements, pathIndex, root: oldRoot } = getSampleMerklePath();
   leaves[2] = 19n;
   let { leaf: newLeaf, root: newRoot } = getSampleMerklePath();
   let enabled = 0;
@@ -99,8 +99,8 @@ function checkLeafUpdateDisable() {
     oldRoot,
     newLeaf,
     newRoot,
-    path_elements,
-    path_index,
+    pathElements,
+    pathIndex,
   };
   return { input: result, name: 'checkLeafUpdateDisable' };
 }

@@ -20,11 +20,11 @@ enum OrderSide {
 
 class OrderInput {
   accountID: bigint = 0n;
-  order_id: bigint = 0n;
-  tokenbuy: bigint = 0n;
-  tokensell: bigint = 0n;
-  total_sell: bigint = 0n;
-  total_buy: bigint = 0n;
+  orderId: bigint = 0n;
+  tokenBuy: bigint = 0n;
+  tokenSell: bigint = 0n;
+  totalSell: bigint = 0n;
+  totalBuy: bigint = 0n;
   sig: TxSignature = null;
   side: OrderSide;
   constructor(data: Partial<OrderInput> = {}) {
@@ -36,7 +36,7 @@ class OrderInput {
   }
   hash(): bigint {
     // although there is no 'TxType.PlaceOrder' now, we can see it as a 'SignType'
-    let data = hash([TxType.PlaceOrder, this.order_id, this.tokensell, this.tokenbuy, this.total_sell, this.total_buy]);
+    let data = hash([TxType.PlaceOrder, this.orderId, this.tokenSell, this.tokenBuy, this.totalSell, this.totalBuy]);
     //data = hash([data, accountID, nonce]);
     // nonce and orderID seems redundant?
     data = hash([data, this.accountID]);
@@ -50,38 +50,38 @@ class OrderInput {
 class OrderState {
   orderInput: OrderInput;
 
-  filled_sell: bigint;
-  filled_buy: bigint;
+  filledSell: bigint;
+  filledBuy: bigint;
 
-  get order_id(): bigint {
-    return this.orderInput.order_id;
+  get orderId(): bigint {
+    return this.orderInput.orderId;
   }
-  get tokenbuy(): bigint {
-    return this.orderInput.tokenbuy;
+  get tokenBuy(): bigint {
+    return this.orderInput.tokenBuy;
   }
-  get tokensell(): bigint {
-    return this.orderInput.tokensell;
+  get tokenSell(): bigint {
+    return this.orderInput.tokenSell;
   }
-  get total_sell(): bigint {
-    return this.orderInput.total_sell;
+  get totalSell(): bigint {
+    return this.orderInput.totalSell;
   }
-  get total_buy(): bigint {
-    return this.orderInput.total_buy;
+  get totalBuy(): bigint {
+    return this.orderInput.totalBuy;
   }
   get side(): OrderSide {
     return this.orderInput.side;
   }
   isFilled(): boolean {
     return (
-      (this.orderInput.side == OrderSide.Buy && this.filled_buy >= this.total_buy) ||
-      (this.orderInput.side == OrderSide.Sell && this.filled_sell >= this.total_sell)
+      (this.orderInput.side == OrderSide.Buy && this.filledBuy >= this.totalBuy) ||
+      (this.orderInput.side == OrderSide.Sell && this.filledSell >= this.totalSell)
     );
   }
   static fromOrderInput(orderInput): OrderState {
     let result = new OrderState();
     result.orderInput = orderInput;
-    result.filled_buy = 0n;
-    result.filled_sell = 0n;
+    result.filledBuy = 0n;
+    result.filledSell = 0n;
     return result;
   }
   static createEmpty(): OrderState {
@@ -94,11 +94,11 @@ class OrderState {
   private orderState2Array(): Array<bigint> {
     let data = Scalar.e(0);
 
-    data = Scalar.add(data, this.order_id);
-    data = Scalar.add(data, Scalar.shl(this.tokenbuy, 32));
-    data = Scalar.add(data, Scalar.shl(this.tokensell, 64));
+    data = Scalar.add(data, this.orderId);
+    data = Scalar.add(data, Scalar.shl(this.tokenBuy, 32));
+    data = Scalar.add(data, Scalar.shl(this.tokenSell, 64));
 
-    return [data, Scalar.e(this.filled_sell), Scalar.e(this.filled_buy), Scalar.e(this.total_sell), Scalar.e(this.total_buy)];
+    return [data, Scalar.e(this.filledSell), Scalar.e(this.filledBuy), Scalar.e(this.totalSell), Scalar.e(this.totalBuy)];
   }
 
   /**

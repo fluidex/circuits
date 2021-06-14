@@ -10,8 +10,6 @@ function TxLength() { return <%= codegen.config.commonPayload.length %>; }
 template DecodeTx() {
     signal input in[TxLength()];
 
-    // TODO: should new_order1_tokensell reuse tokenID1?
-
     <% for(const item of codegen.config.commonPayload) { %>
     signal output <%= item %>;<% } %>
 

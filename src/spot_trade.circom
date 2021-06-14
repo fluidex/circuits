@@ -74,8 +74,8 @@ template fillLimitCheck() {
 // (1) checks old order state
 // (2) check new order state
 // (3) check order detail:
-//  (a) oldOrderID: m, newOrderID: n, m < n, replace old order, check new_filled_amount === this_amount
-//  (b) oldOrderID: n, newOrderID: n, same order, check new_filled_amount === old_filled_amount + this_mount
+//  (a) oldOrderID: m, newOrderID: n, m < n, replace old order, check newFilledAmount === thisAmount
+//  (b) oldOrderID: n, newOrderID: n, same order, check newFilledAmount === oldFilledAmount + thisAmount
 //  (c) oldOrderID: 0, newOrderID: n, new order, checking either constraint works, since them are same actually
 //     (a) and (c) can be checked similarly
 template orderUpdater(orderLevels) {
@@ -104,18 +104,18 @@ template orderUpdater(orderLevels) {
     signal input newOrderFilledBuy;
     signal input newOrderAmountBuy;
 
-    signal input order_path_elements[orderLevels][1];
-    signal order_path_index[orderLevels];
+    signal input orderPathElements[orderLevels][1];
+    signal orderPathIndex[orderLevels];
 
     signal output oldOrderRoot;
     signal output newOrderRoot;
 
-    // decode order_path_index
+    // decode orderPathIndex
     component borderPos = Num2BitsIfEnabled(orderLevels);
     borderPos.enabled <== enabled;
     borderPos.in <== orderPos;
     for (var i = 0; i < orderLevels; i++) {
-        order_path_index[i] <== borderPos.out[i];
+        orderPathIndex[i] <== borderPos.out[i];
     }
 
 
@@ -125,39 +125,39 @@ template orderUpdater(orderLevels) {
 
     
     component orderHashOld = HashOrder();
-    orderHashOld.tokensell <== oldOrderTokenSell;
-    orderHashOld.tokenbuy <== oldOrderTokenBuy;
-    orderHashOld.filled_sell <== oldOrderFilledSell;
-    orderHashOld.filled_buy <== oldOrderFilledBuy;
-    orderHashOld.total_sell <== oldOrderAmountSell;
-    orderHashOld.total_buy <== oldOrderAmountBuy;
-    orderHashOld.order_id <== oldOrderID;
+    orderHashOld.tokenSell <== oldOrderTokenSell;
+    orderHashOld.tokenBuy <== oldOrderTokenBuy;
+    orderHashOld.filledSell <== oldOrderFilledSell;
+    orderHashOld.filledBuy <== oldOrderFilledBuy;
+    orderHashOld.totalSell <== oldOrderAmountSell;
+    orderHashOld.totalBuy <== oldOrderAmountBuy;
+    orderHashOld.orderId <== oldOrderID;
 
     // - check order tree update
     component orderTreeOld = CalculateRootFromMerklePath(orderLevels);
     orderTreeOld.leaf <== orderHashOld.out;
     for (var i = 0; i < orderLevels; i++) {
-        orderTreeOld.path_index[i] <== order_path_index[i];
-        orderTreeOld.path_elements[i][0] <== order_path_elements[i][0];
+        orderTreeOld.pathIndex[i] <== orderPathIndex[i];
+        orderTreeOld.pathElements[i][0] <== orderPathElements[i][0];
     }
     oldOrderRoot <== orderTreeOld.root;
 
     
     component orderHashNew = HashOrder();
-    orderHashNew.tokensell <== newOrderTokenSell;
-    orderHashNew.tokenbuy <== newOrderTokenBuy;
-    orderHashNew.filled_sell <== newOrderFilledSell;
-    orderHashNew.filled_buy <== newOrderFilledBuy;
-    orderHashNew.total_sell <== newOrderAmountSell;
-    orderHashNew.total_buy <== newOrderAmountBuy;
-    orderHashNew.order_id <== newOrderID;
+    orderHashNew.tokenSell <== newOrderTokenSell;
+    orderHashNew.tokenBuy <== newOrderTokenBuy;
+    orderHashNew.filledSell <== newOrderFilledSell;
+    orderHashNew.filledBuy <== newOrderFilledBuy;
+    orderHashNew.totalSell <== newOrderAmountSell;
+    orderHashNew.totalBuy <== newOrderAmountBuy;
+    orderHashNew.orderId <== newOrderID;
 
     // - check order tree update
     component orderTreeNew = CalculateRootFromMerklePath(orderLevels);
     orderTreeNew.leaf <== orderHashNew.out;
     for (var i = 0; i < orderLevels; i++) {
-        orderTreeNew.path_index[i] <== order_path_index[i];
-        orderTreeNew.path_elements[i][0] <== order_path_elements[i][0];
+        orderTreeNew.pathIndex[i] <== orderPathIndex[i];
+        orderTreeNew.pathElements[i][0] <== orderPathElements[i][0];
     }
     newOrderRoot <== orderTreeNew.root;
 
@@ -208,7 +208,7 @@ template orderUpdater(orderLevels) {
     // then, a sell order with price 9 amount 1
     // then, a buy order with price 9 amount 1
     // then, a buy order with price 10 amount 1
-    // In this senario, the order with larger order_id is replaced.
+    // In this senario, the order with larger order id is replaced.
     component isNewOrder = LessThan(192);
     isNewOrder.in[0] <== oldOrderID;
     isNewOrder.in[1] <== newOrderID;
@@ -244,7 +244,6 @@ template orderUpdater(orderLevels) {
 }
 
 // TODO: maker taker (related to fee), according to timestamp: order1 maker, order2 taker
-// TODO: is tradeHistory_storage_leaf necessary?
 template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input enabled;
     
@@ -339,122 +338,122 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     check2.in[0] <== newOrder1TokenBuy;
     check2.in[1] <== newOrder2TokenSell;
 
-    signal input amount_2to1;
-    signal input amount_1to2;
-    // amount_2to1 > 0;
-    component order1Thisget_check = amountCheck();
-    order1Thisget_check.enabled <== enabled;
-    order1Thisget_check.amount <== amount_2to1;
-    // amount_1to2 > 0;
-    component order2Thisget_check = amountCheck();
-    order2Thisget_check.enabled <== enabled;
-    order2Thisget_check.amount <== amount_1to2;
+    signal input amount2to1;
+    signal input amount1to2;
+    // amount2to1 > 0;
+    component amountCheck2to1 = amountCheck();
+    amountCheck2to1.enabled <== enabled;
+    amountCheck2to1.amount <== amount2to1;
+    // amount1to2 > 0;
+    component amountCheck1to2 = amountCheck();
+    amountCheck1to2.enabled <== enabled;
+    amountCheck1to2.amount <== amount1to2;
 
     /// order1 price check
-    component order1_pricecheck = priceCheck();
-    order1_pricecheck.enabled <== enabled;
-    order1_pricecheck.thisSell <== amount_1to2;
-    order1_pricecheck.thisBuy <== amount_2to1;
-    order1_pricecheck.totalSell <== newOrder1AmountSell;
-    order1_pricecheck.totalBuy <== newOrder1AmountBuy;
+    component order1Pricecheck = priceCheck();
+    order1Pricecheck.enabled <== enabled;
+    order1Pricecheck.thisSell <== amount1to2;
+    order1Pricecheck.thisBuy <== amount2to1;
+    order1Pricecheck.totalSell <== newOrder1AmountSell;
+    order1Pricecheck.totalBuy <== newOrder1AmountBuy;
 
     /// order2 price check
-    component order2_pricecheck = priceCheck();
-    order2_pricecheck.enabled <== enabled;
-    order2_pricecheck.thisSell <== amount_2to1;
-    order2_pricecheck.thisBuy <== amount_1to2;
-    order2_pricecheck.totalSell <== newOrder2AmountSell;
-    order2_pricecheck.totalBuy <== newOrder2AmountBuy;
+    component order2Pricecheck = priceCheck();
+    order2Pricecheck.enabled <== enabled;
+    order2Pricecheck.thisSell <== amount2to1;
+    order2Pricecheck.thisBuy <== amount1to2;
+    order2Pricecheck.totalSell <== newOrder2AmountSell;
+    order2Pricecheck.totalBuy <== newOrder2AmountBuy;
 
-    // /// order1 fill_limit check
-    component order1_filledcheck = fillLimitCheck();
-    order1_filledcheck.enabled <== enabled;
-    order1_filledcheck.filledSell <== newOrder1FilledSell;
-    order1_filledcheck.thisSell <== amount_1to2;
-    order1_filledcheck.totalSell <== newOrder1AmountSell;
-    order1_filledcheck.filledBuy <== newOrder1FilledBuy;
-    order1_filledcheck.thisBuy <== amount_2to1;
-    order1_filledcheck.totalBuy <== newOrder1AmountBuy;
+    // /// order1 fill limit check
+    component order1Filledcheck = fillLimitCheck();
+    order1Filledcheck.enabled <== enabled;
+    order1Filledcheck.filledSell <== newOrder1FilledSell;
+    order1Filledcheck.thisSell <== amount1to2;
+    order1Filledcheck.totalSell <== newOrder1AmountSell;
+    order1Filledcheck.filledBuy <== newOrder1FilledBuy;
+    order1Filledcheck.thisBuy <== amount2to1;
+    order1Filledcheck.totalBuy <== newOrder1AmountBuy;
 
-    // /// order2 fill_limit check
-    component order2_filledcheck = fillLimitCheck();
-    order2_filledcheck.enabled <== enabled;
-    order2_filledcheck.filledSell <== newOrder2FilledSell;
-    order2_filledcheck.thisSell <== amount_2to1;
-    order2_filledcheck.totalSell <== newOrder2AmountSell;
-    order2_filledcheck.filledBuy <== newOrder2FilledBuy;
-    order2_filledcheck.thisBuy <== amount_1to2;
-    order2_filledcheck.totalBuy <== newOrder2AmountBuy;
+    // /// order2 fill limit check
+    component order2Filledcheck = fillLimitCheck();
+    order2Filledcheck.enabled <== enabled;
+    order2Filledcheck.filledSell <== newOrder2FilledSell;
+    order2Filledcheck.thisSell <== amount2to1;
+    order2Filledcheck.totalSell <== newOrder2AmountSell;
+    order2Filledcheck.filledBuy <== newOrder2FilledBuy;
+    order2Filledcheck.thisBuy <== amount1to2;
+    order2Filledcheck.totalBuy <== newOrder2AmountBuy;
 
 
     // TODO: check timestamp & 2 orders' validUntil
     // TODO: tx fee & trading fee
 
 
-    signal input order_path_elements[2][orderLevels][1];
+    signal input orderPathElements[2][orderLevels][1];
     /// update order 1
 
-    component order1_updater = orderUpdater(orderLevels);
-    order1_updater.enabled <== enabled;
-    order1_updater.orderPos <== order1Pos;
-    order1_updater.thisSell <== amount_1to2;
-    order1_updater.thisBuy <== amount_2to1;
+    component order1Updater = orderUpdater(orderLevels);
+    order1Updater.enabled <== enabled;
+    order1Updater.orderPos <== order1Pos;
+    order1Updater.thisSell <== amount1to2;
+    order1Updater.thisBuy <== amount2to1;
     
-    order1_updater.oldOrderID <== oldOrder1ID;
-    order1_updater.oldOrderTokenSell <== oldOrder1TokenSell;
-    order1_updater.oldOrderFilledSell <== oldOrder1FilledSell;
-    order1_updater.oldOrderAmountSell <== oldOrder1AmountSell;
-    order1_updater.oldOrderTokenBuy <== oldOrder1TokenBuy;
-    order1_updater.oldOrderFilledBuy <== oldOrder1FilledBuy;
-    order1_updater.oldOrderAmountBuy <== oldOrder1AmountBuy;
-    order1_updater.newOrderID <== newOrder1ID;
-    order1_updater.newOrderTokenSell <== newOrder1TokenSell;
-    order1_updater.newOrderFilledSell <== newOrder1FilledSell;
-    order1_updater.newOrderAmountSell <== newOrder1AmountSell;
-    order1_updater.newOrderTokenBuy <== newOrder1TokenBuy;
-    order1_updater.newOrderFilledBuy <== newOrder1FilledBuy;
-    order1_updater.newOrderAmountBuy <== newOrder1AmountBuy;
+    order1Updater.oldOrderID <== oldOrder1ID;
+    order1Updater.oldOrderTokenSell <== oldOrder1TokenSell;
+    order1Updater.oldOrderFilledSell <== oldOrder1FilledSell;
+    order1Updater.oldOrderAmountSell <== oldOrder1AmountSell;
+    order1Updater.oldOrderTokenBuy <== oldOrder1TokenBuy;
+    order1Updater.oldOrderFilledBuy <== oldOrder1FilledBuy;
+    order1Updater.oldOrderAmountBuy <== oldOrder1AmountBuy;
+    order1Updater.newOrderID <== newOrder1ID;
+    order1Updater.newOrderTokenSell <== newOrder1TokenSell;
+    order1Updater.newOrderFilledSell <== newOrder1FilledSell;
+    order1Updater.newOrderAmountSell <== newOrder1AmountSell;
+    order1Updater.newOrderTokenBuy <== newOrder1TokenBuy;
+    order1Updater.newOrderFilledBuy <== newOrder1FilledBuy;
+    order1Updater.newOrderAmountBuy <== newOrder1AmountBuy;
 
     for (var i = 0; i < orderLevels; i++) {
-        order1_updater.order_path_elements[i][0] <== order_path_elements[0][i][0];
+        order1Updater.orderPathElements[i][0] <== orderPathElements[0][i][0];
     }
 
     /// update order 2
-    component order2_updater = orderUpdater(orderLevels);
-    order2_updater.enabled <== enabled;
-    order2_updater.orderPos <== order2Pos;
-    order2_updater.thisSell <== amount_2to1;
-    order2_updater.thisBuy <== amount_1to2;
+    component order2Updater = orderUpdater(orderLevels);
+    order2Updater.enabled <== enabled;
+    order2Updater.orderPos <== order2Pos;
+    order2Updater.thisSell <== amount2to1;
+    order2Updater.thisBuy <== amount1to2;
     
-    order2_updater.oldOrderID <== oldOrder2ID;
-    order2_updater.oldOrderTokenSell <== oldOrder2TokenSell;
-    order2_updater.oldOrderFilledSell <== oldOrder2FilledSell;
-    order2_updater.oldOrderAmountSell <== oldOrder2AmountSell;
-    order2_updater.oldOrderTokenBuy <== oldOrder2TokenBuy;
-    order2_updater.oldOrderFilledBuy <== oldOrder2FilledBuy;
-    order2_updater.oldOrderAmountBuy <== oldOrder2AmountBuy;
-    order2_updater.newOrderID <== newOrder2ID;
-    order2_updater.newOrderTokenSell <== newOrder2TokenSell;
-    order2_updater.newOrderFilledSell <== newOrder2FilledSell;
-    order2_updater.newOrderAmountSell <== newOrder2AmountSell;
-    order2_updater.newOrderTokenBuy <== newOrder2TokenBuy;
-    order2_updater.newOrderFilledBuy <== newOrder2FilledBuy;
-    order2_updater.newOrderAmountBuy <== newOrder2AmountBuy;
+    order2Updater.oldOrderID <== oldOrder2ID;
+    order2Updater.oldOrderTokenSell <== oldOrder2TokenSell;
+    order2Updater.oldOrderFilledSell <== oldOrder2FilledSell;
+    order2Updater.oldOrderAmountSell <== oldOrder2AmountSell;
+    order2Updater.oldOrderTokenBuy <== oldOrder2TokenBuy;
+    order2Updater.oldOrderFilledBuy <== oldOrder2FilledBuy;
+    order2Updater.oldOrderAmountBuy <== oldOrder2AmountBuy;
+    order2Updater.newOrderID <== newOrder2ID;
+    order2Updater.newOrderTokenSell <== newOrder2TokenSell;
+    order2Updater.newOrderFilledSell <== newOrder2FilledSell;
+    order2Updater.newOrderAmountSell <== newOrder2AmountSell;
+    order2Updater.newOrderTokenBuy <== newOrder2TokenBuy;
+    order2Updater.newOrderFilledBuy <== newOrder2FilledBuy;
+    order2Updater.newOrderAmountBuy <== newOrder2AmountBuy;
 
     for (var i = 0; i < orderLevels; i++) {
-        order2_updater.order_path_elements[i][0] <== order_path_elements[1][i][0];
+        order2Updater.orderPathElements[i][0] <== orderPathElements[1][i][0];
     }
 
     
 
     component checkEqOrderRoot0 = ForceEqualIfEnabled();
     checkEqOrderRoot0.enabled <== enabled;
-    checkEqOrderRoot0.in[0] <== order1_updater.oldOrderRoot;
+    checkEqOrderRoot0.in[0] <== order1Updater.oldOrderRoot;
     checkEqOrderRoot0.in[1] <== orderRoot1;
 
     component checkEqOrderRoot1 = ForceEqualIfEnabled();
     checkEqOrderRoot1.enabled <== enabled;
-    checkEqOrderRoot1.in[0] <== order2_updater.newOrderRoot;
+    checkEqOrderRoot1.in[0] <== order2Updater.newOrderRoot;
     checkEqOrderRoot1.in[1] <== orderRoot2;
 
 
@@ -475,37 +474,37 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input order2TokenSellBalance;
     signal input order2TokenBuyBalance;
 
-    signal input old_account_root;
-    signal input new_account_root;
-    signal input old_account1_balance_path_elements[balanceLevels][1];
-    signal input tmp_account1_balance_path_elements[balanceLevels][1];
-    signal input old_account1_path_elements[accountLevels][1];
-    signal input old_account2_balance_path_elements[balanceLevels][1];
-    signal input tmp_account2_balance_path_elements[balanceLevels][1];
-    signal input tmp_account2_path_elements[accountLevels][1];
+    signal input oldAccountRoot;
+    signal input newAccountRoot;
+    signal input oldAccount1BalancePathElements[balanceLevels][1];
+    signal input tmpAccount1BalancePathElements[balanceLevels][1];
+    signal input oldAccount1PathElements[accountLevels][1];
+    signal input oldAccount2BalancePathElements[balanceLevels][1];
+    signal input tmpAccount2BalancePathElements[balanceLevels][1];
+    signal input tmpAccount2PathElements[accountLevels][1];
     
     component transfer = tradeTransfer(balanceLevels, accountLevels);
     transfer.enabled <== enabled;
     transfer.accountID1 <== order1AccountID;
     transfer.accountID2 <== order2AccountID;
-    transfer.amount_1to2 <== amount_1to2;
-    transfer.amount_2to1 <== amount_2to1;
-    transfer.tokenID_1to2 <== newOrder1TokenSell;
-    transfer.tokenID_2to1 <== newOrder2TokenSell;
+    transfer.amount1to2 <== amount1to2;
+    transfer.amount2to1 <== amount2to1;
+    transfer.tokenID1to2 <== newOrder1TokenSell;
+    transfer.tokenID2to1 <== newOrder2TokenSell;
     transfer.nonce1 <== order1AccountNonce;
     transfer.sign1 <== order1AccountSign;
     transfer.account1BalanceSell <== order1TokenSellBalance;
     transfer.account1BalanceBuy <== order1TokenBuyBalance;
     transfer.ay1 <== order1AccountAy;
     transfer.ethAddr1 <== order1AccountEthAddr;
-    transfer.oldOrder1Root <== order1_updater.oldOrderRoot;
-    transfer.newOrder1Root <== order1_updater.newOrderRoot;
+    transfer.oldOrder1Root <== order1Updater.oldOrderRoot;
+    transfer.newOrder1Root <== order1Updater.newOrderRoot;
     for (var i = 0; i < balanceLevels; i++) {
-        transfer.old_account1_balance_path_elements[i][0] <== old_account1_balance_path_elements[i][0];
-        transfer.tmp_account1_balance_path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
+        transfer.oldAccount1BalancePathElements[i][0] <== oldAccount1BalancePathElements[i][0];
+        transfer.tmpAccount1BalancePathElements[i][0] <== tmpAccount1BalancePathElements[i][0];
     }
     for (var i = 0; i < accountLevels; i++) {
-        transfer.old_account1_path_elements[i][0] <== old_account1_path_elements[i][0];
+        transfer.oldAccount1PathElements[i][0] <== oldAccount1PathElements[i][0];
     }
     transfer.nonce2 <== order2AccountNonce;
     transfer.sign2 <== order2AccountSign;
@@ -513,16 +512,16 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     transfer.account2BalanceBuy <== order2TokenBuyBalance;
     transfer.ay2 <== order2AccountAy;
     transfer.ethAddr2 <== order2AccountEthAddr;
-    transfer.oldOrder2Root <== order2_updater.oldOrderRoot;
-    transfer.newOrder2Root <== order2_updater.newOrderRoot;
-    transfer.oldAccountRoot <== old_account_root;
-    transfer.newAccountRoot <== new_account_root;
+    transfer.oldOrder2Root <== order2Updater.oldOrderRoot;
+    transfer.newOrder2Root <== order2Updater.newOrderRoot;
+    transfer.oldAccountRoot <== oldAccountRoot;
+    transfer.newAccountRoot <== newAccountRoot;
     for (var i = 0; i < balanceLevels; i++) {
-        transfer.old_account2_balance_path_elements[i][0] <== old_account2_balance_path_elements[i][0];
-        transfer.tmp_account2_balance_path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
+        transfer.oldAccount2BalancePathElements[i][0] <== oldAccount2BalancePathElements[i][0];
+        transfer.tmpAccount2BalancePathElements[i][0] <== tmpAccount2BalancePathElements[i][0];
     }
     for (var i = 0; i < accountLevels; i++) {
-        transfer.tmp_account2_path_elements[i][0] <== tmp_account2_path_elements[i][0];
+        transfer.tmpAccount2PathElements[i][0] <== tmpAccount2PathElements[i][0];
     }
 }
 
@@ -532,10 +531,10 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // Tx
     signal input accountID1;
     signal input accountID2;
-    signal input amount_1to2;
-    signal input amount_2to1;
-    signal input tokenID_1to2;
-    signal input tokenID_2to1;
+    signal input amount1to2;
+    signal input amount2to1;
+    signal input tokenID1to2;
+    signal input tokenID2to1;
 
     // order1 account state
     signal input nonce1;
@@ -544,9 +543,9 @@ template tradeTransfer(balanceLevels, accountLevels) {
     signal input account1BalanceBuy;
     signal input ay1;
     signal input ethAddr1;
-    signal input old_account1_balance_path_elements[balanceLevels][1];
-    signal input tmp_account1_balance_path_elements[balanceLevels][1];
-    signal input old_account1_path_elements[accountLevels][1];
+    signal input oldAccount1BalancePathElements[balanceLevels][1];
+    signal input tmpAccount1BalancePathElements[balanceLevels][1];
+    signal input oldAccount1PathElements[accountLevels][1];
 
     // order2 account state
     signal input nonce2;
@@ -555,9 +554,9 @@ template tradeTransfer(balanceLevels, accountLevels) {
     signal input account2BalanceBuy;
     signal input ay2;
     signal input ethAddr2;
-    signal input old_account2_balance_path_elements[balanceLevels][1];
-    signal input tmp_account2_balance_path_elements[balanceLevels][1];
-    signal input tmp_account2_path_elements[accountLevels][1];
+    signal input oldAccount2BalancePathElements[balanceLevels][1];
+    signal input tmpAccount2BalancePathElements[balanceLevels][1];
+    signal input tmpAccount2PathElements[accountLevels][1];
 
     // Roots
     signal input oldOrder1Root;
@@ -567,37 +566,37 @@ template tradeTransfer(balanceLevels, accountLevels) {
     signal input oldAccountRoot;
     signal input newAccountRoot;
 
-    signal balance_1to2_path_index[balanceLevels];
-    signal balance_2to1_path_index[balanceLevels];
-    signal account1_path_index[accountLevels];
-    signal account2_path_index[accountLevels];
+    signal balance1to2PathIndex[balanceLevels];
+    signal balance2to1PathIndex[balanceLevels];
+    signal account1PathIndex[accountLevels];
+    signal account2PathIndex[accountLevels];
 
-    // decode balance_path_index
-    component bTokenID_1to2 = Num2BitsIfEnabled(balanceLevels);
-    bTokenID_1to2.enabled <== enabled;
-    bTokenID_1to2.in <== tokenID_1to2;
+    // decode balancePathIndex
+    component bTokenID1to2 = Num2BitsIfEnabled(balanceLevels);
+    bTokenID1to2.enabled <== enabled;
+    bTokenID1to2.in <== tokenID1to2;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_1to2_path_index[i] <== bTokenID_1to2.out[i];
+        balance1to2PathIndex[i] <== bTokenID1to2.out[i];
     }
-    component bTokenID_2to1 = Num2BitsIfEnabled(balanceLevels);
-    bTokenID_2to1.enabled <== enabled;
-    bTokenID_2to1.in <== tokenID_2to1;
+    component bTokenID2to1 = Num2BitsIfEnabled(balanceLevels);
+    bTokenID2to1.enabled <== enabled;
+    bTokenID2to1.in <== tokenID2to1;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_2to1_path_index[i] <== bTokenID_2to1.out[i];
+        balance2to1PathIndex[i] <== bTokenID2to1.out[i];
     }
 
-    // decode account_path_index
+    // decode accountPathIndex
     component bAccountID1 = Num2BitsIfEnabled(accountLevels);
     bAccountID1.enabled <== enabled;
     bAccountID1.in <== accountID1;
     for (var i = 0; i < accountLevels; i++) {
-        account1_path_index[i] <== bAccountID1.out[i];
+        account1PathIndex[i] <== bAccountID1.out[i];
     }
     component bAccountID2 = Num2BitsIfEnabled(accountLevels);
     bAccountID2.enabled <== enabled;
     bAccountID2.in <== accountID2;
     for (var i = 0; i < accountLevels; i++) {
-        account2_path_index[i] <== bAccountID2.out[i];
+        account2PathIndex[i] <== bAccountID2.out[i];
     }
 
     // TODO: underflow check
@@ -618,17 +617,17 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // Step2: update sender balance
     
     component tree1Account1Update = CalculateRootFromMerklePath( balanceLevels);
-    tree1Account1Update.leaf <== account1BalanceSell - amount_1to2;
+    tree1Account1Update.leaf <== account1BalanceSell - amount1to2;
     for (var i = 0; i < balanceLevels; i++) {
-        tree1Account1Update.path_index[i] <== balance_1to2_path_index[i];
-        tree1Account1Update.path_elements[i][0] <== old_account1_balance_path_elements[i][0];
+        tree1Account1Update.pathIndex[i] <== balance1to2PathIndex[i];
+        tree1Account1Update.pathElements[i][0] <== oldAccount1BalancePathElements[i][0];
     }
 
     component tree2Account1Update = CalculateRootFromMerklePath( balanceLevels);
     tree2Account1Update.leaf <== account1BalanceBuy;
     for (var i = 0; i < balanceLevels; i++) {
-        tree2Account1Update.path_index[i] <== balance_2to1_path_index[i];
-        tree2Account1Update.path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
+        tree2Account1Update.pathIndex[i] <== balance2to1PathIndex[i];
+        tree2Account1Update.pathElements[i][0] <== tmpAccount1BalancePathElements[i][0];
     }
     component checkAccount1Update = ForceEqualIfEnabled();
     checkAccount1Update.enabled <== enabled;
@@ -640,10 +639,10 @@ template tradeTransfer(balanceLevels, accountLevels) {
     
     
     component balanceTreeMidAccount1 = CalculateRootFromMerklePath(balanceLevels);
-    balanceTreeMidAccount1.leaf <== account1BalanceBuy + amount_2to1;
+    balanceTreeMidAccount1.leaf <== account1BalanceBuy + amount2to1;
     for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeMidAccount1.path_index[i] <== balance_2to1_path_index[i];
-        balanceTreeMidAccount1.path_elements[i][0] <== tmp_account1_balance_path_elements[i][0];
+        balanceTreeMidAccount1.pathIndex[i] <== balance2to1PathIndex[i];
+        balanceTreeMidAccount1.pathElements[i][0] <== tmpAccount1BalancePathElements[i][0];
     }
     
     // account state hash
@@ -658,16 +657,16 @@ template tradeTransfer(balanceLevels, accountLevels) {
     component accountTreeMidAccount1 = CalculateRootFromMerklePath(accountLevels);
     accountTreeMidAccount1.leaf <== accountHashMidAccount1.out;
     for (var i = 0; i < accountLevels; i++) {
-        accountTreeMidAccount1.path_index[i] <== account1_path_index[i];
-        accountTreeMidAccount1.path_elements[i][0] <== old_account1_path_elements[i][0];
+        accountTreeMidAccount1.pathIndex[i] <== account1PathIndex[i];
+        accountTreeMidAccount1.pathElements[i][0] <== oldAccount1PathElements[i][0];
     }
     
     
     component balanceTreeMidAccount2 = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeMidAccount2.leaf <== account2BalanceSell;
     for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeMidAccount2.path_index[i] <== balance_2to1_path_index[i];
-        balanceTreeMidAccount2.path_elements[i][0] <== old_account2_balance_path_elements[i][0];
+        balanceTreeMidAccount2.pathIndex[i] <== balance2to1PathIndex[i];
+        balanceTreeMidAccount2.pathElements[i][0] <== oldAccount2BalancePathElements[i][0];
     }
     
     // account state hash
@@ -682,8 +681,8 @@ template tradeTransfer(balanceLevels, accountLevels) {
     component accountTreeMidAccount2 = CalculateRootFromMerklePath(accountLevels);
     accountTreeMidAccount2.leaf <== accountHashMidAccount2.out;
     for (var i = 0; i < accountLevels; i++) {
-        accountTreeMidAccount2.path_index[i] <== account2_path_index[i];
-        accountTreeMidAccount2.path_elements[i][0] <== tmp_account2_path_elements[i][0];
+        accountTreeMidAccount2.pathIndex[i] <== account2PathIndex[i];
+        accountTreeMidAccount2.pathElements[i][0] <== tmpAccount2PathElements[i][0];
     }
     component checkMid = ForceEqualIfEnabled();
     checkMid.enabled <== enabled;
@@ -693,17 +692,17 @@ template tradeTransfer(balanceLevels, accountLevels) {
     // Step4: update account 2 balance
     
     component tree1Account2Update = CalculateRootFromMerklePath( balanceLevels);
-    tree1Account2Update.leaf <== account2BalanceSell - amount_2to1;
+    tree1Account2Update.leaf <== account2BalanceSell - amount2to1;
     for (var i = 0; i < balanceLevels; i++) {
-        tree1Account2Update.path_index[i] <== balance_2to1_path_index[i];
-        tree1Account2Update.path_elements[i][0] <== old_account2_balance_path_elements[i][0];
+        tree1Account2Update.pathIndex[i] <== balance2to1PathIndex[i];
+        tree1Account2Update.pathElements[i][0] <== oldAccount2BalancePathElements[i][0];
     }
 
     component tree2Account2Update = CalculateRootFromMerklePath( balanceLevels);
     tree2Account2Update.leaf <== account2BalanceBuy;
     for (var i = 0; i < balanceLevels; i++) {
-        tree2Account2Update.path_index[i] <== balance_1to2_path_index[i];
-        tree2Account2Update.path_elements[i][0] <== tmp_account2_balance_path_elements[i][0];
+        tree2Account2Update.pathIndex[i] <== balance1to2PathIndex[i];
+        tree2Account2Update.pathElements[i][0] <== tmpAccount2BalancePathElements[i][0];
     }
     component checkAccount2Update = ForceEqualIfEnabled();
     checkAccount2Update.enabled <== enabled;
