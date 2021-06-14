@@ -4,7 +4,7 @@ include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
 
 /**
- * Process a deposit_and_create_account transaction, also support create 0 balance account
+ * Process a deposit and create account transaction, also support create 0 balance account
  * @param balanceLevels - balance tree depth
  * @param accountLevels - account tree depth
  * @input amount - {Uint192} - amount to deposit from L1 to L2

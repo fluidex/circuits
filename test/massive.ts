@@ -36,11 +36,11 @@ function initTestCase(nTxsn, balanceLevels, orderLevels, accountLevels) {
   const order1_id = 1n;
   const order1 = new OrderInput({
     accountID: accountID1,
-    order_id: order1_id,
-    tokenbuy: tokenID_2to1,
-    tokensell: tokenID_1to2,
-    total_sell: amount_1to2 * nTxs * 100n,
-    total_buy: amount_2to1 * nTxs * 100n,
+    orderId: order1_id,
+    tokenBuy: tokenID_2to1,
+    tokenSell: tokenID_1to2,
+    totalSell: amount_1to2 * nTxs * 100n,
+    totalBuy: amount_2to1 * nTxs * 100n,
   });
   order1.signWith(account1);
   state.setAccountOrder(accountID1, OrderState.fromOrderInput(order1));
@@ -53,11 +53,11 @@ function initTestCase(nTxsn, balanceLevels, orderLevels, accountLevels) {
   const order2_id = 1n;
   const order2 = new OrderInput({
     accountID: accountID2,
-    order_id: order2_id,
-    tokenbuy: tokenID_1to2,
-    tokensell: tokenID_2to1,
-    total_sell: amount_2to1 * nTxs * 100n,
-    total_buy: amount_1to2 * nTxs * 100n,
+    orderId: order2_id,
+    tokenBuy: tokenID_1to2,
+    tokenSell: tokenID_2to1,
+    totalSell: amount_2to1 * nTxs * 100n,
+    totalBuy: amount_1to2 * nTxs * 100n,
   });
   order2.signWith(account2);
   state.setAccountOrder(accountID2, OrderState.fromOrderInput(order2));
@@ -66,22 +66,22 @@ function initTestCase(nTxsn, balanceLevels, orderLevels, accountLevels) {
 
   for (var i = 0; i < nTxs; i++) {
     let spotTradeTx = {
-      order1_accountID: accountID1,
-      order2_accountID: accountID2,
-      tokenID_1to2: tokenID_1to2,
-      tokenID_2to1: tokenID_2to1,
-      amount_1to2: amount_1to2,
-      amount_2to1: amount_2to1,
-      order1_id: order1_id,
-      order1_amountsell: order1.total_sell,
-      order1_amountbuy: order1.total_buy,
-      order1_filledsell: amount_1to2 * BigInt(i),
-      order1_filledbuy: amount_2to1 * BigInt(i),
-      order2_id: order2_id,
-      order2_amountsell: order2.total_sell,
-      order2_amountbuy: order2.total_buy,
-      order2_filledsell: amount_2to1 * BigInt(i),
-      order2_filledbuy: amount_1to2 * BigInt(i),
+      order1AccountID: accountID1,
+      order2AccountID: accountID2,
+      tokenID1to2: tokenID_1to2,
+      tokenID2to1: tokenID_2to1,
+      amount1to2: amount_1to2,
+      amount2to1: amount_2to1,
+      order1Id: order1_id,
+      order1Amountsell: order1.totalSell,
+      order1Amountbuy: order1.totalBuy,
+      order1Filledsell: amount_1to2 * BigInt(i),
+      order1Filledbuy: amount_2to1 * BigInt(i),
+      order2Id: order2_id,
+      order2Amountsell: order2.totalSell,
+      order2Amountbuy: order2.totalBuy,
+      order2Filledsell: amount_2to1 * BigInt(i),
+      order2Filledbuy: amount_1to2 * BigInt(i),
     };
     state.SpotTrade(spotTradeTx);
   }
@@ -106,9 +106,9 @@ class TestMassive implements SimpleTest {
     let input = {
       txsType: test_case.txsType,
       encodedTxs: test_case.encodedTxs,
-      balance_path_elements: test_case.balance_path_elements,
-      order_path_elements: test_case.order_path_elements,
-      account_path_elements: test_case.account_path_elements,
+      balancePathElements: test_case.balancePathElements,
+      orderPathElements: test_case.orderPathElements,
+      accountPathElements: test_case.accountPathElements,
       orderRoots: test_case.orderRoots,
       oldAccountRoots: test_case.oldAccountRoots,
       newAccountRoots: test_case.newAccountRoots,

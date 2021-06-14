@@ -66,8 +66,8 @@ function initTestCase() {
     ay: account.ay,
     ethAddr: Scalar.fromString(account.ethAddr, 16),
     orderRoot: genesisOrderRoot,
-    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][0],
-    account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][0],
+    balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][0],
+    accountPathElements: block.accountPathElements[block.accountPathElements.length - 1][0],
     oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
     newAccountRoot: block.newAccountRoots[block.newAccountRoots.length - 1],
   };
@@ -91,8 +91,8 @@ class TestWithdraw implements SimpleTest {
       ay: test_case.ay,
       ethAddr: test_case.ethAddr,
       orderRoot: test_case.orderRoot,
-      balance_path_elements: test_case.balance_path_elements,
-      account_path_elements: test_case.account_path_elements,
+      balancePathElements: test_case.balancePathElements,
+      accountPathElements: test_case.accountPathElements,
       oldAccountRoot: test_case.oldAccountRoot,
       newAccountRoot: test_case.newAccountRoot,
     };

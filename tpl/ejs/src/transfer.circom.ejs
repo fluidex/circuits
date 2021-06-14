@@ -23,16 +23,16 @@ include "../node_modules/circomlib/circuits/mux1.circom";
  * @input ay1 - {Field} - ay of the sender leaf
  * @input ethAddr1 - {Uint160} - ethAddr of the sender leaf
  * @input orderRoot1 - {Field} - order root of the sender leaf
- * @input sender_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the sender leaf
- * @input sender_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the sender leaf
+ * @input senderBalancePathElements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the sender leaf
+ * @input senderAccountPathElements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the sender leaf
  * @input nonce2 - {Uint40} - nonce of the receiver leaf
  * @input sign2 - {Bool} - sign of the receiver leaf
  * @input balance2 - {Uint192} - balance of the receiver leaf
  * @input ay2 - {Field} - ay of the receiver leaf
  * @input ethAddr2 - {Uint160} - ethAddr of the receiver leaf
  * @input orderRoot2 - {Field} - order root of the receiver leaf
- * @input receiver_balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the receiver leaf
- * @input receiver_account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the receiver leaf
+ * @input receiverBalancePathElements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the receiver leaf
+ * @input receiverAccountPathElements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the receiver leaf
  * @input oldAccountRoot - {Field} - initial account state root
  * @input newAccountRoot - {Field} - final account state root
  */
@@ -71,39 +71,39 @@ template Transfer(balanceLevels, accountLevels) {
     signal input orderRoot2;
     signal input oldAccountRoot;
     signal input newAccountRoot;
-    signal input sender_balance_path_elements[balanceLevels][1];
-    signal input sender_account_path_elements[accountLevels][1];
-    signal input receiver_balance_path_elements[balanceLevels][1];
-    signal input receiver_account_path_elements[accountLevels][1];
+    signal input senderBalancePathElements[balanceLevels][1];
+    signal input senderAccountPathElements[accountLevels][1];
+    signal input receiverBalancePathElements[balanceLevels][1];
+    signal input receiverAccountPathElements[accountLevels][1];
 
 
     // Path index
-    signal balance_path_index[balanceLevels];
-    signal sender_account_path_index[accountLevels];
-    signal receiver_account_path_index[accountLevels];
+    signal balancePathIndex[balanceLevels];
+    signal senderAccountPathIndex[accountLevels];
+    signal receiverAccountPathIndex[accountLevels];
 
     ////////////////////////// Step 1: decode inputs: decode merkle path here ////////////////////////////
 
-    // decode balance_path_index
+    // decode balancePathIndex
     component bTokenID = Num2BitsIfEnabled(balanceLevels);
     bTokenID.enabled <== enabled;
     bTokenID.in <== tokenID;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_path_index[i] <== bTokenID.out[i];
+        balancePathIndex[i] <== bTokenID.out[i];
     }
 
-    // decode account_path_index
+    // decode accountPathIndex
     component bFrom = Num2BitsIfEnabled(accountLevels);
     bFrom.enabled <== enabled;
     bFrom.in <== fromAccountID;
     for (var i = 0; i < accountLevels; i++) {
-        sender_account_path_index[i] <== bFrom.out[i];
+        senderAccountPathIndex[i] <== bFrom.out[i];
     }
     component bTo = Num2BitsIfEnabled(accountLevels);
     bTo.enabled <== enabled;
     bTo.in <== toAccountID;
     for (var i = 0; i < accountLevels; i++) {
-        receiver_account_path_index[i] <== bTo.out[i];
+        receiverAccountPathIndex[i] <== bTo.out[i];
     }
 
     component not = NOT();
@@ -141,9 +141,9 @@ template Transfer(balanceLevels, accountLevels) {
         balance: 'balance1 - amount',
         nonce: 'nonce1 + 1', sign: 'sign1', ay: 'ay1', ethAddr: 'ethAddr1', 
         orderRoot: 'orderRoot1',
-        account_path_index: 'sender_account_path_index',
-        balance_path_elements: 'sender_balance_path_elements', 
-        account_path_elements: 'sender_account_path_elements'}}) %>
+        accountPathIndex: 'senderAccountPathIndex',
+        balancePathElements: 'senderBalancePathElements', 
+        accountPathElements: 'senderAccountPathElements'}}) %>
 
     // check when transfer to new 
 
@@ -172,9 +172,9 @@ template Transfer(balanceLevels, accountLevels) {
         ay: 'multiMux.out[3]', 
         ethAddr: 'multiMux.out[4]', 
         orderRoot: 'multiMux.out[5]',
-        account_path_index: 'receiver_account_path_index',
-        balance_path_elements: 'receiver_balance_path_elements', 
-        account_path_elements: 'receiver_account_path_elements'}}) %>
+        accountPathIndex: 'receiverAccountPathIndex',
+        balancePathElements: 'receiverBalancePathElements', 
+        accountPathElements: 'receiverAccountPathElements'}}) %>
 
     <%- codegen.generateFromTpl(codegen.tpls.CheckEqTpl, {ctx: 'Mid', replacers: { 
         lhs: 'accountTreeSenderNew.root',

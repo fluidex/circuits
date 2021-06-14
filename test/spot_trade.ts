@@ -67,11 +67,11 @@ function initTestCase() {
   const order1_amountsell = 1000n;
   const order1_amountbuy = 10000n;
   const order1 = new OrderInput({
-    order_id: order1_id,
-    tokenbuy: tokenID_2to1,
-    tokensell: tokenID_1to2,
-    total_sell: order1_amountsell,
-    total_buy: order1_amountbuy,
+    orderId: order1_id,
+    tokenBuy: tokenID_2to1,
+    tokenSell: tokenID_1to2,
+    totalSell: order1_amountsell,
+    totalBuy: order1_amountbuy,
   });
   let orderState1 = OrderState.fromOrderInput(order1);
   state.setAccountOrder(accountID1, orderState1);
@@ -81,26 +81,26 @@ function initTestCase() {
   const order2_amountsell = 10000n;
   const order2_amountbuy = 1000n;
   const order2 = new OrderInput({
-    order_id: order2_id,
-    tokenbuy: tokenID_1to2,
-    tokensell: tokenID_2to1,
-    total_sell: order2_amountsell,
-    total_buy: order2_amountbuy,
+    orderId: order2_id,
+    tokenBuy: tokenID_1to2,
+    tokenSell: tokenID_2to1,
+    totalSell: order2_amountsell,
+    totalBuy: order2_amountbuy,
   });
   let orderState2 = OrderState.fromOrderInput(order2);
-  orderState2.filled_sell = 10n;
-  orderState2.filled_buy = 1n;
+  orderState2.filledSell = 10n;
+  orderState2.filledBuy = 1n;
   state.setAccountOrder(accountID2, orderState2);
 
   let spotTradeTx = {
-    order1_accountID: accountID1,
-    order2_accountID: accountID2,
-    tokenID_1to2: tokenID_1to2,
-    tokenID_2to1: tokenID_2to1,
-    amount_1to2: amount_1to2,
-    amount_2to1: amount_2to1,
-    order1_id: order1_id,
-    order2_id: order2_id,
+    order1AccountID: accountID1,
+    order2AccountID: accountID2,
+    tokenID1to2: tokenID_1to2,
+    tokenID2to1: tokenID_2to1,
+    amount1to2: amount_1to2,
+    amount2to1: amount_2to1,
+    order1Id: order1_id,
+    order2Id: order2_id,
   };
   state.SpotTrade(spotTradeTx);
 
@@ -122,10 +122,10 @@ function initTestCase() {
     order2_amountbuy: order2_amountbuy,
     amount_2to1: amount_2to1,
     amount_1to2: amount_1to2,
-    order1_filledsell: orderState1.filled_sell,
-    order1_filledbuy: orderState1.filled_buy,
-    order2_filledsell: orderState2.filled_sell,
-    order2_filledbuy: orderState2.filled_buy,
+    order1_filledsell: orderState1.filledSell,
+    order1_filledbuy: orderState1.filledBuy,
+    order2_filledsell: orderState2.filledSell,
+    order2_filledbuy: orderState2.filledBuy,
     order1_accountID: accountID1,
     order2_accountID: accountID2,
     order1_account_nonce: nonce1,
@@ -140,15 +140,15 @@ function initTestCase() {
     order1_token_buy_balance: account1_balance_buy,
     order2_token_sell_balance: account2_balance_sell,
     order2_token_buy_balance: account2_balance_buy,
-    order_path_elements: block.order_path_elements[block.order_path_elements.length - 1],
+    orderPathElements: block.orderPathElements[block.orderPathElements.length - 1],
     old_account_root: block.oldAccountRoots[block.oldAccountRoots.length - 1],
     new_account_root: block.newAccountRoots[block.newAccountRoots.length - 1],
-    old_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][0],
-    tmp_account1_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][3],
-    old_account1_path_elements: block.account_path_elements[block.account_path_elements.length - 1][0],
-    old_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][2],
-    tmp_account2_balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][1],
-    tmp_account2_path_elements: block.account_path_elements[block.account_path_elements.length - 1][1],
+    old_account1_balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][0],
+    tmp_account1_balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][3],
+    old_account1_path_elements: block.accountPathElements[block.accountPathElements.length - 1][0],
+    old_account2_balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][2],
+    tmp_account2_balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][1],
+    tmp_account2_path_elements: block.accountPathElements[block.accountPathElements.length - 1][1],
   };
 }
 

@@ -35,6 +35,7 @@ function initTestCase() {
     }
   }
   state.setAccountNonce(accountID, nonce);
+  /*
   const placeOrderTx = {
     orderID: 1n,
     accountID: accountID,
@@ -49,6 +50,7 @@ function initTestCase() {
     amount_sell: amount_sell,
     amount_buy: amount_buy,
   };
+  */
   //state.PlaceOrder(placeOrderTx);
 
   let block = state.forge();
@@ -56,9 +58,9 @@ function initTestCase() {
   return {
     enabled: 1,
     in: block.encodedTxs[block.encodedTxs.length - 1],
-    balance_path_elements: block.balance_path_elements[block.balance_path_elements.length - 1][0],
-    order_path_elements: block.order_path_elements[block.order_path_elements.length - 1][0],
-    account_path_elements: block.account_path_elements[block.account_path_elements.length - 1][0],
+    balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][0],
+    orderPathElements: block.orderPathElements[block.orderPathElements.length - 1][0],
+    accountPathElements: block.accountPathElements[block.accountPathElements.length - 1][0],
     oldOrderRoot: block.orderRoots[block.orderRoots.length - 1][0],
     newOrderRoot: block.orderRoots[block.orderRoots.length - 1][1],
     oldAccountRoot: block.oldAccountRoots[block.oldAccountRoots.length - 1],
@@ -72,9 +74,9 @@ class TestPlaceOrder implements SimpleTest {
     let input = {
       enabled: test_case.enabled,
       in: test_case.in,
-      balance_path_elements: test_case.balance_path_elements,
-      order_path_elements: test_case.order_path_elements,
-      account_path_elements: test_case.account_path_elements,
+      balancePathElements: test_case.balancePathElements,
+      orderPathElements: test_case.orderPathElements,
+      accountPathElements: test_case.accountPathElements,
       oldOrderRoot: test_case.oldOrderRoot,
       newOrderRoot: test_case.newOrderRoot,
       oldAccountRoot: test_case.oldAccountRoot,

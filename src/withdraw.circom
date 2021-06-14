@@ -110,8 +110,8 @@ template Withdraw(balanceLevels, accountLevels) {
  * @input ay - {Field} - ay of the account leaf
  * @input ethAddr - {Uint160} - ethAddr of the account leaf
  * @input orderRoot - {Field} - order root of the account leaf
- * @input balance_path_elements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the account tree
- * @input account_path_elements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the account tree
+ * @input balancePathElements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the account tree
+ * @input accountPathElements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the account tree
  * @input oldAccountRoot - {Field} - initial acount state root
  * @input newAccountRoot - {Field} - final acount state root
  */
@@ -135,31 +135,31 @@ template WithdrawLegacy(balanceLevels, accountLevels) {
     signal input ay;
     signal input ethAddr;
     signal input orderRoot;
-    signal input balance_path_elements[balanceLevels][1];
-    signal input account_path_elements[accountLevels][1];
+    signal input balancePathElements[balanceLevels][1];
+    signal input accountPathElements[accountLevels][1];
 
     // Roots
     signal input oldAccountRoot;
     signal input newAccountRoot;
 
     // Path index
-    signal balance_path_index[balanceLevels];
-    signal account_path_index[accountLevels];
+    signal balancePathIndex[balanceLevels];
+    signal accountPathIndex[accountLevels];
 
-    // decode balance_path_index
+    // decode balancePathIndex
     component bTokenID = Num2BitsIfEnabled(balanceLevels);
     bTokenID.enabled <== enabled;
     bTokenID.in <== tokenID;
     for (var i = 0; i < balanceLevels; i++) {
-        balance_path_index[i] <== bTokenID.out[i];
+        balancePathIndex[i] <== bTokenID.out[i];
     }
 
-    // decode account_path_index
+    // decode accountPathIndex
     component bFrom = Num2BitsIfEnabled(accountLevels);
     bFrom.enabled <== enabled;
     bFrom.in <== accountID;
     for (var i = 0; i < accountLevels; i++) {
-        account_path_index[i] <== bFrom.out[i];
+        accountPathIndex[i] <== bFrom.out[i];
     }
 
     // - verify eddsa signature
@@ -196,8 +196,8 @@ template WithdrawLegacy(balanceLevels, accountLevels) {
     component balanceTreeOld = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeOld.leaf <== balance;
     for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeOld.path_index[i] <== balance_path_index[i];
-        balanceTreeOld.path_elements[i][0] <== balance_path_elements[i][0];
+        balanceTreeOld.pathIndex[i] <== balancePathIndex[i];
+        balanceTreeOld.pathElements[i][0] <== balancePathElements[i][0];
     }
     
     // account state hash
@@ -212,8 +212,8 @@ template WithdrawLegacy(balanceLevels, accountLevels) {
     component accountTreeOld = CalculateRootFromMerklePath(accountLevels);
     accountTreeOld.leaf <== accountHashOld.out;
     for (var i = 0; i < accountLevels; i++) {
-        accountTreeOld.path_index[i] <== account_path_index[i];
-        accountTreeOld.path_elements[i][0] <== account_path_elements[i][0];
+        accountTreeOld.pathIndex[i] <== accountPathIndex[i];
+        accountTreeOld.pathElements[i][0] <== accountPathElements[i][0];
     }
     component checkEqOld = ForceEqualIfEnabled();
     checkEqOld.enabled <== enabled;
@@ -227,8 +227,8 @@ template WithdrawLegacy(balanceLevels, accountLevels) {
     component balanceTreeNew = CalculateRootFromMerklePath(balanceLevels);
     balanceTreeNew.leaf <== balance - amount;
     for (var i = 0; i < balanceLevels; i++) {
-        balanceTreeNew.path_index[i] <== balance_path_index[i];
-        balanceTreeNew.path_elements[i][0] <== balance_path_elements[i][0];
+        balanceTreeNew.pathIndex[i] <== balancePathIndex[i];
+        balanceTreeNew.pathElements[i][0] <== balancePathElements[i][0];
     }
     
     // account state hash
@@ -243,8 +243,8 @@ template WithdrawLegacy(balanceLevels, accountLevels) {
     component accountTreeNew = CalculateRootFromMerklePath(accountLevels);
     accountTreeNew.leaf <== accountHashNew.out;
     for (var i = 0; i < accountLevels; i++) {
-        accountTreeNew.path_index[i] <== account_path_index[i];
-        accountTreeNew.path_elements[i][0] <== account_path_elements[i][0];
+        accountTreeNew.pathIndex[i] <== accountPathIndex[i];
+        accountTreeNew.pathElements[i][0] <== accountPathElements[i][0];
     }
     component checkEqNew = ForceEqualIfEnabled();
     checkEqNew.enabled <== enabled;

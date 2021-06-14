@@ -46,11 +46,11 @@ class TestHashAccount implements SimpleTest {
 }
 
 const orderInput = new OrderInput({
-  tokensell: 1n,
-  tokenbuy: 2n,
-  total_sell: 100n,
-  total_buy: 1000n,
-  order_id: 0n,
+  tokenSell: 1n,
+  tokenBuy: 2n,
+  totalSell: 100n,
+  totalBuy: 1000n,
+  orderId: 0n,
 });
 const orderState = OrderState.fromOrderInput(orderInput);
 class TestHashOrder implements SimpleTest {
@@ -58,13 +58,13 @@ class TestHashOrder implements SimpleTest {
     return [
       {
         input: {
-          tokensell: orderState.tokensell,
-          tokenbuy: orderState.tokenbuy,
-          filled_sell: orderState.filled_sell,
-          filled_buy: orderState.filled_buy,
-          total_sell: orderState.total_sell,
-          total_buy: orderState.total_buy,
-          order_id: orderState.order_id,
+          tokenSell: orderState.tokenSell,
+          tokenBuy: orderState.tokenBuy,
+          filledSell: orderState.filledSell,
+          filledBuy: orderState.filledBuy,
+          totalSell: orderState.totalSell,
+          totalBuy: orderState.totalBuy,
+          orderId: orderState.orderId,
         },
         output: {
           out: orderState.hash(),
