@@ -57,23 +57,23 @@ function parseOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quot
     status: 0,
     role: originalOrder.role,
     accountID: originalOrder.accountID,
-    order_id: originalOrder.ID,
+    orderId: originalOrder.ID,
   };
   obj.quoteAmount = BigInt(convertNumber(originalOrder.amount * originalOrder.price, quoteToken));
   if (side == OrderSide.Sell) {
-    obj.tokensell = baseTokenID;
-    obj.tokenbuy = quoteTokenID;
-    obj.total_sell = obj.baseAmount;
-    obj.total_buy = obj.quoteAmount;
-    obj.filled_sell = obj.finishedBase;
-    obj.filled_buy = obj.finishedQuote;
+    obj.tokenSell = baseTokenID;
+    obj.tokenBuy = quoteTokenID;
+    obj.totalSell = obj.baseAmount;
+    obj.totalBuy = obj.quoteAmount;
+    obj.filledSell = obj.finishedBase;
+    obj.filledBuy = obj.finishedQuote;
   } else if (side == OrderSide.Buy) {
-    obj.tokensell = quoteTokenID;
-    obj.tokenbuy = baseTokenID;
-    obj.total_sell = obj.quoteAmount;
-    obj.total_buy = obj.baseAmount;
-    obj.filled_sell = obj.finishedQuote;
-    obj.filled_buy = obj.finishedBase;
+    obj.tokenSell = quoteTokenID;
+    obj.tokenBuy = baseTokenID;
+    obj.totalSell = obj.quoteAmount;
+    obj.totalBuy = obj.baseAmount;
+    obj.filledSell = obj.finishedQuote;
+    obj.filledBuy = obj.finishedBase;
   } else {
     throw new Error('invalid order side ' + side);
   }
@@ -146,21 +146,21 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
   function checkGlobalStateKnowsOrder(order) {
     const isNewOrder = order.finishedBase == '0' && order.finishedQuote == '0';
     if (isNewOrder) {
-      assert(!state.hasOrder(order.accountID, order.order_id), 'invalid new order');
+      assert(!state.hasOrder(order.accountID, order.orderId), 'invalid new order');
       let orderToPut = new OrderInput({
         accountID: order.accountID,
-        orderId: order.order_id,
-        tokenSell: order.tokensell,
-        tokenBuy: order.tokenbuy,
-        totalSell: order.total_sell,
-        totalBuy: order.total_buy,
+        orderId: order.orderId,
+        tokenSell: order.tokenSell,
+        tokenBuy: order.tokenBuy,
+        totalSell: order.totalSell,
+        totalBuy: order.totalBuy,
         side: order.side,
         sig: null,
       });
       orderToPut.signWith(accounts[Number(order.accountID)]);
       state.updateOrderState(order.accountID, OrderState.fromOrderInput(orderToPut));
     } else {
-      assert(state.hasOrder(order.accountID, order.order_id), 'invalid old order, too many open orders?');
+      assert(state.hasOrder(order.accountID, order.orderId), 'invalid old order, too many open orders?');
     }
   }
   checkGlobalStateKnowsOrder(askOrderStateBefore);
@@ -177,8 +177,8 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
     checkEqByKeys(balanceStateLocal, balanceState);
     let askOrderLocal = state.getAccountOrderByOrderId(askUserID, askOrderID);
     let bidOrderLocal = state.getAccountOrderByOrderId(bidUserID, bidOrderID);
-    checkEqByKeys(askOrderLocal, askOrder, ['filled_sell', 'filled_buy']);
-    checkEqByKeys(bidOrderLocal, bidOrder, ['filled_sell', 'filled_buy']);
+    checkEqByKeys(askOrderLocal, askOrder, ['filledSell', 'filledBuy']);
+    checkEqByKeys(bidOrderLocal, bidOrder, ['filledSell', 'filledBuy']);
   }
   checkState(parseBalance(trade.state_before.balance, [baseToken, quoteToken]), askOrderStateBefore, bidOrderStateBefore);
   // now we construct the trade and exec it
@@ -190,8 +190,8 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
         tokenID2to1: quoteTokenID,
         amount1to2: BigInt(convertNumber(trade.amount, baseToken)),
         amount2to1: BigInt(convertNumber(trade.quote_amount, quoteToken)),
-        order1Id: askOrderStateBefore.order_id,
-        order2Id: bidOrderStateBefore.order_id,
+        order1Id: askOrderStateBefore.orderId,
+        order2Id: bidOrderStateBefore.orderId,
       }
     : {
         order1AccountID: bidOrderStateBefore.accountID,
@@ -200,8 +200,8 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
         tokenID2to1: baseTokenID,
         amount1to2: BigInt(convertNumber(trade.quote_amount, quoteToken)),
         amount2to1: BigInt(convertNumber(trade.amount, baseToken)),
-        order1Id: bidOrderStateBefore.order_id,
-        order2Id: askOrderStateBefore.order_id,
+        order1Id: bidOrderStateBefore.orderId,
+        order2Id: askOrderStateBefore.orderId,
       };
   state.SpotTrade(spotTradeTx);
   // finally we check the state after this trade
