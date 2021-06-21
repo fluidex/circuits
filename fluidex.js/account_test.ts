@@ -1,6 +1,8 @@
 import * as ethers from 'ethers';
 import * as assert from 'assert';
 import * as eddsa from './eddsa';
+import { hash } from './hash';
+const babyJub = require('circomlib').babyJub;
 const keccak256 = require('js-sha3').keccak256;
 import { L2Account, Account, get_CREATE_L2_ACCOUNT_MSG, recoverPublicKeyFromSignature } from './account';
 
@@ -63,7 +65,17 @@ function TestL2AccountKeyAndSign() {
   //console.log(eddsa.unpackSignature(packedSig));
 }
 
+function TestL2SigVerify() {
+  // copied from TestL2AccountKeyAndSign
+  const pubkey = "a59226beb68d565521497d38e37f7d09c9d4e97ac1ebc94fba5de524cb1ca4a0";
+  const msg = 1357924680n;
+  const sig = "7ddc5c6aadf5e80200bd9f28e9d5bf932cbb7f4224cce0fa11154f4ad24dc5831c295fb522b7b8b4921e271bc6b265f4d7114fbe9516d23e69760065053ca704";
+  const pubkeyPoint = babyJub.unpackPoint(Buffer.from(pubkey, "hex"));
+  assert(eddsa.verifyWithHasher(msg, eddsa.unpackSignature(Buffer.from(sig, "hex")), pubkeyPoint, hash));
+}
+
 async function main() {
+  await TestL2SigVerify();
   await TestL2AccountKeyAndSign();
   await TestRecoverPublicKeyAndAddress();
   await ethersSign();
