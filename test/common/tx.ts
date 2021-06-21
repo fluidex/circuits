@@ -1,10 +1,5 @@
-import { hash } from '../../node_modules/fluidex.js/src/hash';
-import { assert } from 'console';
-import { Account } from '../../node_modules/fluidex.js/src/account';
-import { Tree } from './binary_merkle_tree';
-import { TxSignature, AccountState } from './account_state';
-const ffjavascript = require('ffjavascript');
-const Scalar = ffjavascript.Scalar;
+import { hash } from 'fluidex.js';
+import { TxSignature } from './account_state';
 import { TxLength, TxDetailIdx } from '../codec/tx_data';
 
 // this sequence'd better consistent with defined in circuits and smart constracts

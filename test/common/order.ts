@@ -1,4 +1,4 @@
-import { OrderInput, OrderSide, OrderState } from '../../node_modules/fluidex.js/src/order';
+import { OrderInput, OrderSide, OrderState } from 'fluidex.js';
 export { OrderInput, OrderSide, OrderState };
 import { Tree } from './binary_merkle_tree';
 

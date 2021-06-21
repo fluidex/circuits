@@ -1,7 +1,6 @@
 const Scalar = require('ffjavascript').Scalar;
-import { hash } from '../../node_modules/fluidex.js/src/hash';
-import { Tree } from './binary_merkle_tree';
-import { Account, TxSignature } from '../../node_modules/fluidex.js/src/account';
+import { hash } from 'fluidex.js';
+import { TxSignature } from 'fluidex.js';
 
 class AccountState {
   nonce: bigint = 0n;

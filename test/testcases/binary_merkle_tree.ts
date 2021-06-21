@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { hash } from '../../node_modules/fluidex.js/src/hash';
+import { hash } from 'fluidex.js';
 import { getCircuitSrcDir } from '../common/circuit';
 import { SimpleTest, TestComponent } from './interface';
 
