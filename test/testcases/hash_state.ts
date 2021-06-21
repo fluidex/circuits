@@ -1,9 +1,11 @@
 import * as path from 'path';
-import { hash } from '../helper.ts/hash';
+import { hash } from '../../fluidex.js/hash';
 const Scalar = require('ffjavascript').Scalar;
-import { Account } from '../helper.ts/account';
-import { AccountState, calculateGenesisOrderRoot, OrderState, OrderInput } from '../helper.ts/state-utils';
+import { Account } from '../../fluidex.js/account';
+import { calculateGenesisOrderRoot, OrderState, OrderInput } from '../common/order';
+import { AccountState } from '../common/account_state';
 import { SimpleTest, TestComponent } from './interface';
+import { getCircuitSrcDir } from '../common/circuit';
 
 const orderLevels = 2;
 
@@ -39,7 +41,7 @@ class TestHashAccount implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'hash_state.circom'),
+      src: path.join(getCircuitSrcDir(), 'lib', 'hash_state.circom'),
       main: 'HashAccount()',
     };
   }
@@ -75,7 +77,7 @@ class TestHashOrder implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'hash_state.circom'),
+      src: path.join(getCircuitSrcDir(), 'lib', 'hash_state.circom'),
       main: 'HashOrder()',
     };
   }
@@ -95,7 +97,7 @@ class TestGenesisOrderRoot implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'hash_state.circom'),
+      src: path.join(getCircuitSrcDir(), 'lib', 'hash_state.circom'),
       main: `CalculateGenesisOrderRoot(${orderLevels})`,
     };
   }

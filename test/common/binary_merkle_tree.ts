@@ -1,5 +1,5 @@
 import { assert } from 'console';
-import { hash } from './hash';
+import { hash } from '../../fluidex.js/hash';
 
 class Tree<T> {
   public height: number;

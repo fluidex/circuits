@@ -1,11 +1,21 @@
-import { hash } from '../helper.ts/hash';
+import { hash } from '../../fluidex.js/hash';
 import { assert } from 'console';
-import { Account } from '../helper.ts/account';
-import { Tree } from '../helper.ts/binary_merkle_tree';
-import { TxSignature, TxType, OrderState, OrderInput, AccountState } from '../helper.ts/state-utils';
+import { Account } from '../../fluidex.js/account';
+import { Tree } from './binary_merkle_tree';
+import { TxSignature, AccountState } from './account_state';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
-import { TxLength, TxDetailIdx } from './codec/tx_data';
+import { TxLength, TxDetailIdx } from '../codec/tx_data';
+
+// this sequence'd better consistent with defined in circuits and smart constracts
+enum TxType {
+  Nop,
+  Deposit,
+  Transfer,
+  Withdraw,
+  PlaceOrder,
+  SpotTrade,
+}
 
 class DepositToNewTx {
   accountID: bigint;
@@ -79,10 +89,6 @@ function hashWithdraw({ accountID, tokenID, amount, nonce, oldBalance }) {
   return data;
 }
 
-function circuitSrcToName(s: string): string {
-  return s.replace(/[ )]/g, '').replace(/[(,]/g, '_');
-}
-
 class RawTx {
   txType: TxType;
   payload: Array<bigint>;
@@ -102,34 +108,16 @@ class RawTx {
   // extra: any;
 }
 
-class L2Block {
-  oldRoot: bigint;
-  newRoot: bigint;
-  txsType: Array<any>;
-  encodedTxs: Array<any>;
-  balancePathElements: Array<any>;
-  orderPathElements: Array<any>;
-  accountPathElements: Array<any>;
-  orderRoots: Array<any>;
-  oldAccountRoots: Array<any>;
-  newAccountRoots: Array<any>;
-}
-
 export {
   TxType,
   TxLength,
   TxDetailIdx,
   hashTransfer,
   hashWithdraw,
-  circuitSrcToName,
-  AccountState,
-  OrderState,
-  OrderInput,
   RawTx,
   DepositToNewTx,
   DepositToOldTx,
   TranferTx,
   WithdrawTx,
   SpotTradeTx,
-  L2Block,
 };

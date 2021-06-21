@@ -1,11 +1,12 @@
 import * as path from 'path';
-import { hash } from '../helper.ts/hash';
+import { hash } from '../../fluidex.js/hash';
 const Scalar = require('ffjavascript').Scalar;
-import { Account, randomMnemonic } from '../helper.ts/account';
-import { calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { Account, randomMnemonic } from '../../fluidex.js/account';
+import { calculateGenesisOrderRoot } from '../common/order';
 import { SimpleTest, TestComponent } from './interface';
-import * as common from './common';
-import { GlobalState } from './global_state';
+import * as common from '../common/tx';
+import { GlobalState } from '../global_state';
+import { getCircuitSrcDir } from '../common/circuit';
 
 // circuit-level definitions
 const orderLevels = 2;
@@ -116,7 +117,7 @@ class TestTransfer implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'transfer.circom'),
+      src: path.join(getCircuitSrcDir(), 'transfer.circom'),
       main: `Transfer(${balanceLevels}, ${accountLevels})`,
     };
   }

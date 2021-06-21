@@ -1,5 +1,6 @@
 import * as path from 'path';
-import { hash } from '../helper.ts/hash';
+import { hash } from '../../fluidex.js/hash';
+import { getCircuitSrcDir } from '../common/circuit';
 import { SimpleTest, TestComponent } from './interface';
 
 class TestCheckLeafExists implements SimpleTest {
@@ -8,7 +9,7 @@ class TestCheckLeafExists implements SimpleTest {
   }
   getComponent() {
     return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'binary_merkle_tree.circom'),
+      src: path.join(getCircuitSrcDir(), 'lib', 'binary_merkle_tree.circom'),
       main: 'CheckLeafExists(2)',
     };
   }
@@ -19,7 +20,7 @@ class TestCheckLeafUpdate implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'binary_merkle_tree.circom'),
+      src: path.join(getCircuitSrcDir(), 'lib', 'binary_merkle_tree.circom'),
       main: 'CheckLeafUpdate(2)',
     };
   }
