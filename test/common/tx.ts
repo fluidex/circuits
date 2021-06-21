@@ -1,6 +1,6 @@
-import { hash } from '../../fluidex.js/hash';
+import { hash } from '../../node_modules/fluidex.js/src/hash';
 import { assert } from 'console';
-import { Account } from '../../fluidex.js/account';
+import { Account } from '../../node_modules/fluidex.js/src/account';
 import { Tree } from './binary_merkle_tree';
 import { TxSignature, AccountState } from './account_state';
 const ffjavascript = require('ffjavascript');

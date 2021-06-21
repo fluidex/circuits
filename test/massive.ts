@@ -1,10 +1,9 @@
 import * as path from 'path';
-import { hash } from '../fluidex.js/hash';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
-import { Account } from '../fluidex.js/account';
+import { Account } from '../node_modules/fluidex.js/src/account';
 
-import { OrderState, OrderInput } from '../fluidex.js/order';
+import { OrderState, OrderInput } from '../node_modules/fluidex.js/src/order';
 import { SimpleTest, TestComponent } from './testcases/interface';
 import { GlobalState } from './global_state';
 //import { assert } from 'console';

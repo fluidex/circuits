@@ -19,6 +19,7 @@
     "eslint-plugin-prettier": "^3.3.1",
     "ethers": "^5.0.31",
     "ffjavascript": "^0.2.34",
+    "fluidex.js": "github:Fluidex/fluidex.js",
     "prettier": "^2.2.1",
     "print-diff": "^1.0.0",
     "printf": "^0.6.1",
