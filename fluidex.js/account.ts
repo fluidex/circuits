@@ -51,7 +51,10 @@ class L2Account {
     this.bjjPubKey = '0x' + compressedBuff.toString('hex');
     //this.bjjCompressed = utils.padZeros(utilsScalar.leBuff2int(compressedBuff).toString(16), 64);
   }
-
+  signHashPacked(h: bigint) {
+    const sig = eddsa.signWithHasher(this.rollupPrvKey, h, hash);
+    return eddsa.packSignature(sig);
+  }
   signHash(h: bigint): TxSignature {
     const sig = eddsa.signWithHasher(this.rollupPrvKey, h, hash);
     return {
