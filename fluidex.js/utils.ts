@@ -1,5 +1,5 @@
 const Scalar = require('ffjavascript').Scalar;
-import { hash } from '../helper.ts/hash';
+import { hash } from './hash';
 const crypto = require('crypto');
 const babyJub = require('circomlib').babyJub;
 

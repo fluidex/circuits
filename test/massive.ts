@@ -1,11 +1,11 @@
 import * as path from 'path';
-import { hash } from '../helper.ts/hash';
+import { hash } from '../fluidex.js/hash';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
-import { Account } from '../helper.ts/account';
-import { calculateGenesisOrderRoot, OrderInput, OrderState } from '../helper.ts/state-utils';
-import { SimpleTest, TestComponent } from './interface';
-import * as common from './common';
+import { Account } from '../fluidex.js/account';
+
+import { OrderState, OrderInput } from '../fluidex.js/order';
+import { SimpleTest, TestComponent } from './testcases/interface';
 import { GlobalState } from './global_state';
 //import { assert } from 'console';
 const assert = require('assert').strict;

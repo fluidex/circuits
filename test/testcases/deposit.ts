@@ -1,11 +1,11 @@
 import * as path from 'path';
-import { hash } from '../helper.ts/hash';
+import { hash } from '../../fluidex.js/hash';
 const Scalar = require('ffjavascript').Scalar;
-import { Account } from '../helper.ts/account';
-import { calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { Account } from '../../fluidex.js/account';
+import { calculateGenesisOrderRoot } from '../common/order';
 import { SimpleTest, TestComponent } from './interface';
-import * as common from './common';
-import { GlobalState } from './global_state';
+import * as common from '../common/tx';
+import { GlobalState } from '../global_state';
 
 // circuit-level definitions
 const orderLevels = 2;

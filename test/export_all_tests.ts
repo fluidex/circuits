@@ -1,16 +1,16 @@
 import * as snarkit from 'snarkit';
-import { circuitSrcToName } from './common';
-import { TestCheckLeafExists, TestCheckLeafUpdate } from './binary_merkle_tree';
-import { TestRescueHash } from './rescue';
-import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './hash_state';
+import { circuitSrcToName } from './common/circuit';
+import { TestCheckLeafExists, TestCheckLeafUpdate } from './testcases/binary_merkle_tree';
+import { TestRescueHash } from './testcases/rescue';
+import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './testcases/hash_state';
 //, TestDepositToOld } from './deposit';
 // already tested within the `block` test case
 //import { TestTransfer } from './transfer';
-import { TestWithdraw } from './withdraw';
+import { TestWithdraw } from './testcases/withdraw';
 //import { TestPlaceOrder } from './place_order';
 //import { TestSpotTrade } from './spot_trade';
-import { TestBlock } from './block';
-import { SimpleTest } from './interface';
+import { TestBlock } from './testcases/block';
+import { SimpleTest } from './testcases/interface';
 
 import * as path from 'path';
 import * as fs from 'fs';

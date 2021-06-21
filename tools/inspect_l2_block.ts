@@ -1,6 +1,6 @@
 var fs = require('fs');
-import { TxLength, TxDetailIdx } from './codec/tx_data';
-import { TxType } from './common';
+import { TxLength, TxDetailIdx } from '../test/codec/tx_data';
+import { TxType } from '../test/common/tx';
 function main() {
   var obj = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
   for (let i = 0; i < obj.txsType.length; i++) {

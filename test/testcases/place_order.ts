@@ -1,9 +1,9 @@
 import * as path from 'path';
 const Scalar = require('ffjavascript').Scalar;
-import { Account } from '../helper.ts/account';
+import { Account } from '../../fluidex.js/account';
 import { SimpleTest, TestComponent } from './interface';
-import * as common from './common';
-import { GlobalState } from './global_state';
+import * as common from '../common/tx';
+import { GlobalState } from '../global_state';
 
 // circuit-level definitions
 const orderLevels = 2;

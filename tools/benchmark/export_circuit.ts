@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import { TestTransfer } from '../../test/transfer';
-import { TestBlock } from '../../test/block';
+import { TestTransfer } from '../../test/testcases/transfer';
+import { TestBlock } from '../../test/testcases/block';
 import { TestMassive } from '../../test/massive';
 //import { exportTestCase } from '../../test/export_all_tests';
 const { unstringifyBigInt, stringifyBigInts } = require('ffjavascript').utils;

@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { hash } from '../helper.ts/hash';
+import { hash } from '../../fluidex.js/hash';
 import { SimpleTest, TestComponent } from './interface';
 
 class TestCheckLeafExists implements SimpleTest {

@@ -1,14 +1,15 @@
 import * as path from 'path';
-import { hash } from '../helper.ts/hash';
+import { hash } from '../../fluidex.js/hash';
 const printf = require('printf');
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
-import { Account } from '../helper.ts/account';
-import { calculateGenesisOrderRoot } from '../helper.ts/state-utils';
+import { Account } from '../../fluidex.js/account';
+import { calculateGenesisOrderRoot } from '../common/order';
 import { SimpleTest, TestComponent } from './interface';
-import * as common from './common';
-import { OrderState, OrderInput } from './common';
-import { GlobalState } from './global_state';
+import * as tx from '../common/tx';
+import { L2Block } from '../common/block';
+import { OrderState, OrderInput } from '../common/order';
+import { GlobalState } from '../global_state';
 //import { assert } from 'console';
 const assert = require('assert').strict;
 
@@ -110,7 +111,7 @@ function initBlockTestCase() {
   };
   let fullTransferTx = state.fillTransferTx(transferTx);
   // user should check fullTransferTx is consistent with transferTx before signing
-  let hash = common.hashTransfer(fullTransferTx);
+  let hash = tx.hashTransfer(fullTransferTx);
   transferTx.signature = account1.signHash(hash);
   state.Transfer(transferTx);
 
@@ -121,7 +122,7 @@ function initBlockTestCase() {
     signature: null,
   };
   let fullWithdrawTx = state.fillWithdrawTx(withdrawTx);
-  hash = common.hashWithdraw(fullWithdrawTx);
+  hash = tx.hashWithdraw(fullWithdrawTx);
   withdrawTx.signature = account0.signHash(hash);
   state.Withdraw(withdrawTx);
 
@@ -177,7 +178,7 @@ function initBlockTestCase() {
 
 let block_test_case = initBlockTestCase();
 
-function initEmptyBlockTestCase(): common.L2Block {
+function initEmptyBlockTestCase(): L2Block {
   let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs);
   // we need to have at least 1 account
   state.createNewAccount();

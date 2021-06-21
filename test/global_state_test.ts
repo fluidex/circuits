@@ -1,13 +1,13 @@
 import { GlobalState } from './global_state';
 import * as snarkit from 'snarkit';
-import { circuitSrcToName, OrderState } from './common';
+import { circuitSrcToName } from './common/circuit';
 import { assert } from 'console';
 import * as fs from 'fs';
 import * as path from 'path';
 const printf = require('printf');
 import { inspect } from 'util';
-import { Account } from '../helper.ts/account';
-import { OrderInput, OrderSide } from '../helper.ts/state-utils';
+import { Account } from '../fluidex.js/account';
+import { OrderState, OrderInput, OrderSide } from '../fluidex.js/order';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 inspect.defaultOptions.depth = null;
