@@ -1,5 +1,5 @@
 import { assert } from 'console';
-import { Account } from '../fluidex.js/account';
+import { Account } from 'fluidex.js';
 import { Tree } from './common/binary_merkle_tree';
 import { calculateGenesisOrderRoot, emptyOrderHash } from './common/order';
 const ffjavascript = require('ffjavascript');
@@ -8,7 +8,7 @@ const Scalar = ffjavascript.Scalar;
 import { RawTx, DepositToNewTx, DepositToOldTx, WithdrawTx, SpotTradeTx, TranferTx, TxLength, TxDetailIdx, TxType } from './common/tx';
 import { L2Block } from './common/block';
 import { AccountState } from './common/account_state';
-import { OrderState } from '../fluidex.js/order';
+import { OrderState } from 'fluidex.js';
 
 // TODO:
 // 1. how to handle order cancel? it it needed to implement order cancel inside circuits?

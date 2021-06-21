@@ -1,7 +1,6 @@
 import * as path from 'path';
-import { hash } from '../../fluidex.js/hash';
 const Scalar = require('ffjavascript').Scalar;
-import { Account } from '../../fluidex.js/account';
+import { Account } from 'fluidex.js';
 import { calculateGenesisOrderRoot } from '../common/order';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from '../common/tx';
