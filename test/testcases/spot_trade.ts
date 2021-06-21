@@ -6,6 +6,7 @@ import { calculateGenesisOrderRoot, OrderInput, OrderState } from '../common/ord
 import { SimpleTest, TestComponent } from './interface';
 import * as common from '../common/tx';
 import { GlobalState } from '../global_state';
+import { getCircuitSrcDir } from '../common/circuit';
 
 // circuit-level definitions
 const orderLevels = 2;
@@ -165,7 +166,7 @@ class TestSpotTrade implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'spot_trade.circom'),
+      src: path.join(getCircuitSrcDir(), 'spot_trade.circom'),
       main: `SpotTrade(${balanceLevels}, ${orderLevels}, ${accountLevels})`,
     };
   }

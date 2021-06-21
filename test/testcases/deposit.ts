@@ -6,6 +6,7 @@ import { calculateGenesisOrderRoot } from '../common/order';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from '../common/tx';
 import { GlobalState } from '../global_state';
+import { getCircuitSrcDir } from '../common/circuit';
 
 // circuit-level definitions
 const orderLevels = 2;
@@ -18,7 +19,7 @@ class TestDepositToOld implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'deposit_to_old.circom'),
+      src: path.join(getCircuitSrcDir(), 'deposit_to_old.circom'),
       main: `DepositToOldLegacy(${balanceLevels}, ${accountLevels})`,
     };
   }
@@ -30,7 +31,7 @@ class TestDepositToNew implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'deposit_to_new.circom'),
+      src: path.join(getCircuitSrcDir(), 'deposit_to_new.circom'),
       main: `DepositToNewLegacy(${balanceLevels}, ${accountLevels})`,
     };
   }

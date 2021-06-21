@@ -6,6 +6,7 @@ import { calculateGenesisOrderRoot } from '../common/order';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from '../common/tx';
 import { GlobalState } from '../global_state';
+import { getCircuitSrcDir } from '../common/circuit';
 
 // circuit-level definitions
 const orderLevels = 2;
@@ -106,7 +107,7 @@ class TestWithdraw implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'withdraw.circom'),
+      src: path.join(getCircuitSrcDir(), 'withdraw.circom'),
       main: `WithdrawLegacy(${balanceLevels}, ${accountLevels})`,
     };
   }

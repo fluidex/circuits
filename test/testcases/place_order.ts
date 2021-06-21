@@ -4,6 +4,7 @@ import { Account } from '../../fluidex.js/account';
 import { SimpleTest, TestComponent } from './interface';
 import * as common from '../common/tx';
 import { GlobalState } from '../global_state';
+import { getCircuitSrcDir } from '../common/circuit';
 
 // circuit-level definitions
 const orderLevels = 2;
@@ -87,7 +88,7 @@ class TestPlaceOrder implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'place_order.circom'),
+      src: path.join(getCircuitSrcDir(), 'place_order.circom'),
       main: `PlaceOrder(${balanceLevels}, ${orderLevels}, ${accountLevels})`,
     };
   }

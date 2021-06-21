@@ -10,6 +10,7 @@ import * as tx from '../common/tx';
 import { L2Block } from '../common/block';
 import { OrderState, OrderInput } from '../common/order';
 import { GlobalState } from '../global_state';
+import { getCircuitSrcDir } from '../common/circuit';
 //import { assert } from 'console';
 const assert = require('assert').strict;
 
@@ -32,7 +33,7 @@ class TestBlock implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'block.circom'),
+      src: path.join(getCircuitSrcDir(), 'block.circom'),
       main: `Block(${nTxs}, ${balanceLevels}, ${orderLevels}, ${accountLevels})`,
     };
   }

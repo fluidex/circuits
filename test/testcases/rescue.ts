@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { getCircuitSrcDir } from '../common/circuit';
 import { SimpleTest, TestComponent } from './interface';
 
 class TestPow5 implements SimpleTest {
@@ -13,7 +14,7 @@ class TestPow5 implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'rescue.circom'),
+      src: path.join(getCircuitSrcDir(), 'lib', 'rescue.circom'),
       main: 'Pow5()',
     };
   }
@@ -31,7 +32,7 @@ class TestInvPow5 implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'rescue.circom'),
+      src: path.join(getCircuitSrcDir(), 'lib', 'rescue.circom'),
       main: 'InvPow5()',
     };
   }
@@ -54,7 +55,7 @@ class TestRescueMimc implements SimpleTest {
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'rescue.circom'),
+      src: path.join(getCircuitSrcDir(), 'lib', 'rescue.circom'),
       main: 'RescueMimc()',
     };
   }
@@ -76,7 +77,7 @@ class TestRescueHash implements SimpleTest {
     const RATE = 2;
     const cycles = Math.ceil(inputLen / RATE);
     return {
-      src: path.join(__dirname, '..', 'src', 'lib', 'rescue.circom'),
+      src: path.join(getCircuitSrcDir(), 'lib', 'rescue.circom'),
       main: `Rescue(${inputLen})`,
     };
   }
