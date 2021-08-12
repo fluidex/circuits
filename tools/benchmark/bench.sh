@@ -23,7 +23,7 @@ function prepare_tools() {
         source $DIR/install_rapidsnark.sh
     fi
     echo install plonkit
-    cargo install --git https://github.com/Fluidex/plonkit
+    cargo install --git https://github.com/fluidex/plonkit
 }
 
 function prepare_circuit() {

@@ -180,7 +180,7 @@ class GlobalState {
       this.updateOrderLeaf(accountID, pos, orderID);
       this.updateNextOrderPos(accountID, pos + 1n);
       if (oldOrder.orderId > orderID) {
-        // https://github.com/Fluidex/circuits/issues/159
+        // https://github.com/fluidex/circuits/issues/159
         throw new Error('order tree full');
       }
 
