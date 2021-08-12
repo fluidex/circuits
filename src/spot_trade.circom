@@ -201,7 +201,7 @@ template orderUpdater(orderLevels) {
 
 
 
-    // TODO: https://github.com/Fluidex/circuits/issues/159
+    // TODO: https://github.com/fluidex/circuits/issues/159
     // it is possible that the first trade of an old order happens later than the first trade of a new order
     // eg. orders: 
     // first, a sell order with price 10 amount 1 
