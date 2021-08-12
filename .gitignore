@@ -7,3 +7,4 @@ testdata/
 dist/
 *.swp
 /extra
+analyse.json

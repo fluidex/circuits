@@ -1,7 +1,8 @@
 import * as snarkit from 'snarkit';
 import { circuitSrcToName } from './common/circuit';
 import { TestCheckLeafExists, TestCheckLeafUpdate } from './testcases/binary_merkle_tree';
-import { TestRescueHash } from './testcases/rescue';
+import { TestRescueHash, TestRescueHash2 } from './testcases/rescue';
+import { TestPoseidonHash } from './testcases/poseidon';
 import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './testcases/hash_state';
 //, TestDepositToOld } from './deposit';
 // already tested within the `block` test case
@@ -18,6 +19,8 @@ import * as fs from 'fs';
 function getAllTests(): Array<SimpleTest> {
   let result = [];
   result.push(new TestRescueHash());
+  result.push(new TestRescueHash2());
+  result.push(new TestPoseidonHash());
   result.push(new TestCheckLeafExists());
   result.push(new TestCheckLeafUpdate());
   result.push(new TestHashAccount());
