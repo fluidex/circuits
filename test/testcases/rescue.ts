@@ -83,4 +83,23 @@ class TestRescueHash implements SimpleTest {
   }
 }
 
-export { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash };
+class TestRescueHash2 implements SimpleTest {
+  getInput() {
+    const inputs = [28829699159647608n, 7521419745152037748n];
+    return { inputs };
+  }
+  getOutput() {
+    return { out: 16571241020258333354093353159575087257074492169409232867884029018069038774606n };
+  }
+  getTestData() {
+    return [{ input: this.getInput(), output: this.getOutput(), name: this.constructor.name }];
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(getCircuitSrcDir(), 'lib', 'rescue.circom'),
+      main: `Rescue(2)`,
+    };
+  }
+}
+
+export { TestPow5, TestInvPow5, TestRescueMimc, TestRescueHash, TestRescueHash2 };

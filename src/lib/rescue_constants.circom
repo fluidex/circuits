@@ -1,4 +1,4 @@
-// generated from https://github.com/Fluidex/rescue_hash_js
+// generated from https://github.com/fluidex/rescue_hash_js
 function RESCUE_ROUND() {
   return [
     [
