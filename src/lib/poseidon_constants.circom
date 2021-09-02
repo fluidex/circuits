@@ -1,1 +1,1 @@
-../../node_modules/circomlib/circuits/poseidon_constants.circom
+include "../../node_modules/circomlib/circuits/poseidon_constants.circom";
