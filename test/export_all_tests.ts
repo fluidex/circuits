@@ -11,6 +11,7 @@ import { TestWithdraw } from './testcases/withdraw';
 //import { TestPlaceOrder } from './place_order';
 //import { TestSpotTrade } from './spot_trade';
 import { TestBlock } from './testcases/block';
+import { TestTxDecode } from './testcases/decode_tx'
 import { SimpleTest } from './testcases/interface';
 
 import * as path from 'path';
@@ -33,6 +34,7 @@ function getAllTests(): Array<SimpleTest> {
   //result.push(new TestPlaceOrder());
   //result.push(new TestSpotTrade());
   result.push(new TestBlock());
+  result.push(new TestTxDecode())
   return result;
 }
 
