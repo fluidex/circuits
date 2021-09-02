@@ -2,6 +2,7 @@ node_modules/
 yarn-error.log
 data/
 .DS_Store
+.vscode
 *.orig
 testdata/
 dist/
