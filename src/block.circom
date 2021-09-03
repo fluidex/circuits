@@ -1,4 +1,4 @@
-// Generated from tpl/ejs/./src/block.circom.ejs. Don't modify this file manually
+// Generated from tpl/ejs/src/block.circom.ejs. Don't modify this file manually
 include "../node_modules/circomlib/circuits/compconstant.circom";
 include "./lib/hash_state.circom";
 include "./decode_tx.circom";
@@ -51,7 +51,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     // decode each transaction
     component decodedTx[nTxs];
     for (var i = 0; i < nTxs; i++) {
-        decodedTx[i] = DecodeTx();
+        decodedTx[i] = DecodeTx(balanceLevels, orderLevels, accountLevels);
         for (var j = 0; j < TxLength(); j++) {
             decodedTx[i].in[j] <== encodedTxs[i][j];
         }

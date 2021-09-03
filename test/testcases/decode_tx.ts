@@ -14,7 +14,7 @@ function mockTransferTx() : Array<bigint> {
   const amount = BigInt('18445532');
 
   encodedTx[TxDetailIdx.AccountID1] = Scalar.e(2);
-  encodedTx[TxDetailIdx.AccountID2] = Scalar.e(55);
+  encodedTx[TxDetailIdx.AccountID2] = Scalar.e(3);
   encodedTx[TxDetailIdx.TokenID1] = Scalar.e(42);
   encodedTx[TxDetailIdx.Amount] = amount;
   encodedTx[TxDetailIdx.Nonce1] = BigInt(100);
@@ -74,6 +74,9 @@ function mockDepositToTx(isNew: boolean) : Array<bigint> {
   return encodedTx
 }
 
+const orderLevels = 2;
+const balanceLevels = 2;
+const accountLevels = 2;
 
 class TestTxDecode implements SimpleTest {
   getTestData() {
@@ -86,7 +89,7 @@ class TestTxDecode implements SimpleTest {
   getComponent(): TestComponent {
     return {
       src: path.join(getCircuitSrcDir(), 'decode_tx.circom'),
-      main: `DecodeTx()`,
+      main: `DecodeTx(${balanceLevels}, ${orderLevels}, ${accountLevels})`,
     };
   }
 }
