@@ -1,4 +1,4 @@
-// Generated from tpl/ejs/src/decode_tx.circom.ejs. Don't modify this file manually
+// Generated from tpl\\ejs\\src\\decode_tx.circom.ejs. Don't modify this file manually
 include "./constants.circom"
 include "./lib/bitify.circom";
 
@@ -11,6 +11,9 @@ function TxLength() { return 61; }
 function FloatLength() { return 40;}
 
 template DecodeTx(balanceLevels, orderLevels, accountLevels) {
+    //TODO: we should also have levels for token tree?
+    var tokenLevels = 16;
+
     signal input in[TxLength()];
 
     
@@ -77,11 +80,12 @@ template DecodeTx(balanceLevels, orderLevels, accountLevels) {
     signal output dstIsNew;
 
     //currently only the least packing for transfer tx ...
-    //so accountID * 2 + amount
-    signal output encodedTxData[accountLevels*2 + FloatLength()];
+    //so accountID * 2 + tokenID + amount
+    signal output encodedTxData[accountLevels*2 + tokenLevels + FloatLength()];
 
     component encodeAccount1 = Num2Bits(accountLevels);
     component encodeAccount2 = Num2Bits(accountLevels);
+    component encodeTokenID = Num2Bits(tokenLevels);
     component encodeAmount = Num2Bits(FloatLength());
 
     
@@ -149,6 +153,7 @@ template DecodeTx(balanceLevels, orderLevels, accountLevels) {
 
     encodeAccount1.in <== accountID1;
     encodeAccount2.in <== accountID2;
+    encodeTokenID.in <== tokenID1;
     //amount is purposed to be 40bit-float, enforce error on overflowed
     encodeAmount.in <== amount;
 
@@ -158,8 +163,12 @@ template DecodeTx(balanceLevels, orderLevels, accountLevels) {
         encodedTxData[i+accountLevels] <== encodeAccount2.out[i];
     }
 
+    for (i = 0; i < tokenLevels; i++) {
+        encodedTxData[i+accountLevels*2] <== encodeTokenID.out[i];
+    }
+
     for (i = 0; i < FloatLength(); i++) {
-        encodedTxData[i+accountLevels*2] <== encodeAmount.out[i];
+        encodedTxData[i+accountLevels*2+tokenLevels] <== encodeAmount.out[i];
     }
 
 }
