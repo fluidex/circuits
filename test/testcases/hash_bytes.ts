@@ -3,21 +3,32 @@ import { SimpleTest, TestComponent } from './interface';
 import { getCircuitSrcDir } from '../common/circuit';
 import {Hash} from 'fast-sha256'
 
-const example = 'hello'
-const totalBit = example.length * 8;
+//4e877400000000
+const bits =  [
+  0, 1, 0, 0, 1, 1, 1, 0, 
+  1, 0, 0, 0, 0, 1, 1, 1, 
+  0, 1, 1, 1, 0, 1, 0, 0, 
+  0, 0, 0, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 0, 0, 0, 
+  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0
+];
 
 class TestHashSha256 implements SimpleTest {
   getTestData() {
-    const bits = []
 
-    for(let i = 0; i < totalBit; i++){
-      const c = example.charCodeAt(i / 8);
-      //notice the bits is group into 8-bit bytes and being input for Sha256
-      bits.push((c & (1 << 7- i % 8))  === 0 ? 0 : 1)
+    let buf = []
+
+    for(let i = 0; i < bits.length / 8; i++){
+      let ch = 0;
+      for (let j = 0; j < 8; j++){
+        ch += bits[i*8 + j] << (7- j)
+      }
+      buf.push(ch)
     }
 
     const hasher = new Hash
-    hasher.update(Buffer.from(example));
+    hasher.update(Buffer.from(buf));
 
     let input = {
       bits,
@@ -27,12 +38,12 @@ class TestHashSha256 implements SimpleTest {
     }
 
     //console.log(JSON.stringify(input, null, 2));
-    return [{ input, output, name: 'TestHashTxData' }];
+    return [{ input, output, name: 'TestSHA256Hash' }];
   }
   getComponent(): TestComponent {
     return {
       src: path.join(getCircuitSrcDir(), 'lib', 'sha256.circom'),
-      main: `Sha256ToNum(${totalBit})`,
+      main: `Sha256ToNum(${bits.length})`,
     };
   }
 }

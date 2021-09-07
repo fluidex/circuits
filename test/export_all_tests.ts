@@ -3,7 +3,9 @@ import { circuitSrcToName } from './common/circuit';
 import { TestCheckLeafExists, TestCheckLeafUpdate } from './testcases/binary_merkle_tree';
 import { TestRescueHash, TestRescueHash2 } from './testcases/rescue';
 import { TestPoseidonHash } from './testcases/poseidon';
+import { TestHashSha256 } from './testcases/hash_bytes';
 import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './testcases/hash_state';
+import { TestHashTxData } from './testcases/hash_txdata';
 //, TestDepositToOld } from './deposit';
 // already tested within the `block` test case
 //import { TestTransfer } from './transfer';
@@ -22,10 +24,12 @@ function getAllTests(): Array<SimpleTest> {
   result.push(new TestRescueHash());
   result.push(new TestRescueHash2());
   result.push(new TestPoseidonHash());
+  result.push(new TestHashSha256());
   result.push(new TestCheckLeafExists());
   result.push(new TestCheckLeafUpdate());
   result.push(new TestHashAccount());
   result.push(new TestHashOrder());
+  result.push(new TestHashTxData());
   result.push(new TestGenesisOrderRoot());
   //result.push(new TestDepositToNew());
   //result.push(new TestDepositToOld());
