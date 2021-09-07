@@ -8,7 +8,13 @@ include "./lib/bitify.circom";
  */
 
 function TxLength() { return 61; }
+
+//currently only the least packing for transfer tx ...
+//so accountID * 2 + tokenID + amount
+
+function TxDataLength(accountLevels, tokenLevels) { return accountLevels * 2 + tokenLevels + 40; }
 function FloatLength() { return 40;}
+
 
 template DecodeTx(balanceLevels, orderLevels, accountLevels) {
     //TODO: we should also have levels for token tree?
@@ -79,9 +85,7 @@ template DecodeTx(balanceLevels, orderLevels, accountLevels) {
     signal output newOrder2AmountBuy;
     signal output dstIsNew;
 
-    //currently only the least packing for transfer tx ...
-    //so accountID * 2 + tokenID + amount
-    signal output encodedTxData[accountLevels*2 + tokenLevels + FloatLength()];
+    signal output encodedTxData[TxDataLength(accountLevels, tokenLevels)];
 
     component encodeAccount1 = Num2Bits(accountLevels);
     component encodeAccount2 = Num2Bits(accountLevels);

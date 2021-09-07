@@ -7,7 +7,7 @@ include "./lib/bitify.circom";
  */
 
 function TxLength() { return <%= codegen.config.commonPayload.length %>; }
-function FloatLength() { return <%= codegen.config.floatLength %>;}
+<%= codegen.codeBlocks.DAProtocolUtils %>
 
 template DecodeTx(balanceLevels, orderLevels, accountLevels) {
     //TODO: we should also have levels for token tree?
@@ -18,9 +18,7 @@ template DecodeTx(balanceLevels, orderLevels, accountLevels) {
     <% for(const item of codegen.config.commonPayload) { %>
     signal output <%= item %>;<% } %>
 
-    //currently only the least packing for transfer tx ...
-    //so accountID * 2 + tokenID + amount
-    signal output encodedTxData[accountLevels*2 + tokenLevels + FloatLength()];
+    signal output encodedTxData[TxDataLength(accountLevels, tokenLevels)];
 
     component encodeAccount1 = Num2Bits(accountLevels);
     component encodeAccount2 = Num2Bits(accountLevels);
