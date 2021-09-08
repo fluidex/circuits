@@ -16,9 +16,7 @@ function TxDataLength(accountLevels, tokenLevels) { return accountLevels * 2 + t
 function FloatLength() { return 40;}
 
 
-template DecodeTx(balanceLevels, orderLevels, accountLevels) {
-    //TODO: we should also have levels for token tree?
-    var tokenLevels = 16;
+template DecodeTx(tokenLevels, orderLevels, accountLevels) {
 
     signal input in[TxLength()];
 

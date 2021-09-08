@@ -7,6 +7,7 @@ include "./transfer.circom";
 include "./withdraw.circom";
 include "./spot_trade.circom";
 include "./base_tx.circom";
+include "./hash_txdata.circom"
 
 /**
  * Process a rollup block and transactions inside
@@ -25,6 +26,8 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     // TODO: replace all the public inputs with sha3 hash later
     signal input oldRoot;
     signal input newRoot;
+    signal input txDataHashHi;
+    signal input txDataHashLo;
 
     // transactions
     signal private input txsType[nTxs];
@@ -48,10 +51,13 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         oldAccountRoots[i] === newAccountRoots[i-1];
     }
 
+    // TODO: we may need tokenTree later?
+    var tokenLevels = 3;
+
     // decode each transaction
     component decodedTx[nTxs];
     for (var i = 0; i < nTxs; i++) {
-        decodedTx[i] = DecodeTx(balanceLevels, orderLevels, accountLevels);
+        decodedTx[i] = DecodeTx(tokenLevels, orderLevels, accountLevels);
         for (var j = 0; j < TxLength(); j++) {
             decodedTx[i].in[j] <== encodedTxs[i][j];
         }
@@ -82,6 +88,16 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         enableSpotTrade[i].in[1] <== TxTypeSpotTrade();
     }
 
+    // data avaliability check
+    var txBits = TxDataLength(accountLevels, tokenLevels);
+    component txDataHasher = HashTxDataForDA(nTxs, accountLevels, tokenLevels);
+    for (var i = 0; i < nTxs; i++) {
+        for (var j = 0; j < txBits; j++) {
+            decodedTx[i].encodedTxData[j] ==> txDataHasher.bits[i*txBits + j];
+        }
+    }
+    txDataHasher.hashOutHi === txDataHashHi;
+    txDataHasher.hashOutLo === txDataHashLo;
 
     // universal check
     component balanceChecker1[nTxs];

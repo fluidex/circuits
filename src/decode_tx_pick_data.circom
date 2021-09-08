@@ -16,3 +16,24 @@ template PickTxDataFromTx(tokenLevels, accountLevels) {
         decoder.encodedTxData[i] ==> txData[i];
     }
 }
+
+
+template PickTxDataFromTxs(nTxs, tokenLevels, accountLevels) {
+    signal input in[nTxs][TxLength()];
+    signal output txData[nTxs*TxDataLength(accountLevels, tokenLevels)];
+    component decoder[nTxs];
+
+    for (var i = 0; i < nTxs; i++) {
+        decoder[i] = DecodeTx(tokenLevels, 0, accountLevels);
+        for (var j = 0; j < TxLength(); j++){
+            decoder[i].in[j] <== in[i][j];
+        }
+    }
+
+    var txBits = TxDataLength(accountLevels, tokenLevels);
+    for (var i = 0; i < nTxs; i++) {
+        for (var j = 0; j < txBits; j++){
+            decoder[i].encodedTxData[j] ==> txData[i*txBits + j];
+        }
+    }
+}

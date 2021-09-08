@@ -104,4 +104,32 @@ class TestTxDataEncode implements SimpleTest {
   }
 }
 
-export { TestTxDataEncode };
+
+class TestTxDataArrayEncode implements SimpleTest {
+  getTestData() {
+    const hasher = new DA_Hasher(accountLevels, tokenLevels);
+    let txpls = [];
+    let txpl = mockTransferTx();
+    hasher.encodeRawPayload(txpl);
+    txpls.push(txpl)
+
+    txpl = mockDepositToTx(true);
+    hasher.encodeRawPayload(txpl);
+    txpls.push(txpl)
+
+    txpl = mockDepositToTx(false);
+    hasher.encodeRawPayload(txpl);
+    txpls.push(txpl)
+
+    return [{input: {in: txpls}, output: {txData: hasher.bits()}, name: 'txs'}];
+  }
+  getComponent(): TestComponent {
+    return {
+      src: path.join(getCircuitSrcDir(), 'decode_tx_pick_data.circom'),
+      main: `PickTxDataFromTxs(3, ${tokenLevels}, ${accountLevels})`,
+    };
+  }
+}
+
+
+export { TestTxDataEncode, TestTxDataArrayEncode };

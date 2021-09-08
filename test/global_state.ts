@@ -8,7 +8,10 @@ const Scalar = ffjavascript.Scalar;
 import { RawTx, DepositToNewTx, DepositToOldTx, WithdrawTx, SpotTradeTx, TranferTx, TxLength, TxDetailIdx, TxType } from './common/tx';
 import { L2Block } from './common/block';
 import { AccountState } from './common/account_state';
+import { DA_Hasher } from './common/da_hashing';
 import { OrderState } from 'fluidex.js';
+
+const tokenLevels = 3;
 
 // TODO:
 // 1. how to handle order cancel? it it needed to implement order cancel inside circuits?
@@ -754,9 +757,16 @@ class GlobalState {
     let accountPathElements = bufferedTxs.map(tx => [tx.accountPath0, tx.accountPath1]);
     let oldAccountRoots = bufferedTxs.map(tx => tx.rootBefore);
     let newAccountRoots = bufferedTxs.map(tx => tx.rootAfter);
+    //data avaliability
+    const hasher = new DA_Hasher(this.accountLevels, tokenLevels);
+    bufferedTxs.forEach(tx => hasher.encodeRawTx(tx));
+    const digest = hasher.digestToFF();
+
     return {
       oldRoot: oldAccountRoots[0],
       newRoot: newAccountRoots[newAccountRoots.length - 1],
+      txDataHashHi: digest.Hi,
+      txDataHashLo: digest.Lo,
       txsType,
       encodedTxs,
       balancePathElements,

@@ -13,7 +13,7 @@ import { TestWithdraw } from './testcases/withdraw';
 //import { TestPlaceOrder } from './place_order';
 //import { TestSpotTrade } from './spot_trade';
 import { TestBlock } from './testcases/block';
-import { TestTxDataEncode } from './testcases/encode_txdata'
+import { TestTxDataEncode, TestTxDataArrayEncode } from './testcases/encode_txdata'
 import { SimpleTest } from './testcases/interface';
 
 import * as path from 'path';
@@ -38,7 +38,8 @@ function getAllTests(): Array<SimpleTest> {
   //result.push(new TestPlaceOrder());
   //result.push(new TestSpotTrade());
   result.push(new TestBlock());
-  result.push(new TestTxDataEncode())
+  result.push(new TestTxDataEncode());
+  result.push(new TestTxDataArrayEncode());
   return result;
 }
 
