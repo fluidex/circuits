@@ -44,6 +44,10 @@ class DA_Hasher extends encodeCtx {
 
     encodeRawTx(tx: tx.RawTx) {
         const {payload} = tx
+        this.encodeRawPayload(payload);
+    }
+
+    encodeRawPayload(payload: Array<bigint>) {
         this.encodeNumber(Number(payload[TxDetailIdx.AccountID1]), this.nAccountLevel)
         this.encodeNumber(Number(payload[TxDetailIdx.AccountID2]), this.nAccountLevel)
         this.encodeNumber(Number(payload[TxDetailIdx.TokenID1]), this.nTokenLevel)

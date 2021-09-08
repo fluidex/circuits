@@ -5,6 +5,7 @@ const Scalar = ffjavascript.Scalar;
 import { SimpleTest, TestComponent } from './interface';
 import { TxLength, TxDetailIdx } from '../common/tx';
 import { getCircuitSrcDir } from '../common/circuit';
+import { DA_Hasher } from '../common/da_hashing';
 const assert = require('assert').strict;
 
 function mockTransferTx() : Array<bigint> {
@@ -74,24 +75,33 @@ function mockDepositToTx(isNew: boolean) : Array<bigint> {
   return encodedTx
 }
 
-const orderLevels = 2;
-const balanceLevels = 2;
+const tokenLevels = 6;
 const accountLevels = 2;
 
-class TestTxDecode implements SimpleTest {
+
+function genOutput(payload: Array<bigint>) : Array<number>{
+  const hasher = new DA_Hasher(accountLevels, tokenLevels);
+  hasher.encodeRawPayload(payload);
+  return hasher.bits()
+}
+
+class TestTxDataEncode implements SimpleTest {
   getTestData() {
     let result = [];
-    result.push({ input: {in: mockTransferTx()}, name: 'transfer' });    
-    result.push({ input: {in: mockDepositToTx(true)}, name: 'depositNew' });    
-    result.push({ input: {in: mockDepositToTx(false)}, name: 'depositOld' });    
+    let txpl = mockTransferTx();
+    result.push({ input: {in: txpl}, output: {txData: genOutput(txpl)}, name: 'transfer' });
+    txpl = mockDepositToTx(true);
+    result.push({ input: {in: txpl}, output: {txData: genOutput(txpl)}, name: 'depositNew' });    
+    txpl = mockDepositToTx(false);
+    result.push({ input: {in: txpl}, output: {txData: genOutput(txpl)}, name: 'depositOld' });    
     return result;
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(getCircuitSrcDir(), 'decode_tx.circom'),
-      main: `DecodeTx(${balanceLevels}, ${orderLevels}, ${accountLevels})`,
+      src: path.join(getCircuitSrcDir(), 'decode_tx_pick_data.circom'),
+      main: `PickTxDataFromTx(${tokenLevels}, ${accountLevels})`,
     };
   }
 }
 
-export { TestTxDecode };
+export { TestTxDataEncode };
