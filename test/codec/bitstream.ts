@@ -1,5 +1,17 @@
 import { Buffer } from 'buffer';
 
+const max32bitInt = 4294967295
+
+//notice the arithmetic in js can handle 2^53 integer while bitshift
+//can just handle 2^32
+function safeShift(n : number) : number{
+  if (n > max32bitInt){
+    return n / 2;
+  }
+
+  return n >>> 1;
+}
+
 class encodeCtx {
   private applyingBit: Array<number>;
   private encodingBits: Array<number>;
@@ -66,7 +78,7 @@ class encodeCtx {
 
     for (let i = 0; i < bits; i++) {
       this.applyBit((n & 1) === 0);
-      n >>= 1;
+      n = safeShift(n);
     }
     if (n > 0) {
       throw new Error('can not encode number within specified bits');
