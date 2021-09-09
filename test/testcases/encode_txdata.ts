@@ -8,8 +8,8 @@ import { getCircuitSrcDir } from '../common/circuit';
 import { DA_Hasher } from '../common/da_hashing';
 const assert = require('assert').strict;
 
-function mockTransferTx() : Array<bigint> {
-  let encodedTx : Array<bigint> = new Array(TxLength);
+function mockTransferTx(): Array<bigint> {
+  let encodedTx: Array<bigint> = new Array(TxLength);
   encodedTx.fill(0n, 0, TxLength);
 
   const amount = BigInt('18445532');
@@ -37,11 +37,11 @@ function mockTransferTx() : Array<bigint> {
   encodedTx[TxDetailIdx.EnableSigCheck1] = 1n;
   encodedTx[TxDetailIdx.DstIsNew] = 0n;
 
-  return encodedTx
+  return encodedTx;
 }
 
-function mockDepositToTx(isNew: boolean) : Array<bigint> {
-  let encodedTx : Array<bigint> = new Array(TxLength);
+function mockDepositToTx(isNew: boolean): Array<bigint> {
+  let encodedTx: Array<bigint> = new Array(TxLength);
   encodedTx.fill(0n, 0, TxLength);
 
   const balance = isNew ? 0n : BigInt('222');
@@ -71,29 +71,28 @@ function mockDepositToTx(isNew: boolean) : Array<bigint> {
 
   encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
   encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
-  encodedTx[TxDetailIdx.DstIsNew] = isNew ? 1n : 0n; 
-  return encodedTx
+  encodedTx[TxDetailIdx.DstIsNew] = isNew ? 1n : 0n;
+  return encodedTx;
 }
 
 const tokenLevels = 6;
 const accountLevels = 2;
 
-
-function genOutput(payload: Array<bigint>) : Array<number>{
+function genOutput(payload: Array<bigint>): Array<number> {
   const hasher = new DA_Hasher(accountLevels, tokenLevels);
   hasher.encodeRawPayload(payload);
-  return hasher.bits()
+  return hasher.bits();
 }
 
 class TestTxDataEncode implements SimpleTest {
   getTestData() {
     let result = [];
     let txpl = mockTransferTx();
-    result.push({ input: {in: txpl}, output: {txData: genOutput(txpl)}, name: 'transfer' });
+    result.push({ input: { in: txpl }, output: { txData: genOutput(txpl) }, name: 'transfer' });
     txpl = mockDepositToTx(true);
-    result.push({ input: {in: txpl}, output: {txData: genOutput(txpl)}, name: 'depositNew' });    
+    result.push({ input: { in: txpl }, output: { txData: genOutput(txpl) }, name: 'depositNew' });
     txpl = mockDepositToTx(false);
-    result.push({ input: {in: txpl}, output: {txData: genOutput(txpl)}, name: 'depositOld' });    
+    result.push({ input: { in: txpl }, output: { txData: genOutput(txpl) }, name: 'depositOld' });
     return result;
   }
   getComponent(): TestComponent {
@@ -104,24 +103,23 @@ class TestTxDataEncode implements SimpleTest {
   }
 }
 
-
 class TestTxDataArrayEncode implements SimpleTest {
   getTestData() {
     const hasher = new DA_Hasher(accountLevels, tokenLevels);
     let txpls = [];
     let txpl = mockTransferTx();
     hasher.encodeRawPayload(txpl);
-    txpls.push(txpl)
+    txpls.push(txpl);
 
     txpl = mockDepositToTx(true);
     hasher.encodeRawPayload(txpl);
-    txpls.push(txpl)
+    txpls.push(txpl);
 
     txpl = mockDepositToTx(false);
     hasher.encodeRawPayload(txpl);
-    txpls.push(txpl)
+    txpls.push(txpl);
 
-    return [{input: {in: txpls}, output: {txData: hasher.bits()}, name: 'txs'}];
+    return [{ input: { in: txpls }, output: { txData: hasher.bits() }, name: 'txs' }];
   }
   getComponent(): TestComponent {
     return {
@@ -130,6 +128,5 @@ class TestTxDataArrayEncode implements SimpleTest {
     };
   }
 }
-
 
 export { TestTxDataEncode, TestTxDataArrayEncode };

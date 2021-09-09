@@ -11,7 +11,6 @@ import { AccountState } from './common/account_state';
 import { DA_Hasher } from './common/da_hashing';
 import { OrderState } from 'fluidex.js';
 
-
 // TODO:
 // 1. how to handle order cancel? it it needed to implement order cancel inside circuits?
 // 2. what will happen when num of open orders > 2**orderLevel?
