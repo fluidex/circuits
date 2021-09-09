@@ -3,9 +3,8 @@ import { circuitSrcToName } from './common/circuit';
 import { TestCheckLeafExists, TestCheckLeafUpdate } from './testcases/binary_merkle_tree';
 import { TestRescueHash, TestRescueHash2 } from './testcases/rescue';
 import { TestPoseidonHash } from './testcases/poseidon';
-import { TestHashSha256 } from './testcases/hash_bytes';
 import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './testcases/hash_state';
-import { TestHashTxData } from './testcases/hash_txdata';
+import { TestHashTxData, TestHashSha256 } from './testcases/hash_txdata';
 //, TestDepositToOld } from './deposit';
 // already tested within the `block` test case
 //import { TestTransfer } from './transfer';

@@ -1,13 +1,13 @@
-// Generated from tpl/ejs/src/block.circom.ejs. Don't modify this file manually
+// Generated from tpl\\ejs\\src\\block.circom.ejs. Don't modify this file manually
 include "../node_modules/circomlib/circuits/compconstant.circom";
 include "./lib/hash_state.circom";
+include "./lib/sha256.circom";
 include "./decode_tx.circom";
 include "./deposit.circom";
 include "./transfer.circom";
 include "./withdraw.circom";
 include "./spot_trade.circom";
 include "./base_tx.circom";
-include "./hash_txdata.circom"
 
 /**
  * Process a rollup block and transactions inside
@@ -28,7 +28,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     signal input newRoot;
     signal input txDataHashHi;
     signal input txDataHashLo;
-
+    
     // transactions
     signal private input txsType[nTxs];
     signal private input encodedTxs[nTxs][TxLength()];
@@ -51,13 +51,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         oldAccountRoots[i] === newAccountRoots[i-1];
     }
 
-    // TODO: we may need tokenTree later?
-    var tokenLevels = 3;
-
     // decode each transaction
     component decodedTx[nTxs];
     for (var i = 0; i < nTxs; i++) {
-        decodedTx[i] = DecodeTx(tokenLevels, orderLevels, accountLevels);
+        decodedTx[i] = DecodeTx(balanceLevels, orderLevels, accountLevels);
         for (var j = 0; j < TxLength(); j++) {
             decodedTx[i].in[j] <== encodedTxs[i][j];
         }
@@ -89,15 +86,15 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     }
 
     // data avaliability check
-    var txBits = TxDataLength(accountLevels, tokenLevels);
-    component txDataHasher = HashTxDataForDA(nTxs, accountLevels, tokenLevels);
+    var txBits = TxDataLength(accountLevels, balanceLevels);
+    component txDataHasher = Sha256ToNum(nTxs *txBits);
     for (var i = 0; i < nTxs; i++) {
         for (var j = 0; j < txBits; j++) {
             decodedTx[i].encodedTxData[j] ==> txDataHasher.bits[i*txBits + j];
         }
     }
     txDataHasher.hashOutHi === txDataHashHi;
-    txDataHasher.hashOutLo === txDataHashLo;
+    txDataHasher.hashOutLo === txDataHashLo;    
 
     // universal check
     component balanceChecker1[nTxs];

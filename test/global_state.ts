@@ -11,7 +11,6 @@ import { AccountState } from './common/account_state';
 import { DA_Hasher } from './common/da_hashing';
 import { OrderState } from 'fluidex.js';
 
-const tokenLevels = 3;
 
 // TODO:
 // 1. how to handle order cancel? it it needed to implement order cancel inside circuits?
@@ -758,7 +757,7 @@ class GlobalState {
     let oldAccountRoots = bufferedTxs.map(tx => tx.rootBefore);
     let newAccountRoots = bufferedTxs.map(tx => tx.rootAfter);
     //data avaliability
-    const hasher = new DA_Hasher(this.accountLevels, tokenLevels);
+    const hasher = new DA_Hasher(this.accountLevels, this.balanceLevels);
     bufferedTxs.forEach(tx => hasher.encodeRawTx(tx));
     const digest = hasher.digestToFF();
 
