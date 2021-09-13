@@ -12,7 +12,7 @@ function TxLength() { return 61; }
 //currently only the minimal required packing for transfer tx ...
 //so accountID * 2 + tokenID + amount
 
-function TxDataLength(accountLevels, tokenLevels) { return accountLevels * 2 + tokenLevels + 40; }
+function TxDataLength(accountLevels, tokenLevels) { return accountLevels * 2 + tokenLevels + FloatLength(); }
 function FloatLength() { return 40;}
 
 
