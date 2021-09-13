@@ -26,10 +26,7 @@ template Sha256ToNum(nBitsIn) {
     signal output hashOutHi;
     signal output hashOutLo;
 
-    var bitPadding = 8 - nBits % 8;
-    if (bitPadding == 8){
-        bitPadding = 0;
-    }
+    var bitPadding = (8 - nBits % 8) % 8;
 
     var hashBits = nBits + bitPadding;
     component hasher = Sha256(hashBits);
