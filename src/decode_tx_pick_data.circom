@@ -1,5 +1,5 @@
-//The circuit used for testing decode_tx.circom, some filed in the output of DecodeTx is picked up so test script
-//can build test cases more convenient
+// This circuit is used for testing decode_tx.circom, some filed in the output of DecodeTx is picked up so test script
+// can build test cases more conveniently
 
 include "./decode_tx.circom"
 

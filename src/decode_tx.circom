@@ -13,7 +13,7 @@ function TxLength() { return 61; }
 //so accountID * 2 + tokenID + amount
 
 function TxDataLength(accountLevels, tokenLevels) { return accountLevels * 2 + tokenLevels + FloatLength(); }
-function FloatLength() { return 40;}
+function FloatLength() { return 40; }
 
 
 template DecodeTx(tokenLevels, orderLevels, accountLevels) {
