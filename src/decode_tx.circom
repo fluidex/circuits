@@ -9,7 +9,7 @@ include "./lib/bitify.circom";
 
 function TxLength() { return 61; }
 
-//currently only the least packing for transfer tx ...
+//currently only the minimal required packing for transfer tx ...
 //so accountID * 2 + tokenID + amount
 
 function TxDataLength(accountLevels, tokenLevels) { return accountLevels * 2 + tokenLevels + 40; }

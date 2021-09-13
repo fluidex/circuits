@@ -1,6 +1,4 @@
-
 include "../../node_modules/circomlib/circuits/sha256/sha256.circom";
-
 
 //this is a work-around for handling the issue of circom, see https://github.com/fluidex/circom-plus/issues/4
 function dummyN(n) {
