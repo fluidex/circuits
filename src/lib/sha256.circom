@@ -44,7 +44,7 @@ template Sha256ToNum(nBitsIn) {
     for (var i = 31; i >= 16; i--){
         for (var j = 7; j >= 0; j--) {
             lc1 += hasher.out[i*8+j] * e2;
-            e2 = e2 + e2;
+            e2 = e2 << 1;
         }
     }
     lc1 ==> hashOutLo;
@@ -54,7 +54,7 @@ template Sha256ToNum(nBitsIn) {
     for (var i = 15; i >= 0; i--){
         for (var j = 7; j >= 0; j--) {
             lc1 += hasher.out[i*8+j] * e2;
-            e2 = e2 + e2;
+            e2 = e2 << 1;
         }
     }
 
