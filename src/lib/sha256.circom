@@ -20,9 +20,9 @@ template Sha256ToNum(nBitsIn) {
     var nBits = dummyN(nBitsIn);
 
     signal input bits[nBits];
-    //ff we common used has ~254 bit for expressing ineger so we have to
-    //divide uint256 into two parts
-    //NOTICE: do not use FF whose order is less than 2^129
+    // The FF we common used has ~254 bit for expressing ineger so we have to
+    // divide uint256 into two parts
+    // NOTICE: do not use FF whose domain/size is less than 2^129
     signal output hashOutHi;
     signal output hashOutLo;
 
