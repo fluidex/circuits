@@ -31,7 +31,7 @@ jobs:
         uses: creyD/prettier_action@v4.0
         with:
           dry: True
-          prettier_options: --check test/* tools/* tpl/*
+          prettier_options: --check **/*.ts **/*.js
           # github_token: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: Cache node_modules
