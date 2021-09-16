@@ -6,6 +6,7 @@ include "./decode_tx.circom"
 template PickTxDataFromTx(tokenLevels, accountLevels) {
     signal input in[TxLength()];
     signal output txData[TxDataLength(accountLevels, tokenLevels)];
+    signal output amount;
     component decoder = DecodeTx(tokenLevels, 0, accountLevels);
 
     for (var i = 0; i < TxLength(); i++){
@@ -15,6 +16,7 @@ template PickTxDataFromTx(tokenLevels, accountLevels) {
     for (var i = 0; i < TxDataLength(accountLevels, tokenLevels); i++){
         decoder.encodedTxData[i] ==> txData[i];
     }
+    decoder.amount ==> amount;
 }
 
 

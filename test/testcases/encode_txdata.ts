@@ -6,6 +6,7 @@ import { SimpleTest, TestComponent } from './interface';
 import { TxLength, TxDetailIdx } from '../common/tx';
 import { getCircuitSrcDir } from '../common/circuit';
 import { DA_Hasher } from '../common/da_hashing';
+import { encodeFloat, decodeFloat } from '../codec/float';
 const assert = require('assert').strict;
 
 function mockTransferTx(): Array<bigint> {
@@ -75,24 +76,62 @@ function mockDepositToTx(isNew: boolean): Array<bigint> {
   return encodedTx;
 }
 
+
+function mockBigDepositToTx(): Array<bigint> {
+  let encodedTx: Array<bigint> = new Array(TxLength);
+  encodedTx.fill(0n, 0, TxLength);
+
+  const amount = BigInt('1000000000000');
+  const tokenID = 42;
+  const ethAddr = BigInt('0x13e987c9169f532e1EAcAFcd69CFc84344Dbd781');
+
+  encodedTx[TxDetailIdx.Amount] = encodeFloat(amount);
+
+  encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tokenID);
+  encodedTx[TxDetailIdx.AccountID1] = Scalar.e(2);
+  encodedTx[TxDetailIdx.Balance1] = 0n;
+  encodedTx[TxDetailIdx.Nonce1] = 0n;
+  encodedTx[TxDetailIdx.EthAddr1] = 0n;
+  encodedTx[TxDetailIdx.Sign1] = 0n;
+  encodedTx[TxDetailIdx.Ay1] = 0n;
+
+  encodedTx[TxDetailIdx.TokenID2] = Scalar.e(tokenID);
+  encodedTx[TxDetailIdx.AccountID2] = Scalar.e(2);
+  encodedTx[TxDetailIdx.Balance2] = amount;
+  encodedTx[TxDetailIdx.Nonce2] = 0n;
+  encodedTx[TxDetailIdx.EthAddr2] = ethAddr;
+  encodedTx[TxDetailIdx.Sign2] = Scalar.e('0x519B');
+  encodedTx[TxDetailIdx.Ay2] = BigInt(999);
+
+  encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
+  encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
+  encodedTx[TxDetailIdx.DstIsNew] = 1n;
+  return encodedTx;
+}
+
 const tokenLevels = 6;
 const accountLevels = 2;
 
-function genOutput(payload: Array<bigint>): Array<number> {
+function genOutput(payload: Array<bigint>): Object {
   const hasher = new DA_Hasher(accountLevels, tokenLevels);
   hasher.encodeRawPayload(payload);
-  return hasher.bits();
+  return {
+    txData: hasher.bits(),
+    amount: decodeFloat(payload[TxDetailIdx.Amount]),
+  }
 }
 
 class TestTxDataEncode implements SimpleTest {
   getTestData() {
     let result = [];
     let txpl = mockTransferTx();
-    result.push({ input: { in: txpl }, output: { txData: genOutput(txpl) }, name: 'transfer' });
+    result.push({ input: { in: txpl }, output: genOutput(txpl), name: 'transfer' });
     txpl = mockDepositToTx(true);
-    result.push({ input: { in: txpl }, output: { txData: genOutput(txpl) }, name: 'depositNew' });
+    result.push({ input: { in: txpl }, output: genOutput(txpl), name: 'depositNew' });
     txpl = mockDepositToTx(false);
-    result.push({ input: { in: txpl }, output: { txData: genOutput(txpl) }, name: 'depositOld' });
+    result.push({ input: { in: txpl }, output: genOutput(txpl), name: 'depositOld' });
+    txpl = mockBigDepositToTx();
+    result.push({ input: { in: txpl }, output: genOutput(txpl), name: 'depositBig' });
     return result;
   }
   getComponent(): TestComponent {

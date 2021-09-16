@@ -1,5 +1,6 @@
 // Generated from tpl\\ejs\\src\\decode_tx.circom.ejs. Don't modify this file manually
 include "./constants.circom"
+include "./floats.circom"
 include "./lib/bitify.circom";
 
 // TODO: i suggest remove this component and let each child op component to do its own decoding
@@ -20,7 +21,25 @@ template DecodeTx(tokenLevels, orderLevels, accountLevels) {
 
     signal input in[TxLength()];
 
-    
+    component decodeAmount1 = DecodeFloats();
+    component decodeAmount2 = DecodeFloats();
+    decodeAmount1.encodedAmount <== in[26];
+    decodeAmount2.encodedAmount <== in[27];
+
+    signal iin[TxLength()];
+
+    for (var i = 0; i < TxLength(); i++){
+        if (i == 26){
+            iin[i] <== decodeAmount1.decodedAmount;
+        }else {
+            if (i == 27){
+                iin[i] <== decodeAmount2.decodedAmount;
+            }else {
+                iin[i] <== in[i];
+            }
+        }
+    }
+
     signal output enableBalanceCheck1;
     signal output accountID1;
     signal output tokenID1;
@@ -90,87 +109,86 @@ template DecodeTx(tokenLevels, orderLevels, accountLevels) {
     component encodeTokenID = Num2Bits(tokenLevels);
     component encodeAmount = Num2Bits(FloatLength());
 
-    
-    enableBalanceCheck1 <== in[0];
-    accountID1 <== in[1];
-    tokenID1 <== in[2];
-    balance1 <== in[3];
-    ethAddr1 <== in[4];
-    sign1 <== in[5];
-    ay1 <== in[6];
-    nonce1 <== in[7];
-    enableBalanceCheck2 <== in[8];
-    accountID2 <== in[9];
-    tokenID2 <== in[10];
-    balance2 <== in[11];
-    ethAddr2 <== in[12];
-    sign2 <== in[13];
-    ay2 <== in[14];
-    nonce2 <== in[15];
-    enableSigCheck1 <== in[16];
-    sigL2Hash1 <== in[17];
-    s1 <== in[18];
-    r8x1 <== in[19];
-    r8y1 <== in[20];
-    enableSigCheck2 <== in[21];
-    sigL2Hash2 <== in[22];
-    s2 <== in[23];
-    r8x2 <== in[24];
-    r8y2 <== in[25];
-    amount <== in[26];
-    amount2 <== in[27];
-    balance3 <== in[28];
-    balance4 <== in[29];
-    order1Pos <== in[30];
-    order2Pos <== in[31];
-    oldOrder1ID <== in[32];
-    oldOrder1TokenSell <== in[33];
-    oldOrder1FilledSell <== in[34];
-    oldOrder1AmountSell <== in[35];
-    oldOrder1TokenBuy <== in[36];
-    oldOrder1FilledBuy <== in[37];
-    oldOrder1AmountBuy <== in[38];
-    newOrder1ID <== in[39];
-    newOrder1TokenSell <== in[40];
-    newOrder1FilledSell <== in[41];
-    newOrder1AmountSell <== in[42];
-    newOrder1TokenBuy <== in[43];
-    newOrder1FilledBuy <== in[44];
-    newOrder1AmountBuy <== in[45];
-    oldOrder2ID <== in[46];
-    oldOrder2TokenSell <== in[47];
-    oldOrder2FilledSell <== in[48];
-    oldOrder2AmountSell <== in[49];
-    oldOrder2TokenBuy <== in[50];
-    oldOrder2FilledBuy <== in[51];
-    oldOrder2AmountBuy <== in[52];
-    newOrder2ID <== in[53];
-    newOrder2TokenSell <== in[54];
-    newOrder2FilledSell <== in[55];
-    newOrder2AmountSell <== in[56];
-    newOrder2TokenBuy <== in[57];
-    newOrder2FilledBuy <== in[58];
-    newOrder2AmountBuy <== in[59];
-    dstIsNew <== in[60];
-
-    encodeAccount1.in <== accountID1;
-    encodeAccount2.in <== accountID2;
-    encodeTokenID.in <== tokenID1;
+    //TODO: we should templatize these codes
+    encodeAccount1.in <== in[1];
+    encodeAccount2.in <== in[9];
+    encodeTokenID.in <== in[2];
     //amount is purposed to be 40bit-float, enforce error on overflowed
-    encodeAmount.in <== amount;
+    encodeAmount.in <== in[26];    
 
-    var i;
-    for (i = 0; i < accountLevels; i++) {
+    for (var i = 0; i < accountLevels; i++) {
         encodedTxData[i] <== encodeAccount1.out[i];
         encodedTxData[i+accountLevels] <== encodeAccount2.out[i];
     }
 
-    for (i = 0; i < tokenLevels; i++) {
+    for (var i = 0; i < tokenLevels; i++) {
         encodedTxData[i+accountLevels*2] <== encodeTokenID.out[i];
     }
 
-    for (i = 0; i < FloatLength(); i++) {
+    for (var i = 0; i < FloatLength(); i++) {
         encodedTxData[i+accountLevels*2+tokenLevels] <== encodeAmount.out[i];
     }
+
+    enableBalanceCheck1 <== iin[0];
+    accountID1 <== iin[1];
+    tokenID1 <== iin[2];
+    balance1 <== iin[3];
+    ethAddr1 <== iin[4];
+    sign1 <== iin[5];
+    ay1 <== iin[6];
+    nonce1 <== iin[7];
+    enableBalanceCheck2 <== iin[8];
+    accountID2 <== iin[9];
+    tokenID2 <== iin[10];
+    balance2 <== iin[11];
+    ethAddr2 <== iin[12];
+    sign2 <== iin[13];
+    ay2 <== iin[14];
+    nonce2 <== iin[15];
+    enableSigCheck1 <== iin[16];
+    sigL2Hash1 <== iin[17];
+    s1 <== iin[18];
+    r8x1 <== iin[19];
+    r8y1 <== iin[20];
+    enableSigCheck2 <== iin[21];
+    sigL2Hash2 <== iin[22];
+    s2 <== iin[23];
+    r8x2 <== iin[24];
+    r8y2 <== iin[25];
+    amount <== iin[26];
+    amount2 <== iin[27];
+    balance3 <== iin[28];
+    balance4 <== iin[29];
+    order1Pos <== iin[30];
+    order2Pos <== iin[31];
+    oldOrder1ID <== iin[32];
+    oldOrder1TokenSell <== iin[33];
+    oldOrder1FilledSell <== iin[34];
+    oldOrder1AmountSell <== iin[35];
+    oldOrder1TokenBuy <== iin[36];
+    oldOrder1FilledBuy <== iin[37];
+    oldOrder1AmountBuy <== iin[38];
+    newOrder1ID <== iin[39];
+    newOrder1TokenSell <== iin[40];
+    newOrder1FilledSell <== iin[41];
+    newOrder1AmountSell <== iin[42];
+    newOrder1TokenBuy <== iin[43];
+    newOrder1FilledBuy <== iin[44];
+    newOrder1AmountBuy <== iin[45];
+    oldOrder2ID <== iin[46];
+    oldOrder2TokenSell <== iin[47];
+    oldOrder2FilledSell <== iin[48];
+    oldOrder2AmountSell <== iin[49];
+    oldOrder2TokenBuy <== iin[50];
+    oldOrder2FilledBuy <== iin[51];
+    oldOrder2AmountBuy <== iin[52];
+    newOrder2ID <== iin[53];
+    newOrder2TokenSell <== iin[54];
+    newOrder2FilledSell <== iin[55];
+    newOrder2AmountSell <== iin[56];
+    newOrder2TokenBuy <== iin[57];
+    newOrder2FilledBuy <== iin[58];
+    newOrder2AmountBuy <== iin[59];
+    dstIsNew <== iin[60];
 
 }

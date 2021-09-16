@@ -9,6 +9,7 @@ import { RawTx, DepositToNewTx, DepositToOldTx, WithdrawTx, SpotTradeTx, Tranfer
 import { L2Block } from './common/block';
 import { AccountState } from './common/account_state';
 import { DA_Hasher } from './common/da_hashing';
+import { encodeFloat } from './codec/float';
 import { OrderState } from 'fluidex.js';
 
 // TODO:
@@ -292,7 +293,7 @@ class GlobalState {
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
-    encodedTx[TxDetailIdx.Amount] = tx.amount;
+    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
 
     encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
@@ -351,7 +352,7 @@ class GlobalState {
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
 
-    encodedTx[TxDetailIdx.Amount] = tx.amount;
+    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
 
     encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
@@ -435,7 +436,7 @@ class GlobalState {
     encodedTx[TxDetailIdx.AccountID1] = tx.from;
     encodedTx[TxDetailIdx.AccountID2] = tx.to;
     encodedTx[TxDetailIdx.TokenID1] = tx.tokenID;
-    encodedTx[TxDetailIdx.Amount] = tx.amount;
+    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
     encodedTx[TxDetailIdx.Nonce1] = fromAccount.nonce;
     encodedTx[TxDetailIdx.Nonce2] = toAccount.nonce;
     encodedTx[TxDetailIdx.Sign1] = fromAccount.sign;
@@ -497,7 +498,7 @@ class GlobalState {
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
 
-    encodedTx[TxDetailIdx.Amount] = tx.amount;
+    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
 
     encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
@@ -625,8 +626,8 @@ class GlobalState {
     encodedTx[TxDetailIdx.OldOrder2FilledBuy] = oldOrder2InTree.filledBuy;
     encodedTx[TxDetailIdx.OldOrder2AmountBuy] = oldOrder2InTree.totalBuy;
 
-    encodedTx[TxDetailIdx.Amount] = tx.amount1to2;
-    encodedTx[TxDetailIdx.Amount2] = tx.amount2to1;
+    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount1to2);
+    encodedTx[TxDetailIdx.Amount2] = encodeFloat(tx.amount2to1);
     encodedTx[TxDetailIdx.Order1Pos] = order1_pos;
     encodedTx[TxDetailIdx.Order2Pos] = order2_pos;
 
