@@ -9,9 +9,7 @@ include "./lib/bitify.circom";
 function TxLength() { return <%= codegen.config.commonPayload.length %>; }
 <%= codegen.codeBlocks.DAProtocolUtils %>
 
-template DecodeTx(balanceLevels, orderLevels, accountLevels) {
-    //TODO: we should also have levels for token tree?
-    var tokenLevels = 16;
+template DecodeTx(tokenLevels, orderLevels, accountLevels) {
 
     signal input in[TxLength()];
 

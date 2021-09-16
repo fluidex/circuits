@@ -5,6 +5,7 @@ const Scalar = require('ffjavascript').Scalar;
 
 const mantisaLen = 35;
 const exponentLen = 5;
+const exponentMax = (1 << 5) - 1;
 const floatLength = mantisaLen + exponentLen;
 
 const config = { mantisaLen, exponentLen, floatLength };
@@ -44,7 +45,7 @@ export function encodeFloat(_f) {
     e++;
   }
 
-  if (e > 31) {
+  if (e > exponentMax) {
     throw new Error('number too big');
   }
 
@@ -73,7 +74,7 @@ export function roundAndEncodeFloat(_f) {
     e++;
   }
 
-  if (e > 31) {
+  if (e > exponentMax) {
     throw new Error('number too big');
   }
 
@@ -100,7 +101,7 @@ export function round(fix) {
     e++;
   }
 
-  if (e > 31) {
+  if (e > exponentMax) {
     throw new Error('number too big');
   }
 
