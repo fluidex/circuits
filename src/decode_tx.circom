@@ -39,7 +39,7 @@ template DecodeTx(tokenLevels, orderLevels, accountLevels) {
             }
         }
     }
-
+    
     signal output enableBalanceCheck1;
     signal output accountID1;
     signal output tokenID1;
@@ -128,7 +128,7 @@ template DecodeTx(tokenLevels, orderLevels, accountLevels) {
     for (var i = 0; i < FloatLength(); i++) {
         encodedTxData[i+accountLevels*2+tokenLevels] <== encodeAmount.out[i];
     }
-
+    
     enableBalanceCheck1 <== iin[0];
     accountID1 <== iin[1];
     tokenID1 <== iin[2];
