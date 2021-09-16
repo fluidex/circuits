@@ -76,7 +76,6 @@ function mockDepositToTx(isNew: boolean): Array<bigint> {
   return encodedTx;
 }
 
-
 function mockBigDepositToTx(): Array<bigint> {
   let encodedTx: Array<bigint> = new Array(TxLength);
   encodedTx.fill(0n, 0, TxLength);
@@ -118,7 +117,7 @@ function genOutput(payload: Array<bigint>): Object {
   return {
     txData: hasher.bits(),
     amount: decodeFloat(payload[TxDetailIdx.Amount]),
-  }
+  };
 }
 
 class TestTxDataEncode implements SimpleTest {

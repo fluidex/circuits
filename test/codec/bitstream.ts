@@ -1,11 +1,11 @@
 import { Buffer } from 'buffer';
 
-const max32bitInt = 4294967295
+const max32bitInt = 4294967295;
 
 //notice the arithmetic in js can handle 2^53 integer while bitshift
 //can just handle 2^32
-function safeShift(n : number) : number{
-  if (n > max32bitInt){
+function safeShift(n: number): number {
+  if (n > max32bitInt) {
     return n / 2;
   }
 
