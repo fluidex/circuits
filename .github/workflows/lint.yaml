@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - prod
+      - release/*
+  pull_request:
+    branches:
+      - master
+      - prod
+      - release/*
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install Node.js 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          # cache: 'npm'
+          # cache-dependency-path: package-lock.json
+
+      - name: Cache node_modules
+        id: npm_cache
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: node_modules-${{ hashFiles('package-lock.json') }}
+
+      - name: npm ci
+        if: steps.npm_cache.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+
+      - name: Prettify js/ts code
+        run: npx prettier --check "**/*.{js,ts}"
+
+      # - run: |
+      #     npx eslint .
