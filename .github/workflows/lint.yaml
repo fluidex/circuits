@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
 
       - name: Install Node.js 16
         uses: actions/setup-node@v2
