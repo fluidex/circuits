@@ -55,7 +55,9 @@ class DA_Hasher extends encodeCtx {
 
   digest(): Buffer {
     let hasher = new Hash();
-    hasher.update(this.seal());
+    let buf = this.seal();
+    //console.log('buf', buf.toString('hex'))
+    hasher.update(buf);
 
     return Buffer.from(hasher.digest());
   }

@@ -40,7 +40,7 @@ export function encodeFloat(_f) {
   let m = f;
   let e = 0;
 
-  while (Scalar.isZero(Scalar.mod(m, 10)) && !Scalar.isZero(Scalar.div(m, 0x800000000))) {
+  while (Scalar.isZero(Scalar.mod(m, 10))) {
     m = Scalar.div(m, 10);
     e++;
   }
@@ -69,7 +69,7 @@ export function roundAndEncodeFloat(_f) {
   let m = f;
   let e = 0;
 
-  while (!Scalar.isZero(Scalar.div(m, mantisa))) {
+  while (!Scalar.isZero(Scalar.div(m, mantisa)) || Scalar.isZero(Scalar.mod(m, 10))) {
     m = Scalar.div(m, 10);
     e++;
   }
