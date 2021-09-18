@@ -10,7 +10,7 @@ include "./lib/bitify.circom";
 function TxLength() { return <%= codegen.config.commonPayload.length %>; }
 <%= codegen.codeBlocks.DAProtocolUtils %>
 
-template DecodeTx(tokenLevels, orderLevels, accountLevels) {
+template DecodeTx(balanceLevels, orderLevels, accountLevels) {
 
     signal input in[TxLength()];
 
@@ -24,7 +24,7 @@ template DecodeTx(tokenLevels, orderLevels, accountLevels) {
     for (var i = 0; i < TxLength(); i++){
         if (i == 26){
             iin[i] <== decodeAmount1.decodedAmount;
-        }else {
+        } else {
             if (i == 27){
                 iin[i] <== decodeAmount2.decodedAmount;
             }else {
@@ -35,11 +35,11 @@ template DecodeTx(tokenLevels, orderLevels, accountLevels) {
     <% for(const item of codegen.config.commonPayload) { %>
     signal output <%= item %>;<% } %>
 
-    signal output encodedTxData[TxDataLength(accountLevels, tokenLevels)];
+    signal output encodedTxData[TxDataLength(accountLevels, balanceLevels)];
 
     component encodeAccount1 = Num2Bits(accountLevels);
     component encodeAccount2 = Num2Bits(accountLevels);
-    component encodeTokenID = Num2Bits(tokenLevels);
+    component encodeTokenID = Num2Bits(balanceLevels);
     component encodeAmount = Num2Bits(FloatLength());
 
     //TODO: we should templatize these codes
@@ -54,12 +54,12 @@ template DecodeTx(tokenLevels, orderLevels, accountLevels) {
         encodedTxData[i+accountLevels] <== encodeAccount2.out[i];
     }
 
-    for (var i = 0; i < tokenLevels; i++) {
+    for (var i = 0; i < balanceLevels; i++) {
         encodedTxData[i+accountLevels*2] <== encodeTokenID.out[i];
     }
 
     for (var i = 0; i < FloatLength(); i++) {
-        encodedTxData[i+accountLevels*2+tokenLevels] <== encodeAmount.out[i];
+        encodedTxData[i+accountLevels*2+balanceLevels] <== encodeAmount.out[i];
     }
     <% for(const idx in codegen.config.commonPayload) { %>
     <%= codegen.config.commonPayload[idx] %> <== iin[<%= idx %>];<% } %>

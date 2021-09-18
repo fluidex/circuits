@@ -13,11 +13,11 @@ function TxLength() { return 61; }
 //currently only the minimal required packing for transfer tx ...
 //so accountID * 2 + tokenID + amount
 
-function TxDataLength(accountLevels, tokenLevels) { return accountLevels * 2 + tokenLevels + 40; }
+function TxDataLength(accountLevels, balanceLevels) { return accountLevels * 2 + balanceLevels + 40; }
 function FloatLength() { return 40;}
 
 
-template DecodeTx(tokenLevels, orderLevels, accountLevels) {
+template DecodeTx(balanceLevels, orderLevels, accountLevels) {
 
     signal input in[TxLength()];
 
@@ -31,7 +31,7 @@ template DecodeTx(tokenLevels, orderLevels, accountLevels) {
     for (var i = 0; i < TxLength(); i++){
         if (i == 26){
             iin[i] <== decodeAmount1.decodedAmount;
-        }else {
+        } else {
             if (i == 27){
                 iin[i] <== decodeAmount2.decodedAmount;
             }else {
@@ -102,11 +102,11 @@ template DecodeTx(tokenLevels, orderLevels, accountLevels) {
     signal output newOrder2AmountBuy;
     signal output dstIsNew;
 
-    signal output encodedTxData[TxDataLength(accountLevels, tokenLevels)];
+    signal output encodedTxData[TxDataLength(accountLevels, balanceLevels)];
 
     component encodeAccount1 = Num2Bits(accountLevels);
     component encodeAccount2 = Num2Bits(accountLevels);
-    component encodeTokenID = Num2Bits(tokenLevels);
+    component encodeTokenID = Num2Bits(balanceLevels);
     component encodeAmount = Num2Bits(FloatLength());
 
     //TODO: we should templatize these codes
@@ -121,12 +121,12 @@ template DecodeTx(tokenLevels, orderLevels, accountLevels) {
         encodedTxData[i+accountLevels] <== encodeAccount2.out[i];
     }
 
-    for (var i = 0; i < tokenLevels; i++) {
+    for (var i = 0; i < balanceLevels; i++) {
         encodedTxData[i+accountLevels*2] <== encodeTokenID.out[i];
     }
 
     for (var i = 0; i < FloatLength(); i++) {
-        encodedTxData[i+accountLevels*2+tokenLevels] <== encodeAmount.out[i];
+        encodedTxData[i+accountLevels*2+balanceLevels] <== encodeAmount.out[i];
     }
     
     enableBalanceCheck1 <== iin[0];
