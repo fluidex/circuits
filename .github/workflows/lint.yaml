@@ -40,7 +40,7 @@ jobs:
           npm ci
 
       - name: Prettify js/ts code
-        run: npx prettier --check \"**/*.{js,ts}\"
+        run: npx prettier --check "**/*.{js,ts}"
 
       # - run: |
       #     npx eslint .
