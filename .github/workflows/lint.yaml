@@ -32,7 +32,7 @@ jobs:
         with:
           dry: True
           prettier_options: --check **/*.{ts,js}
-          only_changed: True
+          file_pattern: *.ts *.js
           # github_token: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: Cache node_modules
