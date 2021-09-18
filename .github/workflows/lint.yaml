@@ -40,12 +40,7 @@ jobs:
           npm ci
 
       - name: Prettify js/ts code
-        uses: creyD/prettier_action@v4.0
-        with:
-          dry: True
-          prettier_options: --check **/*.{ts,js}
-          file_pattern: "*.ts *.js"
-          # github_token: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run fmt
 
       # - run: |
       #     npx eslint .
