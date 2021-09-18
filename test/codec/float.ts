@@ -11,15 +11,15 @@ const floatLength = mantisaLen + exponentLen;
 const config = { mantisaLen, exponentLen, floatLength };
 export { config };
 
-const mantisa = Scalar.pow(2, mantisaLen); //34359738368
+const mantisaMax = Scalar.pow(2, mantisaLen); //34359738368
 /**
  * Convert a float to a fix
  * @param {Scalar} fl - Scalar encoded in float
  * @returns {Scalar} Scalar encoded in fix
  */
 export function decodeFloat(fl) {
-  const m = fl % mantisa;
-  const e = Math.floor(Scalar.toNumber(fl / mantisa));
+  const m = fl % mantisaMax;
+  const e = Math.floor(Scalar.toNumber(fl / mantisaMax));
 
   const exp = Scalar.pow(10, e);
 
@@ -49,11 +49,11 @@ export function encodeFloat(_f) {
     throw new Error('number too big');
   }
 
-  if (!Scalar.isZero(Scalar.div(m, mantisa))) {
+  if (!Scalar.isZero(Scalar.div(m, mantisaMax))) {
     throw new Error('not enough precission');
   }
 
-  const res = m + Scalar.mul(mantisa, e);
+  const res = m + Scalar.mul(mantisaMax, e);
   return res;
 }
 
@@ -69,7 +69,7 @@ export function roundAndEncodeFloat(_f) {
   let m = f;
   let e = 0;
 
-  while (!Scalar.isZero(Scalar.div(m, mantisa)) || Scalar.isZero(Scalar.mod(m, 10))) {
+  while (!Scalar.isZero(Scalar.div(m, mantisaMax)) || Scalar.isZero(Scalar.mod(m, 10))) {
     m = Scalar.div(m, 10);
     e++;
   }
@@ -78,7 +78,7 @@ export function roundAndEncodeFloat(_f) {
     throw new Error('number too big');
   }
 
-  const res = m + Scalar.mul(mantisa, e);
+  const res = m + Scalar.mul(mantisaMax, e);
   return res;
 }
 
@@ -94,7 +94,7 @@ export function round(fix) {
   let m = f;
   let e = 0;
 
-  while (!Scalar.isZero(Scalar.div(m, mantisa))) {
+  while (!Scalar.isZero(Scalar.div(m, mantisaMax))) {
     const roundUp = Scalar.gt(Scalar.mod(m, 10), 5);
     m = Scalar.div(m, 10);
     if (roundUp) m = Scalar.add(m, 1);
@@ -105,7 +105,7 @@ export function round(fix) {
     throw new Error('number too big');
   }
 
-  const res = m + Scalar.mul(mantisa, e);
+  const res = m + Scalar.mul(mantisaMax, e);
 
   return decodeFloat(res);
 }
@@ -114,7 +114,7 @@ export function round(fix) {
 //testing ...
 const start = Scalar.e('34360000000')
 let test1 = encodeFloat(start);
-if (test1 % mantisa != Scalar.e('3436000000'))throw new Error(`ad-hoc test fail: ${test1}`);
+if (test1 % mantisaMax != Scalar.e('3436000000'))throw new Error(`ad-hoc test fail: ${test1}`);
 let test2 = decodeFloat(test1)
 if (test2 != start)throw new Error(`ad-hoc test fail: ${test2}`);
 const startPrecious = Scalar.e('34361111111')
@@ -125,7 +125,7 @@ try {
     if (typeof e === 'string')throw new Error(`ad-hoc test fail: ${e}`)
 }
 let test4 = roundAndEncodeFloat(startPrecious)
-if (test4 % mantisa != Scalar.e('3436111111'))throw new Error(`ad-hoc test fail: ${test4}`);
+if (test4 % mantisaMax != Scalar.e('3436111111'))throw new Error(`ad-hoc test fail: ${test4}`);
 let test5 = round(startPrecious)
 if (Scalar.add(test5, 1) != startPrecious)throw new Error(`ad-hoc test fail: ${test5}`);
 */
