@@ -1,6 +1,8 @@
 export class L2Block {
   oldRoot: bigint;
   newRoot: bigint;
+  txDataHashHi: bigint;
+  txDataHashLo: bigint;
   txsType: Array<any>;
   encodedTxs: Array<any>;
   balancePathElements: Array<any>;

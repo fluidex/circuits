@@ -8,6 +8,8 @@ const Scalar = ffjavascript.Scalar;
 import { RawTx, DepositToNewTx, DepositToOldTx, WithdrawTx, SpotTradeTx, TranferTx, TxLength, TxDetailIdx, TxType } from './common/tx';
 import { L2Block } from './common/block';
 import { AccountState } from './common/account_state';
+import { DA_Hasher } from './common/da_hashing';
+import { encodeFloat } from './codec/float';
 import { OrderState } from 'fluidex.js';
 
 // TODO:
@@ -291,7 +293,7 @@ class GlobalState {
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
-    encodedTx[TxDetailIdx.Amount] = tx.amount;
+    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
 
     encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
@@ -350,7 +352,7 @@ class GlobalState {
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
 
-    encodedTx[TxDetailIdx.Amount] = tx.amount;
+    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
 
     encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
@@ -434,7 +436,7 @@ class GlobalState {
     encodedTx[TxDetailIdx.AccountID1] = tx.from;
     encodedTx[TxDetailIdx.AccountID2] = tx.to;
     encodedTx[TxDetailIdx.TokenID1] = tx.tokenID;
-    encodedTx[TxDetailIdx.Amount] = tx.amount;
+    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
     encodedTx[TxDetailIdx.Nonce1] = fromAccount.nonce;
     encodedTx[TxDetailIdx.Nonce2] = toAccount.nonce;
     encodedTx[TxDetailIdx.Sign1] = fromAccount.sign;
@@ -496,7 +498,7 @@ class GlobalState {
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
 
-    encodedTx[TxDetailIdx.Amount] = tx.amount;
+    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
 
     encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
@@ -624,8 +626,8 @@ class GlobalState {
     encodedTx[TxDetailIdx.OldOrder2FilledBuy] = oldOrder2InTree.filledBuy;
     encodedTx[TxDetailIdx.OldOrder2AmountBuy] = oldOrder2InTree.totalBuy;
 
-    encodedTx[TxDetailIdx.Amount] = tx.amount1to2;
-    encodedTx[TxDetailIdx.Amount2] = tx.amount2to1;
+    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount1to2);
+    encodedTx[TxDetailIdx.Amount2] = encodeFloat(tx.amount2to1);
     encodedTx[TxDetailIdx.Order1Pos] = order1_pos;
     encodedTx[TxDetailIdx.Order2Pos] = order2_pos;
 
@@ -754,9 +756,16 @@ class GlobalState {
     let accountPathElements = bufferedTxs.map(tx => [tx.accountPath0, tx.accountPath1]);
     let oldAccountRoots = bufferedTxs.map(tx => tx.rootBefore);
     let newAccountRoots = bufferedTxs.map(tx => tx.rootAfter);
+    //data avaliability
+    const hasher = new DA_Hasher(this.accountLevels, this.balanceLevels);
+    bufferedTxs.forEach(tx => hasher.encodeRawTx(tx));
+    const digest = hasher.digestToFF();
+
     return {
       oldRoot: oldAccountRoots[0],
       newRoot: newAccountRoots[newAccountRoots.length - 1],
+      txDataHashHi: digest.Hi,
+      txDataHashLo: digest.Lo,
       txsType,
       encodedTxs,
       balancePathElements,

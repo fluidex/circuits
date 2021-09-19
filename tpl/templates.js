@@ -188,6 +188,17 @@ ${generateMultiAssign(compName, ['accountID', 'ethAddr', 'sign', 'ay', 'nonce', 
         }
 `;
 };
+
+const DAProtocolUtilsTplFn = function (floatLength) {
+  return `
+//currently only the minimal required packing for transfer tx ...
+//so accountID * 2 + tokenID + amount
+
+function TxDataLength(accountLevels, tokenLevels) { return accountLevels * 2 + tokenLevels + ${floatLength}; }
+function FloatLength() { return ${floatLength};}
+`;
+};
+
 export {
   JsInputEncoderTpl,
   RsInputEncoderTpl,
@@ -201,6 +212,7 @@ export {
   LoopAssignTpl,
   CheckEqTpl,
   MultiCheckEqTpl,
+  DAProtocolUtilsTplFn,
   universalBalanceCheckTplFn,
   generateMultiAssign,
 };

@@ -4,6 +4,7 @@ import { TestCheckLeafExists, TestCheckLeafUpdate } from './testcases/binary_mer
 import { TestRescueHash, TestRescueHash2 } from './testcases/rescue';
 import { TestPoseidonHash } from './testcases/poseidon';
 import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './testcases/hash_state';
+import { TestHashTxData, TestHashSha256 } from './testcases/hash_txdata';
 //, TestDepositToOld } from './deposit';
 // already tested within the `block` test case
 //import { TestTransfer } from './transfer';
@@ -11,6 +12,8 @@ import { TestWithdraw } from './testcases/withdraw';
 //import { TestPlaceOrder } from './place_order';
 //import { TestSpotTrade } from './spot_trade';
 import { TestBlock } from './testcases/block';
+import { TestDecodeFloat } from './testcases/decode_float';
+import { TestTxDataEncode, TestTxDataArrayEncode } from './testcases/encode_txdata';
 import { SimpleTest } from './testcases/interface';
 
 import * as path from 'path';
@@ -21,10 +24,12 @@ function getAllTests(): Array<SimpleTest> {
   result.push(new TestRescueHash());
   result.push(new TestRescueHash2());
   result.push(new TestPoseidonHash());
+  result.push(new TestHashSha256());
   result.push(new TestCheckLeafExists());
   result.push(new TestCheckLeafUpdate());
   result.push(new TestHashAccount());
   result.push(new TestHashOrder());
+  result.push(new TestHashTxData());
   result.push(new TestGenesisOrderRoot());
   //result.push(new TestDepositToNew());
   //result.push(new TestDepositToOld());
@@ -33,6 +38,9 @@ function getAllTests(): Array<SimpleTest> {
   //result.push(new TestPlaceOrder());
   //result.push(new TestSpotTrade());
   result.push(new TestBlock());
+  result.push(new TestDecodeFloat());
+  result.push(new TestTxDataEncode());
+  result.push(new TestTxDataArrayEncode());
   return result;
 }
 

@@ -1,6 +1,7 @@
-// Generated from tpl/ejs/./src/block.circom.ejs. Don't modify this file manually
+// Generated from tpl\\ejs\\src\\block.circom.ejs. Don't modify this file manually
 include "../node_modules/circomlib/circuits/compconstant.circom";
 include "./lib/hash_state.circom";
+include "./lib/sha256.circom";
 include "./decode_tx.circom";
 include "./deposit.circom";
 include "./transfer.circom";
@@ -25,7 +26,9 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     // TODO: replace all the public inputs with sha3 hash later
     signal input oldRoot;
     signal input newRoot;
-
+    signal input txDataHashHi;
+    signal input txDataHashLo;
+    
     // transactions
     signal private input txsType[nTxs];
     signal private input encodedTxs[nTxs][TxLength()];
@@ -51,7 +54,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     // decode each transaction
     component decodedTx[nTxs];
     for (var i = 0; i < nTxs; i++) {
-        decodedTx[i] = DecodeTx();
+        decodedTx[i] = DecodeTx(balanceLevels, orderLevels, accountLevels);
         for (var j = 0; j < TxLength(); j++) {
             decodedTx[i].in[j] <== encodedTxs[i][j];
         }
@@ -82,6 +85,16 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         enableSpotTrade[i].in[1] <== TxTypeSpotTrade();
     }
 
+    // data avaliability check
+    var txBits = TxDataLength(accountLevels, balanceLevels);
+    component txDataHasher = Sha256ToNum(nTxs *txBits);
+    for (var i = 0; i < nTxs; i++) {
+        for (var j = 0; j < txBits; j++) {
+            decodedTx[i].encodedTxData[j] ==> txDataHasher.bits[i*txBits + j];
+        }
+    }
+    txDataHasher.hashOutHi === txDataHashHi;
+    txDataHasher.hashOutLo === txDataHashLo;    
 
     // universal check
     component balanceChecker1[nTxs];

@@ -72,6 +72,7 @@ const config = {
   orderLeafs: getOrderLeafs(),
   commonPayload: getCommonPayload(),
   txLength: getCommonPayload().length,
+  floatLength: 40, //bits for float epxressing amounts
   placeOrder: {
     inputSignals: splitAndTrim(`
         order_pos

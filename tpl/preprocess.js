@@ -9,6 +9,10 @@ const tpls = require('./templates');
 const codegen = {
   config,
   tpls,
+  // finished codes
+  codeBlocks: {
+    DAProtocolUtils: tpls.DAProtocolUtilsTplFn(config.floatLength),
+  },
   // renderXXX uses ejs template
   renderInputEncoderJs,
   renderInputEncoderRs,
@@ -33,7 +37,6 @@ function renderInputEncoderJs(encoderName, inputSignals, config) {
 function renderLoopAssign(assignItems, loopVar, loopCount) {
   return ejs.render(tpls.LoopAssignTpl, { assignItems, loopVar, loopCount });
 }
-
 function renderInputEncoderRs(encoderName, inputSignals, config) {
   return ejs.render(tpls.RsInputEncoderTpl, { encoderName, inputSignals, config });
 }

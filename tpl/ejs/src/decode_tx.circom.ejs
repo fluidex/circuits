@@ -1,4 +1,6 @@
 include "./constants.circom"
+include "./floats.circom"
+include "./lib/bitify.circom";
 
 // TODO: i suggest remove this component and let each child op component to do its own decoding
 /**
@@ -6,14 +8,60 @@ include "./constants.circom"
  */
 
 function TxLength() { return <%= codegen.config.commonPayload.length %>; }
+<%= codegen.codeBlocks.DAProtocolUtils %>
 
-template DecodeTx() {
+template DecodeTx(balanceLevels, orderLevels, accountLevels) {
+
     signal input in[TxLength()];
 
+    component decodeAmount1 = DecodeFloats();
+    component decodeAmount2 = DecodeFloats();
+    decodeAmount1.encodedAmount <== in[26];
+    decodeAmount2.encodedAmount <== in[27];
+
+    signal iin[TxLength()];
+
+    for (var i = 0; i < TxLength(); i++){
+        if (i == 26){
+            iin[i] <== decodeAmount1.decodedAmount;
+        } else {
+            if (i == 27){
+                iin[i] <== decodeAmount2.decodedAmount;
+            }else {
+                iin[i] <== in[i];
+            }
+        }
+    }
     <% for(const item of codegen.config.commonPayload) { %>
     signal output <%= item %>;<% } %>
 
+    signal output encodedTxData[TxDataLength(accountLevels, balanceLevels)];
+
+    component encodeAccount1 = Num2Bits(accountLevels);
+    component encodeAccount2 = Num2Bits(accountLevels);
+    component encodeTokenID = Num2Bits(balanceLevels);
+    component encodeAmount = Num2Bits(FloatLength());
+
+    //TODO: we should templatize these codes
+    encodeAccount1.in <== in[1];
+    encodeAccount2.in <== in[9];
+    encodeTokenID.in <== in[2];
+    //amount is purposed to be 40bit-float, enforce error on overflowed
+    encodeAmount.in <== in[26];    
+
+    for (var i = 0; i < accountLevels; i++) {
+        encodedTxData[i] <== encodeAccount1.out[i];
+        encodedTxData[i+accountLevels] <== encodeAccount2.out[i];
+    }
+
+    for (var i = 0; i < balanceLevels; i++) {
+        encodedTxData[i+accountLevels*2] <== encodeTokenID.out[i];
+    }
+
+    for (var i = 0; i < FloatLength(); i++) {
+        encodedTxData[i+accountLevels*2+balanceLevels] <== encodeAmount.out[i];
+    }
     <% for(const idx in codegen.config.commonPayload) { %>
-    <%= codegen.config.commonPayload[idx] %> <== in[<%= idx %>];<% } %>
+    <%= codegen.config.commonPayload[idx] %> <== iin[<%= idx %>];<% } %>
 
 }
