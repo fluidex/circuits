@@ -111,7 +111,7 @@ function mockBigDepositToTx(): Array<bigint> {
 const tokenLevels = 6;
 const accountLevels = 2;
 
-function genOutput(payload: Array<bigint>): Object {
+function genOutput(payload: Array<bigint>): any {
   const hasher = new DA_Hasher(accountLevels, tokenLevels);
   hasher.encodeRawPayload(payload);
   return {

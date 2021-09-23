@@ -63,7 +63,7 @@ function initTestCase(nTxsn, balanceLevels, orderLevels, accountLevels) {
 
   /// start txs
 
-  for (var i = 0; i < nTxs; i++) {
+  for (let i = 0; i < nTxs; i++) {
     let spotTradeTx = {
       order1AccountID: accountID1,
       order2AccountID: accountID2,

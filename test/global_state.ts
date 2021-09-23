@@ -47,7 +47,7 @@ class GlobalState {
     orderLevels: number,
     accountLevels: number,
     nTx: number,
-    options: object = { enable_self_trade: false, verbose: false },
+    options: any = { enable_self_trade: false, verbose: false },
   ) {
     this.balanceLevels = balanceLevels;
     this.orderLevels = orderLevels;
@@ -64,8 +64,8 @@ class GlobalState {
     this.orderIdToPos = new Map();
     this.orderPosToId = new Map();
     this.accounts = new Map(); // map[account_id]acount_state
-    this.bufferedTxs = new Array();
-    this.bufferedBlocks = new Array();
+    this.bufferedTxs = [];
+    this.bufferedBlocks = [];
     this.nextOrderPositions = new Map();
     this.options = options;
     this.nTx = nTx;
