@@ -42,5 +42,5 @@ jobs:
       - name: Prettify js/ts code
         run: npx prettier --check "**/*.{js,ts}"
 
-      # - run: |
-      #     npx eslint .
+      - run: |
+          npx eslint .

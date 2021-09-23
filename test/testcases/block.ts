@@ -168,7 +168,7 @@ function initBlockTestCase() {
   };
   state.SpotTrade(spotTradeTx);
 
-  for (var i = state.bufferedTxs.length; i < nTxs; i++) {
+  for (let i = state.bufferedTxs.length; i < nTxs; i++) {
     state.Nop();
   }
 
@@ -182,7 +182,7 @@ function initEmptyBlockTestCase(): L2Block {
   let state = new GlobalState(balanceLevels, orderLevels, accountLevels, nTxs);
   // we need to have at least 1 account
   state.createNewAccount();
-  for (var i = 0; i < nTxs; i++) {
+  for (let i = 0; i < nTxs; i++) {
     state.Nop();
   }
   let block = state.forgeAllL2Blocks()[0];
