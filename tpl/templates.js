@@ -113,7 +113,6 @@ const CalcAccountTreeTpl = `
     accountHash__.sign <== sign;
     accountHash__.balanceRoot <== balanceRoot;
     accountHash__.ay <== ay;
-    accountHash__.ethAddr <== ethAddr;
     accountHash__.orderRoot <== orderRoot;
     // check account tree
     component accountTree__ = CalculateRootFromMerklePath(accountLevels);
@@ -179,7 +178,7 @@ const universalBalanceCheckTplFn = function (compName, prefix, suffix) {
         ${compName}.accountRoot <== accountRoot;
         ${compName}.orderRoot <== orderRoot;
         ${compName}.tokenID <== tokenID;
-${generateMultiAssign(compName, ['accountID', 'ethAddr', 'sign', 'ay', 'nonce', 'balance'], prefix, suffix, 8)}
+${generateMultiAssign(compName, ['accountID', 'sign', 'ay', 'nonce', 'balance'], prefix, suffix, 8)}
         for (var j = 0; j < balanceLevels; j++) {
             ${compName}.balancePathElements[j][0] <== balancePathElements[j][0];
         }

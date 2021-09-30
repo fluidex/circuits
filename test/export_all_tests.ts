@@ -5,12 +5,12 @@ import { TestRescueHash, TestRescueHash2 } from './testcases/rescue';
 import { TestPoseidonHash } from './testcases/poseidon';
 import { TestHashAccount, TestHashOrder, TestGenesisOrderRoot } from './testcases/hash_state';
 import { TestHashTxData, TestHashSha256 } from './testcases/hash_txdata';
-//, TestDepositToOld } from './deposit';
+//import { TestDepositToNew, TestDepositToOld } from './testcases/deposit';
 // already tested within the `block` test case
-//import { TestTransfer } from './transfer';
+import { TestTransfer } from './testcases/transfer';
 import { TestWithdraw } from './testcases/withdraw';
 //import { TestPlaceOrder } from './place_order';
-//import { TestSpotTrade } from './spot_trade';
+//import { TestSpotTrade } from './testcases/spot_trade';
 import { TestBlock } from './testcases/block';
 import { TestDecodeFloat } from './testcases/decode_float';
 import { TestTxDataEncode, TestTxDataArrayEncode } from './testcases/encode_txdata';
@@ -33,7 +33,7 @@ function getAllTests(): Array<SimpleTest> {
   result.push(new TestGenesisOrderRoot());
   //result.push(new TestDepositToNew());
   //result.push(new TestDepositToOld());
-  //result.push(new TestTransfer());
+  result.push(new TestTransfer());
   result.push(new TestWithdraw());
   //result.push(new TestPlaceOrder());
   //result.push(new TestSpotTrade());

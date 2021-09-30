@@ -148,8 +148,8 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
         <%- codegen.generateMultiFieldsAssign('processDeposit[i]', 
             ['enableBalanceCheck1', 'enableBalanceCheck2', 'amount',  
-            'balance1', 'nonce1', 'sign1', 'ay1', 'ethAddr1',
-            'balance2', 'nonce2', 'sign2', 'ay2', 'ethAddr2',
+            'balance1', 'nonce1', 'sign1', 'ay1', 
+            'balance2', 'nonce2', 'sign2', 'ay2', 
             'dstIsNew'], 
             'decodedTx[i].') %>
 
@@ -161,8 +161,8 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         <%- codegen.generateMultiFieldsAssign('processTransfer[i]', 
             ['enableBalanceCheck1', 'enableBalanceCheck2', 'enableSigCheck1',
             'amount', 
-            'balance1', 'nonce1', 'sign1', 'ay1', 'ethAddr1',
-            'balance2', 'nonce2', 'sign2', 'ay2', 'ethAddr2',
+            'balance1', 'nonce1', 'sign1', 'ay1', 
+            'balance2', 'nonce2', 'sign2', 'ay2', 
             'sigL2Hash1',
             'dstIsNew', 
             ], 
@@ -194,8 +194,8 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
             'amount',
             'balance1', 'balance2',
             'sigL2Hash1',
-            'ethAddr1', 'ay1', 'sign1', 'nonce1',
-            'ethAddr2', 'ay2', 'sign2', 'nonce2'], 
+            'ay1', 'sign1', 'nonce1',
+            'ay2', 'sign2', 'nonce2'], 
             'decodedTx[i].') %>  
         processWithdraw[i].orderRoot1 <== orderRoots[i][0];
         processWithdraw[i].orderRoot2 <== orderRoots[i][1];    
@@ -215,14 +215,12 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].order1AccountNonce <== decodedTx[i].nonce1;
         processSpotTrade[i].order1AccountSign <== decodedTx[i].sign1;
         processSpotTrade[i].order1AccountAy <== decodedTx[i].ay1;
-        processSpotTrade[i].order1AccountEthAddr <== decodedTx[i].ethAddr1;
 
         processSpotTrade[i].order2Pos <== decodedTx[i].order2Pos;
         processSpotTrade[i].order2AccountID <== decodedTx[i].accountID2;
         processSpotTrade[i].order2AccountNonce <== decodedTx[i].nonce2;
         processSpotTrade[i].order2AccountSign <== decodedTx[i].sign2;
         processSpotTrade[i].order2AccountAy <== decodedTx[i].ay2;
-        processSpotTrade[i].order2AccountEthAddr <== decodedTx[i].ethAddr2;
 
         processSpotTrade[i].amount1to2 <== decodedTx[i].amount;
         processSpotTrade[i].amount2to1 <== decodedTx[i].amount2;

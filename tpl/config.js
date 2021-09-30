@@ -27,7 +27,6 @@ function getCommonPayload() {
   accountID1
   tokenID1
   balance1
-  ethAddr1
   sign1 // sign and ay are used both in balance checker and sig checker
   ay1
   nonce1
@@ -36,7 +35,6 @@ function getCommonPayload() {
   accountID2
   tokenID2
   balance2
-  ethAddr2
   sign2
   ay2
   nonce2
@@ -72,6 +70,7 @@ const config = {
   orderLeafs: getOrderLeafs(),
   commonPayload: getCommonPayload(),
   txLength: getCommonPayload().length,
+  txIdx: getCommonPayload().reduce((out, item, idx) => Object.defineProperty(out, item, { value: `${idx}`, enumerable: true }), {}),
   floatLength: 40, //bits for float epxressing amounts
   placeOrder: {
     inputSignals: splitAndTrim(`
@@ -93,7 +92,6 @@ const config = {
         nonce
         sign
         ay
-        ethAddr
     `),
     encoderName: 'PlaceOrderTxData',
   },
@@ -113,10 +111,8 @@ const config = {
         r8y
         nonce1
         balance1
-        ethAddr1
         nonce2
         balance2
-        ethAddr2
         midAccountRoot
     `),
     encoderName: 'TransferTxData',

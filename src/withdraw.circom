@@ -1,4 +1,4 @@
-// Generated from tpl/ejs/./src/withdraw.circom.ejs. Don't modify this file manually
+// Generated from tpl/ejs/src/withdraw.circom.ejs. Don't modify this file manually
 include "./lib/bitify.circom";
 include "./lib/eddsaposeidon.circom";
 include "./lib/utils_bjj.circom";
@@ -27,12 +27,10 @@ template Withdraw(balanceLevels, accountLevels) {
 
     signal input sign1;
     signal input ay1;
-    signal input ethAddr1;
     signal input orderRoot1;
     
     signal input sign2;
     signal input ay2;
-    signal input ethAddr2;
     signal input orderRoot2;
 
     signal input sigL2Hash1; // TODO: add a circuit to compute sigL2Hash. (compressedTx -> decodedTx -> sigL2Hash)
@@ -82,13 +80,8 @@ template Withdraw(balanceLevels, accountLevels) {
 
     component checkEq7 = ForceEqualIfEnabled();
     checkEq7.enabled <== enabled;
-    checkEq7.in[0] <== ethAddr1;
-    checkEq7.in[1] <== ethAddr2;
-
-    component checkEq8 = ForceEqualIfEnabled();
-    checkEq8.enabled <== enabled;
-    checkEq8.in[0] <== orderRoot1;
-    checkEq8.in[1] <== orderRoot2;
+    checkEq7.in[0] <== orderRoot1;
+    checkEq7.in[1] <== orderRoot2;
 
 
 }
@@ -108,7 +101,6 @@ template Withdraw(balanceLevels, accountLevels) {
  * @input sign - {Bool} - sign of the account leaf
  * @input balance - {Uint192} - balance of the account leaf
  * @input ay - {Field} - ay of the account leaf
- * @input ethAddr - {Uint160} - ethAddr of the account leaf
  * @input orderRoot - {Field} - order root of the account leaf
  * @input balancePathElements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the account tree
  * @input accountPathElements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the account tree
@@ -133,7 +125,6 @@ template WithdrawLegacy(balanceLevels, accountLevels) {
     signal input sign;
     signal input balance;
     signal input ay;
-    signal input ethAddr;
     signal input orderRoot;
     signal input balancePathElements[balanceLevels][1];
     signal input accountPathElements[accountLevels][1];
@@ -206,7 +197,6 @@ template WithdrawLegacy(balanceLevels, accountLevels) {
     accountHashOld.sign <== sign;
     accountHashOld.balanceRoot <== balanceTreeOld.root;
     accountHashOld.ay <== ay;
-    accountHashOld.ethAddr <== ethAddr;
     accountHashOld.orderRoot <== orderRoot;
     // check account tree
     component accountTreeOld = CalculateRootFromMerklePath(accountLevels);
@@ -237,7 +227,6 @@ template WithdrawLegacy(balanceLevels, accountLevels) {
     accountHashNew.sign <== sign;
     accountHashNew.balanceRoot <== balanceTreeNew.root;
     accountHashNew.ay <== ay;
-    accountHashNew.ethAddr <== ethAddr;
     accountHashNew.orderRoot <== orderRoot;
     // check account tree
     component accountTreeNew = CalculateRootFromMerklePath(accountLevels);

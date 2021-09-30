@@ -7,7 +7,6 @@ template BalanceChecker(balanceLevels, accountLevels) {
 
     signal input accountID;
     signal input tokenID;
-    signal input ethAddr;
     signal input sign;
     signal input ay;
     signal input nonce;
@@ -46,7 +45,6 @@ template BalanceChecker(balanceLevels, accountLevels) {
         nonce: 'nonce', 
         sign: 'sign', 
         ay: 'ay', 
-        ethAddr: 'ethAddr', 
         orderRoot: 'orderRoot',
         balancePathIndex: 'balancePathIndex', 
         balancePathElements: 'balancePathElements',

@@ -121,7 +121,6 @@ class TestHashTxData implements SimpleTest {
       accountID: accountID1,
       tokenID: Scalar.e(tokenID),
       amount: BigInt('1234567'),
-      ethAddr: Scalar.fromString('0x13e987c9169f532e1EAcAFcd69CFc84344Dbd781'),
       sign: BigInt('0x5191'),
       ay: BigInt(999),
     });

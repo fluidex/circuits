@@ -1,9 +1,10 @@
-// Generated from tpl/ejs/./src/transfer.circom.ejs. Don't modify this file manually
+// Generated from tpl/ejs/src/transfer.circom.ejs. Don't modify this file manually
 include "./lib/bitify.circom";
 include "lib/eddsaposeidon.circom";
 include "./lib/utils_bjj.circom";
 include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
+include "../node_modules/circomlib/circuits/gates.circom";
 include "../node_modules/circomlib/circuits/mux1.circom";
 
 /**
@@ -22,7 +23,6 @@ include "../node_modules/circomlib/circuits/mux1.circom";
  * @input sign1 - {Bool} - sign of the sender leaf
  * @input balance1 - {Uint192} - balance of the sender leaf
  * @input ay1 - {Field} - ay of the sender leaf
- * @input ethAddr1 - {Uint160} - ethAddr of the sender leaf
  * @input orderRoot1 - {Field} - order root of the sender leaf
  * @input senderBalancePathElements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the sender leaf
  * @input senderAccountPathElements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the sender leaf
@@ -30,7 +30,6 @@ include "../node_modules/circomlib/circuits/mux1.circom";
  * @input sign2 - {Bool} - sign of the receiver leaf
  * @input balance2 - {Uint192} - balance of the receiver leaf
  * @input ay2 - {Field} - ay of the receiver leaf
- * @input ethAddr2 - {Uint160} - ethAddr of the receiver leaf
  * @input orderRoot2 - {Field} - order root of the receiver leaf
  * @input receiverBalancePathElements[balanceLevels][1] - {Array(Field)} - siblings balance merkle proof of the receiver leaf
  * @input receiverAccountPathElements[accountLevels][1] - {Array(Field)} - siblings account merkle proof of the receiver leaf
@@ -60,13 +59,11 @@ template Transfer(balanceLevels, accountLevels) {
     signal input nonce1;
     signal input sign1;
     signal input ay1;
-    signal input ethAddr1;
 
     signal input balance2;
     signal input nonce2;
     signal input sign2;
     signal input ay2;
-    signal input ethAddr2;
     
     signal input orderRoot1;
     signal input orderRoot2;
@@ -166,7 +163,6 @@ template Transfer(balanceLevels, accountLevels) {
     accountHashSenderNew.sign <== sign1;
     accountHashSenderNew.balanceRoot <== balanceTreeSenderNew.root;
     accountHashSenderNew.ay <== ay1;
-    accountHashSenderNew.ethAddr <== ethAddr1;
     accountHashSenderNew.orderRoot <== orderRoot1;
     // check account tree
     component accountTreeSenderNew = CalculateRootFromMerklePath(accountLevels);
@@ -180,21 +176,19 @@ template Transfer(balanceLevels, accountLevels) {
 
     // check when transfer to old
 
-    component multiMux = MultiMux1(6);
+    component multiMux = MultiMux1(5);
     // if dstIsNew is true, output is multiMux[*][1]
     multiMux.s <== dstIsNew;
     multiMux.c[0][0] <== balance2 - amount;
     multiMux.c[1][0] <== nonce2;
     multiMux.c[2][0] <== sign2;
     multiMux.c[3][0] <== ay2;
-    multiMux.c[4][0] <== ethAddr2;
-    multiMux.c[5][0] <== orderRoot2;
+    multiMux.c[4][0] <== orderRoot2;
     multiMux.c[0][1] <== balance2 - amount; // make sure balance2 - amount == 0
     multiMux.c[1][1] <== 0;
     multiMux.c[2][1] <== 0;
     multiMux.c[3][1] <== 0;
-    multiMux.c[4][1] <== 0;
-    multiMux.c[5][1] <== genesisOrderRoot;
+    multiMux.c[4][1] <== genesisOrderRoot;
       
     
     
@@ -211,8 +205,7 @@ template Transfer(balanceLevels, accountLevels) {
     accountHashReceiverOld.sign <== multiMux.out[2];
     accountHashReceiverOld.balanceRoot <== balanceTreeReceiverOld.root;
     accountHashReceiverOld.ay <== multiMux.out[3];
-    accountHashReceiverOld.ethAddr <== multiMux.out[4];
-    accountHashReceiverOld.orderRoot <== multiMux.out[5];
+    accountHashReceiverOld.orderRoot <== multiMux.out[4];
     // check account tree
     component accountTreeReceiverOld = CalculateRootFromMerklePath(accountLevels);
     accountTreeReceiverOld.leaf <== accountHashReceiverOld.out;

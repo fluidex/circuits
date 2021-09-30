@@ -16,7 +16,6 @@ class DepositToNewTx {
   accountID: bigint;
   tokenID: bigint;
   amount: bigint;
-  ethAddr: bigint;
   sign: bigint;
   ay: bigint;
 }

@@ -25,8 +25,6 @@ function mockTransferTx(): Array<bigint> {
   encodedTx[TxDetailIdx.Sign2] = Scalar.e('0x5192');
   encodedTx[TxDetailIdx.Ay1] = BigInt(999);
   encodedTx[TxDetailIdx.Ay2] = BigInt(777);
-  encodedTx[TxDetailIdx.EthAddr1] = BigInt('0x13e987c9169f532e1EAcAFcd69CFc84344Dbd781');
-  encodedTx[TxDetailIdx.EthAddr2] = BigInt('0x80466c64868e1ab14a1ddf27a676c3fcbe638fe5');
   encodedTx[TxDetailIdx.Balance1] = BigInt('88343453');
   encodedTx[TxDetailIdx.Balance2] = BigInt('333222') + amount;
   encodedTx[TxDetailIdx.SigL2Hash1] = BigInt('0x63ef02a25975e693d6fc198081162a52393da755e21ac2ebd6b3a2b2d0c4b290');
@@ -48,7 +46,6 @@ function mockDepositToTx(isNew: boolean): Array<bigint> {
   const balance = isNew ? 0n : BigInt('222');
   const amount = BigInt('18445532');
   const tokenID = 42;
-  const ethAddr = BigInt('0x13e987c9169f532e1EAcAFcd69CFc84344Dbd781');
   const nonce = BigInt(100);
   const ay = BigInt(999);
 
@@ -58,7 +55,6 @@ function mockDepositToTx(isNew: boolean): Array<bigint> {
   encodedTx[TxDetailIdx.AccountID1] = Scalar.e(2);
   encodedTx[TxDetailIdx.Balance1] = balance;
   encodedTx[TxDetailIdx.Nonce1] = isNew ? 0n : nonce;
-  encodedTx[TxDetailIdx.EthAddr1] = isNew ? 0n : ethAddr;
   encodedTx[TxDetailIdx.Sign1] = isNew ? 0n : Scalar.e('0x519A');
   encodedTx[TxDetailIdx.Ay1] = isNew ? 0n : ay;
 
@@ -66,7 +62,6 @@ function mockDepositToTx(isNew: boolean): Array<bigint> {
   encodedTx[TxDetailIdx.AccountID2] = Scalar.e(2);
   encodedTx[TxDetailIdx.Balance2] = amount + balance;
   encodedTx[TxDetailIdx.Nonce2] = isNew ? 0n : nonce;
-  encodedTx[TxDetailIdx.EthAddr2] = ethAddr;
   encodedTx[TxDetailIdx.Sign2] = Scalar.e('0x519B');
   encodedTx[TxDetailIdx.Ay2] = BigInt(999);
 
@@ -82,7 +77,6 @@ function mockBigDepositToTx(): Array<bigint> {
 
   const amount = BigInt('1000000000000');
   const tokenID = 42;
-  const ethAddr = BigInt('0x13e987c9169f532e1EAcAFcd69CFc84344Dbd781');
 
   encodedTx[TxDetailIdx.Amount] = encodeFloat(amount);
 
@@ -90,7 +84,6 @@ function mockBigDepositToTx(): Array<bigint> {
   encodedTx[TxDetailIdx.AccountID1] = Scalar.e(2);
   encodedTx[TxDetailIdx.Balance1] = 0n;
   encodedTx[TxDetailIdx.Nonce1] = 0n;
-  encodedTx[TxDetailIdx.EthAddr1] = 0n;
   encodedTx[TxDetailIdx.Sign1] = 0n;
   encodedTx[TxDetailIdx.Ay1] = 0n;
 
@@ -98,7 +91,6 @@ function mockBigDepositToTx(): Array<bigint> {
   encodedTx[TxDetailIdx.AccountID2] = Scalar.e(2);
   encodedTx[TxDetailIdx.Balance2] = amount;
   encodedTx[TxDetailIdx.Nonce2] = 0n;
-  encodedTx[TxDetailIdx.EthAddr2] = ethAddr;
   encodedTx[TxDetailIdx.Sign2] = Scalar.e('0x519B');
   encodedTx[TxDetailIdx.Ay2] = BigInt(999);
 

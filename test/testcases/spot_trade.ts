@@ -72,6 +72,7 @@ function initTestCase() {
     totalSell: order1_amountsell,
     totalBuy: order1_amountbuy,
   });
+  order1.signWith(account1);
   let orderState1 = OrderState.fromOrderInput(order1);
   state.setAccountOrder(accountID1, orderState1);
 
@@ -86,6 +87,7 @@ function initTestCase() {
     totalSell: order2_amountsell,
     totalBuy: order2_amountbuy,
   });
+  order2.signWith(account2);
   let orderState2 = OrderState.fromOrderInput(order2);
   orderState2.filledSell = 10n;
   orderState2.filledBuy = 1n;
@@ -107,13 +109,17 @@ function initTestCase() {
   // TODO: assert length
   return {
     enabled: 1,
+    enableBalanceCheck1: 1,
+    enableBalanceCheck2: 2,
+    enableSigCheck1: 0,
+    enableSigCheck2: 0,
     order1_id: order1_id,
-    order1_pos: order1_id,
-    order1_tokensell: tokenID_1to2,
+    order1Pos: order1_id,
+    tokenID1: tokenID_1to2,
+    tokenID2: tokenID_2to1,
     order1_amountsell: order1_amountsell,
-    order1_tokenbuy: tokenID_2to1,
     order1_amountbuy: order1_amountbuy,
-    order2_pos: order2_id,
+    order2Pos: order2_id,
     order2_id: order2_id,
     order2_tokensell: tokenID_2to1,
     order2_amountsell: order2_amountsell,
@@ -131,10 +137,8 @@ function initTestCase() {
     order2_account_nonce: nonce2,
     order1_account_sign: account1.sign,
     order2_account_sign: account2.sign,
-    order1_account_ay: Scalar.fromString(account1.ay, 16),
-    order2_account_ay: Scalar.fromString(account2.ay, 16),
-    order1_account_ethAddr: Scalar.fromString(account1.ethAddr, 16),
-    order2_account_ethAddr: Scalar.fromString(account2.ethAddr, 16),
+    order1_account_ay: account1.ay,
+    order2_account_ay: account2.ay,
     order1_token_sell_balance: account1_balance_sell,
     order1_token_buy_balance: account1_balance_buy,
     order2_token_sell_balance: account2_balance_sell,
