@@ -228,7 +228,6 @@ function handleDeposit(state: GlobalState, accounts: Array<Account>, deposit) {
       accountID: userID,
       tokenID,
       amount: delta,
-      ethAddr: Scalar.fromString(account.ethAddr, 16),
       sign: BigInt(account.sign),
       ay: account.ay,
     });

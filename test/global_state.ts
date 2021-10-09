@@ -78,8 +78,8 @@ class GlobalState {
     this.accounts.get(accountID).updateAccountKey(account);
     this.recalculateFromAccountState(accountID);
   }
-  setAccountL2Addr(accountID: bigint, sign, ay, ethAddr) {
-    this.accounts.get(accountID).updateL2Addr(sign, ay, ethAddr);
+  setAccountL2Addr(accountID: bigint, sign, ay) {
+    this.accounts.get(accountID).updateL2Addr(sign, ay);
     this.recalculateFromAccountState(accountID);
   }
   setAccountNonce(accountID, nonce: BigInt) {
@@ -281,14 +281,17 @@ class GlobalState {
       accountPath,
     };
   }
+  //ethAddr has been excluded from l2 states
+  /*
   getL1Addr(accountID) {
     return this.accounts.get(accountID).ethAddr;
   }
+  */
   DepositToNew(tx: DepositToNewTx) {
     if (this.options.verbose) {
       console.log('DepositToNew', tx.accountID, tx.tokenID, tx.amount);
     }
-    assert(this.accounts.get(tx.accountID).ethAddr == 0n, 'DepositToNew');
+    assert(this.accounts.get(tx.accountID).ay == 0n, 'DepositToNew');
     let proof = this.stateProof(tx.accountID, tx.tokenID);
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
@@ -299,7 +302,6 @@ class GlobalState {
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
     encodedTx[TxDetailIdx.Balance1] = 0n;
     encodedTx[TxDetailIdx.Nonce1] = 0n;
-    encodedTx[TxDetailIdx.EthAddr1] = 0n;
     encodedTx[TxDetailIdx.Sign1] = 0n;
     encodedTx[TxDetailIdx.Ay1] = 0n;
 
@@ -307,7 +309,6 @@ class GlobalState {
     encodedTx[TxDetailIdx.AccountID2] = Scalar.e(tx.accountID);
     encodedTx[TxDetailIdx.Balance2] = tx.amount;
     encodedTx[TxDetailIdx.Nonce2] = 0n;
-    encodedTx[TxDetailIdx.EthAddr2] = tx.ethAddr;
     encodedTx[TxDetailIdx.Sign2] = Scalar.e(tx.sign);
     encodedTx[TxDetailIdx.Ay2] = tx.ay;
 
@@ -334,7 +335,7 @@ class GlobalState {
 
     // then update global state
     this.setTokenBalance(tx.accountID, tx.tokenID, tx.amount);
-    this.setAccountL2Addr(tx.accountID, tx.sign, tx.ay, tx.ethAddr);
+    this.setAccountL2Addr(tx.accountID, tx.sign, tx.ay);
     rawTx.rootAfter = this.root();
     this.addRawTx(rawTx);
   }
@@ -342,7 +343,7 @@ class GlobalState {
     if (this.options.verbose) {
       console.log('DepositToOld', tx.accountID, tx.tokenID, tx.amount);
     }
-    //assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'DepositToOld');
+    assert(this.accounts.get(tx.accountID).ay != 0n, 'DepositToOld');
     let proof = this.stateProof(tx.accountID, tx.tokenID);
     let oldBalance = this.getTokenBalance(tx.accountID, tx.tokenID);
     let nonce = this.accounts.get(tx.accountID).nonce;
@@ -358,7 +359,6 @@ class GlobalState {
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
     encodedTx[TxDetailIdx.Balance1] = oldBalance;
     encodedTx[TxDetailIdx.Nonce1] = nonce;
-    encodedTx[TxDetailIdx.EthAddr1] = acc.ethAddr;
     encodedTx[TxDetailIdx.Sign1] = acc.sign;
     encodedTx[TxDetailIdx.Ay1] = acc.ay;
 
@@ -366,7 +366,6 @@ class GlobalState {
     encodedTx[TxDetailIdx.AccountID2] = Scalar.e(tx.accountID);
     encodedTx[TxDetailIdx.Balance2] = oldBalance + tx.amount;
     encodedTx[TxDetailIdx.Nonce2] = nonce;
-    encodedTx[TxDetailIdx.EthAddr2] = acc.ethAddr;
     encodedTx[TxDetailIdx.Sign2] = acc.sign;
     encodedTx[TxDetailIdx.Ay2] = acc.ay;
 
@@ -421,8 +420,8 @@ class GlobalState {
     return fullTx;
   }
   Transfer(tx: TranferTx) {
-    assert(this.accounts.get(tx.from).ethAddr != 0n, 'TransferTx: empty fromAccount');
-    assert(this.accounts.get(tx.to).ethAddr != 0n, 'Transfer: empty toAccount');
+    assert(this.accounts.get(tx.from).ay != 0n, 'TransferTx: empty fromAccount');
+    assert(this.accounts.get(tx.to).ay != 0n, 'Transfer: empty toAccount');
     let proofFrom = this.stateProof(tx.from, tx.tokenID);
     let fromAccount = this.accounts.get(tx.from);
     let toAccount = this.accounts.get(tx.to);
@@ -443,8 +442,6 @@ class GlobalState {
     encodedTx[TxDetailIdx.Sign2] = toAccount.sign;
     encodedTx[TxDetailIdx.Ay1] = fromAccount.ay;
     encodedTx[TxDetailIdx.Ay2] = toAccount.ay;
-    encodedTx[TxDetailIdx.EthAddr1] = fromAccount.ethAddr;
-    encodedTx[TxDetailIdx.EthAddr2] = toAccount.ethAddr;
     encodedTx[TxDetailIdx.Balance1] = fromOldBalance;
     encodedTx[TxDetailIdx.Balance2] = toOldBalance + tx.amount;
     encodedTx[TxDetailIdx.SigL2Hash1] = tx.signature.hash;
@@ -486,7 +483,7 @@ class GlobalState {
     this.addRawTx(rawTx);
   }
   Withdraw(tx: WithdrawTx) {
-    assert(this.accounts.get(tx.accountID).ethAddr != 0n, 'Withdraw');
+    assert(this.accounts.get(tx.accountID).ay != 0n, 'Withdraw');
     let proof = this.stateProof(tx.accountID, tx.tokenID);
 
     let acc = this.accounts.get(tx.accountID);
@@ -504,7 +501,6 @@ class GlobalState {
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
     encodedTx[TxDetailIdx.Balance1] = oldBalance;
     encodedTx[TxDetailIdx.Nonce1] = nonce;
-    encodedTx[TxDetailIdx.EthAddr1] = acc.ethAddr;
     encodedTx[TxDetailIdx.Sign1] = acc.sign;
     encodedTx[TxDetailIdx.Ay1] = acc.ay;
 
@@ -512,7 +508,6 @@ class GlobalState {
     encodedTx[TxDetailIdx.AccountID2] = Scalar.e(tx.accountID);
     encodedTx[TxDetailIdx.Balance2] = oldBalance - tx.amount;
     encodedTx[TxDetailIdx.Nonce2] = nonce + 1n;
-    encodedTx[TxDetailIdx.EthAddr2] = acc.ethAddr;
     encodedTx[TxDetailIdx.Sign2] = acc.sign;
     encodedTx[TxDetailIdx.Ay2] = acc.ay;
 
@@ -553,8 +548,8 @@ class GlobalState {
   // case2: old order is valid old order with different order id, but we will replace it.
   // case3: old order has same order id, we will modify it
   SpotTrade(tx: SpotTradeTx) {
-    //assert(this.accounts.get(tx.order1_accountID).ethAddr != 0n, 'SpotTrade account1');
-    //assert(this.accounts.get(tx.order2_accountID).ethAddr != 0n, 'SpotTrade account2');
+    //assert(this.accounts.get(tx.order1AccountID).ay != 0n, 'SpotTrade account1');
+    //assert(this.accounts.get(tx.order2AccountID).ay != 0n, 'SpotTrade account2');
     if (tx.order1AccountID == tx.order2AccountID) {
       throw new Error('self trade not allowed');
     }
@@ -586,8 +581,6 @@ class GlobalState {
     encodedTx.fill(0n, 0, TxLength);
     encodedTx[TxDetailIdx.AccountID1] = tx.order1AccountID;
     encodedTx[TxDetailIdx.AccountID2] = tx.order2AccountID;
-    encodedTx[TxDetailIdx.EthAddr1] = account1.ethAddr;
-    encodedTx[TxDetailIdx.EthAddr2] = account2.ethAddr;
     encodedTx[TxDetailIdx.Sign1] = account1.sign;
     encodedTx[TxDetailIdx.Sign2] = account2.sign;
     encodedTx[TxDetailIdx.Ay1] = account1.ay;

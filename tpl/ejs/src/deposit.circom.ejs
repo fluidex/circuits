@@ -27,13 +27,11 @@ template Deposit(balanceLevels, accountLevels) {
     signal input nonce1;
     signal input sign1;
     signal input ay1;
-    signal input ethAddr1;
 
     signal input balance2;
     signal input nonce2;
     signal input sign2;
     signal input ay2;
-    signal input ethAddr2;
 
     signal input amount;
 
@@ -64,7 +62,6 @@ template Deposit(balanceLevels, accountLevels) {
         ['nonce1', '0'],
         ['ay1', '0'],
         ['sign1', '0'],
-        ['ethAddr1', '0'],
         ['orderRoot1', 'genesisOrderRoot'],
     ], {ctx: 'CheckWhenEmpty', replacers: {enabled: 'depositToNewCheck.out'}}) %>
 
@@ -74,7 +71,6 @@ template Deposit(balanceLevels, accountLevels) {
         ['nonce1', 'nonce2'],
         ['sign1', 'sign2'],
         ['ay1', 'ay2'],
-        ['ethAddr1', 'ethAddr2'],
         ['orderRoot1', 'orderRoot2'],
     ], {ctx: 'CheckWhenNotEmpty', replacers: {enabled: 'depositToOldCheck.out'}}) %>
 

@@ -1,4 +1,4 @@
-// Generated from tpl/ejs/./src/deposit.circom.ejs. Don't modify this file manually
+// Generated from tpl/ejs/src/deposit.circom.ejs. Don't modify this file manually
 include "./lib/bitify.circom";
 include "./lib/hash_state.circom";
 include "./lib/binary_merkle_tree.circom";
@@ -28,13 +28,11 @@ template Deposit(balanceLevels, accountLevels) {
     signal input nonce1;
     signal input sign1;
     signal input ay1;
-    signal input ethAddr1;
 
     signal input balance2;
     signal input nonce2;
     signal input sign2;
     signal input ay2;
-    signal input ethAddr2;
 
     signal input amount;
 
@@ -104,13 +102,8 @@ template Deposit(balanceLevels, accountLevels) {
 
     component checkEqCheckWhenEmpty4 = ForceEqualIfEnabled();
     checkEqCheckWhenEmpty4.enabled <== depositToNewCheck.out;
-    checkEqCheckWhenEmpty4.in[0] <== ethAddr1;
-    checkEqCheckWhenEmpty4.in[1] <== 0;
-
-    component checkEqCheckWhenEmpty5 = ForceEqualIfEnabled();
-    checkEqCheckWhenEmpty5.enabled <== depositToNewCheck.out;
-    checkEqCheckWhenEmpty5.in[0] <== orderRoot1;
-    checkEqCheckWhenEmpty5.in[1] <== genesisOrderRoot;
+    checkEqCheckWhenEmpty4.in[0] <== orderRoot1;
+    checkEqCheckWhenEmpty4.in[1] <== genesisOrderRoot;
 
 
 
@@ -135,13 +128,8 @@ template Deposit(balanceLevels, accountLevels) {
 
     component checkEqCheckWhenNotEmpty3 = ForceEqualIfEnabled();
     checkEqCheckWhenNotEmpty3.enabled <== depositToOldCheck.out;
-    checkEqCheckWhenNotEmpty3.in[0] <== ethAddr1;
-    checkEqCheckWhenNotEmpty3.in[1] <== ethAddr2;
-
-    component checkEqCheckWhenNotEmpty4 = ForceEqualIfEnabled();
-    checkEqCheckWhenNotEmpty4.enabled <== depositToOldCheck.out;
-    checkEqCheckWhenNotEmpty4.in[0] <== orderRoot1;
-    checkEqCheckWhenNotEmpty4.in[1] <== orderRoot2;
+    checkEqCheckWhenNotEmpty3.in[0] <== orderRoot1;
+    checkEqCheckWhenNotEmpty3.in[1] <== orderRoot2;
 
 
 

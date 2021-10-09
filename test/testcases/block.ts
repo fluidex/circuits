@@ -85,17 +85,16 @@ function initBlockTestCase() {
 
   /// start txs
 
-  assert(state.accounts.get(accountID0).ethAddr == 0n, 'account0 should be empty');
+  assert(state.accounts.get(accountID0).ay == 0n, 'account0 should be empty');
   state.DepositToNew({
     accountID: accountID0,
     tokenID: tokenID,
     amount: 200n,
-    ethAddr: Scalar.fromString(account0.ethAddr, 16),
     sign: BigInt(account0.sign),
     ay: account0.ay,
   });
 
-  assert(state.accounts.get(accountID1).ethAddr != 0n, 'account1 should not be empty');
+  assert(state.accounts.get(accountID1).ay != 0n, 'account1 should not be empty');
   state.DepositToOld({
     accountID: accountID1,
     tokenID: tokenID,

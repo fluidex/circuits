@@ -11,13 +11,11 @@ const orderLevels = 2;
 
 const balanceRoot = hash([1n]);
 const account = Account.random();
-const ethAddrNoPrefix = account.ethAddr.replace('0x', '');
 const account_state = new AccountState({
   nonce: 49n,
   sign: account.sign,
   balanceRoot: balanceRoot,
   ay: account.ay,
-  ethAddr: Scalar.fromString(ethAddrNoPrefix, 16),
   orderRoot: calculateGenesisOrderRoot(orderLevels),
 });
 class TestHashAccount implements SimpleTest {
@@ -29,7 +27,6 @@ class TestHashAccount implements SimpleTest {
           sign: account_state.sign,
           balanceRoot: account_state.balanceRoot,
           ay: account_state.ay,
-          ethAddr: account_state.ethAddr,
           orderRoot: account_state.orderRoot,
         },
         output: {

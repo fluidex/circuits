@@ -1,4 +1,4 @@
-// Generated from tpl\\ejs\\src\\block.circom.ejs. Don't modify this file manually
+// Generated from tpl/ejs/src/block.circom.ejs. Don't modify this file manually
 include "../node_modules/circomlib/circuits/compconstant.circom";
 include "./lib/hash_state.circom";
 include "./lib/sha256.circom";
@@ -118,7 +118,6 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         balanceChecker1[i].tokenID <== decodedTx[i].tokenID1;
 
         balanceChecker1[i].accountID <== decodedTx[i].accountID1;
-        balanceChecker1[i].ethAddr <== decodedTx[i].ethAddr1;
         balanceChecker1[i].sign <== decodedTx[i].sign1;
         balanceChecker1[i].ay <== decodedTx[i].ay1;
         balanceChecker1[i].nonce <== decodedTx[i].nonce1;
@@ -138,7 +137,6 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         balanceChecker2[i].tokenID <== decodedTx[i].tokenID2;
 
         balanceChecker2[i].accountID <== decodedTx[i].accountID2;
-        balanceChecker2[i].ethAddr <== decodedTx[i].ethAddr2;
         balanceChecker2[i].sign <== decodedTx[i].sign2;
         balanceChecker2[i].ay <== decodedTx[i].ay2;
         balanceChecker2[i].nonce <== decodedTx[i].nonce2;
@@ -189,12 +187,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processDeposit[i].nonce1 <== decodedTx[i].nonce1;
         processDeposit[i].sign1 <== decodedTx[i].sign1;
         processDeposit[i].ay1 <== decodedTx[i].ay1;
-        processDeposit[i].ethAddr1 <== decodedTx[i].ethAddr1;
         processDeposit[i].balance2 <== decodedTx[i].balance2;
         processDeposit[i].nonce2 <== decodedTx[i].nonce2;
         processDeposit[i].sign2 <== decodedTx[i].sign2;
         processDeposit[i].ay2 <== decodedTx[i].ay2;
-        processDeposit[i].ethAddr2 <== decodedTx[i].ethAddr2;
         processDeposit[i].dstIsNew <== decodedTx[i].dstIsNew;
 
 
@@ -212,12 +208,10 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processTransfer[i].nonce1 <== decodedTx[i].nonce1;
         processTransfer[i].sign1 <== decodedTx[i].sign1;
         processTransfer[i].ay1 <== decodedTx[i].ay1;
-        processTransfer[i].ethAddr1 <== decodedTx[i].ethAddr1;
         processTransfer[i].balance2 <== decodedTx[i].balance2;
         processTransfer[i].nonce2 <== decodedTx[i].nonce2;
         processTransfer[i].sign2 <== decodedTx[i].sign2;
         processTransfer[i].ay2 <== decodedTx[i].ay2;
-        processTransfer[i].ethAddr2 <== decodedTx[i].ethAddr2;
         processTransfer[i].sigL2Hash1 <== decodedTx[i].sigL2Hash1;
         processTransfer[i].dstIsNew <== decodedTx[i].dstIsNew;
 
@@ -251,11 +245,9 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processWithdraw[i].balance1 <== decodedTx[i].balance1;
         processWithdraw[i].balance2 <== decodedTx[i].balance2;
         processWithdraw[i].sigL2Hash1 <== decodedTx[i].sigL2Hash1;
-        processWithdraw[i].ethAddr1 <== decodedTx[i].ethAddr1;
         processWithdraw[i].ay1 <== decodedTx[i].ay1;
         processWithdraw[i].sign1 <== decodedTx[i].sign1;
         processWithdraw[i].nonce1 <== decodedTx[i].nonce1;
-        processWithdraw[i].ethAddr2 <== decodedTx[i].ethAddr2;
         processWithdraw[i].ay2 <== decodedTx[i].ay2;
         processWithdraw[i].sign2 <== decodedTx[i].sign2;
         processWithdraw[i].nonce2 <== decodedTx[i].nonce2;
@@ -309,14 +301,12 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].order1AccountNonce <== decodedTx[i].nonce1;
         processSpotTrade[i].order1AccountSign <== decodedTx[i].sign1;
         processSpotTrade[i].order1AccountAy <== decodedTx[i].ay1;
-        processSpotTrade[i].order1AccountEthAddr <== decodedTx[i].ethAddr1;
 
         processSpotTrade[i].order2Pos <== decodedTx[i].order2Pos;
         processSpotTrade[i].order2AccountID <== decodedTx[i].accountID2;
         processSpotTrade[i].order2AccountNonce <== decodedTx[i].nonce2;
         processSpotTrade[i].order2AccountSign <== decodedTx[i].sign2;
         processSpotTrade[i].order2AccountAy <== decodedTx[i].ay2;
-        processSpotTrade[i].order2AccountEthAddr <== decodedTx[i].ethAddr2;
 
         processSpotTrade[i].amount1to2 <== decodedTx[i].amount;
         processSpotTrade[i].amount2to1 <== decodedTx[i].amount2;

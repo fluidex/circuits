@@ -1,4 +1,4 @@
-// Generated from tpl/ejs/./src/spot_trade.circom.ejs. Don't modify this file manually
+// Generated from tpl/ejs/src/spot_trade.circom.ejs. Don't modify this file manually
 include "./lib/bitify.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
@@ -466,8 +466,6 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input order2AccountSign;
     signal input order1AccountAy;
     signal input order2AccountAy;
-    signal input order1AccountEthAddr;
-    signal input order2AccountEthAddr;
 
     signal input order1TokenSellBalance;
     signal input order1TokenBuyBalance;
@@ -496,7 +494,6 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     transfer.account1BalanceSell <== order1TokenSellBalance;
     transfer.account1BalanceBuy <== order1TokenBuyBalance;
     transfer.ay1 <== order1AccountAy;
-    transfer.ethAddr1 <== order1AccountEthAddr;
     transfer.oldOrder1Root <== order1Updater.oldOrderRoot;
     transfer.newOrder1Root <== order1Updater.newOrderRoot;
     for (var i = 0; i < balanceLevels; i++) {
@@ -511,7 +508,6 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     transfer.account2BalanceSell <== order2TokenSellBalance;
     transfer.account2BalanceBuy <== order2TokenBuyBalance;
     transfer.ay2 <== order2AccountAy;
-    transfer.ethAddr2 <== order2AccountEthAddr;
     transfer.oldOrder2Root <== order2Updater.oldOrderRoot;
     transfer.newOrder2Root <== order2Updater.newOrderRoot;
     transfer.oldAccountRoot <== oldAccountRoot;
@@ -542,7 +538,6 @@ template tradeTransfer(balanceLevels, accountLevels) {
     signal input account1BalanceSell;
     signal input account1BalanceBuy;
     signal input ay1;
-    signal input ethAddr1;
     signal input oldAccount1BalancePathElements[balanceLevels][1];
     signal input tmpAccount1BalancePathElements[balanceLevels][1];
     signal input oldAccount1PathElements[accountLevels][1];
@@ -553,7 +548,6 @@ template tradeTransfer(balanceLevels, accountLevels) {
     signal input account2BalanceSell;
     signal input account2BalanceBuy;
     signal input ay2;
-    signal input ethAddr2;
     signal input oldAccount2BalancePathElements[balanceLevels][1];
     signal input tmpAccount2BalancePathElements[balanceLevels][1];
     signal input tmpAccount2PathElements[accountLevels][1];
@@ -651,7 +645,6 @@ template tradeTransfer(balanceLevels, accountLevels) {
     accountHashMidAccount1.sign <== sign1;
     accountHashMidAccount1.balanceRoot <== balanceTreeMidAccount1.root;
     accountHashMidAccount1.ay <== ay1;
-    accountHashMidAccount1.ethAddr <== ethAddr1;
     accountHashMidAccount1.orderRoot <== newOrder1Root;
     // check account tree
     component accountTreeMidAccount1 = CalculateRootFromMerklePath(accountLevels);
@@ -675,7 +668,6 @@ template tradeTransfer(balanceLevels, accountLevels) {
     accountHashMidAccount2.sign <== sign2;
     accountHashMidAccount2.balanceRoot <== balanceTreeMidAccount2.root;
     accountHashMidAccount2.ay <== ay2;
-    accountHashMidAccount2.ethAddr <== ethAddr2;
     accountHashMidAccount2.orderRoot <== oldOrder2Root;
     // check account tree
     component accountTreeMidAccount2 = CalculateRootFromMerklePath(accountLevels);

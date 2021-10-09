@@ -10,12 +10,11 @@ include "binary_merkle_tree.circom";
  * e0: sign(1 bit) | nonce(40bits)
  * e1: balanceRoot
  * e2: ay
- * e3: ethAddr
+ * e3: orderRoot
  * @input nonce - {Uint40} - nonce
  * @input sign - {Bool} - babyjubjub sign
  * @input balanceRoot - {Field} - account's balance_tree root
  * @input ay - {Field} - babyjubjub Y coordinate
- * @input ethAddr - {Uint160} - etehreum address
  * @input orderRoot - {Field} - account's order_tree root
  * @output out - {Field} - resulting poseidon hash
  */
@@ -24,7 +23,6 @@ template HashAccount() {
     signal input sign;
     signal input balanceRoot;
     signal input ay;
-    signal input ethAddr;
     signal input orderRoot;
 
     signal output out;
@@ -33,13 +31,12 @@ template HashAccount() {
 
     e0 <== nonce + sign * (1 << 40);
 
-    component hash = Poseidon(5);
+    component hash = Poseidon(4);
 
     hash.inputs[0] <== e0;
     hash.inputs[1] <== balanceRoot;
     hash.inputs[2] <== ay;
-    hash.inputs[3] <== ethAddr;
-    hash.inputs[4] <== orderRoot;
+    hash.inputs[3] <== orderRoot;
 
     hash.out ==> out;
 }

@@ -1,4 +1,4 @@
-// Generated from tpl/ejs/./src/base_tx.circom.ejs. Don't modify this file manually
+// Generated from tpl/ejs/src/base_tx.circom.ejs. Don't modify this file manually
 
 include "lib/eddsaposeidon.circom";
 include "./lib/utils_bjj.circom";
@@ -8,7 +8,6 @@ template BalanceChecker(balanceLevels, accountLevels) {
 
     signal input accountID;
     signal input tokenID;
-    signal input ethAddr;
     signal input sign;
     signal input ay;
     signal input nonce;
@@ -57,7 +56,6 @@ template BalanceChecker(balanceLevels, accountLevels) {
     accountHash.sign <== sign;
     accountHash.balanceRoot <== balanceTree.root;
     accountHash.ay <== ay;
-    accountHash.ethAddr <== ethAddr;
     accountHash.orderRoot <== orderRoot;
     // check account tree
     component accountTree = CalculateRootFromMerklePath(accountLevels);

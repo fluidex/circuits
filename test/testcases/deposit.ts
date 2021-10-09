@@ -49,7 +49,6 @@ function initDepositToNew() {
     accountID: accountID,
     tokenID: tokenID,
     amount: amount,
-    ethAddr: Scalar.fromString(account.ethAddr),
     sign: BigInt(account.sign),
     ay: account.ay,
   });
@@ -61,7 +60,6 @@ function initDepositToNew() {
     genesisOrderRoot: state.defaultOrderRoot,
     accountID: accountID,
     tokenID: tokenID,
-    ethAddr: Scalar.fromString(account.ethAddr, 16),
     sign: account.sign,
     ay: account.ay,
     amount: amount,
@@ -113,7 +111,6 @@ function initDepositToOld() {
     ay: account.ay,
     balance: balance,
     balance2: balance + amount,
-    ethAddr: Scalar.fromString(account.ethAddr, 16),
     orderRoot: genesisOrderRoot,
     balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][1],
     accountPathElements: block.accountPathElements[block.accountPathElements.length - 1][1],
