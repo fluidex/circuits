@@ -14,7 +14,7 @@ for (let i = 0; i < maxAccountNum; i++) {
   state.createNewAccount({ next_order_id: 1n });
 }
 
-function fromPubkey(pbk: string): {sign: bigint, ay: bigint} {
+function fromPubkey(pbk: string): { sign: bigint; ay: bigint } {
   let pbkbuf = Buffer.from(pbk, 'hex');
   pbkbuf.reverse();
   let sign = (pbkbuf[0] & 0x80) === 0 ? BigInt(0) : BigInt(1);
