@@ -14,12 +14,18 @@ for (let i = 0; i < maxAccountNum; i++) {
   state.createNewAccount({ next_order_id: 1n });
 }
 
-function fromPubkey(pbk: string): bigint {
+function fromPubkey(pbk: string): {sign: bigint, ay: bigint} {
   let pbkbuf = Buffer.from(pbk, 'hex');
   pbkbuf.reverse();
+  let sign = (pbkbuf[0] & 0x80) === 0 ? BigInt(0) : BigInt(1);
   pbkbuf[0] &= 0x7f;
-  return BigInt('0x' + pbkbuf.toString('hex'));
+  return {
+    ay: BigInt('0x' + pbkbuf.toString('hex')),
+    sign,
+  };
 }
+
+const testPubkey = '5d182c51bcfe99583d7075a7a0c10d96bef82b8a059c4bf8c5f6e7124cf2bba3';
 
 //fake "deposit to new" like what has been done in the rs rollup-manager
 state.DepositToNew({
@@ -27,10 +33,7 @@ state.DepositToNew({
   //in 'fake deposit' we use tokeID as 0
   tokenID: BigInt(0),
   amount: BigInt(0),
-  //sign is extracted from pubkey but we do not use it in encoding
-  //so just omit it
-  sign: BigInt(0),
-  ay: fromPubkey('5d182c51bcfe99583d7075a7a0c10d96bef82b8a059c4bf8c5f6e7124cf2bba3'),
+  ...fromPubkey(testPubkey),
 });
 
 state.DepositToOld({
@@ -43,8 +46,7 @@ state.DepositToNew({
   accountID: BigInt(1),
   tokenID: BigInt(0),
   amount: BigInt(0),
-  sign: BigInt(0),
-  ay: fromPubkey('5d182c51bcfe99583d7075a7a0c10d96bef82b8a059c4bf8c5f6e7124cf2bba3'),
+  ...fromPubkey(testPubkey),
 });
 
 state.DepositToOld({
