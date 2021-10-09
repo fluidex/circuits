@@ -176,6 +176,7 @@ template Transfer(balanceLevels, accountLevels) {
 
     // check when transfer to old
 
+    // for reusing universal checker, balance2 here is the final balance of the receiver
     component multiMux = MultiMux1(5);
     // if dstIsNew is true, output is multiMux[*][1]
     multiMux.s <== dstIsNew;

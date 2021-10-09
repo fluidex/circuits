@@ -96,6 +96,7 @@ function initTestCase() {
     senderAccountPathElements: block.accountPathElements[block.accountPathElements.length - 1][0],
     nonce2: nonce2,
     sign2: account2.sign,
+    // for reusing universal checker, balance2 here is the final balance of the receiver
     balance2: balance2 + amount,
     ay2: account2.ay,
     orderRoot2: genesisOrderRoot,
