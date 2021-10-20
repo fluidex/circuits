@@ -1,4 +1,3 @@
-import { assert } from 'console';
 import { GlobalState } from './global_state';
 
 //consistent with .env settings in rollup-state-manager
@@ -25,34 +24,49 @@ function fromPubkey(pbk: string): { sign: bigint; ay: bigint } {
   };
 }
 
-const testPubkey = '5d182c51bcfe99583d7075a7a0c10d96bef82b8a059c4bf8c5f6e7124cf2bba3';
+const accountID1 = BigInt(1);
+const accountID2 = BigInt(2);
+
+const testPubkey1 = '5d182c51bcfe99583d7075a7a0c10d96bef82b8a059c4bf8c5f6e7124cf2bba3';
+const testPubkey2 = 'e9b54eb2dbf0a14faafd109ea2a6a292b78276c8381f8ef984dddefeafb2deaf';
 
 //fake "deposit to new" like what has been done in the rs rollup-manager
 state.DepositToNew({
-  accountID: BigInt(0),
+  accountID: accountID1,
   //in 'fake deposit' we use tokeID as 0
   tokenID: BigInt(0),
   amount: BigInt(0),
-  ...fromPubkey(testPubkey),
-});
-
-state.DepositToOld({
-  accountID: BigInt(0),
-  tokenID: BigInt(0), //in integration test we specified "ETH" which has a hardcoded id as 0
-  amount: BigInt(30000),
+  ...fromPubkey(testPubkey1),
 });
 
 state.DepositToNew({
-  accountID: BigInt(1),
+  accountID: accountID2,
+  //in 'fake deposit' we use tokeID as 0
   tokenID: BigInt(0),
   amount: BigInt(0),
-  ...fromPubkey(testPubkey),
+  ...fromPubkey(testPubkey2),
 });
 
 state.DepositToOld({
-  accountID: BigInt(1),
-  tokenID: BigInt(0), //in integration test we specified "ETH" which has a hardcoded id as 0
-  amount: BigInt(30000),
+  accountID: accountID1,
+  tokenID: BigInt(1), //in integration test we specified "USDT" which has a hardcoded id as 1
+  amount: BigInt(500_000_000_000),
+});
+
+/*
+state.DepositToOld({
+  accountID: accountID1,
+  tokenID: BigInt(1), //in integration test we specified "USDT" which has a hardcoded id as 1
+  amount: BigInt(500_000_000_000),
+});
+*/
+
+state.Withdraw({
+  accountID: accountID1,
+  tokenID: BigInt(1),
+  amount: BigInt(100_000_000),
+  signature:
+    'ce6e16056da007b3d7274db0ef3f546a101bd99be4137dfe97340b8f2481caac3a7af82bef9d00c226227280413de24714acd2458ba369d052ea43e0cd063601',
 });
 
 let blocks = state.forgeAllL2Blocks();
