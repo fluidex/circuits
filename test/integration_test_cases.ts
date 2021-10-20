@@ -53,14 +53,6 @@ state.DepositToOld({
   amount: BigInt(500_000_000_000),
 });
 
-/*
-state.DepositToOld({
-  accountID: accountID1,
-  tokenID: BigInt(1), //in integration test we specified "USDT" which has a hardcoded id as 1
-  amount: BigInt(500_000_000_000),
-});
-*/
-
 state.Withdraw({
   accountID: accountID1,
   tokenID: BigInt(1),
