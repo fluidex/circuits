@@ -9,7 +9,12 @@ function TxDataLength(balanceLevels, orderLevels, accountLevels) {
         <%- codegen.generateDALengthCheckBlock(scheme, {replacers: {'_ret':'ret'}}) -%>
     <% } -%>
 
-    return ret + 3;
+    ret += 3;
+    var padding = ret % 8;
+    if ( padding != 0){
+        ret += 8 - padding;
+    }
+    return ret;
 }
 
 template EncodeData(balanceLevels, orderLevels, accountLevels) {

@@ -19,7 +19,12 @@ function TxDataLength(balanceLevels, orderLevels, accountLevels) {
     if ( ret < encodeL2Key){
         ret = encodeL2Key;
     }    
-    return ret + 3;
+    ret += 3;
+    var padding = ret % 8;
+    if ( padding != 0){
+        ret += 8 - padding;
+    }
+    return ret;
 }
 
 template EncodeData(balanceLevels, orderLevels, accountLevels) {
