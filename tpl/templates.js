@@ -1,3 +1,5 @@
+import { assert } from "console";
+
 const JsInputEncoderTpl = `import { TxLength } from '../common';
 import { assert } from 'console';
 class <%= encoderName %> {<% for (const s of inputSignals) { %>
@@ -188,14 +190,71 @@ ${generateMultiAssign(compName, ['accountID', 'sign', 'ay', 'nonce', 'balance'],
 `;
 };
 
-const DAProtocolUtilsTplFn = function (floatLength) {
-  return `
-//currently only the minimal required packing for transfer tx ...
-//so accountID * 2 + tokenID + amount
+const DAProtocolEncodeFieldTpl = `component encode<%- scheme %><%- fieldName %> = Num2Bits(<%- fieldBits %>);
+    encode<%- scheme %><%- fieldName %>.in <== <%- unCapFieldName %>;
+    for (var i = 0; i < <%- fieldBits %>; i++) {
+        encoded<%- scheme %>Tx[i+offset] <== use<%- scheme %>*encode<%- scheme %><%- fieldName %>.out[i];
+    }
+    offset += <%- fieldBits %>;`
 
-function TxDataLength(accountLevels, tokenLevels) { return accountLevels * 2 + tokenLevels + ${floatLength}; }
-function FloatLength() { return ${floatLength};}
-`;
+const DAProtocolHeadingTplFn = function (scheme) {
+    switch (scheme) {
+    case 'common':
+        return `
+    use__ <== commonFlag * isL2KeyUnChanged.out;
+    encoded__Tx[0] <== 0;
+    //TODO: this bit should be marked as 'fully exit' (withdraw all balance)
+    encoded__Tx[1] <== 0;
+    encoded__Tx[2] <== use__*isWithDraw;`
+    case 'spotTrade':
+        return `
+    use__ <== isSpotTrade;
+    component isOrder1Filled = IsEqual();
+    component isOrder2Filled = IsEqual();
+    isOrder1Filled.in[0] <== newOrder1FilledBuy;
+    isOrder1Filled.in[1] <== newOrder1AmountBuy;
+    isOrder2Filled.in[0] <== newOrder2FilledBuy;
+    isOrder2Filled.in[1] <== newOrder2AmountBuy;
+
+    encoded__Tx[0] <== 0;
+    encoded__Tx[1] <== use__*isOrder1Filled.out;
+    encoded__Tx[2] <== use__*isOrder1Filled.out;`
+    case 'l2Key':
+        return `
+    use__ <== isL2KeyUpdated.out;        
+    //this constraints ensure l2key can only be updated under a 'dummy' deposit tx
+    signal notDepositFlag;
+    notDepositFlag <== isWithDraw + isTransfer + isSpotTrade;
+    notDepositFlag * isL2KeyUpdated.out === 0;
+    //(isWithDraw + isTransfer + isSpotTrade) * isL2KeyUpdated.out === 0;
+    amount * isL2KeyUpdated.out === 0;
+    encoded__Tx[0] <== use__;
+    encoded__Tx[1] <== 0;
+    encoded__Tx[2] <== 0;`
+    default:
+        assert(typeof scheme !== 'string', `unrecognized scheme ${scheme}`);
+        return ['ay1', 'newOrder1FilledBuy', 'newOrder2FilledBuy']
+    }
+}
+
+const DAProtocolLengthCheckTplFn = function (protocol) {
+    assert(Array.isArray(protocol), 'must valid protocol array');
+
+    const bitsFieldsAggr = protocol.reduce((out, [_, bitField]) => {
+        if (out[bitField]){
+            out[bitField] += 1;
+        }else {
+            out[bitField] = 1;
+        }
+        return out
+    }, {});
+
+    const lengthFormula = Object.entries(bitsFieldsAggr).map(([key, val]) => `${key}*${val}`).join(' + ');
+    return `
+    var encode__ = ${lengthFormula};
+    if ( _ret < encode__){
+        _ret = encode__;
+    }`
 };
 
 export {
@@ -211,7 +270,9 @@ export {
   LoopAssignTpl,
   CheckEqTpl,
   MultiCheckEqTpl,
-  DAProtocolUtilsTplFn,
+  DAProtocolEncodeFieldTpl,
+  DAProtocolLengthCheckTplFn,
+  DAProtocolHeadingTplFn,
   universalBalanceCheckTplFn,
   generateMultiAssign,
 };

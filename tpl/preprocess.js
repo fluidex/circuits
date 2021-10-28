@@ -4,20 +4,19 @@ const ejs = require('ejs');
 const printDiff = require('print-diff');
 const { config } = require('./config');
 const tpls = require('./templates');
+const { assert } = require('console');
 
 // codegen is the module to inject inside the ejs template system
 const codegen = {
   config,
   tpls,
-  // finished codes
-  codeBlocks: {
-    DAProtocolUtils: tpls.DAProtocolUtilsTplFn(config.floatLength),
-  },
+  dataEncode: synthesisDAParams(config.dataEncodeSchemes),
   // renderXXX uses ejs template
   renderInputEncoderJs,
   renderInputEncoderRs,
   renderInputDecoderCircom,
   renderLoopAssign,
+  renderDAEncodeField,
   generateUniversalBalanceCheck,
   // generateXXX uses simple str.replace
   generateBalanceCheckCircom,
@@ -27,7 +26,10 @@ const codegen = {
   generateFromTpl,
   generateMultiFieldsAssign,
   generateMultiCheckEq,
+  generateDALengthCheckBlock,
+  generatedDAHeadingBlock,
   // helper function to convert camel case to all cap case
+  capitalization,
   camelToAllCap,
 };
 
@@ -68,6 +70,56 @@ function camelToAllCap(str) {
   const result = str.replace(/((?!(?<=I)D)[A-Z])/g, ' $1');
   return result.split(' ').join('_').toUpperCase();
 }
+function capitalization(str){
+  return str[0].toUpperCase() + str.slice(1);
+} 
+
+function renderDAEncodeField(scheme, fieldName, fieldBits) {
+  return ejs.render(tpls.DAProtocolEncodeFieldTpl, {
+    scheme: capitalization(scheme), 
+    unCapFieldName: fieldName,
+    fieldName: capitalization(fieldName), 
+    fieldBits})
+}
+//protocol is [[<FieldName>, <bits>]]
+//bits fields can be: balanceLevels, orderLevels, accountLevels, floats, addrs, or any number
+//default ctx is set to scheme's name, _ret can be replaced as the checking variable, 
+//and bits fields' name can also be replaced
+function generateDALengthCheckBlock(scheme, { ctx, replacers }) {
+  const tpl = tpls.DAProtocolLengthCheckTplFn(config.dataEncodeSchemes[scheme]);
+  //always replace floats and addrs
+  //TODO: addrs is still being hardcoded
+  return generateFromTpl(tpl, {ctx: ctx || capitalization(scheme), 
+    replacers: Object.assign({floats: `${config.floatLength}`, addrs: '254'}, replacers)});
+}
+
+function generatedDAHeadingBlock(scheme, { ctx, replacers = {} }) {
+  const tpl = tpls.DAProtocolHeadingTplFn(scheme);
+  return generateFromTpl(tpl, {ctx: ctx || capitalization(scheme), replacers});
+}
+
+function synthesisDAParams(schemes) {
+  let fields = {};
+  for (const n in schemes){
+    schemes[n].reduce(
+      (out, [item]) => {
+        assert(config.txIdx[item], `field ${item} must be one of the payload`);
+        out[item] = true
+        return out
+      }, fields);
+  }
+
+  tpls.DAProtocolHeadingTplFn().reduce((out, item) => {
+    assert(config.txIdx[item], `field ${item} must be one of the payload`);
+    out[item] = true
+    return out
+  }, fields);
+
+  return {schemes, fields}
+}
+//console.log(codegen.dataEncode)
+//console.log(generateDALengthCheckBlock({ctx: 'spotTrade', replacers: {'_ret': 'ret'}}));
+//console.log(renderDAEncodeField('spotTrade', 'amount1', 'accountLevels'));
 
 // replace '__' with ctx, for all {k:v} in replacers, replace ` ${k}` with ` ${v}`
 function generateFromTpl(tpl, { ctx, replacers }) {

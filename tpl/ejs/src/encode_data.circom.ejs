@@ -1,0 +1,64 @@
+// Generated from tpl/ejs/src/decode_tx.circom.ejs. Don't modify this file manually
+include "./constants.circom"
+include "./floats.circom"
+include "./lib/bitify.circom";
+
+function TxDataLength(balanceLevels, orderLevels, accountLevels) { 
+    var ret = 0;
+    <% for(const scheme in codegen.dataEncode.schemes){ -%>
+        <%- codegen.generateDALengthCheckBlock(scheme, {replacers: {'_ret':'ret'}}) -%>
+    <% } -%>
+
+    return ret + 3;
+}
+
+template EncodeData(balanceLevels, orderLevels, accountLevels) {
+
+    var floats = <%- codegen.config.floatLength %>;
+    <% for(const item in codegen.dataEncode.fields) { %>
+    signal input <%= item %>;<% } %>
+    //signal required from block circuit
+    signal input isDeposit;
+    signal input isWithDraw;
+    signal input isTransfer;
+    signal input isSpotTrade;
+
+    var encodeLength = TxDataLength(balanceLevels, orderLevels, accountLevels);
+    signal output encodedTxData[encodeLength];
+
+    var offset = 0;
+    signal commonFlag;
+    commonFlag <== isDeposit + isWithDraw + isTransfer;
+    component isL2KeyUnChanged = IsEqual();
+    component isL2KeyUpdated = IsZero();
+    isL2KeyUnChanged.in[0] <== ay1;
+    isL2KeyUnChanged.in[1] <== ay2;
+    isL2KeyUpdated.in <== isL2KeyUnChanged.out;
+    var schemeCheck = 0;
+    <%_ for(const scheme in codegen.dataEncode.schemes) { %>
+    <%_ let capScheme = codegen.capitalization(scheme) -%>
+    //start scheme {<%- scheme %>} encoding
+    signal use<%- capScheme %>;
+    signal encoded<%- capScheme %>Tx[encodeLength];
+    <%- codegen.generatedDAHeadingBlock(scheme, {}) %>
+    schemeCheck += use<%- capScheme %>;
+    offset = 3;
+    //start filling encoded part
+        <%_ for(const [fieldName, fieldType] of codegen.dataEncode.schemes[scheme]) { -%>
+    <%- codegen.renderDAEncodeField(scheme, fieldName, fieldType) %>
+        <%_ } -%>
+    //filling reset part by 0
+    assert(offset <= encodeLength);
+    for (var i = 0; i < encodeLength - offset; i++) {
+        encoded<%- capScheme %>Tx[i+offset] <== 0;
+    }
+    <%_ } %>
+    schemeCheck === 1;
+    
+    for(var i = 0; i < encodeLength;i++){
+        <%_ { let capSchemes = Object.keys(codegen.dataEncode.schemes).map(codegen.capitalization) -%>
+        encodedTxData[i] <== <%- capSchemes.map(n => `encoded${n}Tx[i]`).join('+') %>;    
+        <%_ } -%>
+    }
+
+}

@@ -102,6 +102,7 @@ function mockBigDepositToTx(): Array<bigint> {
 
 const tokenLevels = 6;
 const accountLevels = 2;
+const orderLevels = 2;
 
 function genOutput(payload: Array<bigint>): any {
   const hasher = new DA_Hasher(accountLevels, tokenLevels);
@@ -116,19 +117,19 @@ class TestTxDataEncode implements SimpleTest {
   getTestData() {
     let result = [];
     let txpl = mockTransferTx();
-    result.push({ input: { in: txpl }, output: genOutput(txpl), name: 'transfer' });
+    result.push({ input: { in: txpl, txType: 2}, output: genOutput(txpl), name: 'transfer' });
     txpl = mockDepositToTx(true);
-    result.push({ input: { in: txpl }, output: genOutput(txpl), name: 'depositNew' });
+    result.push({ input: { in: txpl, txType: 1}, output: genOutput(txpl), name: 'depositNew' });
     txpl = mockDepositToTx(false);
-    result.push({ input: { in: txpl }, output: genOutput(txpl), name: 'depositOld' });
+    result.push({ input: { in: txpl, txType: 1}, output: genOutput(txpl), name: 'depositOld' });
     txpl = mockBigDepositToTx();
-    result.push({ input: { in: txpl }, output: genOutput(txpl), name: 'depositBig' });
+    result.push({ input: { in: txpl, txType: 1}, output: genOutput(txpl), name: 'depositBig' });
     return result;
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(getCircuitSrcDir(), 'decode_tx_pick_data.circom'),
-      main: `PickTxDataFromTx(${tokenLevels}, ${accountLevels})`,
+      src: path.join(getCircuitSrcDir(), 'tx_dec_enc.circom'),
+      main: `GenerateTxDataFromTx(${tokenLevels}, ${orderLevels}, ${accountLevels})`,
     };
   }
 }

@@ -1,0 +1,38 @@
+// This circuit dedicate for a simple unit test of decode_tx.circom and encode_data.circom
+
+include "./decode_tx.circom"
+include "./encode_data.circom"
+
+template GenerateTxDataFromTx(balanceLevels, orderLevels, accountLevels) {
+    signal input in[TxLength()];
+    signal input txType;
+    signal output txData[TxDataLength(balanceLevels, orderLevels, accountLevels)];
+    signal output amount;
+    component decoder = DecodeTx();
+    component encodeData = EncodeData(balanceLevels, orderLevels, accountLevels);
+
+    for (var i = 0; i < TxLength(); i++){
+        decoder.in[i] <== in[i];
+    }
+
+    <% for(const item in codegen.dataEncode.fields) { %>
+    encodeData.<%- item %> <== decoder.<%- item %>;<% } %>    
+
+    var typeConstant[4] = [TxTypeDeposit(), TxTypeTransfer(), TxTypeWithdraw(), TxTypeSpotTrade()];
+    component checkTypes[4];
+    for (var i = 0; i < 4; i++){
+        checkTypes[i] = IsEqual();
+        checkTypes[i].in[0] <== txType;
+        checkTypes[i].in[1] <== typeConstant[i];        
+    }
+    encodeData.isDeposit <== checkTypes[0].out;
+    encodeData.isWithDraw <== checkTypes[1].out;
+    encodeData.isTransfer <== checkTypes[2].out;
+    encodeData.isSpotTrade <== checkTypes[3].out;
+
+    for (var i = 0; i < TxDataLength(balanceLevels, orderLevels, accountLevels); i++){
+        encodeData.encodedTxData[i] ==> txData[i];
+    }
+    decoder.amount ==> amount;
+}
+
