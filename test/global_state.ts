@@ -697,7 +697,7 @@ class GlobalState {
     encodedTx[TxDetailIdx.NewOrder2AmountBuy] = order2State.totalBuy;
 
     encodedTx[TxDetailIdx.TokenID1] = order1State.tokenSell;
-    encodedTx[TxDetailIdx.TokenID2] = order2State.tokenBuy;
+    encodedTx[TxDetailIdx.TokenID2] = order2State.tokenSell;
 
     rawTx.rootAfter = this.root();
     this.addRawTx(rawTx);
