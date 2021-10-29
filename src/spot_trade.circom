@@ -325,7 +325,17 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
     component checkEq5 = ForceEqualIfEnabled();
     checkEq5.enabled <== enabled;
     checkEq5.in[0] <== tokenID2;
-    checkEq5.in[1] <== newOrder2TokenBuy;
+    checkEq5.in[1] <== newOrder1TokenBuy;
+
+    component checkEq4 = ForceEqualIfEnabled();
+    checkEq4.enabled <== enabled;
+    checkEq4.in[0] <== tokenID1;
+    checkEq4.in[1] <== newOrder2TokenBuy;
+
+    component checkEq5 = ForceEqualIfEnabled();
+    checkEq5.enabled <== enabled;
+    checkEq5.in[0] <== tokenID2;
+    checkEq5.in[1] <== newOrder2TokenSell;
 
 
 

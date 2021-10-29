@@ -223,7 +223,9 @@ template SpotTrade(balanceLevels, orderLevels, accountLevels) {
         ['enableSigCheck1', '1'],
         ['enableSigCheck2', '1'],
         ['tokenID1', 'newOrder1TokenSell'],
-        ['tokenID2', 'newOrder2TokenBuy']
+        ['tokenID2', 'newOrder1TokenBuy'],
+        ['tokenID1', 'newOrder2TokenBuy']
+        ['tokenID2', 'newOrder2TokenSell']
     ], {ctx: '', replacers: {}}) %>
 
     component check1 = ForceEqualIfEnabled();
