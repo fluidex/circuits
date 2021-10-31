@@ -750,7 +750,7 @@ class GlobalState {
     let oldAccountRoots = bufferedTxs.map(tx => tx.rootBefore);
     let newAccountRoots = bufferedTxs.map(tx => tx.rootAfter);
     //data avaliability
-    const hasher = new DA_Hasher(this.accountLevels, this.balanceLevels);
+    const hasher = new DA_Hasher(this.balanceLevels, this.orderLevels, this.accountLevels);
     bufferedTxs.forEach(tx => hasher.encodeRawTx(tx));
     const digest = hasher.digestToFF();
 

@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer';
+import { assert } from 'console';
 
 const max32bitInt = 4294967295;
 
@@ -89,6 +90,21 @@ class encodeCtx {
     for (let i = 0; i < s.length; i++) {
       this.encodeNumber(s.charCodeAt(i), 8);
     }
+  }
+
+  //align to specified length
+  encodeAlign(len: number){
+    const curLen = this.encodingBits.length;
+    const padding = curLen % len && (len - curLen % len);
+    for(let i = 0; i < padding; i++){
+      this.applyBit(true);
+    }
+    //sanity check
+    assert(this.checkAlign(len));
+  }
+
+  checkAlign(len: number) : boolean {
+    return this.encodingBits.length % len === 0;
   }
 }
 

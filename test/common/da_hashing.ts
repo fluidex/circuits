@@ -1,61 +1,140 @@
-import { config, encodeFloat } from '../codec/float';
+import { encodeFloat } from '../codec/float';
 import { Hash } from 'fast-sha256';
-import { encodeCtx } from '../codec/bitstream';
+import { DAEncoder } from '../codec/encode_data';
 import * as tx from './tx';
+import { OrderState } from 'fluidex.js';
+import { assert } from 'console';
 
-export function txDAEncodeLength(nAccountLevel, nTokenLevel) {
-  return nAccountLevel * 2 + nTokenLevel + config.floatLength;
-}
+const { TxDetailIdx, TxType } = tx;
 
-const { TxDetailIdx } = tx;
+class DA_Hasher {
+  private encoder: DAEncoder;
 
-class DA_Hasher extends encodeCtx {
-  private nAccountLevel: number;
-  private nTokenLevel: number;
+  constructor(nTokenLevel : number, nOrderLevel : number, nAccountLevel : number) {
+    this.encoder = new DAEncoder(nTokenLevel, nOrderLevel, nAccountLevel);
+  }
 
-  constructor(nAccountLevel, nTokenLevel) {
-    super();
-    this.nAccountLevel = nAccountLevel;
-    this.nTokenLevel = nTokenLevel;
+  encodedLen() : number {
+    return this.encoder.encodedLen();
   }
 
   encodeTransfer(tx: tx.TranferTx) {
-    this.encodeNumber(Number(tx.from), this.nAccountLevel);
-    this.encodeNumber(Number(tx.to), this.nAccountLevel);
-    this.encodeNumber(Number(tx.tokenID), this.nTokenLevel);
-    this.encodeNumber(Number(encodeFloat(tx.amount)), config.floatLength);
+    this.encoder.encodeNumber(0, 3); //000
+    this.encoder.encodeCommon([
+      tx.from, 
+      tx.to, 
+      tx.tokenID, 
+      tx.tokenID,
+      encodeFloat(tx.amount)
+    ], 
+    DAEncoder.commonIdx);
+  }
+
+  encodeWithDraw(tx: tx.WithdrawTx) {
+    this.encoder.encodeNumber(2, 3); //010
+    this.encoder.encodeCommon([
+      tx.accountID, 
+      tx.accountID, 
+      tx.tokenID, 
+      tx.tokenID,
+      encodeFloat(tx.amount)
+    ], 
+    DAEncoder.commonIdx);
   }
 
   encodeDeposit(tx: tx.DepositToOldTx | tx.DepositToNewTx) {
-    this.encodeNumber(Number(tx.accountID), this.nAccountLevel);
-    this.encodeNumber(Number(tx.accountID), this.nAccountLevel);
-    this.encodeNumber(Number(tx.tokenID), this.nTokenLevel);
-    this.encodeNumber(Number(encodeFloat(tx.amount)), config.floatLength);
+    this.encoder.encodeNumber(0, 3); //000
+    this.encoder.encodeCommon([
+      tx.accountID, 
+      tx.accountID, 
+      tx.tokenID, 
+      tx.tokenID,
+      encodeFloat(tx.amount)
+    ], 
+    DAEncoder.commonIdx);
+  }
+
+  encodeKeyUpdate(tx: tx.DepositToNewTx) {
+    this.encoder.encodeNumber(1, 3); //100
+    assert(tx.amount === BigInt(0));
+    this.encoder.encodeL2Key([
+      tx.accountID, 
+      tx.ay,
+    ], 
+    DAEncoder.l2KeyIdx);
   }
 
   encodeNop() {
-    this.encodeNumber(0, txDAEncodeLength(this.nAccountLevel, this.nTokenLevel));
+    this.encoder.encodeNop();
   }
 
-  encodeSpotTrade(tx: tx.SpotTradeTx) {
-    throw new Error('no implementment');
+  encodeSpotTrade(tx: tx.SpotTradeTx, order1: OrderState, order2: OrderState) {
+    let hd = 0
+    if (order1.isFilled()){
+      hd |= 2
+    }
+    if (order2.isFilled()){
+      hd |= 4
+    }
+    this.encoder.encodeNumber(hd, 3); //010, 011 or 001
+
+    this.encoder.encodeSpotTrade([
+      tx.order1AccountID, 
+      tx.order2AccountID, 
+      tx.tokenID1to2, 
+      tx.tokenID2to1,
+      encodeFloat(order1.totalSell()),
+      encodeFloat(order1.totalBuy()),
+      tx.order1Id,
+      encodeFloat(order2.totalSell()),
+      encodeFloat(order2.totalBuy()),
+      tx.order2Id,
+    ], 
+    DAEncoder.spotTradeIdx);
   }
 
   encodeRawTx(tx: tx.RawTx) {
-    const { payload } = tx;
-    this.encodeRawPayload(payload);
+    const { txType, payload } = tx;
+    assert(this.encoder.checkAlign());
+    switch(txType){
+    case TxType.Deposit:
+      if (payload[TxDetailIdx.Ay1] !== payload[TxDetailIdx.Ay2]){
+        this.encoder.encodeNumber(1, 3); //100
+        this.encodeRawPayload(payload, 'encodeL2Key');
+        break;
+      }
+    case TxType.Transfer:
+      this.encoder.encodeNumber(0, 3); //000
+      this.encodeRawPayload(payload, 'encodeCommon');
+      break;
+    case TxType.SpotTrade:
+      this.encoder.encodeNumber(
+        (payload[TxDetailIdx.NewOrder1FilledBuy] === payload[TxDetailIdx.NewOrder1AmountBuy] ? 2: 0)
+        + (payload[TxDetailIdx.NewOrder2FilledBuy] === payload[TxDetailIdx.NewOrder2AmountBuy] ? 4: 0)
+        , 3); //010, 011 or 001
+      this.encodeRawPayload(payload, 'encodeSpotTrade');
+      break;
+    case TxType.Withdraw:
+      this.encoder.encodeNumber(2, 3); //010
+      this.encodeRawPayload(payload, 'encodeCommon');
+      break;
+    case TxType.Nop:
+      this.encodeRawPayload(payload, 'encodeNop');
+    }
+    
   }
 
-  encodeRawPayload(payload: Array<bigint>) {
-    this.encodeNumber(Number(payload[TxDetailIdx.AccountID1]), this.nAccountLevel);
-    this.encodeNumber(Number(payload[TxDetailIdx.AccountID2]), this.nAccountLevel);
-    this.encodeNumber(Number(payload[TxDetailIdx.TokenID1]), this.nTokenLevel);
-    this.encodeNumber(Number(payload[TxDetailIdx.Amount]), config.floatLength);
+  encodeRawPayload(payload: Array<bigint>, scheme: string) {
+    this.encoder[scheme](payload, TxDetailIdx);
+  }
+
+  bits() : Array<number> {
+    return this.encoder.bits();
   }
 
   digest(): Buffer {
     let hasher = new Hash();
-    let buf = this.seal();
+    let buf = this.encoder.seal();
     //console.log('buf', buf.toString('hex'))
     hasher.update(buf);
 
@@ -91,4 +170,4 @@ if (ffDigest.Hi.toString(16) + ffDigest.Lo.toString(16) !==
 
 export { DA_Hasher };
 
-export default { txDAEncodeLength, DA_Hasher };
+export default { DA_Hasher };

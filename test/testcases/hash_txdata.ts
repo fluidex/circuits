@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { SimpleTest, TestComponent } from './interface';
 import { getCircuitSrcDir } from '../common/circuit';
-import { txDAEncodeLength, DA_Hasher } from '../common/da_hashing';
+import { DA_Hasher } from '../common/da_hashing';
 import { Hash } from 'fast-sha256';
 
 //4e877400000000
@@ -107,15 +107,16 @@ const Scalar = ffjavascript.Scalar;
 const nTxs = 5;
 const accountLevels = 3;
 const tokenLevels = 3;
-const totalBit = txDAEncodeLength(accountLevels, tokenLevels) * nTxs;
+const orderLevels = 3;
+const hasher = new DA_Hasher(tokenLevels, orderLevels, accountLevels);
+const totalBit = hasher.encodedLen() * nTxs;
 
 class TestHashTxData implements SimpleTest {
   getTestData() {
     const tokenID = 5;
     const accountID1 = Scalar.e(2);
     const accountID2 = Scalar.e(6);
-
-    const hasher = new DA_Hasher(accountLevels, tokenLevels);
+    const hasher = new DA_Hasher(tokenLevels, orderLevels, accountLevels);
 
     hasher.encodeDeposit({
       accountID: accountID1,

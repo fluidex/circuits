@@ -3,13 +3,13 @@ const printf = require('printf');
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 import { SimpleTest, TestComponent } from './interface';
-import { TxLength, TxDetailIdx } from '../common/tx';
+import { TxLength, TxDetailIdx, RawTx, TxType } from '../common/tx';
 import { getCircuitSrcDir } from '../common/circuit';
 import { DA_Hasher } from '../common/da_hashing';
 import { encodeFloat, decodeFloat } from '../codec/float';
 const assert = require('assert').strict;
 
-function mockTransferTx(): Array<bigint> {
+function mockTransferTx(): RawTx {
   let encodedTx: Array<bigint> = new Array(TxLength);
   encodedTx.fill(0n, 0, TxLength);
 
@@ -36,15 +36,18 @@ function mockTransferTx(): Array<bigint> {
   encodedTx[TxDetailIdx.EnableSigCheck1] = 1n;
   encodedTx[TxDetailIdx.DstIsNew] = 0n;
 
-  return encodedTx;
+  let ret = new RawTx;
+  ret.payload = encodedTx;
+  ret.txType = TxType.Transfer;
+  return ret;
 }
 
-function mockDepositToTx(isNew: boolean): Array<bigint> {
+function mockDepositToTx(isNew: boolean): RawTx {
   let encodedTx: Array<bigint> = new Array(TxLength);
   encodedTx.fill(0n, 0, TxLength);
 
   const balance = isNew ? 0n : BigInt('222');
-  const amount = BigInt('18445532');
+  const amount = isNew ? 0n: BigInt('18445532');
   const tokenID = 42;
   const nonce = BigInt(100);
   const ay = BigInt(999);
@@ -63,15 +66,19 @@ function mockDepositToTx(isNew: boolean): Array<bigint> {
   encodedTx[TxDetailIdx.Balance2] = amount + balance;
   encodedTx[TxDetailIdx.Nonce2] = isNew ? 0n : nonce;
   encodedTx[TxDetailIdx.Sign2] = Scalar.e('0x519B');
-  encodedTx[TxDetailIdx.Ay2] = BigInt(999);
+  encodedTx[TxDetailIdx.Ay2] = ay;
 
   encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
   encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
   encodedTx[TxDetailIdx.DstIsNew] = isNew ? 1n : 0n;
-  return encodedTx;
+
+  let ret = new RawTx;
+  ret.payload = encodedTx;
+  ret.txType = TxType.Deposit;
+  return ret;
 }
 
-function mockBigDepositToTx(): Array<bigint> {
+function mockBigDepositToTx(): RawTx {
   let encodedTx: Array<bigint> = new Array(TxLength);
   encodedTx.fill(0n, 0, TxLength);
 
@@ -85,7 +92,7 @@ function mockBigDepositToTx(): Array<bigint> {
   encodedTx[TxDetailIdx.Balance1] = 0n;
   encodedTx[TxDetailIdx.Nonce1] = 0n;
   encodedTx[TxDetailIdx.Sign1] = 0n;
-  encodedTx[TxDetailIdx.Ay1] = 0n;
+  encodedTx[TxDetailIdx.Ay1] = BigInt(999);
 
   encodedTx[TxDetailIdx.TokenID2] = Scalar.e(tokenID);
   encodedTx[TxDetailIdx.AccountID2] = Scalar.e(2);
@@ -96,20 +103,24 @@ function mockBigDepositToTx(): Array<bigint> {
 
   encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
   encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
-  encodedTx[TxDetailIdx.DstIsNew] = 1n;
-  return encodedTx;
+  encodedTx[TxDetailIdx.DstIsNew] = 0n;
+
+  let ret = new RawTx;
+  ret.payload = encodedTx;
+  ret.txType = TxType.Deposit;
+  return ret;
 }
 
 const tokenLevels = 6;
 const accountLevels = 2;
 const orderLevels = 2;
 
-function genOutput(payload: Array<bigint>): any {
-  const hasher = new DA_Hasher(accountLevels, tokenLevels);
-  hasher.encodeRawPayload(payload);
+function genOutput(rawTx: RawTx): any {
+  const hasher = new DA_Hasher(tokenLevels, orderLevels, accountLevels);
+  hasher.encodeRawTx(rawTx);
   return {
     txData: hasher.bits(),
-    amount: decodeFloat(payload[TxDetailIdx.Amount]),
+    amount: decodeFloat(rawTx.payload[TxDetailIdx.Amount]),
   };
 }
 
@@ -117,13 +128,13 @@ class TestTxDataEncode implements SimpleTest {
   getTestData() {
     let result = [];
     let txpl = mockTransferTx();
-    result.push({ input: { in: txpl, txType: 2}, output: genOutput(txpl), name: 'transfer' });
+    result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'transfer' });
     txpl = mockDepositToTx(true);
-    result.push({ input: { in: txpl, txType: 1}, output: genOutput(txpl), name: 'depositNew' });
+    result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'depositNew' });
     txpl = mockDepositToTx(false);
-    result.push({ input: { in: txpl, txType: 1}, output: genOutput(txpl), name: 'depositOld' });
+    result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'depositOld' });
     txpl = mockBigDepositToTx();
-    result.push({ input: { in: txpl, txType: 1}, output: genOutput(txpl), name: 'depositBig' });
+    result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'depositBig' });
     return result;
   }
   getComponent(): TestComponent {
@@ -136,18 +147,18 @@ class TestTxDataEncode implements SimpleTest {
 
 class TestTxDataArrayEncode implements SimpleTest {
   getTestData() {
-    const hasher = new DA_Hasher(accountLevels, tokenLevels);
+    const hasher = new DA_Hasher(tokenLevels, orderLevels, accountLevels);
     let txpls = [];
     let txpl = mockTransferTx();
-    hasher.encodeRawPayload(txpl);
+    hasher.encodeRawTx(txpl);
     txpls.push(txpl);
 
     txpl = mockDepositToTx(true);
-    hasher.encodeRawPayload(txpl);
+    hasher.encodeRawTx(txpl);
     txpls.push(txpl);
 
     txpl = mockDepositToTx(false);
-    hasher.encodeRawPayload(txpl);
+    hasher.encodeRawTx(txpl);
     txpls.push(txpl);
 
     return [{ input: { in: txpls }, output: { txData: hasher.bits() }, name: 'txs' }];
