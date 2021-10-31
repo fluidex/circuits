@@ -619,8 +619,8 @@ class GlobalState {
     encodedTx[TxDetailIdx.OldOrder2FilledBuy] = oldOrder2InTree.filledBuy;
     encodedTx[TxDetailIdx.OldOrder2AmountBuy] = oldOrder2InTree.totalBuy;
 
-    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount1to2);
-    encodedTx[TxDetailIdx.Amount2] = encodeFloat(tx.amount2to1);
+    encodedTx[TxDetailIdx.Amount1] = tx.amount1to2;
+    encodedTx[TxDetailIdx.Amount2] = tx.amount2to1;
     encodedTx[TxDetailIdx.Order1Pos] = order1_pos;
     encodedTx[TxDetailIdx.Order2Pos] = order2_pos;
 
@@ -683,18 +683,18 @@ class GlobalState {
     encodedTx[TxDetailIdx.NewOrder1ID] = order1State.orderId;
     encodedTx[TxDetailIdx.NewOrder1TokenSell] = order1State.tokenSell;
     encodedTx[TxDetailIdx.NewOrder1FilledSell] = order1State.filledSell;
-    encodedTx[TxDetailIdx.NewOrder1AmountSell] = order1State.totalSell;
+    encodedTx[TxDetailIdx.NewOrder1AmountSell] = encodeFloat(order1State.totalSell);
     encodedTx[TxDetailIdx.NewOrder1TokenBuy] = order1State.tokenBuy;
     encodedTx[TxDetailIdx.NewOrder1FilledBuy] = order1State.filledBuy;
-    encodedTx[TxDetailIdx.NewOrder1AmountBuy] = order1State.totalBuy;
+    encodedTx[TxDetailIdx.NewOrder1AmountBuy] = encodeFloat(order1State.totalBuy);
 
     encodedTx[TxDetailIdx.NewOrder2ID] = order2State.orderId;
     encodedTx[TxDetailIdx.NewOrder2TokenSell] = order2State.tokenSell;
     encodedTx[TxDetailIdx.NewOrder2FilledSell] = order2State.filledSell;
-    encodedTx[TxDetailIdx.NewOrder2AmountSell] = order2State.totalSell;
+    encodedTx[TxDetailIdx.NewOrder2AmountSell] = encodeFloat(order2State.totalSell);
     encodedTx[TxDetailIdx.NewOrder2TokenBuy] = order2State.tokenBuy;
     encodedTx[TxDetailIdx.NewOrder2FilledBuy] = order2State.filledBuy;
-    encodedTx[TxDetailIdx.NewOrder2AmountBuy] = order2State.totalBuy;
+    encodedTx[TxDetailIdx.NewOrder2AmountBuy] = encodeFloat(order2State.totalBuy);
 
     encodedTx[TxDetailIdx.TokenID1] = order1State.tokenSell;
     encodedTx[TxDetailIdx.TokenID2] = order2State.tokenBuy;

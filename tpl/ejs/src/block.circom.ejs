@@ -2,6 +2,7 @@ include "../node_modules/circomlib/circuits/compconstant.circom";
 include "./lib/hash_state.circom";
 include "./lib/sha256.circom";
 include "./decode_tx.circom";
+include "./encode_data.circom"
 include "./deposit.circom";
 include "./transfer.circom";
 include "./withdraw.circom";
@@ -53,11 +54,11 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     // decode each transaction
     component decodedTx[nTxs];
     for (var i = 0; i < nTxs; i++) {
-        decodedTx[i] = DecodeTx(balanceLevels, orderLevels, accountLevels);
+        decodedTx[i] = DecodeTx();
         for (var j = 0; j < TxLength(); j++) {
             decodedTx[i].in[j] <== encodedTxs[i][j];
         }
-    }
+    }   
 
     component genesisOrderRoot = CalculateGenesisOrderRoot(orderLevels);
 
@@ -84,12 +85,23 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         enableSpotTrade[i].in[1] <== TxTypeSpotTrade();
     }
 
-    // data avaliability check
-    var txBits = TxDataLength(accountLevels, balanceLevels);
+    // data avaliability
+    component encodeData[nTxs];
+    for (var i = 0; i < nTxs; i++) {
+        encodeData[i] = EncodeData(balanceLevels, orderLevels, accountLevels);
+        <%- codegen.renderDAEncoderInput('encodeData[i]', 'encodedTxs[i]') %>
+        encodeData.isDeposit <== enableDeposit[i].out;
+        encodeData.isTransfer <== enableTransfer[i].out;
+        encodeData.isWithDraw <== enableWithdraw[i].out;
+        encodeData.isSpotTrade <== enableSpotTrade[i].out;
+        encodeData.isL2KeyUpdated <== decodedTx[i].dstIsNew;        
+    }
+
+    var txBits = TxDataLength(balanceLevels, orderLevels, accountLevels);
     component txDataHasher = Sha256ToNum(nTxs *txBits);
     for (var i = 0; i < nTxs; i++) {
         for (var j = 0; j < txBits; j++) {
-            decodedTx[i].encodedTxData[j] ==> txDataHasher.bits[i*txBits + j];
+            encodeData[i].encodedTxData[j] ==> txDataHasher.bits[i*txBits + j];
         }
     }
     txDataHasher.hashOutHi === txDataHashHi;
@@ -222,7 +234,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].order2AccountSign <== decodedTx[i].sign2;
         processSpotTrade[i].order2AccountAy <== decodedTx[i].ay2;
 
-        processSpotTrade[i].amount1to2 <== decodedTx[i].amount;
+        processSpotTrade[i].amount1to2 <== decodedTx[i].amount1;
         processSpotTrade[i].amount2to1 <== decodedTx[i].amount2;
 
         processSpotTrade[i].orderRoot1 <== orderRoots[i][0];
@@ -230,7 +242,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
         processSpotTrade[i].order1TokenSellBalance <== decodedTx[i].balance1;
         // for reusing universal checker, balance2 here must be a leaf of the final merkle tree
-        processSpotTrade[i].order2TokenBuyBalance <== decodedTx[i].balance2 - decodedTx[i].amount;
+        processSpotTrade[i].order2TokenBuyBalance <== decodedTx[i].balance2 - decodedTx[i].amount1;
         processSpotTrade[i].order2TokenSellBalance <== decodedTx[i].balance3;
         processSpotTrade[i].order1TokenBuyBalance <== decodedTx[i].balance4 - decodedTx[i].amount2;
 
