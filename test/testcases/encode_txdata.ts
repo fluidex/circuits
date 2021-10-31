@@ -111,6 +111,55 @@ function mockBigDepositToTx(): RawTx {
   return ret;
 }
 
+function mockSpotTradeTx(): RawTx {
+  let encodedTx: Array<bigint> = new Array(TxLength);
+  encodedTx.fill(0n, 0, TxLength);
+
+  const tokenID1 = 42;
+  const tokenID2 = 30;
+
+  encodedTx[TxDetailIdx.Amount1] = BigInt('10000');
+  encodedTx[TxDetailIdx.Amount2] = BigInt('1');
+
+  encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tokenID1);
+  encodedTx[TxDetailIdx.AccountID1] = Scalar.e(2);
+  encodedTx[TxDetailIdx.Balance1] = 0n;
+  encodedTx[TxDetailIdx.Nonce1] = 0n;
+  encodedTx[TxDetailIdx.Sign1] = 0n;
+  encodedTx[TxDetailIdx.Ay1] = BigInt(999);
+  encodedTx[TxDetailIdx.NewOrder1TokenBuy] = Scalar.e(tokenID2);
+  encodedTx[TxDetailIdx.NewOrder1TokenSell] = Scalar.e(tokenID1);
+  encodedTx[TxDetailIdx.NewOrder1AmountBuy] = BigInt(1);
+  encodedTx[TxDetailIdx.NewOrder1AmountSell] = BigInt(10000);
+  encodedTx[TxDetailIdx.NewOrder1FilledBuy] = BigInt(1);
+  encodedTx[TxDetailIdx.NewOrder1FilledSell] = BigInt(10000);
+  encodedTx[TxDetailIdx.NewOrder1ID] = 1n;
+
+  encodedTx[TxDetailIdx.TokenID2] = Scalar.e(tokenID2);
+  encodedTx[TxDetailIdx.AccountID2] = Scalar.e(1);
+  encodedTx[TxDetailIdx.Balance2] = 0n;
+  encodedTx[TxDetailIdx.Nonce2] = 0n;
+  encodedTx[TxDetailIdx.Sign2] = Scalar.e('0x519B');
+  encodedTx[TxDetailIdx.Ay2] = BigInt(777);
+  encodedTx[TxDetailIdx.NewOrder2TokenBuy] = Scalar.e(tokenID1);
+  encodedTx[TxDetailIdx.NewOrder2TokenSell] = Scalar.e(tokenID2);
+  encodedTx[TxDetailIdx.NewOrder2AmountBuy] = BigInt(500000);
+  encodedTx[TxDetailIdx.NewOrder2AmountSell] = BigInt(5);
+  encodedTx[TxDetailIdx.NewOrder2FilledBuy] = BigInt(10000);
+  encodedTx[TxDetailIdx.NewOrder2FilledSell] = BigInt(1);
+  encodedTx[TxDetailIdx.NewOrder2ID] = 0n;
+
+  encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
+  encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
+  encodedTx[TxDetailIdx.DstIsNew] = 0n;
+
+  let ret = new RawTx;
+  ret.payload = encodedTx;
+  ret.txType = TxType.SpotTrade;
+  return ret;
+}
+
+
 const tokenLevels = 6;
 const accountLevels = 2;
 const orderLevels = 2;
@@ -130,11 +179,13 @@ class TestTxDataEncode implements SimpleTest {
     let txpl = mockTransferTx();
     result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'transfer' });
     txpl = mockDepositToTx(true);
-    result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'depositNew' });
+    result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'L2keyUpdate' });
     txpl = mockDepositToTx(false);
     result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'depositOld' });
     txpl = mockBigDepositToTx();
     result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'depositBig' });
+    txpl = mockSpotTradeTx();
+    result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'spotTrade' });    
     return result;
   }
   getComponent(): TestComponent {

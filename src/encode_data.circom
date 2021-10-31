@@ -125,7 +125,7 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
 
     encodedSpotTradeTx[0] <== 0;
     encodedSpotTradeTx[1] <== useSpotTrade*isOrder1Filled.out;
-    encodedSpotTradeTx[2] <== useSpotTrade*isOrder1Filled.out;
+    encodedSpotTradeTx[2] <== useSpotTrade*isOrder2Filled.out;
     schemeCheck += useSpotTrade;
     offset = 3;
     //start filling encoded part

@@ -228,7 +228,7 @@ const DAProtocolHeadingTplFn = function (scheme) {
 
     encoded__Tx[0] <== 0;
     encoded__Tx[1] <== use__*isOrder1Filled.out;
-    encoded__Tx[2] <== use__*isOrder1Filled.out;`
+    encoded__Tx[2] <== use__*isOrder2Filled.out;`
     case 'l2Key':
         return `
     use__ <== isL2KeyUpdated;        
