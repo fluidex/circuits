@@ -60,7 +60,10 @@ class encodeCtx {
       return this._sealed;
     }
 
-    this.encodingBuf.push(this.encodingChar);
+    if (this.encodingBits.length % 8 !== 0){
+      this.encodingBuf.push(this.encodingChar);
+    }
+  
     const sealed = Buffer.from(this.encodingBuf);
     Object.defineProperty(this, '_sealed', { value: sealed });
     return sealed;
