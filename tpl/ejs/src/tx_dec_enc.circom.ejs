@@ -15,20 +15,22 @@ template GenerateTxDataFromTx(balanceLevels, orderLevels, accountLevels) {
         decoder.in[i] <== in[i];
     }
 
-    <% for(const item in codegen.dataEncode.fields) { %>
-    encodeData.<%- item %> <== decoder.<%- item %>;<% } %>    
-
+    <%- codegen.renderDAEncoderInput('encodeData', 'in') %>
     var typeConstant[4] = [TxTypeDeposit(), TxTypeTransfer(), TxTypeWithdraw(), TxTypeSpotTrade()];
+    var checkTypeFlags = 0;
     component checkTypes[4];
     for (var i = 0; i < 4; i++){
         checkTypes[i] = IsEqual();
         checkTypes[i].in[0] <== txType;
-        checkTypes[i].in[1] <== typeConstant[i];        
+        checkTypes[i].in[1] <== typeConstant[i];
+        checkTypeFlags += checkTypes[i].out;     
     }
+    assert(checkTypeFlags == 1);
     encodeData.isDeposit <== checkTypes[0].out;
-    encodeData.isWithDraw <== checkTypes[1].out;
-    encodeData.isTransfer <== checkTypes[2].out;
+    encodeData.isTransfer <== checkTypes[1].out;
+    encodeData.isWithDraw <== checkTypes[2].out;
     encodeData.isSpotTrade <== checkTypes[3].out;
+    encodeData.isL2KeyUpdated <== decoder.dstIsNew;
 
     for (var i = 0; i < TxDataLength(balanceLevels, orderLevels, accountLevels); i++){
         encodeData.encodedTxData[i] ==> txData[i];

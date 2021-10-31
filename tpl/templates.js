@@ -190,6 +190,12 @@ ${generateMultiAssign(compName, ['accountID', 'sign', 'ay', 'nonce', 'balance'],
 `;
 };
 
+const DAProtocolInputFieldTpl = `
+    <%_ for(const item in fields) { -%>
+    <%- encoder %>.<%- item %> <== <%- input %>[<%- txIdx[item] %>];
+    <%_ } -%>
+`
+
 const DAProtocolEncodeFieldTpl = `component encode<%- scheme %><%- fieldName %> = Num2Bits(<%- fieldBits %>);
     encode<%- scheme %><%- fieldName %>.in <== <%- unCapFieldName %>;
     for (var i = 0; i < <%- fieldBits %>; i++) {
@@ -201,7 +207,11 @@ const DAProtocolHeadingTplFn = function (scheme) {
     switch (scheme) {
     case 'common':
         return `
-    use__ <== commonFlag * isL2KeyUnChanged.out;
+    component isL2KeyUnChanged = IsZero();
+    isL2KeyUnChanged.in <== isL2KeyUpdated;
+    signal isRealDeposit;
+    isRealDeposit <== isL2KeyUnChanged.out * isDeposit;
+    use__ <== isRealDeposit + isWithDraw + isTransfer;
     encoded__Tx[0] <== 0;
     //TODO: this bit should be marked as 'fully exit' (withdraw all balance)
     encoded__Tx[1] <== 0;
@@ -221,13 +231,13 @@ const DAProtocolHeadingTplFn = function (scheme) {
     encoded__Tx[2] <== use__*isOrder1Filled.out;`
     case 'l2Key':
         return `
-    use__ <== isL2KeyUpdated.out;        
+    use__ <== isL2KeyUpdated;        
     //this constraints ensure l2key can only be updated under a 'dummy' deposit tx
     signal notDepositFlag;
     notDepositFlag <== isWithDraw + isTransfer + isSpotTrade;
-    notDepositFlag * isL2KeyUpdated.out === 0;
-    //(isWithDraw + isTransfer + isSpotTrade) * isL2KeyUpdated.out === 0;
-    amount * isL2KeyUpdated.out === 0;
+    isL2KeyUpdated * notDepositFlag === 0;
+    //(isWithDraw + isTransfer + isSpotTrade) * isL2KeyUpdated === 0;
+    amount * isL2KeyUpdated === 0;
     encoded__Tx[0] <== use__;
     encoded__Tx[1] <== 0;
     encoded__Tx[2] <== 0;`
@@ -270,6 +280,7 @@ export {
   LoopAssignTpl,
   CheckEqTpl,
   MultiCheckEqTpl,
+  DAProtocolInputFieldTpl,
   DAProtocolEncodeFieldTpl,
   DAProtocolLengthCheckTplFn,
   DAProtocolHeadingTplFn,

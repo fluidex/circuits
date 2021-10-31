@@ -17,33 +17,37 @@ template GenerateTxDataFromTx(balanceLevels, orderLevels, accountLevels) {
     }
 
     
-    encodeData.accountID1 <== decoder.accountID1;
-    encodeData.accountID2 <== decoder.accountID2;
-    encodeData.tokenID1 <== decoder.tokenID1;
-    encodeData.tokenID2 <== decoder.tokenID2;
-    encodeData.amount <== decoder.amount;
-    encodeData.newOrder1AmountSell <== decoder.newOrder1AmountSell;
-    encodeData.newOrder1AmountBuy <== decoder.newOrder1AmountBuy;
-    encodeData.newOrder1ID <== decoder.newOrder1ID;
-    encodeData.newOrder2AmountSell <== decoder.newOrder2AmountSell;
-    encodeData.newOrder2AmountBuy <== decoder.newOrder2AmountBuy;
-    encodeData.newOrder2ID <== decoder.newOrder2ID;
-    encodeData.ay2 <== decoder.ay2;
-    encodeData.ay1 <== decoder.ay1;
-    encodeData.newOrder1FilledBuy <== decoder.newOrder1FilledBuy;
-    encodeData.newOrder2FilledBuy <== decoder.newOrder2FilledBuy;    
+    encodeData.accountID1 <== in[1];
+    encodeData.accountID2 <== in[8];
+    encodeData.tokenID1 <== in[2];
+    encodeData.tokenID2 <== in[9];
+    encodeData.amount <== in[24];
+    encodeData.newOrder1AmountSell <== in[41];
+    encodeData.newOrder1AmountBuy <== in[44];
+    encodeData.newOrder1ID <== in[38];
+    encodeData.newOrder2AmountSell <== in[55];
+    encodeData.newOrder2AmountBuy <== in[58];
+    encodeData.newOrder2ID <== in[52];
+    encodeData.ay2 <== in[12];
+    encodeData.ay1 <== in[5];
+    encodeData.newOrder1FilledBuy <== in[43];
+    encodeData.newOrder2FilledBuy <== in[57];
 
     var typeConstant[4] = [TxTypeDeposit(), TxTypeTransfer(), TxTypeWithdraw(), TxTypeSpotTrade()];
+    var checkTypeFlags = 0;
     component checkTypes[4];
     for (var i = 0; i < 4; i++){
         checkTypes[i] = IsEqual();
         checkTypes[i].in[0] <== txType;
-        checkTypes[i].in[1] <== typeConstant[i];        
+        checkTypes[i].in[1] <== typeConstant[i];
+        checkTypeFlags += checkTypes[i].out;     
     }
+    assert(checkTypeFlags == 1);
     encodeData.isDeposit <== checkTypes[0].out;
-    encodeData.isWithDraw <== checkTypes[1].out;
-    encodeData.isTransfer <== checkTypes[2].out;
+    encodeData.isTransfer <== checkTypes[1].out;
+    encodeData.isWithDraw <== checkTypes[2].out;
     encodeData.isSpotTrade <== checkTypes[3].out;
+    encodeData.isL2KeyUpdated <== decoder.dstIsNew;
 
     for (var i = 0; i < TxDataLength(balanceLevels, orderLevels, accountLevels); i++){
         encodeData.encodedTxData[i] ==> txData[i];

@@ -16,6 +16,7 @@ const codegen = {
   renderInputEncoderRs,
   renderInputDecoderCircom,
   renderLoopAssign,
+  renderDAEncoderInput,
   renderDAEncodeField,
   generateUniversalBalanceCheck,
   // generateXXX uses simple str.replace
@@ -73,6 +74,12 @@ function camelToAllCap(str) {
 function capitalization(str){
   return str[0].toUpperCase() + str.slice(1);
 } 
+function renderDAEncoderInput(encoderName, inputName,
+  fields = codegen.dataEncode.fields, txIdx = config.txIdx) {
+
+  return ejs.render(tpls.DAProtocolInputFieldTpl, 
+    {encoder: encoderName, input: inputName, fields, txIdx})
+}
 
 function renderDAEncodeField(scheme, fieldName, fieldBits) {
   return ejs.render(tpls.DAProtocolEncodeFieldTpl, {

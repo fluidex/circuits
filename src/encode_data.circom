@@ -51,25 +51,23 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     signal input isWithDraw;
     signal input isTransfer;
     signal input isSpotTrade;
+    signal input isL2KeyUpdated;
 
     var encodeLength = TxDataLength(balanceLevels, orderLevels, accountLevels);
     signal output encodedTxData[encodeLength];
 
     var offset = 0;
-    signal commonFlag;
-    commonFlag <== isDeposit + isWithDraw + isTransfer;
-    component isL2KeyUnChanged = IsEqual();
-    component isL2KeyUpdated = IsZero();
-    isL2KeyUnChanged.in[0] <== ay1;
-    isL2KeyUnChanged.in[1] <== ay2;
-    isL2KeyUpdated.in <== isL2KeyUnChanged.out;
     var schemeCheck = 0;
 
     //start scheme {common} encoding
     signal useCommon;
     signal encodedCommonTx[encodeLength];
     
-    useCommon <== commonFlag * isL2KeyUnChanged.out;
+    component isL2KeyUnChanged = IsZero();
+    isL2KeyUnChanged.in <== isL2KeyUpdated;
+    signal isRealDeposit;
+    isRealDeposit <== isL2KeyUnChanged.out * isDeposit;
+    useCommon <== isRealDeposit + isWithDraw + isTransfer;
     encodedCommonTx[0] <== 0;
     //TODO: this bit should be marked as 'fully exit' (withdraw all balance)
     encodedCommonTx[1] <== 0;
@@ -201,13 +199,13 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     signal useL2Key;
     signal encodedL2KeyTx[encodeLength];
     
-    useL2Key <== isL2KeyUpdated.out;        
+    useL2Key <== isL2KeyUpdated;        
     //this constraints ensure l2key can only be updated under a 'dummy' deposit tx
     signal notDepositFlag;
     notDepositFlag <== isWithDraw + isTransfer + isSpotTrade;
-    notDepositFlag * isL2KeyUpdated.out === 0;
-    //(isWithDraw + isTransfer + isSpotTrade) * isL2KeyUpdated.out === 0;
-    amount * isL2KeyUpdated.out === 0;
+    isL2KeyUpdated * notDepositFlag === 0;
+    //(isWithDraw + isTransfer + isSpotTrade) * isL2KeyUpdated === 0;
+    amount * isL2KeyUpdated === 0;
     encodedL2KeyTx[0] <== useL2Key;
     encodedL2KeyTx[1] <== 0;
     encodedL2KeyTx[2] <== 0;
