@@ -50,8 +50,8 @@ class DAEncoder extends encodeCtx {
     const floats = <%- codegen.config.floatLength %>;
     //dummy reference
     [accountLevels, balanceLevels, orderLevels, floats];
-    <%_ for(const [fieldName, fieldType] of codegen.dataEncode.schemes[scheme]) { -%>
-    this.encodeNumber(Number(payload[idx['<%- codegen.capitalization(fieldName)%>']]), <%- fieldType%>);
+    <%_ for(const [fieldName, fieldType, relaxed] of codegen.dataEncode.schemes[scheme]) { -%>
+    this.encodeNumber(payload[idx['<%- codegen.capitalization(fieldName)%>']], <%- fieldType%>, <%- relaxed ? 'true' : 'false' %>);
     <%_ } -%>
     this.encodeAlign(this.encodeLength);
   }

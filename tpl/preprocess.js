@@ -81,12 +81,12 @@ function renderDAEncoderInput(encoderName, inputName,
     {encoder: encoderName, input: inputName, fields, txIdx})
 }
 
-function renderDAEncodeField(scheme, fieldName, fieldBits) {
+function renderDAEncodeField(scheme, [fieldName, fieldBits, fieldRelaxed]) {
   return ejs.render(tpls.DAProtocolEncodeFieldTpl, {
     scheme: capitalization(scheme), 
     unCapFieldName: fieldName,
     fieldName: capitalization(fieldName), 
-    fieldBits})
+    fieldBits, relaxed: fieldRelaxed})
 }
 //protocol is [[<FieldName>, <bits>]]
 //bits fields can be: balanceLevels, orderLevels, accountLevels, floats, addrs, or any number

@@ -4,6 +4,23 @@ include "../node_modules/circomlib/circuits/gates.circom";
 include "./lib/binary_merkle_tree.circom";
 include "./lib/hash_state.circom";
 
+template TruncateOrderID(orderLevel) {
+
+    signal input orderID;
+    signal output out;
+
+    component toBits = Num2BitsIfEnabled(orderLevel);
+    toBits.enabled <== 0;
+    toBits.in <== orderID;
+
+    component restoreBits = Bits2Num(orderLevel);
+    for (var i = 0; i < orderLevel; i++){
+        restoreBits.in[i] <== toBits.out[i];
+    }
+
+    restoreBits.out ==> out;
+}
+
 template amountCheck() {
     signal input enabled;
 

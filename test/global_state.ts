@@ -242,10 +242,20 @@ class GlobalState {
     if (orderPos >= 2 ** this.orderLevels) {
       throw new Error(`orderPos ${orderPos} invalid for orderLevels ${this.orderLevels}`);
     }
+    const orderIDMask = (1 << this.orderLevels) - 1;
 
     const order: OrderState = this.orderMap.get(accountID).get(orderID);
     //console.log({ order });
+    //TODO: for resolve https://github.com/fluidex/circuits/issues/191,
+    //we truncate orderId temporary when calcting order's hash,
+    //if this resoultion has become permanent we should update the hash()
+    //method in fluidex.js
+    const keepedInput = order.orderInput;
+    const updatedInput = Object.assign({}, order.orderInput);
+    updatedInput.orderId = updatedInput.orderId & BigInt(orderIDMask);
+    order.orderInput = updatedInput;
     this.orderTrees.get(accountID).setValue(orderPos, order.hash());
+    order.orderInput = keepedInput;
     this.orderIdToPos.get(accountID).set(order.orderId, orderPos);
     this.orderPosToId.get(accountID).set(orderPos, order.orderId);
     this.recalculateFromOrderTree(accountID);

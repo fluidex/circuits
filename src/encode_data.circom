@@ -1,5 +1,4 @@
 // Generated from tpl/ejs/src/encode_data.circom.ejs. Don't modify this file manually
-// Generated from tpl/ejs/src/decode_tx.circom.ejs. Don't modify this file manually
 include "./constants.circom"
 include "./floats.circom"
 include "./lib/bitify.circom";
@@ -76,32 +75,37 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     schemeCheck += useCommon;
     offset = 3;
     //start filling encoded part
-    component encodeCommonAccountID1 = Num2Bits(accountLevels);
+    component encodeCommonAccountID1 = Num2BitsIfEnabled(accountLevels);
     encodeCommonAccountID1.in <== accountID1;
+    encodeCommonAccountID1.enabled <== 1;
     for (var i = 0; i < accountLevels; i++) {
         encodedCommonTx[i+offset] <== useCommon*encodeCommonAccountID1.out[i];
     }
     offset += accountLevels;
-    component encodeCommonAccountID2 = Num2Bits(accountLevels);
+    component encodeCommonAccountID2 = Num2BitsIfEnabled(accountLevels);
     encodeCommonAccountID2.in <== accountID2;
+    encodeCommonAccountID2.enabled <== 1;
     for (var i = 0; i < accountLevels; i++) {
         encodedCommonTx[i+offset] <== useCommon*encodeCommonAccountID2.out[i];
     }
     offset += accountLevels;
-    component encodeCommonTokenID1 = Num2Bits(balanceLevels);
+    component encodeCommonTokenID1 = Num2BitsIfEnabled(balanceLevels);
     encodeCommonTokenID1.in <== tokenID1;
+    encodeCommonTokenID1.enabled <== 1;
     for (var i = 0; i < balanceLevels; i++) {
         encodedCommonTx[i+offset] <== useCommon*encodeCommonTokenID1.out[i];
     }
     offset += balanceLevels;
-    component encodeCommonTokenID2 = Num2Bits(balanceLevels);
+    component encodeCommonTokenID2 = Num2BitsIfEnabled(balanceLevels);
     encodeCommonTokenID2.in <== tokenID2;
+    encodeCommonTokenID2.enabled <== 1;
     for (var i = 0; i < balanceLevels; i++) {
         encodedCommonTx[i+offset] <== useCommon*encodeCommonTokenID2.out[i];
     }
     offset += balanceLevels;
-    component encodeCommonAmount = Num2Bits(floats);
+    component encodeCommonAmount = Num2BitsIfEnabled(floats);
     encodeCommonAmount.in <== amount;
+    encodeCommonAmount.enabled <== 1;
     for (var i = 0; i < floats; i++) {
         encodedCommonTx[i+offset] <== useCommon*encodeCommonAmount.out[i];
     }
@@ -131,62 +135,72 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     schemeCheck += useSpotTrade;
     offset = 3;
     //start filling encoded part
-    component encodeSpotTradeAccountID1 = Num2Bits(accountLevels);
+    component encodeSpotTradeAccountID1 = Num2BitsIfEnabled(accountLevels);
     encodeSpotTradeAccountID1.in <== accountID1;
+    encodeSpotTradeAccountID1.enabled <== 1;
     for (var i = 0; i < accountLevels; i++) {
         encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeAccountID1.out[i];
     }
     offset += accountLevels;
-    component encodeSpotTradeAccountID2 = Num2Bits(accountLevels);
+    component encodeSpotTradeAccountID2 = Num2BitsIfEnabled(accountLevels);
     encodeSpotTradeAccountID2.in <== accountID2;
+    encodeSpotTradeAccountID2.enabled <== 1;
     for (var i = 0; i < accountLevels; i++) {
         encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeAccountID2.out[i];
     }
     offset += accountLevels;
-    component encodeSpotTradeTokenID1 = Num2Bits(balanceLevels);
+    component encodeSpotTradeTokenID1 = Num2BitsIfEnabled(balanceLevels);
     encodeSpotTradeTokenID1.in <== tokenID1;
+    encodeSpotTradeTokenID1.enabled <== 1;
     for (var i = 0; i < balanceLevels; i++) {
         encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeTokenID1.out[i];
     }
     offset += balanceLevels;
-    component encodeSpotTradeTokenID2 = Num2Bits(balanceLevels);
+    component encodeSpotTradeTokenID2 = Num2BitsIfEnabled(balanceLevels);
     encodeSpotTradeTokenID2.in <== tokenID2;
+    encodeSpotTradeTokenID2.enabled <== 1;
     for (var i = 0; i < balanceLevels; i++) {
         encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeTokenID2.out[i];
     }
     offset += balanceLevels;
-    component encodeSpotTradeNewOrder1AmountSell = Num2Bits(floats);
+    component encodeSpotTradeNewOrder1AmountSell = Num2BitsIfEnabled(floats);
     encodeSpotTradeNewOrder1AmountSell.in <== newOrder1AmountSell;
+    encodeSpotTradeNewOrder1AmountSell.enabled <== 1;
     for (var i = 0; i < floats; i++) {
         encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeNewOrder1AmountSell.out[i];
     }
     offset += floats;
-    component encodeSpotTradeNewOrder1AmountBuy = Num2Bits(floats);
+    component encodeSpotTradeNewOrder1AmountBuy = Num2BitsIfEnabled(floats);
     encodeSpotTradeNewOrder1AmountBuy.in <== newOrder1AmountBuy;
+    encodeSpotTradeNewOrder1AmountBuy.enabled <== 1;
     for (var i = 0; i < floats; i++) {
         encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeNewOrder1AmountBuy.out[i];
     }
     offset += floats;
-    component encodeSpotTradeNewOrder1ID = Num2Bits(orderLevels);
+    component encodeSpotTradeNewOrder1ID = Num2BitsIfEnabled(orderLevels);
     encodeSpotTradeNewOrder1ID.in <== newOrder1ID;
+    encodeSpotTradeNewOrder1ID.enabled <== 0;
     for (var i = 0; i < orderLevels; i++) {
         encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeNewOrder1ID.out[i];
     }
     offset += orderLevels;
-    component encodeSpotTradeNewOrder2AmountSell = Num2Bits(floats);
+    component encodeSpotTradeNewOrder2AmountSell = Num2BitsIfEnabled(floats);
     encodeSpotTradeNewOrder2AmountSell.in <== newOrder2AmountSell;
+    encodeSpotTradeNewOrder2AmountSell.enabled <== 1;
     for (var i = 0; i < floats; i++) {
         encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeNewOrder2AmountSell.out[i];
     }
     offset += floats;
-    component encodeSpotTradeNewOrder2AmountBuy = Num2Bits(floats);
+    component encodeSpotTradeNewOrder2AmountBuy = Num2BitsIfEnabled(floats);
     encodeSpotTradeNewOrder2AmountBuy.in <== newOrder2AmountBuy;
+    encodeSpotTradeNewOrder2AmountBuy.enabled <== 1;
     for (var i = 0; i < floats; i++) {
         encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeNewOrder2AmountBuy.out[i];
     }
     offset += floats;
-    component encodeSpotTradeNewOrder2ID = Num2Bits(orderLevels);
+    component encodeSpotTradeNewOrder2ID = Num2BitsIfEnabled(orderLevels);
     encodeSpotTradeNewOrder2ID.in <== newOrder2ID;
+    encodeSpotTradeNewOrder2ID.enabled <== 0;
     for (var i = 0; i < orderLevels; i++) {
         encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeNewOrder2ID.out[i];
     }
@@ -215,14 +229,16 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     schemeCheck += useL2Key;
     offset = 3;
     //start filling encoded part
-    component encodeL2KeyAccountID1 = Num2Bits(accountLevels);
+    component encodeL2KeyAccountID1 = Num2BitsIfEnabled(accountLevels);
     encodeL2KeyAccountID1.in <== accountID1;
+    encodeL2KeyAccountID1.enabled <== 1;
     for (var i = 0; i < accountLevels; i++) {
         encodedL2KeyTx[i+offset] <== useL2Key*encodeL2KeyAccountID1.out[i];
     }
     offset += accountLevels;
-    component encodeL2KeyAy2 = Num2Bits(254);
+    component encodeL2KeyAy2 = Num2BitsIfEnabled(254);
     encodeL2KeyAy2.in <== ay2;
+    encodeL2KeyAy2.enabled <== 1;
     for (var i = 0; i < 254; i++) {
         encodedL2KeyTx[i+offset] <== useL2Key*encodeL2KeyAy2.out[i];
     }

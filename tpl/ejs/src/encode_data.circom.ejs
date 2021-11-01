@@ -1,4 +1,3 @@
-// Generated from tpl/ejs/src/decode_tx.circom.ejs. Don't modify this file manually
 include "./constants.circom"
 include "./floats.circom"
 include "./lib/bitify.circom";
@@ -44,8 +43,8 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     schemeCheck += use<%- capScheme %>;
     offset = 3;
     //start filling encoded part
-        <%_ for(const [fieldName, fieldType] of codegen.dataEncode.schemes[scheme]) { -%>
-    <%- codegen.renderDAEncodeField(scheme, fieldName, fieldType) %>
+        <%_ for(const fieldOpts of codegen.dataEncode.schemes[scheme]) { -%>
+    <%- codegen.renderDAEncodeField(scheme, fieldOpts) %>
         <%_ } -%>
     //filling reset part by 0
     assert(offset <= encodeLength);

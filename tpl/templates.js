@@ -94,7 +94,9 @@ const CalcOrderTreeTpl = `
     orderHash__.filledBuy <== orderFilledBuy;
     orderHash__.totalSell <== orderAmountSell;
     orderHash__.totalBuy <== orderAmountBuy;
-    orderHash__.orderId <== orderID;
+    component truncatedOrderId__ = TruncateOrderID(orderLevels);
+    truncatedOrderId__.orderID <== orderID;    
+    orderHash__.orderId <== truncatedOrderId__.out;
 
     // - check order tree update
     component orderTree__ = CalculateRootFromMerklePath(orderLevels);
@@ -196,8 +198,9 @@ const DAProtocolInputFieldTpl = `
     <%_ } -%>
 `
 
-const DAProtocolEncodeFieldTpl = `component encode<%- scheme %><%- fieldName %> = Num2Bits(<%- fieldBits %>);
+const DAProtocolEncodeFieldTpl = `component encode<%- scheme %><%- fieldName %> = Num2BitsIfEnabled(<%- fieldBits %>);
     encode<%- scheme %><%- fieldName %>.in <== <%- unCapFieldName %>;
+    encode<%- scheme %><%- fieldName %>.enabled <== <%- relaxed ? '0' : '1' %>;
     for (var i = 0; i < <%- fieldBits %>; i++) {
         encoded<%- scheme %>Tx[i+offset] <== use<%- scheme %>*encode<%- scheme %><%- fieldName %>.out[i];
     }

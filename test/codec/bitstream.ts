@@ -73,21 +73,18 @@ class encodeCtx {
     return this.encodingBits;
   }
 
-  encodeBigNumber(n: bigint, bits: number) {
-    if (this._sealed) throw new Error('no input after being sealed');
+  _encodeBigNum(n: bigint, bits: number, relax: boolean) {
 
     for (let i = 0; i < bits; i++) {
       this.applyBit((n & 1n) === 0n);
       n /= 2n;
     }
-    if (n > 0n) {
+    if (n > 0n && !relax) {
       throw new Error('can not encode number within specified bits');
     }
   }
 
-  encodeNumber(n: number, bits: number) {
-    if (this._sealed) throw new Error('no input after being sealed');
-
+  _encodeNumber(n: number, bits: number, relax: boolean) {
     if (n < 0 || !Number.isInteger(n)) {
       throw new Error(`invalid: ${n}, only positive integer is allowed`);
     }
@@ -96,8 +93,18 @@ class encodeCtx {
       this.applyBit((n & 1) === 0);
       n = safeShift(n);
     }
-    if (n > 0) {
+    if (n > 0 && !relax) {
       throw new Error('can not encode number within specified bits');
+    }
+  }
+
+  encodeNumber(n: number | bigint, bits: number, relax: boolean = false) {
+    if (this._sealed) throw new Error('no input after being sealed');
+
+    if (bits <= 48){
+      this._encodeNumber(Number(n), bits, relax);
+    }else {
+      this._encodeBigNum(BigInt(n), bits, relax);
     }
   }
 

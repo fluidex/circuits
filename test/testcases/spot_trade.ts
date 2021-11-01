@@ -13,7 +13,7 @@ const accountLevels = 2;
 
 const genesisOrderRoot = calculateGenesisOrderRoot(orderLevels);
 
-function initTestCase() {
+function initTestCase(persetIds : Array<bigint> = []) {
   let state = new GlobalState(balanceLevels, orderLevels, accountLevels, 1);
 
   const account1 = Account.random();
@@ -62,7 +62,7 @@ function initTestCase() {
 
   /// set up orders
   // order1
-  const order1_id = 1n;
+  const order1_id = persetIds[0] || 1n;
   const order1_amountsell = 1000n;
   const order1_amountbuy = 10000n;
   const order1 = new OrderInput({
@@ -77,7 +77,7 @@ function initTestCase() {
   state.setAccountOrder(accountID1, orderState1);
 
   // order2
-  const order2_id = 1n;
+  const order2_id = persetIds[1] || 1n;
   const order2_amountsell = 10000n;
   const order2_amountbuy = 1000n;
   const order2 = new OrderInput({
@@ -164,7 +164,10 @@ class TestSpotTrade implements SimpleTest {
     return {};
   }
   getTestData() {
-    return [{ input: this.getInput(), output: this.getOutput(), name: this.constructor.name }];
+    return [
+      { input: this.getInput(), output: this.getOutput(), name: this.constructor.name },
+      { input: initTestCase([41n, 41n]), output: this.getOutput(), name: this.constructor.name + '_BigID' },
+      { input: initTestCase([3n, 42n]), output: this.getOutput(), name: this.constructor.name + '_BigID2' }];
   }
   getComponent(): TestComponent {
     return {

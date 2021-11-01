@@ -127,6 +127,7 @@ const config = {
     `),
     encoderName: 'TransferTxData',
   },
+  //[fieldName, filedBits, releaxed (number not need to be fitted in field Bits)]:
   dataEncodeSchemes: {
     common: [
       ['accountID1', 'accountLevels'],
@@ -142,10 +143,10 @@ const config = {
       ['tokenID2', 'balanceLevels'],
       ['newOrder1AmountSell', 'floats'],
       ['newOrder1AmountBuy', 'floats'],
-      ['newOrder1ID', 'orderLevels'],
+      ['newOrder1ID', 'orderLevels', true],
       ['newOrder2AmountSell', 'floats'],
       ['newOrder2AmountBuy', 'floats'],
-      ['newOrder2ID', 'orderLevels'],
+      ['newOrder2ID', 'orderLevels', true],
     ],
     l2Key: [
       ['accountID1', 'accountLevels'],

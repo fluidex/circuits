@@ -59,11 +59,11 @@ class DAEncoder extends encodeCtx {
     const floats = 40;
     //dummy reference
     [accountLevels, balanceLevels, orderLevels, floats];
-    this.encodeNumber(Number(payload[idx['AccountID1']]), accountLevels);
-    this.encodeNumber(Number(payload[idx['AccountID2']]), accountLevels);
-    this.encodeNumber(Number(payload[idx['TokenID1']]), balanceLevels);
-    this.encodeNumber(Number(payload[idx['TokenID2']]), balanceLevels);
-    this.encodeNumber(Number(payload[idx['Amount']]), floats);
+    this.encodeNumber(payload[idx['AccountID1']], accountLevels, false);
+    this.encodeNumber(payload[idx['AccountID2']], accountLevels, false);
+    this.encodeNumber(payload[idx['TokenID1']], balanceLevels, false);
+    this.encodeNumber(payload[idx['TokenID2']], balanceLevels, false);
+    this.encodeNumber(payload[idx['Amount']], floats, false);
     this.encodeAlign(this.encodeLength);
   }
 
@@ -88,16 +88,16 @@ class DAEncoder extends encodeCtx {
     const floats = 40;
     //dummy reference
     [accountLevels, balanceLevels, orderLevels, floats];
-    this.encodeNumber(Number(payload[idx['AccountID1']]), accountLevels);
-    this.encodeNumber(Number(payload[idx['AccountID2']]), accountLevels);
-    this.encodeNumber(Number(payload[idx['TokenID1']]), balanceLevels);
-    this.encodeNumber(Number(payload[idx['TokenID2']]), balanceLevels);
-    this.encodeNumber(Number(payload[idx['NewOrder1AmountSell']]), floats);
-    this.encodeNumber(Number(payload[idx['NewOrder1AmountBuy']]), floats);
-    this.encodeNumber(Number(payload[idx['NewOrder1ID']]), orderLevels);
-    this.encodeNumber(Number(payload[idx['NewOrder2AmountSell']]), floats);
-    this.encodeNumber(Number(payload[idx['NewOrder2AmountBuy']]), floats);
-    this.encodeNumber(Number(payload[idx['NewOrder2ID']]), orderLevels);
+    this.encodeNumber(payload[idx['AccountID1']], accountLevels, false);
+    this.encodeNumber(payload[idx['AccountID2']], accountLevels, false);
+    this.encodeNumber(payload[idx['TokenID1']], balanceLevels, false);
+    this.encodeNumber(payload[idx['TokenID2']], balanceLevels, false);
+    this.encodeNumber(payload[idx['NewOrder1AmountSell']], floats, false);
+    this.encodeNumber(payload[idx['NewOrder1AmountBuy']], floats, false);
+    this.encodeNumber(payload[idx['NewOrder1ID']], orderLevels, true);
+    this.encodeNumber(payload[idx['NewOrder2AmountSell']], floats, false);
+    this.encodeNumber(payload[idx['NewOrder2AmountBuy']], floats, false);
+    this.encodeNumber(payload[idx['NewOrder2ID']], orderLevels, true);
     this.encodeAlign(this.encodeLength);
   }
 
@@ -114,8 +114,8 @@ class DAEncoder extends encodeCtx {
     const floats = 40;
     //dummy reference
     [accountLevels, balanceLevels, orderLevels, floats];
-    this.encodeNumber(Number(payload[idx['AccountID1']]), accountLevels);
-    this.encodeBigNumber(payload[idx['Ay2']], 254);
+    this.encodeNumber(payload[idx['AccountID1']], accountLevels, false);
+    this.encodeNumber(payload[idx['Ay2']], 254, false);
     this.encodeAlign(this.encodeLength);
   }
 
