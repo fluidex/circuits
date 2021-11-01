@@ -99,6 +99,7 @@ class DA_Hasher {
     switch(txType){
     case TxType.Deposit:
       if (payload[TxDetailIdx.Ay1] !== payload[TxDetailIdx.Ay2]){
+        assert(payload[TxDetailIdx.Amount] === 0n);
         this.encoder.encodeNumber(1, 3); //100
         this.encodeRawPayload(payload, 'encodeL2Key');
         break;
@@ -115,16 +116,18 @@ class DA_Hasher {
       this.encodeRawPayload(payload, 'encodeSpotTrade');
       break;
     case TxType.Withdraw:
-      this.encoder.encodeNumber(2, 3); //010
+      this.encoder.encodeNumber(4, 3); //001
       this.encodeRawPayload(payload, 'encodeCommon');
       break;
     case TxType.Nop:
       this.encodeRawPayload(payload, 'encodeNop');
+      break;
     }
     
   }
 
   encodeRawPayload(payload: Array<bigint>, scheme: string) {
+    assert(typeof this.encoder[scheme] === 'function')
     this.encoder[scheme](payload, TxDetailIdx);
   }
 

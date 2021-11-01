@@ -115,7 +115,7 @@ class DAEncoder extends encodeCtx {
     //dummy reference
     [accountLevels, balanceLevels, orderLevels, floats];
     this.encodeNumber(Number(payload[idx['AccountID1']]), accountLevels);
-    this.encodeNumber(Number(payload[idx['Ay2']]), 254);
+    this.encodeBigNumber(payload[idx['Ay2']], 254);
     this.encodeAlign(this.encodeLength);
   }
 

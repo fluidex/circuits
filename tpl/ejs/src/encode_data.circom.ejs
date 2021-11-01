@@ -40,6 +40,7 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     signal use<%- capScheme %>;
     signal encoded<%- capScheme %>Tx[encodeLength];
     <%- codegen.generatedDAHeadingBlock(scheme, {}) %>
+    use<%- capScheme %>*(use<%- capScheme %> - 1) === 0;
     schemeCheck += use<%- capScheme %>;
     offset = 3;
     //start filling encoded part
@@ -52,7 +53,10 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
         encoded<%- capScheme %>Tx[i+offset] <== 0;
     }
     <%_ } %>
-    schemeCheck === 1;
+
+    signal finalCheck;
+    finalCheck <== schemeCheck;
+    finalCheck * (finalCheck - 1) === 0;
     
     for(var i = 0; i < encodeLength;i++){
         <%_ { let capSchemes = Object.keys(codegen.dataEncode.schemes).map(codegen.capitalization) -%>

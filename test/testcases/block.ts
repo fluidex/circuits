@@ -47,9 +47,10 @@ function initBlockTestCase() {
   const tokenID_1to2 = 0n;
   const tokenID_2to1 = 1n;
 
-  const account0 = Account.random();
-  const account1 = Account.random();
-  const account2 = Account.random();
+  //so we should have identify testData for each generations
+  const account0 = Account.fromPrivkey('0x208f08f80330c32744f66ec2d870cf8005325e37019dae71c97ec3e5078df47a');
+  const account1 = Account.fromPrivkey('0x208f08f80330c32744f66ec2d870cf8005325e37019dae71c97ec3e5078df47b');
+  const account2 = Account.fromPrivkey('0x208f08f80330c32744f66ec2d870cf8005325e37019dae71c97ec3e5078df47c');
   const accountID0 = state.createNewAccount();
   const accountID1 = state.createNewAccount();
   const accountID2 = state.createNewAccount();
@@ -81,7 +82,7 @@ function initBlockTestCase() {
   let order2State = OrderState.fromOrderInput(order2);
   order2State.filledBuy = 1n;
   order2State.filledSell = 10n;
-  state.setAccountOrder(accountID2, order2State);
+  state.setAccountOrder(accountID2, order2State, true);
 
   /// start txs
 
@@ -139,6 +140,7 @@ function initBlockTestCase() {
     tokenID: tokenID_2to1,
     amount: 1990n,
   });
+
   const order1_id = 1n;
   const order1: OrderInput = new OrderInput({
     accountID: accountID1,
@@ -154,7 +156,6 @@ function initBlockTestCase() {
   //const order1_pos = state.nextOrderIds.get(accountID1);
   //assert(order1_pos === 1n, 'unexpected order pos');
   state.setAccountOrder(accountID1, OrderState.fromOrderInput(order1));
-
   let spotTradeTx = {
     order1AccountID: accountID1,
     order2AccountID: accountID2,

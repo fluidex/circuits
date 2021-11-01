@@ -107,11 +107,11 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     encodeData[i].newOrder1FilledBuy <== encodedTxs[i][43];
     encodeData[i].newOrder2FilledBuy <== encodedTxs[i][57];
 
-        encodeData.isDeposit <== enableDeposit[i].out;
-        encodeData.isTransfer <== enableTransfer[i].out;
-        encodeData.isWithDraw <== enableWithdraw[i].out;
-        encodeData.isSpotTrade <== enableSpotTrade[i].out;
-        encodeData.isL2KeyUpdated <== decodedTx[i].dstIsNew;        
+        encodeData[i].isDeposit <== enableDeposit[i].out;
+        encodeData[i].isTransfer <== enableTransfer[i].out;
+        encodeData[i].isWithDraw <== enableWithdraw[i].out;
+        encodeData[i].isSpotTrade <== enableSpotTrade[i].out;
+        encodeData[i].isL2KeyUpdated <== decodedTx[i].dstIsNew;        
     }
 
     var txBits = TxDataLength(balanceLevels, orderLevels, accountLevels);

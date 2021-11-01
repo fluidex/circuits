@@ -73,6 +73,18 @@ class encodeCtx {
     return this.encodingBits;
   }
 
+  encodeBigNumber(n: bigint, bits: number) {
+    if (this._sealed) throw new Error('no input after being sealed');
+
+    for (let i = 0; i < bits; i++) {
+      this.applyBit((n & 1n) === 0n);
+      n /= 2n;
+    }
+    if (n > 0n) {
+      throw new Error('can not encode number within specified bits');
+    }
+  }
+
   encodeNumber(n: number, bits: number) {
     if (this._sealed) throw new Error('no input after being sealed');
 

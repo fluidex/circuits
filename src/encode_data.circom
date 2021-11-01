@@ -72,6 +72,7 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     //TODO: this bit should be marked as 'fully exit' (withdraw all balance)
     encodedCommonTx[1] <== 0;
     encodedCommonTx[2] <== useCommon*isWithDraw;
+    useCommon*(useCommon - 1) === 0;
     schemeCheck += useCommon;
     offset = 3;
     //start filling encoded part
@@ -126,6 +127,7 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     encodedSpotTradeTx[0] <== 0;
     encodedSpotTradeTx[1] <== useSpotTrade*isOrder1Filled.out;
     encodedSpotTradeTx[2] <== useSpotTrade*isOrder2Filled.out;
+    useSpotTrade*(useSpotTrade - 1) === 0;
     schemeCheck += useSpotTrade;
     offset = 3;
     //start filling encoded part
@@ -209,6 +211,7 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     encodedL2KeyTx[0] <== useL2Key;
     encodedL2KeyTx[1] <== 0;
     encodedL2KeyTx[2] <== 0;
+    useL2Key*(useL2Key - 1) === 0;
     schemeCheck += useL2Key;
     offset = 3;
     //start filling encoded part
@@ -230,7 +233,10 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
         encodedL2KeyTx[i+offset] <== 0;
     }
 
-    schemeCheck === 1;
+
+    signal finalCheck;
+    finalCheck <== schemeCheck;
+    finalCheck * (finalCheck - 1) === 0;
     
     for(var i = 0; i < encodeLength;i++){
         encodedTxData[i] <== encodedCommonTx[i]+encodedSpotTradeTx[i]+encodedL2KeyTx[i];    
