@@ -2,17 +2,17 @@
 import { encodeCtx } from './bitstream';
 
 export function txDAEncodeLength(nTokenLevel: number, nOrderLevel: number, nAccountLevel: number) {
-  var ret = 0;
+  let ret = 0;
 
-  var encodeCommon = nAccountLevel * 2 + nTokenLevel * 2 + 40 * 1;
+  let encodeCommon = nAccountLevel * 2 + nTokenLevel * 2 + 40 * 1;
   if (ret < encodeCommon) {
     ret = encodeCommon;
   }
-  var encodeSpotTrade = nAccountLevel * 2 + nTokenLevel * 2 + 40 * 4 + nOrderLevel * 2;
+  let encodeSpotTrade = nAccountLevel * 2 + nTokenLevel * 2 + 40 * 4 + nOrderLevel * 2;
   if (ret < encodeSpotTrade) {
     ret = encodeSpotTrade;
   }
-  var encodeL2Key = 254 * 1 + nAccountLevel * 1;
+  let encodeL2Key = 254 * 1 + nAccountLevel * 1;
   if (ret < encodeL2Key) {
     ret = encodeL2Key;
   }
@@ -51,7 +51,7 @@ class DAEncoder extends encodeCtx {
     Amount: 4,
   };
 
-  encodeCommon(payload: Array<bigint>, idx: Object) {
+  encodeCommon(payload: Array<bigint>, idx) {
     //have to turn the field name into variables
     const accountLevels = this.nAccountLevel;
     const balanceLevels = this.nTokenLevel;
@@ -80,7 +80,7 @@ class DAEncoder extends encodeCtx {
     NewOrder2ID: 9,
   };
 
-  encodeSpotTrade(payload: Array<bigint>, idx: Object) {
+  encodeSpotTrade(payload: Array<bigint>, idx) {
     //have to turn the field name into variables
     const accountLevels = this.nAccountLevel;
     const balanceLevels = this.nTokenLevel;
@@ -106,7 +106,7 @@ class DAEncoder extends encodeCtx {
     Ay2: 1,
   };
 
-  encodeL2Key(payload: Array<bigint>, idx: Object) {
+  encodeL2Key(payload: Array<bigint>, idx) {
     //have to turn the field name into variables
     const accountLevels = this.nAccountLevel;
     const balanceLevels = this.nTokenLevel;
