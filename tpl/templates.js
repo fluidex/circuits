@@ -1,4 +1,4 @@
-import { assert } from "console";
+import { assert } from 'console';
 
 const JsInputEncoderTpl = `import { TxLength } from '../common';
 import { assert } from 'console';
@@ -196,7 +196,7 @@ const DAProtocolInputFieldTpl = `
     <%_ for(const item in fields) { -%>
     <%- encoder %>.<%- item %> <== <%- input %>[<%- txIdx[item] %>];
     <%_ } -%>
-`
+`;
 
 const DAProtocolEncodeFieldTpl = `component encode<%- scheme %><%- fieldName %> = Num2BitsIfEnabled(<%- fieldBits %>);
     encode<%- scheme %><%- fieldName %>.in <== <%- unCapFieldName %>;
@@ -204,12 +204,12 @@ const DAProtocolEncodeFieldTpl = `component encode<%- scheme %><%- fieldName %> 
     for (var i = 0; i < <%- fieldBits %>; i++) {
         encoded<%- scheme %>Tx[i+offset] <== use<%- scheme %>*encode<%- scheme %><%- fieldName %>.out[i];
     }
-    offset += <%- fieldBits %>;`
+    offset += <%- fieldBits %>;`;
 
 const DAProtocolHeadingTplFn = function (scheme) {
-    switch (scheme) {
+  switch (scheme) {
     case 'common':
-        return `
+      return `
     component isL2KeyUnChanged = IsZero();
     isL2KeyUnChanged.in <== isL2KeyUpdated;
     signal isRealDeposit;
@@ -218,9 +218,9 @@ const DAProtocolHeadingTplFn = function (scheme) {
     encoded__Tx[0] <== 0;
     //TODO: this bit should be marked as 'fully exit' (withdraw all balance)
     encoded__Tx[1] <== 0;
-    encoded__Tx[2] <== use__*isWithDraw;`
+    encoded__Tx[2] <== use__*isWithDraw;`;
     case 'spotTrade':
-        return `
+      return `
     use__ <== isSpotTrade;
     component isOrder1Filled = IsEqual();
     component isOrder2Filled = IsEqual();
@@ -231,9 +231,9 @@ const DAProtocolHeadingTplFn = function (scheme) {
 
     encoded__Tx[0] <== 0;
     encoded__Tx[1] <== use__*isOrder1Filled.out;
-    encoded__Tx[2] <== use__*isOrder2Filled.out;`
+    encoded__Tx[2] <== use__*isOrder2Filled.out;`;
     case 'l2Key':
-        return `
+      return `
     use__ <== isL2KeyUpdated;        
     //this constraints ensure l2key can only be updated under a 'dummy' deposit tx
     signal notDepositFlag;
@@ -243,31 +243,33 @@ const DAProtocolHeadingTplFn = function (scheme) {
     amount * isL2KeyUpdated === 0;
     encoded__Tx[0] <== use__;
     encoded__Tx[1] <== 0;
-    encoded__Tx[2] <== 0;`
+    encoded__Tx[2] <== 0;`;
     default:
-        assert(typeof scheme !== 'string', `unrecognized scheme ${scheme}`);
-        return ['ay1', 'newOrder1FilledBuy', 'newOrder2FilledBuy']
-    }
-}
+      assert(typeof scheme !== 'string', `unrecognized scheme ${scheme}`);
+      return ['ay1', 'newOrder1FilledBuy', 'newOrder2FilledBuy'];
+  }
+};
 
 const DAProtocolLengthCheckTplFn = function (protocol) {
-    assert(Array.isArray(protocol), 'must valid protocol array');
+  assert(Array.isArray(protocol), 'must valid protocol array');
 
-    const bitsFieldsAggr = protocol.reduce((out, [_, bitField]) => {
-        if (out[bitField]){
-            out[bitField] += 1;
-        }else {
-            out[bitField] = 1;
-        }
-        return out
-    }, {});
+  const bitsFieldsAggr = protocol.reduce((out, [_, bitField]) => {
+    if (out[bitField]) {
+      out[bitField] += 1;
+    } else {
+      out[bitField] = 1;
+    }
+    return out;
+  }, {});
 
-    const lengthFormula = Object.entries(bitsFieldsAggr).map(([key, val]) => `${key}*${val}`).join(' + ');
-    return `
+  const lengthFormula = Object.entries(bitsFieldsAggr)
+    .map(([key, val]) => `${key}*${val}`)
+    .join(' + ');
+  return `
     var encode__ = ${lengthFormula};
     if ( _ret < encode__){
         _ret = encode__;
-    }`
+    }`;
 };
 
 export {

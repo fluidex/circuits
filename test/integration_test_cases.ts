@@ -80,3 +80,4 @@ console.log('the merkle root should be asserted as following:');
 console.log('block 0:', '0x' + blocks[0].newRoot.toString(16).padStart(64, '0'));
 console.log('block 1:', '0x' + blocks[1].newRoot.toString(16).padStart(64, '0'));
 console.log('block 2:', '0x' + blocks[2].newRoot.toString(16).padStart(64, '0'));
+console.log('block 3:', '0x' + blocks[3].newRoot.toString(16).padStart(64, '0'));

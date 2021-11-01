@@ -36,7 +36,7 @@ function mockTransferTx(): RawTx {
   encodedTx[TxDetailIdx.EnableSigCheck1] = 1n;
   encodedTx[TxDetailIdx.DstIsNew] = 0n;
 
-  let ret = new RawTx;
+  let ret = new RawTx();
   ret.payload = encodedTx;
   ret.txType = TxType.Transfer;
   return ret;
@@ -47,7 +47,7 @@ function mockDepositToTx(isNew: boolean): RawTx {
   encodedTx.fill(0n, 0, TxLength);
 
   const balance = isNew ? 0n : BigInt('222');
-  const amount = isNew ? 0n: BigInt('18445532');
+  const amount = isNew ? 0n : BigInt('18445532');
   const tokenID = 42;
   const nonce = BigInt(100);
   const ay = BigInt(999);
@@ -72,7 +72,7 @@ function mockDepositToTx(isNew: boolean): RawTx {
   encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
   encodedTx[TxDetailIdx.DstIsNew] = isNew ? 1n : 0n;
 
-  let ret = new RawTx;
+  let ret = new RawTx();
   ret.payload = encodedTx;
   ret.txType = TxType.Deposit;
   return ret;
@@ -105,7 +105,7 @@ function mockBigDepositToTx(): RawTx {
   encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
   encodedTx[TxDetailIdx.DstIsNew] = 0n;
 
-  let ret = new RawTx;
+  let ret = new RawTx();
   ret.payload = encodedTx;
   ret.txType = TxType.Deposit;
   return ret;
@@ -153,12 +153,11 @@ function mockSpotTradeTx(): RawTx {
   encodedTx[TxDetailIdx.EnableBalanceCheck2] = 1n;
   encodedTx[TxDetailIdx.DstIsNew] = 0n;
 
-  let ret = new RawTx;
+  let ret = new RawTx();
   ret.payload = encodedTx;
   ret.txType = TxType.SpotTrade;
   return ret;
 }
-
 
 const tokenLevels = 6;
 const accountLevels = 2;
@@ -177,15 +176,15 @@ class TestTxDataEncode implements SimpleTest {
   getTestData() {
     let result = [];
     let txpl = mockTransferTx();
-    result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'transfer' });
+    result.push({ input: { in: txpl.payload, txType: txpl.txType }, output: genOutput(txpl), name: 'transfer' });
     txpl = mockDepositToTx(true);
-    result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'L2keyUpdate' });
+    result.push({ input: { in: txpl.payload, txType: txpl.txType }, output: genOutput(txpl), name: 'L2keyUpdate' });
     txpl = mockDepositToTx(false);
-    result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'depositOld' });
+    result.push({ input: { in: txpl.payload, txType: txpl.txType }, output: genOutput(txpl), name: 'depositOld' });
     txpl = mockBigDepositToTx();
-    result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'depositBig' });
+    result.push({ input: { in: txpl.payload, txType: txpl.txType }, output: genOutput(txpl), name: 'depositBig' });
     txpl = mockSpotTradeTx();
-    result.push({ input: { in: txpl.payload, txType: txpl.txType}, output: genOutput(txpl), name: 'spotTrade' });    
+    result.push({ input: { in: txpl.payload, txType: txpl.txType }, output: genOutput(txpl), name: 'spotTrade' });
     return result;
   }
   getComponent(): TestComponent {

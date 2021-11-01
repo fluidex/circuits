@@ -5,7 +5,18 @@ import { calculateGenesisOrderRoot, emptyOrderHash } from './common/order';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 
-import { RawTx, DepositToNewTx, DepositToOldTx, WithdrawTx, SpotTradeTx, TranferTx, UpdateL2Key, TxLength, TxDetailIdx, TxType } from './common/tx';
+import {
+  RawTx,
+  DepositToNewTx,
+  DepositToOldTx,
+  WithdrawTx,
+  SpotTradeTx,
+  TranferTx,
+  UpdateL2Key,
+  TxLength,
+  TxDetailIdx,
+  TxType,
+} from './common/tx';
 import { L2Block } from './common/block';
 import { AccountState } from './common/account_state';
 import { DA_Hasher } from './common/da_hashing';
@@ -205,7 +216,7 @@ class GlobalState {
   setAccountOrder(accountID: bigint, order: OrderState, update: boolean = false) {
     this.updateOrderState(accountID, order);
     //while running, set order should not modify root
-    if (update){
+    if (update) {
       this.placeOrderIntoTree(accountID, order.orderId);
     }
   }
@@ -300,7 +311,7 @@ class GlobalState {
     return this.accounts.get(accountID).ethAddr;
   }
   */
-  UpdateL2Key(tx: UpdateL2Key, newAccount : boolean = false) {
+  UpdateL2Key(tx: UpdateL2Key, newAccount: boolean = false) {
     if (this.options.verbose) {
       console.log('UpdateL2Key', tx.accountID);
     }
@@ -309,7 +320,7 @@ class GlobalState {
     let proof = this.stateProof(tx.accountID, 0n);
     let oldBalance = this.getTokenBalance(tx.accountID, 0n);
     let acc = this.accounts.get(tx.accountID);
-    if (newAccount){
+    if (newAccount) {
       assert(oldBalance === 0n);
       assert(acc.ay === 0n);
       assert(acc.orderRoot === this.defaultOrderRoot);
@@ -356,13 +367,13 @@ class GlobalState {
 
     this.setAccountL2Addr(tx.accountID, tx.sign, tx.ay);
     rawTx.rootAfter = this.root();
-    this.addRawTx(rawTx);    
+    this.addRawTx(rawTx);
   }
   DepositToNew(tx: DepositToNewTx) {
     if (this.options.verbose) {
       console.log('DepositToNew (being decomposited)', tx.accountID, tx.tokenID, tx.amount);
     }
-    //decomposite depositToNew into two tx 
+    //decomposite depositToNew into two tx
     this.UpdateL2Key(tx, true);
     this.DepositToOld(tx);
   }

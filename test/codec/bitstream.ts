@@ -60,10 +60,10 @@ class encodeCtx {
       return this._sealed;
     }
 
-    if (this.encodingBits.length % 8 !== 0){
+    if (this.encodingBits.length % 8 !== 0) {
       this.encodingBuf.push(this.encodingChar);
     }
-  
+
     const sealed = Buffer.from(this.encodingBuf);
     Object.defineProperty(this, '_sealed', { value: sealed });
     return sealed;
@@ -74,7 +74,6 @@ class encodeCtx {
   }
 
   _encodeBigNum(n: bigint, bits: number, relax: boolean) {
-
     for (let i = 0; i < bits; i++) {
       this.applyBit((n & 1n) === 0n);
       n /= 2n;
@@ -101,9 +100,9 @@ class encodeCtx {
   encodeNumber(n: number | bigint, bits: number, relax: boolean = false) {
     if (this._sealed) throw new Error('no input after being sealed');
 
-    if (bits <= 48){
+    if (bits <= 48) {
       this._encodeNumber(Number(n), bits, relax);
-    }else {
+    } else {
       this._encodeBigNum(BigInt(n), bits, relax);
     }
   }
@@ -115,17 +114,17 @@ class encodeCtx {
   }
 
   //align to specified length
-  encodeAlign(len: number){
+  encodeAlign(len: number) {
     const curLen = this.encodingBits.length;
-    const padding = curLen % len && (len - curLen % len);
-    for(let i = 0; i < padding; i++){
+    const padding = curLen % len && len - (curLen % len);
+    for (let i = 0; i < padding; i++) {
       this.applyBit(true);
     }
     //sanity check
     assert(this.checkAlign(len));
   }
 
-  checkAlign(len: number) : boolean {
+  checkAlign(len: number): boolean {
     return this.encodingBits.length % len === 0;
   }
 }

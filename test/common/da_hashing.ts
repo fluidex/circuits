@@ -10,58 +10,33 @@ const { TxDetailIdx, TxType } = tx;
 class DA_Hasher {
   private encoder: DAEncoder;
 
-  constructor(nTokenLevel : number, nOrderLevel : number, nAccountLevel : number) {
+  constructor(nTokenLevel: number, nOrderLevel: number, nAccountLevel: number) {
     this.encoder = new DAEncoder(nTokenLevel, nOrderLevel, nAccountLevel);
   }
 
-  encodedLen() : number {
+  encodedLen(): number {
     return this.encoder.encodedLen();
   }
 
   encodeTransfer(tx: tx.TranferTx) {
     this.encoder.encodeNumber(0, 3); //000
-    this.encoder.encodeCommon([
-      tx.from, 
-      tx.to, 
-      tx.tokenID, 
-      tx.tokenID,
-      encodeFloat(tx.amount)
-    ], 
-    DAEncoder.commonIdx);
+    this.encoder.encodeCommon([tx.from, tx.to, tx.tokenID, tx.tokenID, encodeFloat(tx.amount)], DAEncoder.commonIdx);
   }
 
   encodeWithDraw(tx: tx.WithdrawTx) {
     this.encoder.encodeNumber(2, 3); //010
-    this.encoder.encodeCommon([
-      tx.accountID, 
-      tx.accountID, 
-      tx.tokenID, 
-      tx.tokenID,
-      encodeFloat(tx.amount)
-    ], 
-    DAEncoder.commonIdx);
+    this.encoder.encodeCommon([tx.accountID, tx.accountID, tx.tokenID, tx.tokenID, encodeFloat(tx.amount)], DAEncoder.commonIdx);
   }
 
   encodeDeposit(tx: tx.DepositToOldTx | tx.DepositToNewTx) {
     this.encoder.encodeNumber(0, 3); //000
-    this.encoder.encodeCommon([
-      tx.accountID, 
-      tx.accountID, 
-      tx.tokenID, 
-      tx.tokenID,
-      encodeFloat(tx.amount)
-    ], 
-    DAEncoder.commonIdx);
+    this.encoder.encodeCommon([tx.accountID, tx.accountID, tx.tokenID, tx.tokenID, encodeFloat(tx.amount)], DAEncoder.commonIdx);
   }
 
   encodeKeyUpdate(tx: tx.DepositToNewTx) {
     this.encoder.encodeNumber(1, 3); //100
     assert(tx.amount === BigInt(0));
-    this.encoder.encodeL2Key([
-      tx.accountID, 
-      tx.ay,
-    ], 
-    DAEncoder.l2KeyIdx);
+    this.encoder.encodeL2Key([tx.accountID, tx.ay], DAEncoder.l2KeyIdx);
   }
 
   encodeNop() {
@@ -69,69 +44,71 @@ class DA_Hasher {
   }
 
   encodeSpotTrade(tx: tx.SpotTradeTx, order1: OrderState, order2: OrderState) {
-    let hd = 0
-    if (order1.isFilled()){
-      hd |= 2
+    let hd = 0;
+    if (order1.isFilled()) {
+      hd |= 2;
     }
-    if (order2.isFilled()){
-      hd |= 4
+    if (order2.isFilled()) {
+      hd |= 4;
     }
     this.encoder.encodeNumber(hd, 3); //010, 011 or 001
 
-    this.encoder.encodeSpotTrade([
-      tx.order1AccountID, 
-      tx.order2AccountID, 
-      tx.tokenID1to2, 
-      tx.tokenID2to1,
-      encodeFloat(order1.totalSell()),
-      encodeFloat(order1.totalBuy()),
-      tx.order1Id,
-      encodeFloat(order2.totalSell()),
-      encodeFloat(order2.totalBuy()),
-      tx.order2Id,
-    ], 
-    DAEncoder.spotTradeIdx);
+    this.encoder.encodeSpotTrade(
+      [
+        tx.order1AccountID,
+        tx.order2AccountID,
+        tx.tokenID1to2,
+        tx.tokenID2to1,
+        encodeFloat(order1.totalSell()),
+        encodeFloat(order1.totalBuy()),
+        tx.order1Id,
+        encodeFloat(order2.totalSell()),
+        encodeFloat(order2.totalBuy()),
+        tx.order2Id,
+      ],
+      DAEncoder.spotTradeIdx,
+    );
   }
 
   encodeRawTx(tx: tx.RawTx) {
     const { txType, payload } = tx;
     assert(this.encoder.checkAlign());
-    switch(txType){
-    case TxType.Deposit:
-      if (payload[TxDetailIdx.Ay1] !== payload[TxDetailIdx.Ay2]){
-        assert(payload[TxDetailIdx.Amount] === 0n);
-        this.encoder.encodeNumber(1, 3); //100
-        this.encodeRawPayload(payload, 'encodeL2Key');
+    switch (txType) {
+      case TxType.Deposit:
+        if (payload[TxDetailIdx.Ay1] !== payload[TxDetailIdx.Ay2]) {
+          assert(payload[TxDetailIdx.Amount] === 0n);
+          this.encoder.encodeNumber(1, 3); //100
+          this.encodeRawPayload(payload, 'encodeL2Key');
+          break;
+        }
+      case TxType.Transfer:
+        this.encoder.encodeNumber(0, 3); //000
+        this.encodeRawPayload(payload, 'encodeCommon');
         break;
-      }
-    case TxType.Transfer:
-      this.encoder.encodeNumber(0, 3); //000
-      this.encodeRawPayload(payload, 'encodeCommon');
-      break;
-    case TxType.SpotTrade:
-      this.encoder.encodeNumber(
-        (payload[TxDetailIdx.NewOrder1FilledBuy] === payload[TxDetailIdx.NewOrder1AmountBuy] ? 2: 0)
-        + (payload[TxDetailIdx.NewOrder2FilledBuy] === payload[TxDetailIdx.NewOrder2AmountBuy] ? 4: 0)
-        , 3); //010, 011 or 001
-      this.encodeRawPayload(payload, 'encodeSpotTrade');
-      break;
-    case TxType.Withdraw:
-      this.encoder.encodeNumber(4, 3); //001
-      this.encodeRawPayload(payload, 'encodeCommon');
-      break;
-    case TxType.Nop:
-      this.encodeRawPayload(payload, 'encodeNop');
-      break;
+      case TxType.SpotTrade:
+        this.encoder.encodeNumber(
+          (payload[TxDetailIdx.NewOrder1FilledBuy] === payload[TxDetailIdx.NewOrder1AmountBuy] ? 2 : 0) +
+            (payload[TxDetailIdx.NewOrder2FilledBuy] === payload[TxDetailIdx.NewOrder2AmountBuy] ? 4 : 0),
+          3,
+        ); //010, 011 or 001
+        this.encodeRawPayload(payload, 'encodeSpotTrade');
+        break;
+      case TxType.Withdraw:
+        this.encoder.encodeNumber(4, 3); //001
+        this.encodeRawPayload(payload, 'encodeCommon');
+        break;
+      case TxType.Nop:
+        this.encodeRawPayload(payload, 'encodeNop');
+        break;
     }
-    
   }
 
   encodeRawPayload(payload: Array<bigint>, scheme: string) {
-    assert(typeof this.encoder[scheme] === 'function')
+    assert(typeof this.encoder[scheme] === 'function');
     this.encoder[scheme](payload, TxDetailIdx);
   }
 
-  bits() : Array<number> {
+  bits(): Array<number> {
     return this.encoder.bits();
   }
 

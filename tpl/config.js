@@ -19,7 +19,8 @@ function orderLeafsNaming(fields, prefixs) {
   }
   return output;
 }
-const getOrderLeafs = () => orderLeafsNaming(['ID', 'tokenSell', 'filledSell', 'amountSell', 'tokenBuy', 'filledBuy', 'amountBuy'], ['old', 'new']);
+const getOrderLeafs = () =>
+  orderLeafsNaming(['ID', 'tokenSell', 'filledSell', 'amountSell', 'tokenBuy', 'filledBuy', 'amountBuy'], ['old', 'new']);
 function getCommonPayload() {
   return splitAndTrim(`
   // first univeral balance checker
@@ -69,18 +70,22 @@ function getCommonPayload() {
 function getEncodedAmount() {
   return splitAndTrim(`
   amount
-  `).concat(orderLeafsNaming(['amountSell', 'amountBuy'], ['new']))
+  `).concat(orderLeafsNaming(['amountSell', 'amountBuy'], ['new']));
 }
 //console.log('commonPayload', getCommonPayload())
 const txIdx = getCommonPayload().reduce((out, item, idx) => Object.defineProperty(out, item, { value: `${idx}`, enumerable: true }), {});
-const encodedIdx = getEncodedAmount().reduce((out, item, idx) => Object.defineProperty(out, txIdx[item], { value: idx, enumerable: true }), {});
+const encodedIdx = getEncodedAmount().reduce(
+  (out, item, idx) => Object.defineProperty(out, txIdx[item], { value: idx, enumerable: true }),
+  {},
+);
 //console.log('idxs', txIdx, encodedIdx)
 const config = {
   orderLeafs: getOrderLeafs(),
   commonPayload: getCommonPayload(),
   encodedPayload: getEncodedAmount(),
   txLength: getCommonPayload().length,
-  txIdx, encodedIdx,
+  txIdx,
+  encodedIdx,
   floatLength: 40, //bits for float epxressing amounts
   placeOrder: {
     inputSignals: splitAndTrim(`
@@ -151,8 +156,8 @@ const config = {
     l2Key: [
       ['accountID1', 'accountLevels'],
       ['ay2', '254'],
-    ],    
-  }
+    ],
+  },
 };
 
 export { config };

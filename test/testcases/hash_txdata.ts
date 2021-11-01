@@ -174,7 +174,7 @@ class TestHashTxData implements SimpleTest {
 
     const input = {
       bits: hasher.bits(),
-    };    
+    };
     if (input.bits.length !== totalBit) throw new Error(`encoded bits (${input.bits.length}) is not expected (${totalBit})`);
 
     const check = generateTestDataFromBits(input.bits);
@@ -185,9 +185,7 @@ class TestHashTxData implements SimpleTest {
       hashOutLo: digest.Lo,
     };
     //console.log(JSON.stringify(input, null, 2));
-    return [{ input, output, name: 'TestHashTxData' },
-      this.getZeroTestData(),
-    ];
+    return [{ input, output, name: 'TestHashTxData' }, this.getZeroTestData()];
   }
   getComponent(): TestComponent {
     return {
