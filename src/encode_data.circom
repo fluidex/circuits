@@ -5,19 +5,20 @@ include "./lib/bitify.circom";
 
 function TxDataLength(balanceLevels, orderLevels, accountLevels) { 
     var ret = 0;
-            
-    var encodeCommon = accountLevels*2 + balanceLevels*2 + 40*1;
-    if ( ret < encodeCommon){
-        ret = encodeCommon;
-    }            
-    var encodeSpotTrade = accountLevels*2 + balanceLevels*2 + 40*4 + orderLevels*2;
-    if ( ret < encodeSpotTrade){
-        ret = encodeSpotTrade;
-    }            
-    var encodeL2Key = 254*1 + accountLevels*1;
-    if ( ret < encodeL2Key){
-        ret = encodeL2Key;
-    }    
+
+    var commonLen = accountLevels*2 + balanceLevels*2 + 40*1;
+    if ( ret < commonLen){
+        ret = commonLen;
+    }
+    var spotTradeLen = accountLevels*2 + balanceLevels*2 + 40*4 + orderLevels*2;
+    if ( ret < spotTradeLen){
+        ret = spotTradeLen;
+    }
+    var l2KeyLen = 254*1 + accountLevels*1;
+    if ( ret < l2KeyLen){
+        ret = l2KeyLen;
+    }
+
     ret += 3;
     var padding = ret % 8;
     if ( padding != 0){

@@ -27,7 +27,7 @@ const codegen = {
   generateFromTpl,
   generateMultiFieldsAssign,
   generateMultiCheckEq,
-  generateDALengthCheckBlock,
+  generateDALengthCalc,
   generatedDAHeadingBlock,
   // helper function to convert camel case to all cap case
   capitalization,
@@ -89,16 +89,13 @@ function renderDAEncodeField(scheme, [fieldName, fieldBits, fieldRelaxed]) {
 }
 //protocol is [[<FieldName>, <bits>]]
 //bits fields can be: balanceLevels, orderLevels, accountLevels, floats, addrs, or any number
-//default ctx is set to scheme's name, _ret can be replaced as the checking variable,
-//and bits fields' name can also be replaced
-function generateDALengthCheckBlock(scheme, { ctx, replacers }) {
-  const tpl = tpls.DAProtocolLengthCheckTplFn(config.dataEncodeSchemes[scheme]);
+//bits fields' name can be replaced
+//ctx is the assigned variant name
+function generateDALengthCalc(scheme, { ctx, replacers }) {
+  const tpl = tpls.DAProtocolSchemeLengthTplFn(config.dataEncodeSchemes[scheme]);
   //always replace floats and addrs
   //TODO: addrs is still being hardcoded
-  return generateFromTpl(tpl, {
-    ctx: ctx || capitalization(scheme),
-    replacers: Object.assign({ floats: `${config.floatLength}`, addrs: '254' }, replacers),
-  });
+  return generateFromTpl(tpl, { ctx, replacers: Object.assign({ floats: `${config.floatLength}`, addrs: '254' }, replacers) });
 }
 
 function generatedDAHeadingBlock(scheme, { ctx, replacers = {} }) {

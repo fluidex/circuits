@@ -3,8 +3,12 @@ import { encodeCtx } from './bitstream';
 export function txDAEncodeLength(nTokenLevel : number, nOrderLevel : number, nAccountLevel : number) {
     let ret = 0;
   <%_ for(const scheme in codegen.dataEncode.schemes){ -%>
-  <%- codegen.generateDALengthCheckBlock(scheme, {replacers: {'_ret':'ret', accountLevels: 'nAccountLevel', 
-    orderLevels: 'nOrderLevel', balanceLevels: 'nTokenLevel', var: 'let'}}) -%>
+    let <%- codegen.generateDALengthCalc(scheme, {ctx: `${scheme}Len`, 
+      replacers: {'_ret':'ret', accountLevels: 'nAccountLevel', 
+      orderLevels: 'nOrderLevel', balanceLevels: 'nTokenLevel', var: 'let'}}) %>;
+    if ( ret < <%- `${scheme}Len` %>){
+      ret = <%- `${scheme}Len` %>;
+    }      
   <%_ } %>
     ret += 3
     ret += ret % 8 && (8 - ret % 8);

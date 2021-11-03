@@ -250,7 +250,7 @@ const DAProtocolHeadingTplFn = function (scheme) {
   }
 };
 
-const DAProtocolLengthCheckTplFn = function (protocol) {
+const DAProtocolSchemeLengthTplFn = function (protocol) {
   assert(Array.isArray(protocol), 'must valid protocol array');
 
   const bitsFieldsAggr = protocol.reduce((out, [_, bitField]) => {
@@ -265,11 +265,7 @@ const DAProtocolLengthCheckTplFn = function (protocol) {
   const lengthFormula = Object.entries(bitsFieldsAggr)
     .map(([key, val]) => `${key}*${val}`)
     .join(' + ');
-  return `
-    var encode__ = ${lengthFormula};
-    if ( _ret < encode__){
-        _ret = encode__;
-    }`;
+  return `__ = ${lengthFormula}`;
 };
 
 export {
@@ -287,7 +283,7 @@ export {
   MultiCheckEqTpl,
   DAProtocolInputFieldTpl,
   DAProtocolEncodeFieldTpl,
-  DAProtocolLengthCheckTplFn,
+  DAProtocolSchemeLengthTplFn,
   DAProtocolHeadingTplFn,
   universalBalanceCheckTplFn,
   generateMultiAssign,

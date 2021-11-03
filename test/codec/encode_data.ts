@@ -3,19 +3,19 @@ import { encodeCtx } from './bitstream';
 
 export function txDAEncodeLength(nTokenLevel: number, nOrderLevel: number, nAccountLevel: number) {
   let ret = 0;
+  let commonLen = nAccountLevel * 2 + nTokenLevel * 2 + 40 * 1;
+  if (ret < commonLen) {
+    ret = commonLen;
+  }
+  let spotTradeLen = nAccountLevel * 2 + nTokenLevel * 2 + 40 * 4 + nOrderLevel * 2;
+  if (ret < spotTradeLen) {
+    ret = spotTradeLen;
+  }
+  let l2KeyLen = 254 * 1 + nAccountLevel * 1;
+  if (ret < l2KeyLen) {
+    ret = l2KeyLen;
+  }
 
-  let encodeCommon = nAccountLevel * 2 + nTokenLevel * 2 + 40 * 1;
-  if (ret < encodeCommon) {
-    ret = encodeCommon;
-  }
-  let encodeSpotTrade = nAccountLevel * 2 + nTokenLevel * 2 + 40 * 4 + nOrderLevel * 2;
-  if (ret < encodeSpotTrade) {
-    ret = encodeSpotTrade;
-  }
-  let encodeL2Key = 254 * 1 + nAccountLevel * 1;
-  if (ret < encodeL2Key) {
-    ret = encodeL2Key;
-  }
   ret += 3;
   ret += ret % 8 && 8 - (ret % 8);
   return ret;
