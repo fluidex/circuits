@@ -75,8 +75,8 @@ function initBlockTestCase() {
     orderId: order2_id,
     tokenBuy: tokenID_1to2,
     tokenSell: tokenID_2to1,
-    totalSell: 10000n,
-    totalBuy: 1000n,
+    totalSell: 1210n,
+    totalBuy: 121n,
   });
   order2.signWith(account2);
   let order2State = OrderState.fromOrderInput(order2);

@@ -1,4 +1,4 @@
-import { encodeFloat } from '../codec/float';
+import { encodeFloat, decodeFloat } from '../codec/float';
 import { Hash } from 'fast-sha256';
 import { DAEncoder } from '../codec/encode_data';
 import * as tx from './tx';
@@ -86,11 +86,15 @@ class DA_Hasher {
         this.encodeRawPayload(payload, 'encodeCommon');
         break;
       case TxType.SpotTrade:
-        this.encoder.encodeNumber(
-          (payload[TxDetailIdx.NewOrder1FilledBuy] === payload[TxDetailIdx.NewOrder1AmountBuy] ? 2 : 0) +
-            (payload[TxDetailIdx.NewOrder2FilledBuy] === payload[TxDetailIdx.NewOrder2AmountBuy] ? 4 : 0),
-          3,
-        ); //010, 011 or 001
+        let order1Filled =
+          payload[TxDetailIdx.NewOrder1FilledBuy] === decodeFloat(payload[TxDetailIdx.NewOrder1AmountBuy]) ||
+          payload[TxDetailIdx.NewOrder1FilledSell] === decodeFloat(payload[TxDetailIdx.NewOrder1AmountSell]);
+        let order2Filled =
+          payload[TxDetailIdx.NewOrder2FilledBuy] === decodeFloat(payload[TxDetailIdx.NewOrder2AmountBuy]) ||
+          payload[TxDetailIdx.NewOrder2FilledSell] === decodeFloat(payload[TxDetailIdx.NewOrder2AmountSell]);
+        assert(order1Filled || order2Filled);
+
+        this.encoder.encodeNumber((order1Filled ? 2 : 0) + (order2Filled ? 4 : 0), 3); //010, 011 or 001
         this.encodeRawPayload(payload, 'encodeSpotTrade');
         break;
       case TxType.Withdraw:

@@ -30,6 +30,8 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     signal input isWithDraw;
     signal input isTransfer;
     signal input isSpotTrade;
+    signal input order1Unfilled;
+    signal input order2Unfilled;
     signal input isL2KeyUpdated;
 
     var encodeLength = TxDataLength(balanceLevels, orderLevels, accountLevels);

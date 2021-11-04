@@ -44,14 +44,13 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     signal input newOrder2ID;
     signal input sign2;
     signal input ay2;
-    signal input ay1;
-    signal input newOrder1FilledBuy;
-    signal input newOrder2FilledBuy;
     //signal required from block circuit
     signal input isDeposit;
     signal input isWithDraw;
     signal input isTransfer;
     signal input isSpotTrade;
+    signal input order1Unfilled;
+    signal input order2Unfilled;
     signal input isL2KeyUpdated;
 
     var encodeLength = TxDataLength(balanceLevels, orderLevels, accountLevels);
@@ -123,12 +122,14 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     signal encodedSpotTradeTx[encodeLength];
     
     useSpotTrade <== isSpotTrade;
-    component isOrder1Filled = IsEqual();
-    component isOrder2Filled = IsEqual();
-    isOrder1Filled.in[0] <== newOrder1FilledBuy;
-    isOrder1Filled.in[1] <== newOrder1AmountBuy;
-    isOrder2Filled.in[0] <== newOrder2FilledBuy;
-    isOrder2Filled.in[1] <== newOrder2AmountBuy;
+    component isOrder1Filled = IsZero();
+    component isOrder2Filled = IsZero();
+    isOrder1Filled.in <== order1Unfilled;
+    isOrder2Filled.in <== order2Unfilled;
+
+    //this constraints ensure we can always deduce the order state from spotTrade
+    assert(order1Unfilled == 0 || order2Unfilled == 0);
+    order1Unfilled * order2Unfilled === 0;
 
     encodedSpotTradeTx[0] <== 0;
     encodedSpotTradeTx[1] <== useSpotTrade*isOrder1Filled.out;

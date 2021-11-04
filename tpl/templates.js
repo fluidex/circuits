@@ -222,12 +222,14 @@ const DAProtocolHeadingTplFn = function (scheme) {
     case 'spotTrade':
       return `
     use__ <== isSpotTrade;
-    component isOrder1Filled = IsEqual();
-    component isOrder2Filled = IsEqual();
-    isOrder1Filled.in[0] <== newOrder1FilledBuy;
-    isOrder1Filled.in[1] <== newOrder1AmountBuy;
-    isOrder2Filled.in[0] <== newOrder2FilledBuy;
-    isOrder2Filled.in[1] <== newOrder2AmountBuy;
+    component isOrder1Filled = IsZero();
+    component isOrder2Filled = IsZero();
+    isOrder1Filled.in <== order1Unfilled;
+    isOrder2Filled.in <== order2Unfilled;
+
+    //this constraints ensure we can always deduce the order state from spotTrade
+    assert(order1Unfilled == 0 || order2Unfilled == 0);
+    order1Unfilled * order2Unfilled === 0;
 
     encoded__Tx[0] <== 0;
     encoded__Tx[1] <== use__*isOrder1Filled.out;
@@ -245,8 +247,7 @@ const DAProtocolHeadingTplFn = function (scheme) {
     encoded__Tx[1] <== 0;
     encoded__Tx[2] <== 0;`;
     default:
-      assert(typeof scheme !== 'string', `unrecognized scheme ${scheme}`);
-      return ['ay1', 'newOrder1FilledBuy', 'newOrder2FilledBuy'];
+      assert(false, `unrecognized scheme ${scheme}`);
   }
 };
 

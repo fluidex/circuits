@@ -30,9 +30,6 @@ template GenerateTxDataFromTx(balanceLevels, orderLevels, accountLevels) {
     encodeData.newOrder2ID <== in[52];
     encodeData.sign2 <== in[11];
     encodeData.ay2 <== in[12];
-    encodeData.ay1 <== in[5];
-    encodeData.newOrder1FilledBuy <== in[43];
-    encodeData.newOrder2FilledBuy <== in[57];
 
     var typeConstant[4] = [TxTypeDeposit(), TxTypeTransfer(), TxTypeWithdraw(), TxTypeSpotTrade()];
     var checkTypeFlags = 0;
@@ -48,6 +45,8 @@ template GenerateTxDataFromTx(balanceLevels, orderLevels, accountLevels) {
     encodeData.isTransfer <== checkTypes[1].out;
     encodeData.isWithDraw <== checkTypes[2].out;
     encodeData.isSpotTrade <== checkTypes[3].out;
+    encodeData.order1Unfilled <== (decoder.newOrder1AmountBuy - decoder.newOrder1FilledBuy) * (decoder.newOrder1AmountSell - decoder.newOrder1FilledSell);
+    encodeData.order2Unfilled <== (decoder.newOrder2AmountBuy - decoder.newOrder2FilledBuy) * (decoder.newOrder2AmountSell - decoder.newOrder2FilledSell);
     encodeData.isL2KeyUpdated <== decoder.dstIsNew;
 
     for (var i = 0; i < TxDataLength(balanceLevels, orderLevels, accountLevels); i++){

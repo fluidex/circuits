@@ -113,11 +113,11 @@ function synthesisDAParams(schemes) {
     }, fields);
   }
 
-  tpls.DAProtocolHeadingTplFn().reduce((out, item) => {
-    assert(config.txIdx[item], `field ${item} must be one of the payload`);
-    out[item] = true;
-    return out;
-  }, fields);
+  // tpls.DAProtocolHeadingTplFn().reduce((out, item) => {
+  //   assert(config.txIdx[item], `field ${item} must be one of the payload`);
+  //   out[item] = true;
+  //   return out;
+  // }, fields);
 
   return { schemes, fields };
 }
