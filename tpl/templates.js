@@ -214,11 +214,11 @@ const DAProtocolHeadingTplFn = function (scheme) {
     isL2KeyUnChanged.in <== isL2KeyUpdated;
     signal isRealDeposit;
     isRealDeposit <== isL2KeyUnChanged.out * isDeposit;
-    use__ <== isRealDeposit + isWithDraw + isTransfer;
+    use__ <== isRealDeposit + isWithdraw + isTransfer;
     encoded__Tx[0] <== 0;
     //TODO: this bit should be marked as 'fully exit' (withdraw all balance)
     encoded__Tx[1] <== 0;
-    encoded__Tx[2] <== use__*isWithDraw;`;
+    encoded__Tx[2] <== use__*isWithdraw;`;
     case 'spotTrade':
       return `
     use__ <== isSpotTrade;
@@ -239,9 +239,9 @@ const DAProtocolHeadingTplFn = function (scheme) {
     use__ <== isL2KeyUpdated;        
     //this constraints ensure l2key can only be updated under a 'dummy' deposit tx
     signal notDepositFlag;
-    notDepositFlag <== isWithDraw + isTransfer + isSpotTrade;
+    notDepositFlag <== isWithdraw + isTransfer + isSpotTrade;
     isL2KeyUpdated * notDepositFlag === 0;
-    //(isWithDraw + isTransfer + isSpotTrade) * isL2KeyUpdated === 0;
+    //(isWithdraw + isTransfer + isSpotTrade) * isL2KeyUpdated === 0;
     amount * isL2KeyUpdated === 0;
     encoded__Tx[0] <== use__;
     encoded__Tx[1] <== 0;

@@ -23,7 +23,7 @@ class DA_Hasher {
     this.encoder.encodeCommon([tx.from, tx.to, tx.tokenID, tx.tokenID, encodeFloat(tx.amount)], DAEncoder.commonIdx);
   }
 
-  encodeWithDraw(tx: tx.WithdrawTx) {
+  encodeWithdraw(tx: tx.WithdrawTx) {
     this.encoder.encodeNumber(2, 3); //010
     this.encoder.encodeCommon([tx.accountID, tx.accountID, tx.tokenID, tx.tokenID, encodeFloat(tx.amount)], DAEncoder.commonIdx);
   }

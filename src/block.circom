@@ -109,7 +109,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
         encodeData[i].isDeposit <== enableDeposit[i].out;
         encodeData[i].isTransfer <== enableTransfer[i].out;
-        encodeData[i].isWithDraw <== enableWithdraw[i].out;
+        encodeData[i].isWithdraw <== enableWithdraw[i].out;
         encodeData[i].isSpotTrade <== enableSpotTrade[i].out;
         encodeData[i].order1Unfilled <== (decodedTx[i].newOrder1AmountBuy - decodedTx[i].newOrder1FilledBuy) * (decodedTx[i].newOrder1AmountSell - decodedTx[i].newOrder1FilledSell);
         encodeData[i].order2Unfilled <== (decodedTx[i].newOrder2AmountBuy - decodedTx[i].newOrder2FilledBuy) * (decodedTx[i].newOrder2AmountSell - decodedTx[i].newOrder2FilledSell);
