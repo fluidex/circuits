@@ -46,7 +46,7 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     signal input ay2;
     //signal required from block circuit
     signal input isDeposit;
-    signal input isWithDraw;
+    signal input isWithdraw;
     signal input isTransfer;
     signal input isSpotTrade;
     signal input order1Unfilled;
@@ -67,11 +67,11 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     isL2KeyUnChanged.in <== isL2KeyUpdated;
     signal isRealDeposit;
     isRealDeposit <== isL2KeyUnChanged.out * isDeposit;
-    useCommon <== isRealDeposit + isWithDraw + isTransfer;
+    useCommon <== isRealDeposit + isWithdraw + isTransfer;
     encodedCommonTx[0] <== 0;
     //TODO: this bit should be marked as 'fully exit' (withdraw all balance)
     encodedCommonTx[1] <== 0;
-    encodedCommonTx[2] <== useCommon*isWithDraw;
+    encodedCommonTx[2] <== useCommon*isWithdraw;
     useCommon*(useCommon - 1) === 0;
     schemeCheck += useCommon;
     offset = 3;
@@ -221,9 +221,9 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     useL2Key <== isL2KeyUpdated;        
     //this constraints ensure l2key can only be updated under a 'dummy' deposit tx
     signal notDepositFlag;
-    notDepositFlag <== isWithDraw + isTransfer + isSpotTrade;
+    notDepositFlag <== isWithdraw + isTransfer + isSpotTrade;
     isL2KeyUpdated * notDepositFlag === 0;
-    //(isWithDraw + isTransfer + isSpotTrade) * isL2KeyUpdated === 0;
+    //(isWithdraw + isTransfer + isSpotTrade) * isL2KeyUpdated === 0;
     amount * isL2KeyUpdated === 0;
     encodedL2KeyTx[0] <== useL2Key;
     encodedL2KeyTx[1] <== 0;
