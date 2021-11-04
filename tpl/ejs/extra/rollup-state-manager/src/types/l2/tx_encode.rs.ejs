@@ -1,0 +1,56 @@
+#![allow(clippy::identity_op)]
+use super::{TxDataEncoder, EncodingParam, RawTx, tx_detail_idx};
+use anyhow::Result;
+
+impl EncodingParam for TxDataEncoder {
+    fn data_bits(&self) -> usize {
+        let mut ret = 0;
+        <%_ for(const scheme in codegen.dataEncode.schemes){ -%>
+        let <%- codegen.generateDALengthCalc(scheme, {ctx: 'scheme_len', 
+            replacers: {'_ret':'ret', 
+            accountLevels: 'self.account_bits', 
+            orderLevels: 'self.order_bits', 
+            balanceLevels: 'self.token_bits'}}) -%>;
+        ret = if ret < scheme_len {scheme_len} else {ret};
+        <%_ } %>
+        ret += 3;
+        if ret % 8 == 0 {
+            ret as usize
+        }else {
+            (ret + (ret % 8)) as usize
+        }
+    }    
+
+}
+
+
+pub trait EncodeForScheme {
+    fn encode(self, encoder: &mut TxDataEncoder) -> Result<()>;
+}
+
+<% for(const scheme in codegen.dataEncode.schemes) { %>
+<%_ 
+    let capScheme = codegen.capitalization(scheme)
+    let protocol = codegen.dataEncode.schemes[scheme];
+    let fieldSpec = {
+        accountLevels: 'encoder.account_bits',
+        balanceLevels: 'encoder.token_bits',
+        orderLevels: 'encoder.order_bits',
+        floats: `${codegen.config.floatLength}`,
+        addrs: '254',
+    }
+-%>
+pub struct For<%- capScheme %>Tx<'d> (&'d RawTx);
+
+impl EncodeForScheme for For<%- capScheme %>Tx<'_> {
+
+    fn encode(self, encoder: &mut TxDataEncoder) -> Result<()>{
+        let payload = &self.0.payload;
+        <%_ for(const [fieldName, fieldBits, relaxed] of protocol) { -%>
+        encoder.encode_fr(&payload[tx_detail_idx::<%- codegen.camelToAllCap(fieldName) %>], <%- fieldSpec[fieldBits] || fieldBits %>)<%- relaxed ? '.ok()' : '?' %>;
+        <%_ } -%>        
+        Ok(())        
+    }
+}    
+<%}%>
+

@@ -81,7 +81,7 @@ class DA_Hasher {
           this.encodeRawPayload(payload, 'encodeL2Key');
           break;
         }
-        //when handling common deposit tx, continue to next case
+      //when handling common deposit tx, continue to next case
       case TxType.Transfer:
         this.encoder.encodeNumber(0, 3); //000
         this.encodeRawPayload(payload, 'encodeCommon');
