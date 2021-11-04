@@ -144,8 +144,8 @@ const config = {
     spotTrade: [
       ['accountID1', 'accountLevels'],
       ['accountID2', 'accountLevels'],
-      ['tokenID1', 'balanceLevels'],
-      ['tokenID2', 'balanceLevels'],
+      ['newOrder1TokenSell', 'balanceLevels'],
+      ['newOrder2TokenSell', 'balanceLevels'],
       ['newOrder1AmountSell', 'floats'],
       ['newOrder1AmountBuy', 'floats'],
       ['newOrder1ID', 'orderLevels', true],

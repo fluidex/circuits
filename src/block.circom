@@ -96,6 +96,8 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     encodeData[i].tokenID1 <== encodedTxs[i][2];
     encodeData[i].tokenID2 <== encodedTxs[i][9];
     encodeData[i].amount <== encodedTxs[i][24];
+    encodeData[i].newOrder1TokenSell <== encodedTxs[i][39];
+    encodeData[i].newOrder2TokenSell <== encodedTxs[i][53];
     encodeData[i].newOrder1AmountSell <== encodedTxs[i][41];
     encodeData[i].newOrder1AmountBuy <== encodedTxs[i][44];
     encodeData[i].newOrder1ID <== encodedTxs[i][38];

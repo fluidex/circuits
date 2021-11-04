@@ -119,6 +119,7 @@ class DA_Hasher {
   digest(): Buffer {
     let hasher = new Hash();
     let buf = this.encoder.seal();
+    //    console.log("buffer", buf.toString('hex'));
     hasher.update(buf);
 
     return Buffer.from(hasher.digest());

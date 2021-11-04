@@ -70,8 +70,8 @@ class DAEncoder extends encodeCtx {
   static spotTradeIdx = {
     AccountID1: 0,
     AccountID2: 1,
-    TokenID1: 2,
-    TokenID2: 3,
+    NewOrder1TokenSell: 2,
+    NewOrder2TokenSell: 3,
     NewOrder1AmountSell: 4,
     NewOrder1AmountBuy: 5,
     NewOrder1ID: 6,
@@ -90,8 +90,8 @@ class DAEncoder extends encodeCtx {
     [accountLevels, balanceLevels, orderLevels, floats];
     this.encodeNumber(payload[idx['AccountID1']], accountLevels, false);
     this.encodeNumber(payload[idx['AccountID2']], accountLevels, false);
-    this.encodeNumber(payload[idx['TokenID1']], balanceLevels, false);
-    this.encodeNumber(payload[idx['TokenID2']], balanceLevels, false);
+    this.encodeNumber(payload[idx['NewOrder1TokenSell']], balanceLevels, false);
+    this.encodeNumber(payload[idx['NewOrder2TokenSell']], balanceLevels, false);
     this.encodeNumber(payload[idx['NewOrder1AmountSell']], floats, false);
     this.encodeNumber(payload[idx['NewOrder1AmountBuy']], floats, false);
     this.encodeNumber(payload[idx['NewOrder1ID']], orderLevels, true);
