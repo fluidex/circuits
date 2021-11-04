@@ -21,8 +21,8 @@ function mockTransferTx(): RawTx {
   encodedTx[TxDetailIdx.Amount] = amount;
   encodedTx[TxDetailIdx.Nonce1] = BigInt(100);
   encodedTx[TxDetailIdx.Nonce2] = BigInt(50);
-  encodedTx[TxDetailIdx.Sign1] = Scalar.e('0x5191');
-  encodedTx[TxDetailIdx.Sign2] = Scalar.e('0x5192');
+  encodedTx[TxDetailIdx.Sign1] = Scalar.e(1);
+  encodedTx[TxDetailIdx.Sign2] = Scalar.e(0);
   encodedTx[TxDetailIdx.Ay1] = BigInt(999);
   encodedTx[TxDetailIdx.Ay2] = BigInt(777);
   encodedTx[TxDetailIdx.Balance1] = BigInt('88343453');
@@ -58,14 +58,14 @@ function mockDepositToTx(isNew: boolean): RawTx {
   encodedTx[TxDetailIdx.AccountID1] = Scalar.e(2);
   encodedTx[TxDetailIdx.Balance1] = balance;
   encodedTx[TxDetailIdx.Nonce1] = isNew ? 0n : nonce;
-  encodedTx[TxDetailIdx.Sign1] = isNew ? 0n : Scalar.e('0x519A');
+  encodedTx[TxDetailIdx.Sign1] = isNew ? 0n : Scalar.e('1');
   encodedTx[TxDetailIdx.Ay1] = isNew ? 0n : ay;
 
   encodedTx[TxDetailIdx.TokenID2] = Scalar.e(tokenID);
   encodedTx[TxDetailIdx.AccountID2] = Scalar.e(2);
   encodedTx[TxDetailIdx.Balance2] = amount + balance;
   encodedTx[TxDetailIdx.Nonce2] = isNew ? 0n : nonce;
-  encodedTx[TxDetailIdx.Sign2] = Scalar.e('0x519B');
+  encodedTx[TxDetailIdx.Sign2] = Scalar.e('1');
   encodedTx[TxDetailIdx.Ay2] = ay;
 
   encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
@@ -98,7 +98,7 @@ function mockBigDepositToTx(): RawTx {
   encodedTx[TxDetailIdx.AccountID2] = Scalar.e(2);
   encodedTx[TxDetailIdx.Balance2] = amount;
   encodedTx[TxDetailIdx.Nonce2] = 0n;
-  encodedTx[TxDetailIdx.Sign2] = Scalar.e('0x519B');
+  encodedTx[TxDetailIdx.Sign2] = Scalar.e('1');
   encodedTx[TxDetailIdx.Ay2] = BigInt(999);
 
   encodedTx[TxDetailIdx.EnableBalanceCheck1] = 1n;
@@ -125,7 +125,7 @@ function mockSpotTradeTx(): RawTx {
   encodedTx[TxDetailIdx.AccountID1] = Scalar.e(2);
   encodedTx[TxDetailIdx.Balance1] = 0n;
   encodedTx[TxDetailIdx.Nonce1] = 0n;
-  encodedTx[TxDetailIdx.Sign1] = 0n;
+  encodedTx[TxDetailIdx.Sign1] = 1n;
   encodedTx[TxDetailIdx.Ay1] = BigInt(999);
   encodedTx[TxDetailIdx.NewOrder1TokenBuy] = Scalar.e(tokenID2);
   encodedTx[TxDetailIdx.NewOrder1TokenSell] = Scalar.e(tokenID1);
@@ -139,7 +139,7 @@ function mockSpotTradeTx(): RawTx {
   encodedTx[TxDetailIdx.AccountID2] = Scalar.e(1);
   encodedTx[TxDetailIdx.Balance2] = 0n;
   encodedTx[TxDetailIdx.Nonce2] = 0n;
-  encodedTx[TxDetailIdx.Sign2] = Scalar.e('0x519B');
+  encodedTx[TxDetailIdx.Sign2] = Scalar.e('0');
   encodedTx[TxDetailIdx.Ay2] = BigInt(777);
   encodedTx[TxDetailIdx.NewOrder2TokenBuy] = Scalar.e(tokenID1);
   encodedTx[TxDetailIdx.NewOrder2TokenSell] = Scalar.e(tokenID2);

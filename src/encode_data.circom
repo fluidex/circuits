@@ -14,7 +14,7 @@ function TxDataLength(balanceLevels, orderLevels, accountLevels) {
     if ( ret < spotTradeLen){
         ret = spotTradeLen;
     }
-    var l2KeyLen = 254*1 + accountLevels*1;
+    var l2KeyLen = 1*1 + 254*1 + accountLevels*1;
     if ( ret < l2KeyLen){
         ret = l2KeyLen;
     }
@@ -42,6 +42,7 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     signal input newOrder2AmountSell;
     signal input newOrder2AmountBuy;
     signal input newOrder2ID;
+    signal input sign2;
     signal input ay2;
     signal input ay1;
     signal input newOrder1FilledBuy;
@@ -237,6 +238,13 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
         encodedL2KeyTx[i+offset] <== useL2Key*encodeL2KeyAccountID1.out[i];
     }
     offset += accountLevels;
+    component encodeL2KeySign2 = Num2BitsIfEnabled(1);
+    encodeL2KeySign2.in <== sign2;
+    encodeL2KeySign2.enabled <== 1;
+    for (var i = 0; i < 1; i++) {
+        encodedL2KeyTx[i+offset] <== useL2Key*encodeL2KeySign2.out[i];
+    }
+    offset += 1;
     component encodeL2KeyAy2 = Num2BitsIfEnabled(254);
     encodeL2KeyAy2.in <== ay2;
     encodeL2KeyAy2.enabled <== 1;

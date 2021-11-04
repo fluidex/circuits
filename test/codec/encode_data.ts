@@ -11,7 +11,7 @@ export function txDAEncodeLength(nTokenLevel: number, nOrderLevel: number, nAcco
   if (ret < spotTradeLen) {
     ret = spotTradeLen;
   }
-  let l2KeyLen = 254 * 1 + nAccountLevel * 1;
+  let l2KeyLen = 1 * 1 + 254 * 1 + nAccountLevel * 1;
   if (ret < l2KeyLen) {
     ret = l2KeyLen;
   }
@@ -103,7 +103,8 @@ class DAEncoder extends encodeCtx {
 
   static l2KeyIdx = {
     AccountID1: 0,
-    Ay2: 1,
+    Sign2: 1,
+    Ay2: 2,
   };
 
   encodeL2Key(payload: Array<bigint>, idx) {
@@ -115,6 +116,7 @@ class DAEncoder extends encodeCtx {
     //dummy reference
     [accountLevels, balanceLevels, orderLevels, floats];
     this.encodeNumber(payload[idx['AccountID1']], accountLevels, false);
+    this.encodeNumber(payload[idx['Sign2']], 1, false);
     this.encodeNumber(payload[idx['Ay2']], 254, false);
     this.encodeAlign(this.encodeLength);
   }

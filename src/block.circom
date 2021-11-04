@@ -102,6 +102,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     encodeData[i].newOrder2AmountSell <== encodedTxs[i][55];
     encodeData[i].newOrder2AmountBuy <== encodedTxs[i][58];
     encodeData[i].newOrder2ID <== encodedTxs[i][52];
+    encodeData[i].sign2 <== encodedTxs[i][11];
     encodeData[i].ay2 <== encodedTxs[i][12];
     encodeData[i].ay1 <== encodedTxs[i][5];
     encodeData[i].newOrder1FilledBuy <== encodedTxs[i][43];

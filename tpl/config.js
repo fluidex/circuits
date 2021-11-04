@@ -155,6 +155,7 @@ const config = {
     ],
     l2Key: [
       ['accountID1', 'accountLevels'],
+      ['sign2', '1'],
       ['ay2', '254'],
     ],
   },

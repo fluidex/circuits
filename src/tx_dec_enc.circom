@@ -28,6 +28,7 @@ template GenerateTxDataFromTx(balanceLevels, orderLevels, accountLevels) {
     encodeData.newOrder2AmountSell <== in[55];
     encodeData.newOrder2AmountBuy <== in[58];
     encodeData.newOrder2ID <== in[52];
+    encodeData.sign2 <== in[11];
     encodeData.ay2 <== in[12];
     encodeData.ay1 <== in[5];
     encodeData.newOrder1FilledBuy <== in[43];
