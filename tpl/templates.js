@@ -1,3 +1,5 @@
+import { assert } from 'console';
+
 const JsInputEncoderTpl = `import { TxLength } from '../common';
 import { assert } from 'console';
 class <%= encoderName %> {<% for (const s of inputSignals) { %>
@@ -92,7 +94,9 @@ const CalcOrderTreeTpl = `
     orderHash__.filledBuy <== orderFilledBuy;
     orderHash__.totalSell <== orderAmountSell;
     orderHash__.totalBuy <== orderAmountBuy;
-    orderHash__.orderId <== orderID;
+    component truncatedOrderId__ = TruncateOrderID(orderLevels);
+    truncatedOrderId__.orderID <== orderID;    
+    orderHash__.orderId <== truncatedOrderId__.out;
 
     // - check order tree update
     component orderTree__ = CalculateRootFromMerklePath(orderLevels);
@@ -188,14 +192,81 @@ ${generateMultiAssign(compName, ['accountID', 'sign', 'ay', 'nonce', 'balance'],
 `;
 };
 
-const DAProtocolUtilsTplFn = function (floatLength) {
-  return `
-//currently only the minimal required packing for transfer tx ...
-//so accountID * 2 + tokenID + amount
-
-function TxDataLength(accountLevels, tokenLevels) { return accountLevels * 2 + tokenLevels + ${floatLength}; }
-function FloatLength() { return ${floatLength};}
+const DAProtocolInputFieldTpl = `
+    <%_ for(const item in fields) { -%>
+    <%- encoder %>.<%- item %> <== <%- input %>[<%- txIdx[item] %>];
+    <%_ } -%>
 `;
+
+const DAProtocolEncodeFieldTpl = `component encode<%- scheme %><%- fieldName %> = Num2BitsIfEnabled(<%- fieldBits %>);
+    encode<%- scheme %><%- fieldName %>.in <== <%- unCapFieldName %>;
+    encode<%- scheme %><%- fieldName %>.enabled <== <%- relaxed ? '0' : '1' %>;
+    for (var i = 0; i < <%- fieldBits %>; i++) {
+        encoded<%- scheme %>Tx[i+offset] <== use<%- scheme %>*encode<%- scheme %><%- fieldName %>.out[i];
+    }
+    offset += <%- fieldBits %>;`;
+
+const DAProtocolHeadingTplFn = function (scheme) {
+  switch (scheme) {
+    case 'common':
+      return `
+    component isL2KeyUnChanged = IsZero();
+    isL2KeyUnChanged.in <== isL2KeyUpdated;
+    signal isRealDeposit;
+    isRealDeposit <== isL2KeyUnChanged.out * isDeposit;
+    use__ <== isRealDeposit + isWithdraw + isTransfer;
+    encoded__Tx[0] <== 0;
+    //TODO: this bit should be marked as 'fully exit' (withdraw all balance)
+    encoded__Tx[1] <== 0;
+    encoded__Tx[2] <== use__*isWithdraw;`;
+    case 'spotTrade':
+      return `
+    use__ <== isSpotTrade;
+    component isOrder1Filled = IsZero();
+    component isOrder2Filled = IsZero();
+    isOrder1Filled.in <== order1Unfilled;
+    isOrder2Filled.in <== order2Unfilled;
+
+    //this constraints ensure we can always deduce the order state from spotTrade
+    assert(order1Unfilled == 0 || order2Unfilled == 0);
+    order1Unfilled * order2Unfilled === 0;
+
+    encoded__Tx[0] <== 0;
+    encoded__Tx[1] <== use__*isOrder1Filled.out;
+    encoded__Tx[2] <== use__*isOrder2Filled.out;`;
+    case 'l2Key':
+      return `
+    use__ <== isL2KeyUpdated;        
+    //this constraints ensure l2key can only be updated under a 'dummy' deposit tx
+    signal notDepositFlag;
+    notDepositFlag <== isWithdraw + isTransfer + isSpotTrade;
+    isL2KeyUpdated * notDepositFlag === 0;
+    //(isWithdraw + isTransfer + isSpotTrade) * isL2KeyUpdated === 0;
+    amount * isL2KeyUpdated === 0;
+    encoded__Tx[0] <== use__;
+    encoded__Tx[1] <== 0;
+    encoded__Tx[2] <== 0;`;
+    default:
+      assert(false, `unrecognized scheme ${scheme}`);
+  }
+};
+
+const DAProtocolSchemeLengthTplFn = function (protocol) {
+  assert(Array.isArray(protocol), 'must valid protocol array');
+
+  const bitsFieldsAggr = protocol.reduce((out, [_, bitField]) => {
+    if (out[bitField]) {
+      out[bitField] += 1;
+    } else {
+      out[bitField] = 1;
+    }
+    return out;
+  }, {});
+
+  const lengthFormula = Object.entries(bitsFieldsAggr)
+    .map(([key, val]) => `${key}*${val}`)
+    .join(' + ');
+  return `__ = ${lengthFormula}`;
 };
 
 export {
@@ -211,7 +282,10 @@ export {
   LoopAssignTpl,
   CheckEqTpl,
   MultiCheckEqTpl,
-  DAProtocolUtilsTplFn,
+  DAProtocolInputFieldTpl,
+  DAProtocolEncodeFieldTpl,
+  DAProtocolSchemeLengthTplFn,
+  DAProtocolHeadingTplFn,
   universalBalanceCheckTplFn,
   generateMultiAssign,
 };

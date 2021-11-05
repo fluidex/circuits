@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { SimpleTest, TestComponent } from './interface';
 import { getCircuitSrcDir } from '../common/circuit';
-import { txDAEncodeLength, DA_Hasher } from '../common/da_hashing';
+import { DA_Hasher } from '../common/da_hashing';
 import { Hash } from 'fast-sha256';
 
 //4e877400000000
@@ -64,32 +64,37 @@ const bits = [
   0,
 ];
 
+function generateTestDataFromBits(bits) {
+  let buf = [];
+
+  for (let i = 0; i < bits.length / 8; i++) {
+    let ch = 0;
+    for (let j = 0; j < 8; j++) {
+      ch += bits[i * 8 + j] << (7 - j);
+    }
+    buf.push(ch);
+  }
+
+  const hasher = new Hash();
+  hasher.update(Buffer.from(buf));
+
+  let input = {
+    bits,
+  };
+  const digest = hasher.digest();
+  let output = {
+    hashOutHi: BigInt('0x' + Buffer.from(digest.slice(0, 16)).toString('hex')),
+    hashOutLo: BigInt('0x' + Buffer.from(digest.slice(16)).toString('hex')),
+  };
+
+  //console.log(JSON.stringify(input, null, 2));
+  return { input, output, name: 'TestSHA256Hash' };
+}
+
 class TestHashSha256 implements SimpleTest {
   getTestData() {
-    let buf = [];
-
-    for (let i = 0; i < bits.length / 8; i++) {
-      let ch = 0;
-      for (let j = 0; j < 8; j++) {
-        ch += bits[i * 8 + j] << (7 - j);
-      }
-      buf.push(ch);
-    }
-
-    const hasher = new Hash();
-    hasher.update(Buffer.from(buf));
-
-    let input = {
-      bits,
-    };
-    const digest = hasher.digest();
-    let output = {
-      hashOutHi: BigInt('0x' + Buffer.from(digest.slice(0, 16)).toString('hex')),
-      hashOutLo: BigInt('0x' + Buffer.from(digest.slice(16)).toString('hex')),
-    };
-
     //console.log(JSON.stringify(input, null, 2));
-    return [{ input, output, name: 'TestSHA256Hash' }];
+    return [generateTestDataFromBits(bits)];
   }
   getComponent(): TestComponent {
     return {
@@ -107,15 +112,38 @@ const Scalar = ffjavascript.Scalar;
 const nTxs = 5;
 const accountLevels = 3;
 const tokenLevels = 3;
-const totalBit = txDAEncodeLength(accountLevels, tokenLevels) * nTxs;
+const orderLevels = 3;
+const hasher = new DA_Hasher(tokenLevels, orderLevels, accountLevels);
+const totalBit = hasher.encodedLen() * nTxs;
 
 class TestHashTxData implements SimpleTest {
+  getZeroTestData() {
+    let buf = new Array(totalBit / 8);
+    let bits = new Array(totalBit);
+    buf.fill(0);
+    bits.fill(0);
+
+    const hasher = new Hash();
+    hasher.update(Buffer.from(buf));
+
+    let input = {
+      bits,
+    };
+    const digest = hasher.digest();
+    let output = {
+      hashOutHi: BigInt('0x' + Buffer.from(digest.slice(0, 16)).toString('hex')),
+      hashOutLo: BigInt('0x' + Buffer.from(digest.slice(16)).toString('hex')),
+    };
+
+    //console.log(JSON.stringify(input, null, 2));
+    return { input, output, name: 'TestSHA256Hash' };
+  }
+
   getTestData() {
     const tokenID = 5;
     const accountID1 = Scalar.e(2);
     const accountID2 = Scalar.e(6);
-
-    const hasher = new DA_Hasher(accountLevels, tokenLevels);
+    const hasher = new DA_Hasher(tokenLevels, orderLevels, accountLevels);
 
     hasher.encodeDeposit({
       accountID: accountID1,
@@ -142,20 +170,22 @@ class TestHashTxData implements SimpleTest {
     hasher.encodeNop();
     hasher.encodeNop();
 
+    const digest = hasher.digestToFF();
+
     const input = {
       bits: hasher.bits(),
     };
-
     if (input.bits.length !== totalBit) throw new Error(`encoded bits (${input.bits.length}) is not expected (${totalBit})`);
 
-    const digest = hasher.digestToFF();
+    const check = generateTestDataFromBits(input.bits);
+    if (check.output.hashOutHi !== digest.Hi) throw new Error(`${check.output.hashOutHi} ${digest.Hi}`);
 
     const output = {
       hashOutHi: digest.Hi,
       hashOutLo: digest.Lo,
     };
     //console.log(JSON.stringify(input, null, 2));
-    return [{ input, output, name: 'TestHashTxData' }];
+    return [{ input, output, name: 'TestHashTxData' }, this.getZeroTestData()];
   }
   getComponent(): TestComponent {
     return {

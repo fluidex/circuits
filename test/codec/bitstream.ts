@@ -1,10 +1,11 @@
 import { Buffer } from 'buffer';
+import { assert } from 'console';
 
 const max32bitInt = 4294967295;
 
 //notice the arithmetic in js can handle 2^53 integer while bitshift
 //can just handle 2^32
-function safeShift(n: number): number {
+function safeRightShift(n: number): number {
   if (n > max32bitInt) {
     return n / 2;
   }
@@ -59,7 +60,10 @@ class encodeCtx {
       return this._sealed;
     }
 
-    this.encodingBuf.push(this.encodingChar);
+    if (this.encodingBits.length % 8 !== 0) {
+      this.encodingBuf.push(this.encodingChar);
+    }
+
     const sealed = Buffer.from(this.encodingBuf);
     Object.defineProperty(this, '_sealed', { value: sealed });
     return sealed;
@@ -69,19 +73,37 @@ class encodeCtx {
     return this.encodingBits;
   }
 
-  encodeNumber(n: number, bits: number) {
-    if (this._sealed) throw new Error('no input after being sealed');
+  _encodeBigNum(n: bigint, bits: number, relax: boolean) {
+    for (let i = 0; i < bits; i++) {
+      this.applyBit((n & 1n) === 0n);
+      n /= 2n;
+    }
+    if (n > 0n && !relax) {
+      throw new Error('can not encode number within specified bits');
+    }
+  }
 
+  _encodeNumber(n: number, bits: number, relax: boolean) {
     if (n < 0 || !Number.isInteger(n)) {
       throw new Error(`invalid: ${n}, only positive integer is allowed`);
     }
 
     for (let i = 0; i < bits; i++) {
       this.applyBit((n & 1) === 0);
-      n = safeShift(n);
+      n = safeRightShift(n);
     }
-    if (n > 0) {
+    if (n > 0 && !relax) {
       throw new Error('can not encode number within specified bits');
+    }
+  }
+
+  encodeNumber(n: number | bigint, bits: number, relax: boolean = false) {
+    if (this._sealed) throw new Error('no input after being sealed');
+
+    if (bits <= 48) {
+      this._encodeNumber(Number(n), bits, relax);
+    } else {
+      this._encodeBigNum(BigInt(n), bits, relax);
     }
   }
 
@@ -89,6 +111,21 @@ class encodeCtx {
     for (let i = 0; i < s.length; i++) {
       this.encodeNumber(s.charCodeAt(i), 8);
     }
+  }
+
+  //align to specified length
+  encodeAlign(len: number) {
+    const curLen = this.encodingBits.length;
+    const padding = curLen % len && len - (curLen % len);
+    for (let i = 0; i < padding; i++) {
+      this.applyBit(true);
+    }
+    //sanity check
+    assert(this.checkAlign(len));
+  }
+
+  checkAlign(len: number): boolean {
+    return this.encodingBits.length % len === 0;
   }
 }
 

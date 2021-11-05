@@ -1,0 +1,72 @@
+import { encodeCtx } from './bitstream';
+
+export function txDAEncodeLength(nTokenLevel : number, nOrderLevel : number, nAccountLevel : number) {
+    let ret = 0;
+  <%_ for(const scheme in codegen.dataEncode.schemes){ -%>
+    let <%- codegen.generateDALengthCalc(scheme, {ctx: `${scheme}Len`, 
+      replacers: {'_ret':'ret', accountLevels: 'nAccountLevel', 
+      orderLevels: 'nOrderLevel', balanceLevels: 'nTokenLevel', var: 'let'}}) %>;
+    if ( ret < <%- `${scheme}Len` %>){
+      ret = <%- `${scheme}Len` %>;
+    }      
+  <%_ } %>
+    ret += 3
+    ret += ret % 8 && (8 - ret % 8);
+    return ret;
+}
+
+class DAEncoder extends encodeCtx {
+  private nAccountLevel: number;
+  private nTokenLevel: number;
+  private nOrderLevel: number;
+  private encodeLength: number;
+
+  constructor(nTokenLevel : number, nOrderLevel : number, nAccountLevel : number) {
+    super();
+    this.nAccountLevel = nAccountLevel;
+    this.nOrderLevel = nOrderLevel;
+    this.nTokenLevel = nTokenLevel;
+    this.encodeLength = txDAEncodeLength(nTokenLevel, nOrderLevel, nAccountLevel);
+  }
+
+  checkAlign() : boolean {
+    return super.checkAlign(this.encodeLength);
+  }
+
+  encodedLen() : number {
+    return this.encodeLength;
+  }
+
+  <%_ for(const scheme in codegen.dataEncode.schemes){ -%>
+  <%_ let capScheme = codegen.capitalization(scheme) -%>
+  static <%- scheme %>Idx = {
+    <%_ for(const idx in codegen.dataEncode.schemes[scheme]) { -%>
+      <%_ let [fieldName] = codegen.dataEncode.schemes[scheme][idx] -%>
+    '<%- codegen.capitalization(fieldName)%>' : <%- idx %>,
+      <%_ } -%>
+  }
+
+  encode<%- capScheme %>(payload: Array<bigint>, idx){
+    //have to turn the field name into variables
+    const accountLevels = this.nAccountLevel;
+    const balanceLevels = this.nTokenLevel;
+    const orderLevels = this.nOrderLevel;
+    const floats = <%- codegen.config.floatLength %>;
+    //dummy reference
+    [accountLevels, balanceLevels, orderLevels, floats];
+    <%_ for(const [fieldName, fieldType, relaxed] of codegen.dataEncode.schemes[scheme]) { -%>
+    this.encodeNumber(payload[idx['<%- codegen.capitalization(fieldName)%>']], <%- fieldType%>, <%- relaxed ? 'true' : 'false' %>);
+    <%_ } -%>
+    this.encodeAlign(this.encodeLength);
+  }
+
+  <%_ } -%>
+
+  encodeNop() {
+    this.encodeNumber(0, this.encodeLength);
+  }
+}
+
+export { DAEncoder };
+
+export default { txDAEncodeLength, DAEncoder };

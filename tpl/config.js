@@ -8,11 +8,10 @@ function upCaseFirstLetter(item) {
   return item.charAt(0).toUpperCase() + item.slice(1);
 }
 // TODO: a better name?
-function getOrderLeafs() {
+function orderLeafsNaming(fields, prefixs) {
   let output = [];
-  let fields = ['ID', 'tokenSell', 'filledSell', 'amountSell', 'tokenBuy', 'filledBuy', 'amountBuy'];
   for (const idx of ['1', '2']) {
-    for (const prefix of ['old', 'new']) {
+    for (const prefix of prefixs) {
       for (const f of fields) {
         output.push(`${prefix}Order${idx}${upCaseFirstLetter(f)}`);
       }
@@ -20,6 +19,8 @@ function getOrderLeafs() {
   }
   return output;
 }
+const getOrderLeafs = () =>
+  orderLeafsNaming(['ID', 'tokenSell', 'filledSell', 'amountSell', 'tokenBuy', 'filledBuy', 'amountBuy'], ['old', 'new']);
 function getCommonPayload() {
   return splitAndTrim(`
   // first univeral balance checker
@@ -52,6 +53,7 @@ function getCommonPayload() {
   r8y2
   // others
   amount
+  amount1
   amount2
   balance3
   balance4
@@ -65,12 +67,25 @@ function getCommonPayload() {
   `),
     );
 }
+function getEncodedAmount() {
+  return splitAndTrim(`
+  amount
+  `).concat(orderLeafsNaming(['amountSell', 'amountBuy'], ['new']));
+}
 //console.log('commonPayload', getCommonPayload())
+const txIdx = getCommonPayload().reduce((out, item, idx) => Object.defineProperty(out, item, { value: `${idx}`, enumerable: true }), {});
+const encodedIdx = getEncodedAmount().reduce(
+  (out, item, idx) => Object.defineProperty(out, txIdx[item], { value: idx, enumerable: true }),
+  {},
+);
+//console.log('idxs', txIdx, encodedIdx)
 const config = {
   orderLeafs: getOrderLeafs(),
   commonPayload: getCommonPayload(),
+  encodedPayload: getEncodedAmount(),
   txLength: getCommonPayload().length,
-  txIdx: getCommonPayload().reduce((out, item, idx) => Object.defineProperty(out, item, { value: `${idx}`, enumerable: true }), {}),
+  txIdx,
+  encodedIdx,
   floatLength: 40, //bits for float epxressing amounts
   placeOrder: {
     inputSignals: splitAndTrim(`
@@ -116,6 +131,33 @@ const config = {
         midAccountRoot
     `),
     encoderName: 'TransferTxData',
+  },
+  //[fieldName, filedBits, releaxed (number not need to be fitted in field Bits)]:
+  dataEncodeSchemes: {
+    common: [
+      ['accountID1', 'accountLevels'],
+      ['accountID2', 'accountLevels'],
+      ['tokenID1', 'balanceLevels'],
+      ['tokenID2', 'balanceLevels'],
+      ['amount', 'floats'],
+    ],
+    spotTrade: [
+      ['accountID1', 'accountLevels'],
+      ['accountID2', 'accountLevels'],
+      ['newOrder1TokenSell', 'balanceLevels'],
+      ['newOrder2TokenSell', 'balanceLevels'],
+      ['newOrder1AmountSell', 'floats'],
+      ['newOrder1AmountBuy', 'floats'],
+      ['newOrder1ID', 'orderLevels', true],
+      ['newOrder2AmountSell', 'floats'],
+      ['newOrder2AmountBuy', 'floats'],
+      ['newOrder2ID', 'orderLevels', true],
+    ],
+    l2Key: [
+      ['accountID1', 'accountLevels'],
+      ['sign2', '1'],
+      ['ay2', '254'],
+    ],
   },
 };
 

@@ -3,6 +3,7 @@ include "../node_modules/circomlib/circuits/compconstant.circom";
 include "./lib/hash_state.circom";
 include "./lib/sha256.circom";
 include "./decode_tx.circom";
+include "./encode_data.circom"
 include "./deposit.circom";
 include "./transfer.circom";
 include "./withdraw.circom";
@@ -54,11 +55,11 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     // decode each transaction
     component decodedTx[nTxs];
     for (var i = 0; i < nTxs; i++) {
-        decodedTx[i] = DecodeTx(balanceLevels, orderLevels, accountLevels);
+        decodedTx[i] = DecodeTx();
         for (var j = 0; j < TxLength(); j++) {
             decodedTx[i].in[j] <== encodedTxs[i][j];
         }
-    }
+    }   
 
     component genesisOrderRoot = CalculateGenesisOrderRoot(orderLevels);
 
@@ -85,12 +86,41 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         enableSpotTrade[i].in[1] <== TxTypeSpotTrade();
     }
 
-    // data avaliability check
-    var txBits = TxDataLength(accountLevels, balanceLevels);
+    // data avaliability
+    component encodeData[nTxs];
+    for (var i = 0; i < nTxs; i++) {
+        encodeData[i] = EncodeData(balanceLevels, orderLevels, accountLevels);
+        
+    encodeData[i].accountID1 <== encodedTxs[i][1];
+    encodeData[i].accountID2 <== encodedTxs[i][8];
+    encodeData[i].tokenID1 <== encodedTxs[i][2];
+    encodeData[i].tokenID2 <== encodedTxs[i][9];
+    encodeData[i].amount <== encodedTxs[i][24];
+    encodeData[i].newOrder1TokenSell <== encodedTxs[i][39];
+    encodeData[i].newOrder2TokenSell <== encodedTxs[i][53];
+    encodeData[i].newOrder1AmountSell <== encodedTxs[i][41];
+    encodeData[i].newOrder1AmountBuy <== encodedTxs[i][44];
+    encodeData[i].newOrder1ID <== encodedTxs[i][38];
+    encodeData[i].newOrder2AmountSell <== encodedTxs[i][55];
+    encodeData[i].newOrder2AmountBuy <== encodedTxs[i][58];
+    encodeData[i].newOrder2ID <== encodedTxs[i][52];
+    encodeData[i].sign2 <== encodedTxs[i][11];
+    encodeData[i].ay2 <== encodedTxs[i][12];
+
+        encodeData[i].isDeposit <== enableDeposit[i].out;
+        encodeData[i].isTransfer <== enableTransfer[i].out;
+        encodeData[i].isWithdraw <== enableWithdraw[i].out;
+        encodeData[i].isSpotTrade <== enableSpotTrade[i].out;
+        encodeData[i].order1Unfilled <== (decodedTx[i].newOrder1AmountBuy - decodedTx[i].newOrder1FilledBuy) * (decodedTx[i].newOrder1AmountSell - decodedTx[i].newOrder1FilledSell);
+        encodeData[i].order2Unfilled <== (decodedTx[i].newOrder2AmountBuy - decodedTx[i].newOrder2FilledBuy) * (decodedTx[i].newOrder2AmountSell - decodedTx[i].newOrder2FilledSell);
+        encodeData[i].isL2KeyUpdated <== decodedTx[i].dstIsNew;        
+    }
+
+    var txBits = TxDataLength(balanceLevels, orderLevels, accountLevels);
     component txDataHasher = Sha256ToNum(nTxs *txBits);
     for (var i = 0; i < nTxs; i++) {
         for (var j = 0; j < txBits; j++) {
-            decodedTx[i].encodedTxData[j] ==> txDataHasher.bits[i*txBits + j];
+            encodeData[i].encodedTxData[j] ==> txDataHasher.bits[i*txBits + j];
         }
     }
     txDataHasher.hashOutHi === txDataHashHi;
@@ -308,7 +338,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].order2AccountSign <== decodedTx[i].sign2;
         processSpotTrade[i].order2AccountAy <== decodedTx[i].ay2;
 
-        processSpotTrade[i].amount1to2 <== decodedTx[i].amount;
+        processSpotTrade[i].amount1to2 <== decodedTx[i].amount1;
         processSpotTrade[i].amount2to1 <== decodedTx[i].amount2;
 
         processSpotTrade[i].orderRoot1 <== orderRoots[i][0];
@@ -316,7 +346,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
         processSpotTrade[i].order1TokenSellBalance <== decodedTx[i].balance1;
         // for reusing universal checker, balance2 here must be a leaf of the final merkle tree
-        processSpotTrade[i].order2TokenBuyBalance <== decodedTx[i].balance2 - decodedTx[i].amount;
+        processSpotTrade[i].order2TokenBuyBalance <== decodedTx[i].balance2 - decodedTx[i].amount1;
         processSpotTrade[i].order2TokenSellBalance <== decodedTx[i].balance3;
         processSpotTrade[i].order1TokenBuyBalance <== decodedTx[i].balance4 - decodedTx[i].amount2;
 

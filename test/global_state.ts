@@ -5,7 +5,18 @@ import { calculateGenesisOrderRoot, emptyOrderHash } from './common/order';
 const ffjavascript = require('ffjavascript');
 const Scalar = ffjavascript.Scalar;
 
-import { RawTx, DepositToNewTx, DepositToOldTx, WithdrawTx, SpotTradeTx, TranferTx, TxLength, TxDetailIdx, TxType } from './common/tx';
+import {
+  RawTx,
+  DepositToNewTx,
+  DepositToOldTx,
+  WithdrawTx,
+  SpotTradeTx,
+  TranferTx,
+  UpdateL2Key,
+  TxLength,
+  TxDetailIdx,
+  TxType,
+} from './common/tx';
 import { L2Block } from './common/block';
 import { AccountState } from './common/account_state';
 import { DA_Hasher } from './common/da_hashing';
@@ -202,9 +213,12 @@ class GlobalState {
     }
   }
   // debug only
-  setAccountOrder(accountID: bigint, order: OrderState) {
+  setAccountOrder(accountID: bigint, order: OrderState, update: boolean = false) {
     this.updateOrderState(accountID, order);
-    this.placeOrderIntoTree(accountID, order.orderId);
+    //while running, set order should not modify root
+    if (update) {
+      this.placeOrderIntoTree(accountID, order.orderId);
+    }
   }
   getOrderPosByID(accountID: bigint, orderID: bigint): bigint {
     const pos = this.orderIdToPos.get(accountID).get(orderID);
@@ -239,10 +253,20 @@ class GlobalState {
     if (orderPos >= 2 ** this.orderLevels) {
       throw new Error(`orderPos ${orderPos} invalid for orderLevels ${this.orderLevels}`);
     }
+    const orderIDMask = (1 << this.orderLevels) - 1;
 
     const order: OrderState = this.orderMap.get(accountID).get(orderID);
     //console.log({ order });
+    //TODO: for resolve https://github.com/fluidex/circuits/issues/191,
+    //we truncate orderId temporary when calcting order's hash,
+    //if this resoultion has become permanent we should update the hash()
+    //method in fluidex.js
+    const keepedInput = order.orderInput;
+    const updatedInput = Object.assign({}, order.orderInput);
+    updatedInput.orderId = updatedInput.orderId & BigInt(orderIDMask);
+    order.orderInput = updatedInput;
     this.orderTrees.get(accountID).setValue(orderPos, order.hash());
+    order.orderInput = keepedInput;
     this.orderIdToPos.get(accountID).set(order.orderId, orderPos);
     this.orderPosToId.get(accountID).set(orderPos, order.orderId);
     this.recalculateFromOrderTree(accountID);
@@ -287,28 +311,36 @@ class GlobalState {
     return this.accounts.get(accountID).ethAddr;
   }
   */
-  DepositToNew(tx: DepositToNewTx) {
+  UpdateL2Key(tx: UpdateL2Key, newAccount: boolean = false) {
     if (this.options.verbose) {
-      console.log('DepositToNew', tx.accountID, tx.tokenID, tx.amount);
+      console.log('UpdateL2Key', tx.accountID);
     }
-    assert(this.accounts.get(tx.accountID).ay == 0n, 'DepositToNew');
-    let proof = this.stateProof(tx.accountID, tx.tokenID);
+    //currently a update L2 key tx is carried by a 'dummy' deposit tx: i.e
+    //deposit 0 amount into token 0
+    let proof = this.stateProof(tx.accountID, 0n);
+    let oldBalance = this.getTokenBalance(tx.accountID, 0n);
+    let acc = this.accounts.get(tx.accountID);
+    if (newAccount) {
+      assert(oldBalance === 0n);
+      assert(acc.ay === 0n);
+      assert(acc.orderRoot === this.defaultOrderRoot);
+    }
     // first, generate the tx
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
-    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
+    encodedTx[TxDetailIdx.Amount] = 0n;
 
-    encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tx.tokenID);
+    encodedTx[TxDetailIdx.TokenID1] = 0n;
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
-    encodedTx[TxDetailIdx.Balance1] = 0n;
-    encodedTx[TxDetailIdx.Nonce1] = 0n;
-    encodedTx[TxDetailIdx.Sign1] = 0n;
-    encodedTx[TxDetailIdx.Ay1] = 0n;
+    encodedTx[TxDetailIdx.Balance1] = oldBalance;
+    encodedTx[TxDetailIdx.Nonce1] = acc.nonce;
+    encodedTx[TxDetailIdx.Sign1] = acc.sign;
+    encodedTx[TxDetailIdx.Ay1] = acc.ay;
 
-    encodedTx[TxDetailIdx.TokenID2] = Scalar.e(tx.tokenID);
+    encodedTx[TxDetailIdx.TokenID2] = 0n;
     encodedTx[TxDetailIdx.AccountID2] = Scalar.e(tx.accountID);
-    encodedTx[TxDetailIdx.Balance2] = tx.amount;
-    encodedTx[TxDetailIdx.Nonce2] = 0n;
+    encodedTx[TxDetailIdx.Balance2] = oldBalance;
+    encodedTx[TxDetailIdx.Nonce2] = acc.nonce;
     encodedTx[TxDetailIdx.Sign2] = Scalar.e(tx.sign);
     encodedTx[TxDetailIdx.Ay2] = tx.ay;
 
@@ -325,19 +357,25 @@ class GlobalState {
       balancePath3: proof.balancePath,
       orderPath0: this.trivialOrderPathElements(),
       orderPath1: this.trivialOrderPathElements(),
-      orderRoot0: this.defaultOrderRoot,
-      orderRoot1: this.defaultOrderRoot,
+      orderRoot0: acc.orderRoot,
+      orderRoot1: acc.orderRoot,
       accountPath0: proof.accountPath,
       accountPath1: proof.accountPath,
       rootBefore: proof.root,
       rootAfter: 0n,
     };
 
-    // then update global state
-    this.setTokenBalance(tx.accountID, tx.tokenID, tx.amount);
     this.setAccountL2Addr(tx.accountID, tx.sign, tx.ay);
     rawTx.rootAfter = this.root();
     this.addRawTx(rawTx);
+  }
+  DepositToNew(tx: DepositToNewTx) {
+    if (this.options.verbose) {
+      console.log('DepositToNew (being decomposited)', tx.accountID, tx.tokenID, tx.amount);
+    }
+    //decomposite depositToNew into two tx
+    this.UpdateL2Key(tx, true);
+    this.DepositToOld(tx);
   }
   DepositToOld(tx: DepositToOldTx) {
     if (this.options.verbose) {
@@ -619,8 +657,8 @@ class GlobalState {
     encodedTx[TxDetailIdx.OldOrder2FilledBuy] = oldOrder2InTree.filledBuy;
     encodedTx[TxDetailIdx.OldOrder2AmountBuy] = oldOrder2InTree.totalBuy;
 
-    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount1to2);
-    encodedTx[TxDetailIdx.Amount2] = encodeFloat(tx.amount2to1);
+    encodedTx[TxDetailIdx.Amount1] = tx.amount1to2;
+    encodedTx[TxDetailIdx.Amount2] = tx.amount2to1;
     encodedTx[TxDetailIdx.Order1Pos] = order1_pos;
     encodedTx[TxDetailIdx.Order2Pos] = order2_pos;
 
@@ -683,18 +721,18 @@ class GlobalState {
     encodedTx[TxDetailIdx.NewOrder1ID] = order1State.orderId;
     encodedTx[TxDetailIdx.NewOrder1TokenSell] = order1State.tokenSell;
     encodedTx[TxDetailIdx.NewOrder1FilledSell] = order1State.filledSell;
-    encodedTx[TxDetailIdx.NewOrder1AmountSell] = order1State.totalSell;
+    encodedTx[TxDetailIdx.NewOrder1AmountSell] = encodeFloat(order1State.totalSell);
     encodedTx[TxDetailIdx.NewOrder1TokenBuy] = order1State.tokenBuy;
     encodedTx[TxDetailIdx.NewOrder1FilledBuy] = order1State.filledBuy;
-    encodedTx[TxDetailIdx.NewOrder1AmountBuy] = order1State.totalBuy;
+    encodedTx[TxDetailIdx.NewOrder1AmountBuy] = encodeFloat(order1State.totalBuy);
 
     encodedTx[TxDetailIdx.NewOrder2ID] = order2State.orderId;
     encodedTx[TxDetailIdx.NewOrder2TokenSell] = order2State.tokenSell;
     encodedTx[TxDetailIdx.NewOrder2FilledSell] = order2State.filledSell;
-    encodedTx[TxDetailIdx.NewOrder2AmountSell] = order2State.totalSell;
+    encodedTx[TxDetailIdx.NewOrder2AmountSell] = encodeFloat(order2State.totalSell);
     encodedTx[TxDetailIdx.NewOrder2TokenBuy] = order2State.tokenBuy;
     encodedTx[TxDetailIdx.NewOrder2FilledBuy] = order2State.filledBuy;
-    encodedTx[TxDetailIdx.NewOrder2AmountBuy] = order2State.totalBuy;
+    encodedTx[TxDetailIdx.NewOrder2AmountBuy] = encodeFloat(order2State.totalBuy);
 
     encodedTx[TxDetailIdx.TokenID1] = order1State.tokenSell;
     encodedTx[TxDetailIdx.TokenID2] = order2State.tokenBuy;
@@ -750,9 +788,10 @@ class GlobalState {
     let oldAccountRoots = bufferedTxs.map(tx => tx.rootBefore);
     let newAccountRoots = bufferedTxs.map(tx => tx.rootAfter);
     //data avaliability
-    const hasher = new DA_Hasher(this.accountLevels, this.balanceLevels);
+    const hasher = new DA_Hasher(this.balanceLevels, this.orderLevels, this.accountLevels);
     bufferedTxs.forEach(tx => hasher.encodeRawTx(tx));
     const digest = hasher.digestToFF();
+    //console.log('block bits', hasher.bits())
 
     return {
       oldRoot: oldAccountRoots[0],

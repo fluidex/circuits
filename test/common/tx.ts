@@ -10,12 +10,19 @@ enum TxType {
   Withdraw,
   PlaceOrder,
   SpotTrade,
+  UpdateL2Key,
 }
 
 class DepositToNewTx {
   accountID: bigint;
   tokenID: bigint;
   amount: bigint;
+  sign: bigint;
+  ay: bigint;
+}
+
+class UpdateL2Key {
+  accountID: bigint;
   sign: bigint;
   ay: bigint;
 }
@@ -114,4 +121,5 @@ export {
   TranferTx,
   WithdrawTx,
   SpotTradeTx,
+  UpdateL2Key,
 };
