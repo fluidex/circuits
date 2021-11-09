@@ -22,26 +22,7 @@ include "./base_tx.circom";
  * @input newAccountRoots[nTxs] - {Array(Field)} - final account state root for each transaction
  */
 template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
-    // public inputs
-    // TODO: replace all the public inputs with sha3 hash later
-    signal input oldRoot;
-    signal input newRoot;
-    signal input txDataHashHi;
-    signal input txDataHashLo;
-    
-    // transactions
-    signal private input txsType[nTxs];
-    signal private input encodedTxs[nTxs][TxLength()];
-
-    // State
-    signal private input balancePathElements[nTxs][4][balanceLevels][1]; // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
-    signal private input orderPathElements[nTxs][2][orderLevels][1]; // index meanings: [tx idx][orderAccount1, orderAccount2][levels][siblings]
-    signal private input accountPathElements[nTxs][2][accountLevels][1]; // index meanings: [tx idx][sender, receiver][levels][siblings]
-
-    // roots
-    signal private input orderRoots[nTxs][2];
-    signal private input oldAccountRoots[nTxs];
-    signal private input newAccountRoots[nTxs];
+<%- codegen.generateBlockCircomInput({ctx: 'nTxs', replacers: {'_TxLength':'TxLength()'}}) %>
 
     oldAccountRoots[0] === oldRoot;
     newAccountRoots[nTxs - 1] === newRoot;
@@ -222,47 +203,8 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
             codegen.config.orderLeafs.concat([
             'enableBalanceCheck1', 'enableBalanceCheck2', 'enableSigCheck1', 'enableSigCheck2',
             'tokenID1', 'tokenID2']), 
-            'decodedTx[i].') %>   
-
-        processSpotTrade[i].order1Pos <== decodedTx[i].order1Pos;
-        processSpotTrade[i].order1AccountID <== decodedTx[i].accountID1;
-        processSpotTrade[i].order1AccountNonce <== decodedTx[i].nonce1;
-        processSpotTrade[i].order1AccountSign <== decodedTx[i].sign1;
-        processSpotTrade[i].order1AccountAy <== decodedTx[i].ay1;
-
-        processSpotTrade[i].order2Pos <== decodedTx[i].order2Pos;
-        processSpotTrade[i].order2AccountID <== decodedTx[i].accountID2;
-        processSpotTrade[i].order2AccountNonce <== decodedTx[i].nonce2;
-        processSpotTrade[i].order2AccountSign <== decodedTx[i].sign2;
-        processSpotTrade[i].order2AccountAy <== decodedTx[i].ay2;
-
-        processSpotTrade[i].amount1to2 <== decodedTx[i].amount1;
-        processSpotTrade[i].amount2to1 <== decodedTx[i].amount2;
-
-        processSpotTrade[i].orderRoot1 <== orderRoots[i][0];
-        processSpotTrade[i].orderRoot2 <== orderRoots[i][1];
-
-        processSpotTrade[i].order1TokenSellBalance <== decodedTx[i].balance1;
-        // for reusing universal checker, balance2 here must be a leaf of the final merkle tree
-        processSpotTrade[i].order2TokenBuyBalance <== decodedTx[i].balance2 - decodedTx[i].amount1;
-        processSpotTrade[i].order2TokenSellBalance <== decodedTx[i].balance3;
-        processSpotTrade[i].order1TokenBuyBalance <== decodedTx[i].balance4 - decodedTx[i].amount2;
-
-        for (var j = 0; j < orderLevels; j++) {
-            processSpotTrade[i].orderPathElements[0][j][0] <== orderPathElements[i][0][j][0];
-            processSpotTrade[i].orderPathElements[1][j][0] <== orderPathElements[i][1][j][0];
-        }
-        for (var j = 0; j < balanceLevels; j++) {
-            processSpotTrade[i].oldAccount1BalancePathElements[j][0] <== balancePathElements[i][0][j][0];
-            processSpotTrade[i].tmpAccount1BalancePathElements[j][0] <== balancePathElements[i][3][j][0];
-            processSpotTrade[i].oldAccount2BalancePathElements[j][0] <== balancePathElements[i][2][j][0];
-            processSpotTrade[i].tmpAccount2BalancePathElements[j][0] <== balancePathElements[i][1][j][0];
-        }
-        for (var j = 0; j < accountLevels; j++) {
-            processSpotTrade[i].oldAccount1PathElements[j][0] <== accountPathElements[i][0][j][0];
-            processSpotTrade[i].tmpAccount2PathElements[j][0] <== accountPathElements[i][1][j][0];
-        }
-        processSpotTrade[i].oldAccountRoot <== oldAccountRoots[i];
-        processSpotTrade[i].newAccountRoot <== newAccountRoots[i];
+            'decodedTx[i].') %>
+        <%- codegen.renderSpotTradeOrderAssign('processSpotTrade[i]', 'decodedTx[i]') %>
+        <%- codegen.renderSpotTradeAssign('processSpotTrade[i]', 'i', {}) %>
     }
 }

@@ -1,0 +1,25 @@
+// This circuit dedicate for a simple unit test of spot_trade.circom 
+
+include "./decode_tx.circom"
+include "./spot_trade.circom";
+
+template TestSpotTrade(balanceLevels, orderLevels, accountLevels) {
+
+<%- codegen.generateBlockCircomInput({ctx: '1', replacers: {'_TxLength':'TxLength()'}}) %>
+    component decodedTx = DecodeTx();
+    for (var i = 0; i < TxLength(); i++) {
+        decodedTx.in[i] <== encodedTxs[0][i];
+    }
+
+    component processSpotTrade = SpotTrade(balanceLevels, orderLevels, accountLevels);
+    processSpotTrade.enabled <== 1;
+
+    <%- codegen.generateMultiFieldsAssign('processSpotTrade', 
+        codegen.config.orderLeafs.concat([
+        'enableBalanceCheck1', 'enableBalanceCheck2', 'enableSigCheck1', 'enableSigCheck2',
+        'tokenID1', 'tokenID2']), 
+        'decodedTx.') %>
+    <%- codegen.renderSpotTradeOrderAssign('processSpotTrade', 'decodedTx') %>
+    <%- codegen.renderSpotTradeAssign('processSpotTrade', '0', {}) %>
+
+}

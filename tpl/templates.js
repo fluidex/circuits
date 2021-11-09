@@ -66,6 +66,68 @@ const LoopAssignTpl = `    for (var <%= loopVar %> = 0; <%= loopVar %> < <%= loo
     <% for (const item of assignItems) { %>        <%= item[0] %>[<%= loopVar %>] <== <%= item[1] %>[<%= loopVar %>];
     <% } %>    }`;
 
+const SpotTradeOrderAssignTpl = `
+    <%_ for(const i of [1,2]) { -%>
+        <%- target %>.order<%- i %>Pos <== <%- assigner %>.order<%- i %>Pos;
+        <%- target %>.order<%- i %>AccountID <== <%- assigner %>.accountID<%- i %>;
+        <%- target %>.order<%- i %>AccountNonce <== <%- assigner %>.nonce<%- i %>;
+        <%- target %>.order<%- i %>AccountSign <== <%- assigner %>.sign<%- i %>;
+        <%- target %>.order<%- i %>AccountAy <== <%- assigner %>.ay<%- i %>;
+    <%_ } -%>
+
+        <%- target %>.amount1to2 <== <%- assigner %>.amount1;
+        <%- target %>.amount2to1 <== <%- assigner %>.amount2;
+        <%- target %>.order1TokenSellBalance <== <%- assigner %>.balance1;
+        // for reusing universal checker, balance2 here must be a leaf of the final merkle tree
+        <%- target %>.order2TokenBuyBalance <== <%- assigner %>.balance2 - <%- assigner %>.amount1;
+        <%- target %>.order2TokenSellBalance <== <%- assigner %>.balance3;
+        <%- target %>.order1TokenBuyBalance <== <%- assigner %>.balance4 - <%- assigner %>.amount2;
+`
+const SpotTradeAssignTpl = `
+        <%_ const ind = indexed ? '[' + indexed + ']' : '' -%>
+        <%- target %>.orderRoot1 <== orderRoots<%- ind %>[0];
+        <%- target %>.orderRoot2 <== orderRoots<%- ind %>[1];
+
+        for (var j = 0; j < orderLevels; j++) {
+            <%- target %>.orderPathElements[0][j][0] <== orderPathElements<%- ind %>[0][j][0];
+            <%- target %>.orderPathElements[1][j][0] <== orderPathElements<%- ind %>[1][j][0];
+        }
+        for (var j = 0; j < balanceLevels; j++) {
+            <%- target %>.oldAccount1BalancePathElements[j][0] <== balancePathElements<%- ind %>[0][j][0];
+            <%- target %>.tmpAccount1BalancePathElements[j][0] <== balancePathElements<%- ind %>[3][j][0];
+            <%- target %>.oldAccount2BalancePathElements[j][0] <== balancePathElements<%- ind %>[2][j][0];
+            <%- target %>.tmpAccount2BalancePathElements[j][0] <== balancePathElements<%- ind %>[1][j][0];
+        }
+        for (var j = 0; j < accountLevels; j++) {
+            <%- target %>.oldAccount1PathElements[j][0] <== accountPathElements<%- ind %>[0][j][0];
+            <%- target %>.tmpAccount2PathElements[j][0] <== accountPathElements<%- ind %>[1][j][0];
+        }
+        <%- target %>.oldAccountRoot <== oldAccountRoots<%- ind %>;
+        <%- target %>.newAccountRoot <== newAccountRoots<%- ind %>;
+`
+const BlockInputTpl = `
+    // public inputs
+    // TODO: replace all the public inputs with sha3 hash later
+    signal input oldRoot;
+    signal input newRoot;
+    signal input txDataHashHi;
+    signal input txDataHashLo;
+
+    // transactions
+    signal private input txsType[__];
+    signal private input encodedTxs[__][ _TxLength];
+
+    // State
+    signal private input balancePathElements[__][4][balanceLevels][1]; // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
+    signal private input orderPathElements[__][2][orderLevels][1]; // index meanings: [tx idx][orderAccount1, orderAccount2][levels][siblings]
+    signal private input accountPathElements[__][2][accountLevels][1]; // index meanings: [tx idx][sender, receiver][levels][siblings]
+
+    // roots
+    signal private input orderRoots[__][2];
+    signal private input oldAccountRoots[__];
+    signal private input newAccountRoots[__];
+`
+
 function generateMultiAssign(comp, fields, prefix, suffix = '', indent = 8) {
   let output = '\n';
   for (const f of fields) {
@@ -73,6 +135,8 @@ function generateMultiAssign(comp, fields, prefix, suffix = '', indent = 8) {
   }
   return output;
 }
+
+
 
 const CalcBalanceTreeTpl = `
     component balanceTree__ = CalculateRootFromMerklePath(balanceLevels);
@@ -94,7 +158,7 @@ const CalcOrderTreeTpl = `
     orderHash__.filledBuy <== orderFilledBuy;
     orderHash__.totalSell <== orderAmountSell;
     orderHash__.totalBuy <== orderAmountBuy;
-    component truncatedOrderId__ = TruncateOrderID(orderLevels);
+    component truncatedOrderId__ = TruncateOrderID();
     truncatedOrderId__.orderID <== orderID;    
     orderHash__.orderId <== truncatedOrderId__.out;
 
@@ -270,6 +334,7 @@ const DAProtocolSchemeLengthTplFn = function (protocol) {
 };
 
 export {
+  BlockInputTpl,
   JsInputEncoderTpl,
   RsInputEncoderTpl,
   CheckBalanceTreeTpl,
@@ -284,6 +349,8 @@ export {
   MultiCheckEqTpl,
   DAProtocolInputFieldTpl,
   DAProtocolEncodeFieldTpl,
+  SpotTradeOrderAssignTpl,
+  SpotTradeAssignTpl,
   DAProtocolSchemeLengthTplFn,
   DAProtocolHeadingTplFn,
   universalBalanceCheckTplFn,

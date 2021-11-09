@@ -18,8 +18,11 @@ const codegen = {
   renderLoopAssign,
   renderDAEncoderInput,
   renderDAEncodeField,
+  renderSpotTradeOrderAssign,
+  renderSpotTradeAssign,
   generateUniversalBalanceCheck,
   // generateXXX uses simple str.replace
+  generateBlockCircomInput,
   generateBalanceCheckCircom,
   generateOrderCheckCircom,
   generateSameRootCircom,
@@ -45,6 +48,16 @@ function renderInputEncoderRs(encoderName, inputSignals, config) {
 }
 function generateMultiFieldsAssign(comp, fields, prefix, suffix = '', indent = 8) {
   return tpls.generateMultiAssign(comp, fields, prefix, suffix, indent);
+}
+function renderSpotTradeOrderAssign(target, assigner){
+  return ejs.render(tpls.SpotTradeOrderAssignTpl, {target, assigner});
+}
+function renderSpotTradeAssign(target, indexed, { replacers = {} }){
+  let template = ejs.render(tpls.SpotTradeAssignTpl, {target, indexed});
+  return generateFromTpl(template, { ctx: 'none', replacers });
+}
+function generateBlockCircomInput({ ctx, replacers }){
+  return generateFromTpl(tpls.BlockInputTpl, { ctx, replacers });
 }
 function generateUniversalBalanceCheck(compName, prefix, suffix, { ctx, replacers }) {
   const tpl = tpls.universalBalanceCheckTplFn(compName, prefix, suffix);
