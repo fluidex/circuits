@@ -253,7 +253,7 @@ class GlobalState {
     if (orderPos >= 2 ** this.orderLevels) {
       throw new Error(`orderPos ${orderPos} invalid for orderLevels ${this.orderLevels}`);
     }
-    const orderIDMask = (1 << this.orderLevels) - 1;
+    const orderIDMask = 4294967295;
 
     const order: OrderState = this.orderMap.get(accountID).get(orderID);
     //console.log({ order });
