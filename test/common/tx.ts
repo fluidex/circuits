@@ -79,7 +79,7 @@ class SpotTradeTx {
 function hashOrderInput({ accountID, tokenBuy, tokenSell, totalBuy, totalSell }) {
   const magicHead = 4n; // TxType.PlaceOrder
   let data = hash([magicHead, tokenSell, tokenBuy, totalSell, totalBuy]);
-  return data;  
+  return data;
 }
 
 //TODO: this function should use the implenent inside fluidex.js (need updating dep)
@@ -94,7 +94,7 @@ function hashWithdraw({ accountID, tokenID, amount, nonce, oldBalance }) {
   const magicHead = 3n; // TxType.Withdraw
   //TODO: oldBalance has not been involved, and maybe it would never be involved later
   //TODO: nonce has not been involved
-  return hash([magicHead, accountID, tokenID, hashAmount, /*nonce*/BigInt(0), BigInt(0)]);
+  return hash([magicHead, accountID, tokenID, hashAmount, /*nonce*/ BigInt(0), BigInt(0)]);
 }
 
 class RawTx {

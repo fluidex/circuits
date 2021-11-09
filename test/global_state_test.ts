@@ -44,13 +44,13 @@ function checkEqByKeys(obj1, obj2, keys = null) {
 
 //patch new state to old form
 function compatibleBalance(originalState) {
-  if (originalState.balance_states){
+  if (originalState.balance_states) {
     originalState.balance = {
       ask_user_base: originalState.balance_states[0].balance,
       ask_user_quote: originalState.balance_states[1].balance,
       bid_user_base: originalState.balance_states[2].balance,
       bid_user_quote: originalState.balance_states[3].balance,
-    }
+    };
   }
 }
 
@@ -64,10 +64,10 @@ function parseBalance(originalBalance, [baseToken, quoteToken]) {
 }
 
 function parseOrder(state: OrderState) {
-  if (!state){
+  if (!state) {
     return null;
   }
-  return Object.assign({}, state.orderInput, {filledSell: state.filledSell, filledBuy: state.filledBuy});
+  return Object.assign({}, state.orderInput, { filledSell: state.filledSell, filledBuy: state.filledBuy });
 }
 
 function buildOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quoteToken], side: OrderSide) {
@@ -107,10 +107,10 @@ function checkOrder(orderSaved, beforeState, [baseToken, quoteToken]) {
   let finishedQuote = BigInt(convertNumber(beforeState.finished_quote, quoteToken));
   let finishedBase = BigInt(convertNumber(beforeState.finished_base, baseToken));
 
-  if (orderSaved.side == OrderSide.Sell){
+  if (orderSaved.side == OrderSide.Sell) {
     assert(orderSaved.filledSell === finishedBase);
     assert(orderSaved.filledBuy === finishedQuote);
-  }else {
+  } else {
     assert(orderSaved.filledBuy === finishedBase);
     assert(orderSaved.filledSell === finishedQuote);
   }
@@ -120,13 +120,19 @@ function patchOrder(orderBefore, afterState, [baseToken, quoteToken]) {
   let finishedQuote = BigInt(convertNumber(afterState.finished_quote, quoteToken));
   let finishedBase = BigInt(convertNumber(afterState.finished_base, baseToken));
 
-  return Object.assign({}, orderBefore, orderBefore.side == OrderSide.Sell ? {
-    filledSell: finishedBase,
-    filledBuy: finishedQuote,
-  } : {
-    filledSell: finishedQuote,
-    filledBuy: finishedBase,
-  });
+  return Object.assign(
+    {},
+    orderBefore,
+    orderBefore.side == OrderSide.Sell
+      ? {
+          filledSell: finishedBase,
+          filledBuy: finishedQuote,
+        }
+      : {
+          filledSell: finishedQuote,
+          filledBuy: finishedBase,
+        },
+  );
 }
 
 function parseSignature(sigStr: string, hash) {
@@ -134,7 +140,7 @@ function parseSignature(sigStr: string, hash) {
   let r8 = babyJub.unpackPoint(sigBuf.slice(0, 32));
   let sign = {
     hash,
-    S: ffutils.leBuff2int(sigBuf.slice(32,64)),
+    S: ffutils.leBuff2int(sigBuf.slice(32, 64)),
     R8x: r8[0],
     R8y: r8[1],
   };
@@ -156,33 +162,37 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
   const savedAskOrder = state.hasOrder(askUserID, askOrderID) ? state.getAccountOrderByOrderId(askUserID, askOrderID) : null;
   const savedBidOrder = state.hasOrder(bidUserID, bidOrderID) ? state.getAccountOrderByOrderId(bidUserID, bidOrderID) : null;
 
-  if (savedAskOrder){
+  if (savedAskOrder) {
     checkOrder(savedAskOrder, trade.state_before.ask_order_state || trade.state_before.order_states[0], [baseToken, quoteToken]);
   }
-  if (savedBidOrder){
+  if (savedBidOrder) {
     checkOrder(savedBidOrder, trade.state_before.bid_order_state || trade.state_before.order_states[1], [baseToken, quoteToken]);
   }
 
-  const askOrderStateBefore = parseOrder(savedAskOrder) || buildOrder(
-    Object.assign(trade.ask_order || trade.state_before.ask_order_state, {
-      ID: askOrderID,
-      accountID: askUserID,
-      role: trade.ask_role,
-    }),
-    [baseTokenID, quoteTokenID],
-    [baseToken, quoteToken],
-    OrderSide.Sell,
-  );
-  const bidOrderStateBefore = parseOrder(savedBidOrder) || buildOrder(
-    Object.assign(trade.bid_order || trade.state_before.bid_order_state, {
-      ID: bidOrderID,
-      accountID: bidUserID,
-      role: trade.bid_role,
-    }),
-    [baseTokenID, quoteTokenID],
-    [baseToken, quoteToken],
-    OrderSide.Buy,
-  );
+  const askOrderStateBefore =
+    parseOrder(savedAskOrder) ||
+    buildOrder(
+      Object.assign(trade.ask_order || trade.state_before.ask_order_state, {
+        ID: askOrderID,
+        accountID: askUserID,
+        role: trade.ask_role,
+      }),
+      [baseTokenID, quoteTokenID],
+      [baseToken, quoteToken],
+      OrderSide.Sell,
+    );
+  const bidOrderStateBefore =
+    parseOrder(savedBidOrder) ||
+    buildOrder(
+      Object.assign(trade.bid_order || trade.state_before.bid_order_state, {
+        ID: bidOrderID,
+        accountID: bidUserID,
+        role: trade.bid_role,
+      }),
+      [baseTokenID, quoteTokenID],
+      [baseToken, quoteToken],
+      OrderSide.Buy,
+    );
 
   //console.log({bidOrderStateAfter});
   // let orderStateBefore = new Map([
@@ -210,29 +220,32 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
         side: order.side,
         sig: null,
       });
-      if (originalData){
-        assert(originalData.signature, "malform trade msg: no signature in order detail");
+      if (originalData) {
+        assert(originalData.signature, 'malform trade msg: no signature in order detail');
         orderToPut.sig = parseSignature(originalData.signature, hashOrderInput(orderToPut));
-      }else {
-        assert(accounts[Number(order.accountID)], "no account provided for replaying message");
+      } else {
+        assert(accounts[Number(order.accountID)], 'no account provided for replaying message');
         orderToPut.signWith(accounts[Number(order.accountID)]);
       }
       state.updateOrderState(order.accountID, OrderState.fromOrderInput(orderToPut));
     } else {
-      assert(state.hasOrder(order.accountID, order.orderId), `invalid old order ${order.orderId} (${order.accountID}'s), too many open orders?`);
+      assert(
+        state.hasOrder(order.accountID, order.orderId),
+        `invalid old order ${order.orderId} (${order.accountID}'s), too many open orders?`,
+      );
     }
   }
   checkGlobalStateKnowsOrder(askOrderStateBefore, trade.ask_order);
   checkGlobalStateKnowsOrder(bidOrderStateBefore, trade.bid_order);
 
-  const askOrderStateAfter = patchOrder(askOrderStateBefore,
-    trade.state_after.ask_order_state || trade.state_after.order_states[0],
-    [baseToken, quoteToken]
-  );
-  const bidOrderStateAfter = patchOrder(bidOrderStateBefore,
-    trade.state_after.bid_order_state || trade.state_after.order_states[1],
-    [baseToken, quoteToken]
-  );
+  const askOrderStateAfter = patchOrder(askOrderStateBefore, trade.state_after.ask_order_state || trade.state_after.order_states[0], [
+    baseToken,
+    quoteToken,
+  ]);
+  const bidOrderStateAfter = patchOrder(bidOrderStateBefore, trade.state_after.bid_order_state || trade.state_after.order_states[1], [
+    baseToken,
+    quoteToken,
+  ]);
 
   compatibleBalance(trade.state_before);
   compatibleBalance(trade.state_after);
@@ -281,18 +294,20 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
   console.log('trade', trade.id, 'test done');
 }
 
-function handleUser(state: GlobalState, {l2_pubkey, user_id}) {
-
+function handleUser(state: GlobalState, { l2_pubkey, user_id }) {
   let compressed = Buffer.from(l2_pubkey.slice(2), 'hex');
   let sign = (compressed[31] & 0x80) == 0 ? 0 : 1;
   let pt = babyJub.unpackPoint(compressed);
   let ay = BigInt(pt[1].toString(10));
-  
-  state.UpdateL2Key({
-    accountID: BigInt(user_id),
-    sign: BigInt(sign),
-    ay,
-  }, true);
+
+  state.UpdateL2Key(
+    {
+      accountID: BigInt(user_id),
+      sign: BigInt(sign),
+      ay,
+    },
+    true,
+  );
 }
 
 function handleRedraw(state: GlobalState, redraw) {
@@ -302,16 +317,15 @@ function handleRedraw(state: GlobalState, redraw) {
   //notice, amount passed to tx is still posistive
   const delta = BigInt(convertNumber(redraw.change, redraw.asset));
   assert(delta < BigInt(0));
-  let redrawTx = {accountID: userID, tokenID, amount: delta * BigInt(-1), signature: null, nonce: BigInt(0), oldBalance: BigInt(0)};
+  let redrawTx = { accountID: userID, tokenID, amount: delta * BigInt(-1), signature: null, nonce: BigInt(0), oldBalance: BigInt(0) };
   redrawTx = state.fillWithdrawTx(redrawTx);
   const txHash = hashWithdraw(redrawTx);
   redrawTx.signature = parseSignature(redraw.signature, txHash);
   state.Withdraw(redrawTx);
-  
-  const balanceAfter = BigInt(convertNumber(redraw.balance, redraw.asset));  
+
+  const balanceAfter = BigInt(convertNumber(redraw.balance, redraw.asset));
   const expectedBalanceAfter = state.getTokenBalance(userID, tokenID);
   assert(expectedBalanceAfter == balanceAfter, 'invalid balance after');
-
 }
 
 function handleDeposit(state: GlobalState, accounts: Array<Account>, deposit) {
@@ -327,12 +341,12 @@ function handleDeposit(state: GlobalState, accounts: Array<Account>, deposit) {
     state.DepositToOld({ accountID: userID, tokenID, amount: delta });
   } else {
     let account = accounts[Number(userID)];
-    if (!account){
+    if (!account) {
       console.log(`create random account for account id {}`, userID);
       account = Account.random();
       accounts[Number(userID)] = account;
     }
-    
+
     state.DepositToNew({
       accountID: userID,
       tokenID,
@@ -349,13 +363,12 @@ function handleTransfer(state: GlobalState, transfer) {
   const userID1 = BigInt(transfer.user_from);
   const userID2 = BigInt(transfer.user_to);
   const amount = BigInt(convertNumber(transfer.amount, transfer.asset));
-  
-  let transferTx = {from: userID1, to: userID2, tokenID, amount, signature: null};
+
+  let transferTx = { from: userID1, to: userID2, tokenID, amount, signature: null };
   let fullTransferTx = state.fillTransferTx(transferTx);
   const txHash = hashTransfer(fullTransferTx);
   fullTransferTx.signature = parseSignature(transfer.signature, txHash);
   state.Transfer(fullTransferTx);
-
 }
 
 function replayMsgs(fileName) {
@@ -409,9 +422,9 @@ function replayMsgs(fileName) {
       handleUser(state, msg.value);
     } else if (msg.type == 'WithdrawMessage') {
       handleRedraw(state, msg.value);
-    }  else if (msg.type =='TransferMessage') {
+    } else if (msg.type == 'TransferMessage') {
       handleTransfer(state, msg.value);
-    }else {
+    } else {
       //console.log('skip msg', msg.type);
     }
   }
@@ -439,7 +452,6 @@ async function exportCircuitAndTestData(blocks, component) {
 }
 
 async function mainTest() {
-
   const replayOnly = process.argv[2];
   const dataFile = process.argv[3];
 
@@ -450,10 +462,10 @@ async function mainTest() {
   // So we can ensure logics of matchengine VS GlobalState VS circuit are same!
   const circuitDir = await exportCircuitAndTestData(blocks, component);
 
-  if (replayOnly === 'skip'){
-    console.log('replay done, circuit output at', circuitDir)
-    return
-  }  
+  if (replayOnly === 'skip') {
+    console.log('replay done, circuit output at', circuitDir);
+    return;
+  }
 
   const testOptions = {
     alwaysRecompile: true,

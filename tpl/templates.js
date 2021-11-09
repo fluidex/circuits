@@ -82,7 +82,7 @@ const SpotTradeOrderAssignTpl = `
         <%- target %>.order2TokenBuyBalance <== <%- assigner %>.balance2 - <%- assigner %>.amount1;
         <%- target %>.order2TokenSellBalance <== <%- assigner %>.balance3;
         <%- target %>.order1TokenBuyBalance <== <%- assigner %>.balance4 - <%- assigner %>.amount2;
-`
+`;
 const SpotTradeAssignTpl = `
         <%_ const ind = indexed ? '[' + indexed + ']' : '' -%>
         <%- target %>.orderRoot1 <== orderRoots<%- ind %>[0];
@@ -104,7 +104,7 @@ const SpotTradeAssignTpl = `
         }
         <%- target %>.oldAccountRoot <== oldAccountRoots<%- ind %>;
         <%- target %>.newAccountRoot <== newAccountRoots<%- ind %>;
-`
+`;
 const BlockInputTpl = `
     // public inputs
     // TODO: replace all the public inputs with sha3 hash later
@@ -126,7 +126,7 @@ const BlockInputTpl = `
     signal private input orderRoots[__][2];
     signal private input oldAccountRoots[__];
     signal private input newAccountRoots[__];
-`
+`;
 
 function generateMultiAssign(comp, fields, prefix, suffix = '', indent = 8) {
   let output = '\n';
@@ -135,8 +135,6 @@ function generateMultiAssign(comp, fields, prefix, suffix = '', indent = 8) {
   }
   return output;
 }
-
-
 
 const CalcBalanceTreeTpl = `
     component balanceTree__ = CalculateRootFromMerklePath(balanceLevels);

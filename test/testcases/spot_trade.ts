@@ -110,16 +110,12 @@ function initTestCase(persetIds: Array<bigint> = []) {
   return block;
 }
 
-
 class TestSpotTrade implements SimpleTest {
-
   getOutput() {
     return {};
   }
   getTestData() {
-    return [
-      { input: initTestCase(), output: this.getOutput(), name: this.constructor.name },
-    ];
+    return [{ input: initTestCase(), output: this.getOutput(), name: this.constructor.name }];
   }
   getComponent(): TestComponent {
     return {
