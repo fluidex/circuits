@@ -1,6 +1,7 @@
 import { GlobalState } from './global_state';
 import * as snarkit from 'snarkit';
 import { circuitSrcToName } from './common/circuit';
+import { hashWithdraw, hashTransfer, hashOrderInput } from './common/tx';
 import { assert } from 'console';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -8,18 +9,20 @@ const printf = require('printf');
 import { inspect } from 'util';
 import { Account } from 'fluidex.js';
 import { OrderState, OrderInput, OrderSide } from 'fluidex.js';
+import { babyJub } from 'circomlib';
+//import { utils as ffutils } from 'ffjavascript';
 const ffjavascript = require('ffjavascript');
-const Scalar = ffjavascript.Scalar;
+const ffutils = ffjavascript.utils;
 inspect.defaultOptions.depth = null;
 
 const verbose = false;
 
 function getTokenId(tokenName) {
-  return { ETH: 0n, USDT: 1n }[tokenName];
+  return { ETH: 0n, USDT: 1n, UNI: 2n, LINK: 3n, YFI: 4n, MATIC: 5n }[tokenName];
 }
 
 function getTokenPrec(tokenName) {
-  return { ETH: 6, USDT: 6 }[tokenName];
+  return { ETH: 4, USDT: 6, UNI: 4, LINK: 4, YFI: 4, MATIC: 4 }[tokenName];
 }
 
 function convertNumber(num, tokenName) {
@@ -39,6 +42,18 @@ function checkEqByKeys(obj1, obj2, keys = null) {
   }
 }
 
+//patch new state to old form
+function compatibleBalance(originalState) {
+  if (originalState.balance_states){
+    originalState.balance = {
+      ask_user_base: originalState.balance_states[0].balance,
+      ask_user_quote: originalState.balance_states[1].balance,
+      bid_user_base: originalState.balance_states[2].balance,
+      bid_user_quote: originalState.balance_states[3].balance,
+    }
+  }
+}
+
 function parseBalance(originalBalance, [baseToken, quoteToken]) {
   return {
     bid_user_base: BigInt(convertNumber(originalBalance.bid_user_base, baseToken)),
@@ -48,7 +63,14 @@ function parseBalance(originalBalance, [baseToken, quoteToken]) {
   };
 }
 
-function parseOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quoteToken], side: OrderSide) {
+function parseOrder(state: OrderState) {
+  if (!state){
+    return null;
+  }
+  return Object.assign({}, state.orderInput, {filledSell: state.filledSell, filledBuy: state.filledBuy});
+}
+
+function buildOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quoteToken], side: OrderSide) {
   let obj: any = {
     baseAmount: BigInt(convertNumber(originalOrder.amount, baseToken)),
     price: BigInt(convertNumber(originalOrder.price, baseToken)),
@@ -81,6 +103,45 @@ function parseOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quot
   return obj;
 }
 
+function checkOrder(orderSaved, beforeState, [baseToken, quoteToken]) {
+  let finishedQuote = BigInt(convertNumber(beforeState.finished_quote, quoteToken));
+  let finishedBase = BigInt(convertNumber(beforeState.finished_base, baseToken));
+
+  if (orderSaved.side == OrderSide.Sell){
+    assert(orderSaved.filledSell === finishedBase);
+    assert(orderSaved.filledBuy === finishedQuote);
+  }else {
+    assert(orderSaved.filledBuy === finishedBase);
+    assert(orderSaved.filledSell === finishedQuote);
+  }
+}
+
+function patchOrder(orderBefore, afterState, [baseToken, quoteToken]) {
+  let finishedQuote = BigInt(convertNumber(afterState.finished_quote, quoteToken));
+  let finishedBase = BigInt(convertNumber(afterState.finished_base, baseToken));
+
+  return Object.assign({}, orderBefore, orderBefore.side == OrderSide.Sell ? {
+    filledSell: finishedBase,
+    filledBuy: finishedQuote,
+  } : {
+    filledSell: finishedQuote,
+    filledBuy: finishedBase,
+  });
+}
+
+function parseSignature(sigStr: string, hash) {
+  const sigBuf = Buffer.from(sigStr, 'hex');
+  let r8 = babyJub.unpackPoint(sigBuf.slice(0, 32));
+  let sign = {
+    hash,
+    S: ffutils.leBuff2int(sigBuf.slice(32,64)),
+    R8x: r8[0],
+    R8y: r8[1],
+  };
+
+  return sign;
+}
+
 function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
   const askIsTaker = trade.ask_role == 'TAKER';
   const bidIsTaker = !askIsTaker;
@@ -92,8 +153,18 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
   const baseTokenID = getTokenId(baseToken);
   const quoteTokenID = getTokenId(quoteToken);
 
-  const askOrderStateBefore = parseOrder(
-    Object.assign(trade.state_before.ask_order_state, {
+  const savedAskOrder = state.hasOrder(askUserID, askOrderID) ? state.getAccountOrderByOrderId(askUserID, askOrderID) : null;
+  const savedBidOrder = state.hasOrder(bidUserID, bidOrderID) ? state.getAccountOrderByOrderId(bidUserID, bidOrderID) : null;
+
+  if (savedAskOrder){
+    checkOrder(savedAskOrder, trade.state_before.ask_order_state || trade.state_before.order_states[0], [baseToken, quoteToken]);
+  }
+  if (savedBidOrder){
+    checkOrder(savedBidOrder, trade.state_before.bid_order_state || trade.state_before.order_states[1], [baseToken, quoteToken]);
+  }
+
+  const askOrderStateBefore = parseOrder(savedAskOrder) || buildOrder(
+    Object.assign(trade.ask_order || trade.state_before.ask_order_state, {
       ID: askOrderID,
       accountID: askUserID,
       role: trade.ask_role,
@@ -102,8 +173,8 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
     [baseToken, quoteToken],
     OrderSide.Sell,
   );
-  const bidOrderStateBefore = parseOrder(
-    Object.assign(trade.state_before.bid_order_state, {
+  const bidOrderStateBefore = parseOrder(savedBidOrder) || buildOrder(
+    Object.assign(trade.bid_order || trade.state_before.bid_order_state, {
       ID: bidOrderID,
       accountID: bidUserID,
       role: trade.bid_role,
@@ -112,41 +183,23 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
     [baseToken, quoteToken],
     OrderSide.Buy,
   );
-  const askOrderStateAfter = parseOrder(
-    Object.assign(trade.state_after.ask_order_state, {
-      ID: askOrderID,
-      accountID: askUserID,
-      role: trade.ask_role,
-    }),
-    [baseTokenID, quoteTokenID],
-    [baseToken, quoteToken],
-    OrderSide.Sell,
-  );
-  const bidOrderStateAfter = parseOrder(
-    Object.assign(trade.state_after.bid_order_state, {
-      ID: bidOrderID,
-      accountID: bidUserID,
-      role: trade.bid_role,
-    }),
-    [baseTokenID, quoteTokenID],
-    [baseToken, quoteToken],
-    OrderSide.Buy,
-  );
+
   //console.log({bidOrderStateAfter});
-  let orderStateBefore = new Map([
-    [BigInt(trade.ask_order_id), askOrderStateBefore],
-    [BigInt(trade.bid_order_id), bidOrderStateBefore],
-  ]);
-  let orderStateAfter = new Map([
-    [BigInt(trade.ask_order_id), askOrderStateAfter],
-    [BigInt(trade.bid_order_id), bidOrderStateAfter],
-  ]);
+  // let orderStateBefore = new Map([
+  //   [BigInt(trade.ask_order_id), askOrderStateBefore],
+  //   [BigInt(trade.bid_order_id), bidOrderStateBefore],
+  // ]);
+  // let orderStateAfter = new Map([
+  //   [BigInt(trade.ask_order_id), askOrderStateAfter],
+  //   [BigInt(trade.bid_order_id), bidOrderStateAfter],
+  // ]);
 
   // first, we check the related two orders are already known to 'GlobalState'
-  function checkGlobalStateKnowsOrder(order) {
+  function checkGlobalStateKnowsOrder(order, originalData) {
     const isNewOrder = order.finishedBase == '0' && order.finishedQuote == '0';
     if (isNewOrder) {
       assert(!state.hasOrder(order.accountID, order.orderId), 'invalid new order');
+
       let orderToPut = new OrderInput({
         accountID: order.accountID,
         orderId: order.orderId,
@@ -157,14 +210,32 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
         side: order.side,
         sig: null,
       });
-      orderToPut.signWith(accounts[Number(order.accountID)]);
+      if (originalData){
+        assert(originalData.signature, "malform trade msg: no signature in order detail");
+        orderToPut.sig = parseSignature(originalData.signature, hashOrderInput(orderToPut));
+      }else {
+        assert(accounts[Number(order.accountID)], "no account provided for replaying message");
+        orderToPut.signWith(accounts[Number(order.accountID)]);
+      }
       state.updateOrderState(order.accountID, OrderState.fromOrderInput(orderToPut));
     } else {
-      assert(state.hasOrder(order.accountID, order.orderId), 'invalid old order, too many open orders?');
+      assert(state.hasOrder(order.accountID, order.orderId), `invalid old order ${order.orderId} (${order.accountID}'s), too many open orders?`);
     }
   }
-  checkGlobalStateKnowsOrder(askOrderStateBefore);
-  checkGlobalStateKnowsOrder(bidOrderStateBefore);
+  checkGlobalStateKnowsOrder(askOrderStateBefore, trade.ask_order);
+  checkGlobalStateKnowsOrder(bidOrderStateBefore, trade.bid_order);
+
+  const askOrderStateAfter = patchOrder(askOrderStateBefore,
+    trade.state_after.ask_order_state || trade.state_after.order_states[0],
+    [baseToken, quoteToken]
+  );
+  const bidOrderStateAfter = patchOrder(bidOrderStateBefore,
+    trade.state_after.bid_order_state || trade.state_after.order_states[1],
+    [baseToken, quoteToken]
+  );
+
+  compatibleBalance(trade.state_before);
+  compatibleBalance(trade.state_after);
 
   // second check order states are same as 'GlobalState'
   function checkState(balanceState, askOrder, bidOrder) {
@@ -210,8 +281,40 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
   console.log('trade', trade.id, 'test done');
 }
 
-function handleDeposit(state: GlobalState, accounts: Array<Account>, deposit) {
+function handleUser(state: GlobalState, {l2_pubkey, user_id}) {
+
+  let compressed = Buffer.from(l2_pubkey.slice(2), 'hex');
+  let sign = (compressed[31] & 0x80) == 0 ? 0 : 1;
+  let pt = babyJub.unpackPoint(compressed);
+  let ay = BigInt(pt[1].toString(10));
+  
+  state.UpdateL2Key({
+    accountID: BigInt(user_id),
+    sign: BigInt(sign),
+    ay,
+  }, true);
+}
+
+function handleRedraw(state: GlobalState, redraw) {
   //{"timestamp":1616062584.0,"user_id":1,"asset":"ETH","business":"deposit","change":"1000000","balance":"1000000","detail":"{\"id\":3}"}}
+  const tokenID = getTokenId(redraw.asset);
+  const userID = BigInt(redraw.user_id);
+  //notice, amount passed to tx is still posistive
+  const delta = BigInt(convertNumber(redraw.change, redraw.asset));
+  assert(delta < BigInt(0));
+  let redrawTx = {accountID: userID, tokenID, amount: delta * BigInt(-1), signature: null, nonce: BigInt(0), oldBalance: BigInt(0)};
+  redrawTx = state.fillWithdrawTx(redrawTx);
+  const txHash = hashWithdraw(redrawTx);
+  redrawTx.signature = parseSignature(redraw.signature, txHash);
+  state.Withdraw(redrawTx);
+  
+  const balanceAfter = BigInt(convertNumber(redraw.balance, redraw.asset));  
+  const expectedBalanceAfter = state.getTokenBalance(userID, tokenID);
+  assert(expectedBalanceAfter == balanceAfter, 'invalid balance after');
+
+}
+
+function handleDeposit(state: GlobalState, accounts: Array<Account>, deposit) {
   const tokenID = getTokenId(deposit.asset);
   const userID = BigInt(deposit.user_id);
   const balanceAfter = BigInt(convertNumber(deposit.balance, deposit.asset));
@@ -220,10 +323,16 @@ function handleDeposit(state: GlobalState, accounts: Array<Account>, deposit) {
   assert(balanceBefore >= 0n, 'invalid balance ' + deposit.toString());
   const expectedBalanceBefore = state.getTokenBalance(userID, tokenID);
   assert(expectedBalanceBefore == balanceBefore, 'invalid balance before');
-  let account = accounts[Number(userID)];
   if (state.hasAccount(userID)) {
     state.DepositToOld({ accountID: userID, tokenID, amount: delta });
   } else {
+    let account = accounts[Number(userID)];
+    if (!account){
+      console.log(`create random account for account id {}`, userID);
+      account = Account.random();
+      accounts[Number(userID)] = account;
+    }
+    
     state.DepositToNew({
       accountID: userID,
       tokenID,
@@ -235,10 +344,24 @@ function handleDeposit(state: GlobalState, accounts: Array<Account>, deposit) {
   // skip check balanceAfter here... the function is too simple to be wrong...
 }
 
-function replayMsgs() {
+function handleTransfer(state: GlobalState, transfer) {
+  const tokenID = getTokenId(transfer.asset);
+  const userID1 = BigInt(transfer.user_from);
+  const userID2 = BigInt(transfer.user_to);
+  const amount = BigInt(convertNumber(transfer.amount, transfer.asset));
+  
+  let transferTx = {from: userID1, to: userID2, tokenID, amount, signature: null};
+  let fullTransferTx = state.fillTransferTx(transferTx);
+  const txHash = hashTransfer(fullTransferTx);
+  fullTransferTx.signature = parseSignature(transfer.signature, txHash);
+  state.Transfer(fullTransferTx);
+
+}
+
+function replayMsgs(fileName) {
   const maxMsgsNumToTest = 1000;
   let lines = fs
-    .readFileSync(path.join(__dirname, 'testdata/msgs_float.jsonl'), 'utf-8')
+    .readFileSync(path.join(__dirname, fileName || 'testdata/msgs_float.jsonl'), 'utf-8')
     .split('\n')
     .filter(Boolean)
     .slice(0, maxMsgsNumToTest);
@@ -247,9 +370,9 @@ function replayMsgs() {
   });
 
   const nTxs = 2;
-  const balanceLevels = 2;
-  const orderLevels = 3;
-  const accountLevels = 2;
+  const balanceLevels = 3;
+  const orderLevels = 4;
+  const accountLevels = 4;
   const maxOrderNum = Math.pow(2, orderLevels);
   const maxAccountNum = Math.pow(2, accountLevels);
   const maxTokenNum = Math.pow(2, balanceLevels);
@@ -261,16 +384,17 @@ function replayMsgs() {
   //assert(maxUserID < maxAccountNum);
   let accounts: Array<Account> = [];
   for (let i = 0; i < maxAccountNum; i++) {
-    // currently the matchengine generates order id from 1
-    const accountID = state.createNewAccount({ next_order_id: 1n });
+    //next order pos has no relation with order id
+    const accountID = state.createNewAccount({ next_order_id: 0n });
     assert(accountID == BigInt(i), 'invalid account id');
-    accounts[i] = Account.random();
+    // accounts[i] = Account.random();
     //  for (let j = 0; j < maxTokenNum; j++) {
     //    state.setTokenBalance(accountID, BigInt(j), 1_000_000n); // default balance
     //  }
   }
   for (const msg of msgs) {
-    if (msg.type === 'BalanceMessage') {
+    // DepositMessage is new version for BalanceMessage
+    if (msg.type === 'BalanceMessage' || msg.type == 'DepositMessage') {
       // handle deposit or withdraw
       const change = BigInt(convertNumber(msg.value.change, msg.value.asset));
       if (change < 0n) {
@@ -281,7 +405,13 @@ function replayMsgs() {
       // handle trades
       const trade = msg.value;
       handleTrade(state, accounts, trade);
-    } else {
+    } else if (msg.type == 'UserMessage') {
+      handleUser(state, msg.value);
+    } else if (msg.type == 'WithdrawMessage') {
+      handleRedraw(state, msg.value);
+    }  else if (msg.type =='TransferMessage') {
+      handleTransfer(state, msg.value);
+    }else {
       //console.log('skip msg', msg.type);
     }
   }
@@ -303,18 +433,28 @@ async function exportCircuitAndTestData(blocks, component) {
   await snarkit.utils.writeCircuitIntoDir(circuitDir, component);
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
-    await snarkit.utils.writeInputOutputIntoDir(path.join(dataDir, printf('%04d', i)), block, {});
+    await snarkit.utils.writeInputOutputIntoDir(path.join(dataDir, printf('b%04d', i)), block, {});
   }
   return circuitDir;
 }
 
 async function mainTest() {
-  const { blocks, component } = replayMsgs();
+
+  const replayOnly = process.argv[2];
+  const dataFile = process.argv[3];
+
+  const { blocks, component } = replayMsgs(dataFile);
   console.log(`generate ${blocks.length} blocks`);
 
   // check all the blocks forged are valid for the block circuit
   // So we can ensure logics of matchengine VS GlobalState VS circuit are same!
   const circuitDir = await exportCircuitAndTestData(blocks, component);
+
+  if (replayOnly === 'skip'){
+    console.log('replay done, circuit output at', circuitDir)
+    return
+  }  
+
   const testOptions = {
     alwaysRecompile: true,
     verbose: false,

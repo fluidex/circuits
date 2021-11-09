@@ -75,19 +75,26 @@ class SpotTradeTx {
   order2Id: bigint;
 }
 
+//TODO: this function should use the implenent inside fluidex.js (need updating dep)
+function hashOrderInput({ accountID, tokenBuy, tokenSell, totalBuy, totalSell }) {
+  const magicHead = 4n; // TxType.PlaceOrder
+  let data = hash([magicHead, tokenSell, tokenBuy, totalSell, totalBuy]);
+  return data;  
+}
+
+//TODO: this function should use the implenent inside fluidex.js (need updating dep)
 function hashTransfer({ from, to, tokenID, amount, fromNonce, toNonce, oldBalanceFrom, oldBalanceTo }) {
-  let data = hash([TxType.Transfer, tokenID, amount]);
-  // do we really need to sign oldBalance?
-  data = hash([data, from, fromNonce, oldBalanceFrom]);
-  data = hash([data, to, toNonce, oldBalanceTo]);
+  const magicHead = 2n; // TxType.Transfer
+  let hashAmount = amount / BigInt(1000000);
+  let data = hash([magicHead, tokenID, hashAmount, from, fromNonce, to]);
   return data;
 }
 function hashWithdraw({ accountID, tokenID, amount, nonce, oldBalance }) {
-  let data = hash([TxType.Withdraw, tokenID, amount]);
-  //console.log([data, accountID, nonce, oldBalance]);
-  // do we really need to sign oldBalance?
-  data = hash([data, accountID, nonce, oldBalance]);
-  return data;
+  let hashAmount = amount / BigInt(1000000);
+  const magicHead = 3n; // TxType.Withdraw
+  //TODO: oldBalance has not been involved, and maybe it would never be involved later
+  //TODO: nonce has not been involved
+  return hash([magicHead, accountID, tokenID, hashAmount, /*nonce*/BigInt(0), BigInt(0)]);
 }
 
 class RawTx {
@@ -115,6 +122,7 @@ export {
   TxDetailIdx,
   hashTransfer,
   hashWithdraw,
+  hashOrderInput,
   RawTx,
   DepositToNewTx,
   DepositToOldTx,

@@ -444,6 +444,7 @@ class GlobalState {
       toNonce: this.accounts.get(tx.to).nonce,
       oldBalanceFrom: this.getTokenBalance(tx.from, tx.tokenID),
       oldBalanceTo: this.getTokenBalance(tx.to, tx.tokenID),
+      signature: null,
     };
     return fullTx;
   }
@@ -452,6 +453,7 @@ class GlobalState {
       accountID: tx.accountID,
       tokenID: tx.tokenID,
       amount: tx.amount,
+      signature: null,
       nonce: this.accounts.get(tx.accountID).nonce,
       oldBalance: this.getTokenBalance(tx.accountID, tx.tokenID),
     };
@@ -473,6 +475,7 @@ class GlobalState {
     encodedTx[TxDetailIdx.AccountID1] = tx.from;
     encodedTx[TxDetailIdx.AccountID2] = tx.to;
     encodedTx[TxDetailIdx.TokenID1] = tx.tokenID;
+    encodedTx[TxDetailIdx.TokenID2] = tx.tokenID;
     encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
     encodedTx[TxDetailIdx.Nonce1] = fromAccount.nonce;
     encodedTx[TxDetailIdx.Nonce2] = toAccount.nonce;
