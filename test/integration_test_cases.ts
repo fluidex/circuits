@@ -33,18 +33,13 @@ const testPubkey2 = 'e9b54eb2dbf0a14faafd109ea2a6a292b78276c8381f8ef984dddefeafb
 const testPubkey3 = '5d182c51bcfe99583d7075a7a0c10d96bef82b8a059c4bf8c5f6e7124cf2bba3';
 
 //fake "deposit to new" like what has been done in the rs rollup-manager
-state.DepositToNew({
+state.UpdateL2Key({
   accountID: accountID1,
-  //in 'fake deposit' we use tokeID as 0
-  tokenID: BigInt(0),
-  amount: BigInt(0),
   ...fromPubkey(testPubkey1),
 });
 
-state.DepositToNew({
+state.UpdateL2Key({
   accountID: accountID2,
-  tokenID: BigInt(0),
-  amount: BigInt(0),
   ...fromPubkey(testPubkey2),
 });
 
@@ -62,10 +57,8 @@ state.Withdraw({
     'ce6e16056da007b3d7274db0ef3f546a101bd99be4137dfe97340b8f2481caac3a7af82bef9d00c226227280413de24714acd2458ba369d052ea43e0cd063601',
 });
 
-state.DepositToNew({
+state.UpdateL2Key({
   accountID: accountID3,
-  tokenID: BigInt(0),
-  amount: BigInt(0),
   ...fromPubkey(testPubkey3),
 });
 
@@ -80,5 +73,5 @@ console.log('the merkle root should be asserted as following:');
 console.log('block 0:', '0x' + blocks[0].newRoot.toString(16).padStart(64, '0'));
 console.log('block 1:', '0x' + blocks[1].newRoot.toString(16).padStart(64, '0'));
 console.log('block 2:', '0x' + blocks[2].newRoot.toString(16).padStart(64, '0'));
-console.log('block 3:', '0x' + blocks[3].newRoot.toString(16).padStart(64, '0'));
-console.log('block 4:', '0x' + blocks[4].newRoot.toString(16).padStart(64, '0'));
+//console.log('block 3:', '0x' + blocks[3].newRoot.toString(16).padStart(64, '0'));
+//console.log('block 4:', '0x' + blocks[4].newRoot.toString(16).padStart(64, '0'));
