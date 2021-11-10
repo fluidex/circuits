@@ -40,7 +40,7 @@ pub trait EncodeForScheme {
         addrs: '254',
     }
 -%>
-pub struct For<%- capScheme %>Tx<'d> (&'d RawTx);
+pub struct For<%- capScheme %>Tx<'d> (pub &'d RawTx);
 
 impl EncodeForScheme for For<%- capScheme %>Tx<'_> {
 
