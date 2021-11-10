@@ -406,7 +406,9 @@ function replayMsgs(fileName) {
     //  }
   }
   for (const msg of msgs) {
-    // DepositMessage is new version for BalanceMessage
+    // TODO: update "testdata/msgs_float.jsonl" and the folllwing codes to the newest message scheme.
+    // Old version: We only have "BalanceMessage". change > 0 is for deposit. change < 0 is for withdraw.
+    // New version: We have "DepositMessage" and "WithdrawMessage". "BalanceMessage" is deprecated.
     if (msg.type === 'BalanceMessage' || msg.type == 'DepositMessage') {
       // handle deposit or withdraw
       const change = BigInt(convertNumberForToken(msg.value.change, msg.value.asset));
