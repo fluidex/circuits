@@ -25,7 +25,7 @@ function getTokenPrec(tokenName) {
   return { ETH: 4, USDT: 6, UNI: 4, LINK: 4, YFI: 4, MATIC: 4 }[tokenName];
 }
 
-function convertNumber(num, tokenName) {
+function convertNumberForToken(num, tokenName) {
   return (num * 10 ** getTokenPrec(tokenName)).toFixed();
 }
 
@@ -56,10 +56,10 @@ function compatibleBalance(originalState) {
 
 function parseBalance(originalBalance, [baseToken, quoteToken]) {
   return {
-    bid_user_base: BigInt(convertNumber(originalBalance.bid_user_base, baseToken)),
-    bid_user_quote: BigInt(convertNumber(originalBalance.bid_user_quote, quoteToken)),
-    ask_user_base: BigInt(convertNumber(originalBalance.ask_user_base, baseToken)),
-    ask_user_quote: BigInt(convertNumber(originalBalance.ask_user_quote, quoteToken)),
+    bid_user_base: BigInt(convertNumberForToken(originalBalance.bid_user_base, baseToken)),
+    bid_user_quote: BigInt(convertNumberForToken(originalBalance.bid_user_quote, quoteToken)),
+    ask_user_base: BigInt(convertNumberForToken(originalBalance.ask_user_base, baseToken)),
+    ask_user_quote: BigInt(convertNumberForToken(originalBalance.ask_user_quote, quoteToken)),
   };
 }
 
@@ -72,16 +72,16 @@ function parseOrder(state: OrderState) {
 
 function buildOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quoteToken], side: OrderSide) {
   let obj: any = {
-    baseAmount: BigInt(convertNumber(originalOrder.amount, baseToken)),
-    price: BigInt(convertNumber(originalOrder.price, baseToken)),
-    finishedQuote: BigInt(convertNumber(originalOrder.finished_quote, quoteToken)),
-    finishedBase: BigInt(convertNumber(originalOrder.finished_base, baseToken)),
+    baseAmount: BigInt(convertNumberForToken(originalOrder.amount, baseToken)),
+    price: BigInt(convertNumberForToken(originalOrder.price, baseToken)),
+    finishedQuote: BigInt(convertNumberForToken(originalOrder.finished_quote, quoteToken)),
+    finishedBase: BigInt(convertNumberForToken(originalOrder.finished_base, baseToken)),
     status: 0,
     role: originalOrder.role,
     accountID: originalOrder.accountID,
     orderId: originalOrder.ID,
   };
-  obj.quoteAmount = BigInt(convertNumber(originalOrder.amount * originalOrder.price, quoteToken));
+  obj.quoteAmount = BigInt(convertNumberForToken(originalOrder.amount * originalOrder.price, quoteToken));
   if (side == OrderSide.Sell) {
     obj.tokenSell = baseTokenID;
     obj.tokenBuy = quoteTokenID;
@@ -104,8 +104,8 @@ function buildOrder(originalOrder, [baseTokenID, quoteTokenID], [baseToken, quot
 }
 
 function checkOrder(orderSaved, beforeState, [baseToken, quoteToken]) {
-  let finishedQuote = BigInt(convertNumber(beforeState.finished_quote, quoteToken));
-  let finishedBase = BigInt(convertNumber(beforeState.finished_base, baseToken));
+  let finishedQuote = BigInt(convertNumberForToken(beforeState.finished_quote, quoteToken));
+  let finishedBase = BigInt(convertNumberForToken(beforeState.finished_base, baseToken));
 
   if (orderSaved.side == OrderSide.Sell) {
     assert(orderSaved.filledSell === finishedBase);
@@ -117,8 +117,8 @@ function checkOrder(orderSaved, beforeState, [baseToken, quoteToken]) {
 }
 
 function patchOrder(orderBefore, afterState, [baseToken, quoteToken]) {
-  let finishedQuote = BigInt(convertNumber(afterState.finished_quote, quoteToken));
-  let finishedBase = BigInt(convertNumber(afterState.finished_base, baseToken));
+  let finishedQuote = BigInt(convertNumberForToken(afterState.finished_quote, quoteToken));
+  let finishedBase = BigInt(convertNumberForToken(afterState.finished_base, baseToken));
 
   return Object.assign(
     {},
@@ -272,8 +272,8 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
         order2AccountID: bidOrderStateBefore.accountID,
         tokenID1to2: baseTokenID,
         tokenID2to1: quoteTokenID,
-        amount1to2: BigInt(convertNumber(trade.amount, baseToken)),
-        amount2to1: BigInt(convertNumber(trade.quote_amount, quoteToken)),
+        amount1to2: BigInt(convertNumberForToken(trade.amount, baseToken)),
+        amount2to1: BigInt(convertNumberForToken(trade.quote_amount, quoteToken)),
         order1Id: askOrderStateBefore.orderId,
         order2Id: bidOrderStateBefore.orderId,
       }
@@ -282,8 +282,8 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
         order2AccountID: askOrderStateBefore.accountID,
         tokenID1to2: quoteTokenID,
         tokenID2to1: baseTokenID,
-        amount1to2: BigInt(convertNumber(trade.quote_amount, quoteToken)),
-        amount2to1: BigInt(convertNumber(trade.amount, baseToken)),
+        amount1to2: BigInt(convertNumberForToken(trade.quote_amount, quoteToken)),
+        amount2to1: BigInt(convertNumberForToken(trade.amount, baseToken)),
         order1Id: bidOrderStateBefore.orderId,
         order2Id: askOrderStateBefore.orderId,
       };
@@ -315,7 +315,7 @@ function handleWithdraw(state: GlobalState, withdraw) {
   const tokenID = getTokenId(withdraw.asset);
   const userID = BigInt(withdraw.user_id);
   //notice, amount passed to tx is still posistive
-  const delta = BigInt(convertNumber(withdraw.change, withdraw.asset));
+  const delta = BigInt(convertNumberForToken(withdraw.change, withdraw.asset));
   assert(delta < BigInt(0));
   let withdrawTx = { accountID: userID, tokenID, amount: delta * BigInt(-1), signature: null, nonce: BigInt(0), oldBalance: BigInt(0) };
   withdrawTx = state.fillWithdrawTx(withdrawTx);
@@ -323,7 +323,7 @@ function handleWithdraw(state: GlobalState, withdraw) {
   withdrawTx.signature = parseSignature(withdraw.signature, txHash);
   state.Withdraw(withdrawTx);
 
-  const balanceAfter = BigInt(convertNumber(withdraw.balance, withdraw.asset));
+  const balanceAfter = BigInt(convertNumberForToken(withdraw.balance, withdraw.asset));
   const expectedBalanceAfter = state.getTokenBalance(userID, tokenID);
   assert(expectedBalanceAfter == balanceAfter, 'invalid balance after');
 }
@@ -331,8 +331,8 @@ function handleWithdraw(state: GlobalState, withdraw) {
 function handleDeposit(state: GlobalState, accounts: Array<Account>, deposit) {
   const tokenID = getTokenId(deposit.asset);
   const userID = BigInt(deposit.user_id);
-  const balanceAfter = BigInt(convertNumber(deposit.balance, deposit.asset));
-  const delta = BigInt(convertNumber(deposit.change, deposit.asset));
+  const balanceAfter = BigInt(convertNumberForToken(deposit.balance, deposit.asset));
+  const delta = BigInt(convertNumberForToken(deposit.change, deposit.asset));
   const balanceBefore = balanceAfter - delta;
   assert(balanceBefore >= 0n, 'invalid balance ' + deposit.toString());
   const expectedBalanceBefore = state.getTokenBalance(userID, tokenID);
@@ -362,7 +362,7 @@ function handleTransfer(state: GlobalState, transfer) {
   const tokenID = getTokenId(transfer.asset);
   const userID1 = BigInt(transfer.user_from);
   const userID2 = BigInt(transfer.user_to);
-  const amount = BigInt(convertNumber(transfer.amount, transfer.asset));
+  const amount = BigInt(convertNumberForToken(transfer.amount, transfer.asset));
 
   let transferTx = { from: userID1, to: userID2, tokenID, amount, signature: null };
   let fullTransferTx = state.fillTransferTx(transferTx);
@@ -409,7 +409,7 @@ function replayMsgs(fileName) {
     // DepositMessage is new version for BalanceMessage
     if (msg.type === 'BalanceMessage' || msg.type == 'DepositMessage') {
       // handle deposit or withdraw
-      const change = BigInt(convertNumber(msg.value.change, msg.value.asset));
+      const change = BigInt(convertNumberForToken(msg.value.change, msg.value.asset));
       if (change < 0n) {
         throw new Error('only support deposit now');
       }
