@@ -310,20 +310,20 @@ function handleUser(state: GlobalState, { l2_pubkey, user_id }) {
   );
 }
 
-function handleRedraw(state: GlobalState, redraw) {
+function handleWithdraw(state: GlobalState, withdraw) {
   //{"timestamp":1616062584.0,"user_id":1,"asset":"ETH","business":"deposit","change":"1000000","balance":"1000000","detail":"{\"id\":3}"}}
-  const tokenID = getTokenId(redraw.asset);
-  const userID = BigInt(redraw.user_id);
+  const tokenID = getTokenId(withdraw.asset);
+  const userID = BigInt(withdraw.user_id);
   //notice, amount passed to tx is still posistive
-  const delta = BigInt(convertNumber(redraw.change, redraw.asset));
+  const delta = BigInt(convertNumber(withdraw.change, withdraw.asset));
   assert(delta < BigInt(0));
-  let redrawTx = { accountID: userID, tokenID, amount: delta * BigInt(-1), signature: null, nonce: BigInt(0), oldBalance: BigInt(0) };
-  redrawTx = state.fillWithdrawTx(redrawTx);
-  const txHash = hashWithdraw(redrawTx);
-  redrawTx.signature = parseSignature(redraw.signature, txHash);
-  state.Withdraw(redrawTx);
+  let withdrawTx = { accountID: userID, tokenID, amount: delta * BigInt(-1), signature: null, nonce: BigInt(0), oldBalance: BigInt(0) };
+  withdrawTx = state.fillWithdrawTx(withdrawTx);
+  const txHash = hashWithdraw(withdrawTx);
+  withdrawTx.signature = parseSignature(withdraw.signature, txHash);
+  state.Withdraw(withdrawTx);
 
-  const balanceAfter = BigInt(convertNumber(redraw.balance, redraw.asset));
+  const balanceAfter = BigInt(convertNumber(withdraw.balance, withdraw.asset));
   const expectedBalanceAfter = state.getTokenBalance(userID, tokenID);
   assert(expectedBalanceAfter == balanceAfter, 'invalid balance after');
 }
@@ -421,7 +421,7 @@ function replayMsgs(fileName) {
     } else if (msg.type == 'UserMessage') {
       handleUser(state, msg.value);
     } else if (msg.type == 'WithdrawMessage') {
-      handleRedraw(state, msg.value);
+      handleWithdraw(state, msg.value);
     } else if (msg.type == 'TransferMessage') {
       handleTransfer(state, msg.value);
     } else {
