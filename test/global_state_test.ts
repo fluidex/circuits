@@ -446,7 +446,7 @@ async function exportCircuitAndTestData(blocks, component) {
   await snarkit.utils.writeCircuitIntoDir(circuitDir, component);
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
-    await snarkit.utils.writeInputOutputIntoDir(path.join(dataDir, printf('b%04d', i)), block, {});
+    await snarkit.utils.writeInputOutputIntoDir(path.join(dataDir, printf('%04d', i)), block, {});
   }
   return circuitDir;
 }
