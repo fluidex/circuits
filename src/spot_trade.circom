@@ -5,17 +5,19 @@ include "../node_modules/circomlib/circuits/gates.circom";
 include "./lib/binary_merkle_tree.circom";
 include "./lib/hash_state.circom";
 
-template TruncateOrderID(orderLevel) {
+template TruncateOrderID() {
 
     signal input orderID;
     signal output out;
 
-    component toBits = Num2BitsIfEnabled(orderLevel);
+    var orderIDLength = 32;
+
+    component toBits = Num2BitsIfEnabled(orderIDLength);
     toBits.enabled <== 0;
     toBits.in <== orderID;
 
-    component restoreBits = Bits2Num(orderLevel);
-    for (var i = 0; i < orderLevel; i++){
+    component restoreBits = Bits2Num(orderIDLength);
+    for (var i = 0; i < orderIDLength; i++){
         restoreBits.in[i] <== toBits.out[i];
     }
 
@@ -148,7 +150,7 @@ template orderUpdater(orderLevels) {
     orderHashOld.filledBuy <== oldOrderFilledBuy;
     orderHashOld.totalSell <== oldOrderAmountSell;
     orderHashOld.totalBuy <== oldOrderAmountBuy;
-    component truncatedOrderIdOld = TruncateOrderID(orderLevels);
+    component truncatedOrderIdOld = TruncateOrderID();
     truncatedOrderIdOld.orderID <== oldOrderID;    
     orderHashOld.orderId <== truncatedOrderIdOld.out;
 
@@ -169,7 +171,7 @@ template orderUpdater(orderLevels) {
     orderHashNew.filledBuy <== newOrderFilledBuy;
     orderHashNew.totalSell <== newOrderAmountSell;
     orderHashNew.totalBuy <== newOrderAmountBuy;
-    component truncatedOrderIdNew = TruncateOrderID(orderLevels);
+    component truncatedOrderIdNew = TruncateOrderID();
     truncatedOrderIdNew.orderID <== newOrderID;    
     orderHashNew.orderId <== truncatedOrderIdNew.out;
 

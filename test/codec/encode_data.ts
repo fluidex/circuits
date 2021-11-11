@@ -7,7 +7,7 @@ export function txDAEncodeLength(nTokenLevel: number, nOrderLevel: number, nAcco
   if (ret < commonLen) {
     ret = commonLen;
   }
-  let spotTradeLen = nAccountLevel * 2 + nTokenLevel * 2 + 40 * 4 + nOrderLevel * 2;
+  let spotTradeLen = 32 * 2 + nAccountLevel * 2 + nTokenLevel * 2 + 40 * 4 + nOrderLevel * 2;
   if (ret < spotTradeLen) {
     ret = spotTradeLen;
   }
@@ -74,10 +74,12 @@ class DAEncoder extends encodeCtx {
     NewOrder2TokenSell: 3,
     NewOrder1AmountSell: 4,
     NewOrder1AmountBuy: 5,
-    NewOrder1ID: 6,
-    NewOrder2AmountSell: 7,
-    NewOrder2AmountBuy: 8,
-    NewOrder2ID: 9,
+    Order1Pos: 6,
+    NewOrder1ID: 7,
+    NewOrder2AmountSell: 8,
+    NewOrder2AmountBuy: 9,
+    Order2Pos: 10,
+    NewOrder2ID: 11,
   };
 
   encodeSpotTrade(payload: Array<bigint>, idx) {
@@ -94,10 +96,12 @@ class DAEncoder extends encodeCtx {
     this.encodeNumber(payload[idx['NewOrder2TokenSell']], balanceLevels, false);
     this.encodeNumber(payload[idx['NewOrder1AmountSell']], floats, false);
     this.encodeNumber(payload[idx['NewOrder1AmountBuy']], floats, false);
-    this.encodeNumber(payload[idx['NewOrder1ID']], orderLevels, true);
+    this.encodeNumber(payload[idx['Order1Pos']], orderLevels, false);
+    this.encodeNumber(payload[idx['NewOrder1ID']], 32, true);
     this.encodeNumber(payload[idx['NewOrder2AmountSell']], floats, false);
     this.encodeNumber(payload[idx['NewOrder2AmountBuy']], floats, false);
-    this.encodeNumber(payload[idx['NewOrder2ID']], orderLevels, true);
+    this.encodeNumber(payload[idx['Order2Pos']], orderLevels, false);
+    this.encodeNumber(payload[idx['NewOrder2ID']], 32, true);
     this.encodeAlign(this.encodeLength);
   }
 

@@ -25,8 +25,8 @@ function initTestCase(persetIds: Array<bigint> = []) {
   const tokenID_1to2 = 1n;
   const tokenID_2to1 = 2n;
   // trade amount
-  const amount_1to2 = 120n;
-  const amount_2to1 = 1200n;
+  const amount_1to2 = 10n;
+  const amount_2to1 = 100n;
 
   /// set up initial accounts
   // account 1
@@ -62,9 +62,9 @@ function initTestCase(persetIds: Array<bigint> = []) {
 
   /// set up orders
   // order1
-  const order1_id = persetIds[0] || 1n;
-  const order1_amountsell = 1000n;
-  const order1_amountbuy = 10000n;
+  const order1_id = persetIds[0] || 42n;
+  const order1_amountsell = 10n;
+  const order1_amountbuy = 100n;
   const order1 = new OrderInput({
     orderId: order1_id,
     tokenBuy: tokenID_2to1,
@@ -77,9 +77,9 @@ function initTestCase(persetIds: Array<bigint> = []) {
   state.setAccountOrder(accountID1, orderState1);
 
   // order2
-  const order2_id = persetIds[1] || 1n;
-  const order2_amountsell = 10000n;
-  const order2_amountbuy = 1000n;
+  const order2_id = persetIds[1] || 233n;
+  const order2_amountsell = 1000n;
+  const order2_amountbuy = 100n;
   const order2 = new OrderInput({
     orderId: order2_id,
     tokenBuy: tokenID_1to2,
@@ -91,7 +91,7 @@ function initTestCase(persetIds: Array<bigint> = []) {
   let orderState2 = OrderState.fromOrderInput(order2);
   orderState2.filledSell = 10n;
   orderState2.filledBuy = 1n;
-  state.setAccountOrder(accountID2, orderState2);
+  state.setAccountOrder(accountID2, orderState2, true);
 
   let spotTradeTx = {
     order1AccountID: accountID1,
@@ -107,73 +107,20 @@ function initTestCase(persetIds: Array<bigint> = []) {
 
   let block = state.forge();
   // TODO: assert length
-  return {
-    enabled: 1,
-    enableBalanceCheck1: 1,
-    enableBalanceCheck2: 2,
-    enableSigCheck1: 0,
-    enableSigCheck2: 0,
-    order1_id: order1_id,
-    order1Pos: order1_id,
-    tokenID1: tokenID_1to2,
-    tokenID2: tokenID_2to1,
-    order1_amountsell: order1_amountsell,
-    order1_amountbuy: order1_amountbuy,
-    order2Pos: order2_id,
-    order2_id: order2_id,
-    order2_tokensell: tokenID_2to1,
-    order2_amountsell: order2_amountsell,
-    order2_tokenbuy: tokenID_1to2,
-    order2_amountbuy: order2_amountbuy,
-    amount_2to1: amount_2to1,
-    amount_1to2: amount_1to2,
-    order1_filledsell: orderState1.filledSell,
-    order1_filledbuy: orderState1.filledBuy,
-    order2_filledsell: orderState2.filledSell,
-    order2_filledbuy: orderState2.filledBuy,
-    order1_accountID: accountID1,
-    order2_accountID: accountID2,
-    order1_account_nonce: nonce1,
-    order2_account_nonce: nonce2,
-    order1_account_sign: account1.sign,
-    order2_account_sign: account2.sign,
-    order1_account_ay: account1.ay,
-    order2_account_ay: account2.ay,
-    order1_token_sell_balance: account1_balance_sell,
-    order1_token_buy_balance: account1_balance_buy,
-    order2_token_sell_balance: account2_balance_sell,
-    order2_token_buy_balance: account2_balance_buy,
-    orderPathElements: block.orderPathElements[block.orderPathElements.length - 1],
-    old_account_root: block.oldAccountRoots[block.oldAccountRoots.length - 1],
-    new_account_root: block.newAccountRoots[block.newAccountRoots.length - 1],
-    old_account1_balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][0],
-    tmp_account1_balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][3],
-    old_account1_path_elements: block.accountPathElements[block.accountPathElements.length - 1][0],
-    old_account2_balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][2],
-    tmp_account2_balancePathElements: block.balancePathElements[block.balancePathElements.length - 1][1],
-    tmp_account2_path_elements: block.accountPathElements[block.accountPathElements.length - 1][1],
-  };
+  return block;
 }
 
-let test_case = initTestCase();
 class TestSpotTrade implements SimpleTest {
-  getInput() {
-    return test_case;
-  }
   getOutput() {
     return {};
   }
   getTestData() {
-    return [
-      { input: this.getInput(), output: this.getOutput(), name: this.constructor.name },
-      { input: initTestCase([41n, 41n]), output: this.getOutput(), name: this.constructor.name + '_BigID' },
-      { input: initTestCase([3n, 42n]), output: this.getOutput(), name: this.constructor.name + '_BigID2' },
-    ];
+    return [{ input: initTestCase(), output: this.getOutput(), name: this.constructor.name }];
   }
   getComponent(): TestComponent {
     return {
-      src: path.join(getCircuitSrcDir(), 'spot_trade.circom'),
-      main: `SpotTrade(${balanceLevels}, ${orderLevels}, ${accountLevels})`,
+      src: path.join(getCircuitSrcDir(), 'tx_spot_trade.circom'),
+      main: `TestSpotTrade(${balanceLevels}, ${orderLevels}, ${accountLevels})`,
     };
   }
 }

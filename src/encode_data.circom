@@ -10,7 +10,7 @@ function TxDataLength(balanceLevels, orderLevels, accountLevels) {
     if ( ret < commonLen){
         ret = commonLen;
     }
-    var spotTradeLen = accountLevels*2 + balanceLevels*2 + 40*4 + orderLevels*2;
+    var spotTradeLen = 32*2 + accountLevels*2 + balanceLevels*2 + 40*4 + orderLevels*2;
     if ( ret < spotTradeLen){
         ret = spotTradeLen;
     }
@@ -40,9 +40,11 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     signal input newOrder2TokenSell;
     signal input newOrder1AmountSell;
     signal input newOrder1AmountBuy;
+    signal input order1Pos;
     signal input newOrder1ID;
     signal input newOrder2AmountSell;
     signal input newOrder2AmountBuy;
+    signal input order2Pos;
     signal input newOrder2ID;
     signal input sign2;
     signal input ay2;
@@ -182,13 +184,20 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
         encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeNewOrder1AmountBuy.out[i];
     }
     offset += floats;
-    component encodeSpotTradeNewOrder1ID = Num2BitsIfEnabled(orderLevels);
-    encodeSpotTradeNewOrder1ID.in <== newOrder1ID;
-    encodeSpotTradeNewOrder1ID.enabled <== 0;
+    component encodeSpotTradeOrder1Pos = Num2BitsIfEnabled(orderLevels);
+    encodeSpotTradeOrder1Pos.in <== order1Pos;
+    encodeSpotTradeOrder1Pos.enabled <== 1;
     for (var i = 0; i < orderLevels; i++) {
-        encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeNewOrder1ID.out[i];
+        encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeOrder1Pos.out[i];
     }
     offset += orderLevels;
+    component encodeSpotTradeNewOrder1ID = Num2BitsIfEnabled(32);
+    encodeSpotTradeNewOrder1ID.in <== newOrder1ID;
+    encodeSpotTradeNewOrder1ID.enabled <== 0;
+    for (var i = 0; i < 32; i++) {
+        encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeNewOrder1ID.out[i];
+    }
+    offset += 32;
     component encodeSpotTradeNewOrder2AmountSell = Num2BitsIfEnabled(floats);
     encodeSpotTradeNewOrder2AmountSell.in <== newOrder2AmountSell;
     encodeSpotTradeNewOrder2AmountSell.enabled <== 1;
@@ -203,13 +212,20 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
         encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeNewOrder2AmountBuy.out[i];
     }
     offset += floats;
-    component encodeSpotTradeNewOrder2ID = Num2BitsIfEnabled(orderLevels);
-    encodeSpotTradeNewOrder2ID.in <== newOrder2ID;
-    encodeSpotTradeNewOrder2ID.enabled <== 0;
+    component encodeSpotTradeOrder2Pos = Num2BitsIfEnabled(orderLevels);
+    encodeSpotTradeOrder2Pos.in <== order2Pos;
+    encodeSpotTradeOrder2Pos.enabled <== 1;
     for (var i = 0; i < orderLevels; i++) {
-        encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeNewOrder2ID.out[i];
+        encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeOrder2Pos.out[i];
     }
     offset += orderLevels;
+    component encodeSpotTradeNewOrder2ID = Num2BitsIfEnabled(32);
+    encodeSpotTradeNewOrder2ID.in <== newOrder2ID;
+    encodeSpotTradeNewOrder2ID.enabled <== 0;
+    for (var i = 0; i < 32; i++) {
+        encodedSpotTradeTx[i+offset] <== useSpotTrade*encodeSpotTradeNewOrder2ID.out[i];
+    }
+    offset += 32;
     //filling reset part by 0
     assert(offset <= encodeLength);
     for (var i = 0; i < encodeLength - offset; i++) {

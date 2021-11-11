@@ -23,16 +23,17 @@ include "./base_tx.circom";
  * @input newAccountRoots[nTxs] - {Array(Field)} - final account state root for each transaction
  */
 template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
+
     // public inputs
     // TODO: replace all the public inputs with sha3 hash later
     signal input oldRoot;
     signal input newRoot;
     signal input txDataHashHi;
     signal input txDataHashLo;
-    
+
     // transactions
     signal private input txsType[nTxs];
-    signal private input encodedTxs[nTxs][TxLength()];
+    signal private input encodedTxs[nTxs][ TxLength()];
 
     // State
     signal private input balancePathElements[nTxs][4][balanceLevels][1]; // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
@@ -43,6 +44,7 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     signal private input orderRoots[nTxs][2];
     signal private input oldAccountRoots[nTxs];
     signal private input newAccountRoots[nTxs];
+
 
     oldAccountRoots[0] === oldRoot;
     newAccountRoots[nTxs - 1] === newRoot;
@@ -100,9 +102,11 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     encodeData[i].newOrder2TokenSell <== encodedTxs[i][53];
     encodeData[i].newOrder1AmountSell <== encodedTxs[i][41];
     encodeData[i].newOrder1AmountBuy <== encodedTxs[i][44];
+    encodeData[i].order1Pos <== encodedTxs[i][29];
     encodeData[i].newOrder1ID <== encodedTxs[i][38];
     encodeData[i].newOrder2AmountSell <== encodedTxs[i][55];
     encodeData[i].newOrder2AmountBuy <== encodedTxs[i][58];
+    encodeData[i].order2Pos <== encodedTxs[i][30];
     encodeData[i].newOrder2ID <== encodedTxs[i][52];
     encodeData[i].sign2 <== encodedTxs[i][11];
     encodeData[i].ay2 <== encodedTxs[i][12];
@@ -324,14 +328,13 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         processSpotTrade[i].enableSigCheck2 <== decodedTx[i].enableSigCheck2;
         processSpotTrade[i].tokenID1 <== decodedTx[i].tokenID1;
         processSpotTrade[i].tokenID2 <== decodedTx[i].tokenID2;
-   
 
+        
         processSpotTrade[i].order1Pos <== decodedTx[i].order1Pos;
         processSpotTrade[i].order1AccountID <== decodedTx[i].accountID1;
         processSpotTrade[i].order1AccountNonce <== decodedTx[i].nonce1;
         processSpotTrade[i].order1AccountSign <== decodedTx[i].sign1;
         processSpotTrade[i].order1AccountAy <== decodedTx[i].ay1;
-
         processSpotTrade[i].order2Pos <== decodedTx[i].order2Pos;
         processSpotTrade[i].order2AccountID <== decodedTx[i].accountID2;
         processSpotTrade[i].order2AccountNonce <== decodedTx[i].nonce2;
@@ -340,15 +343,15 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
 
         processSpotTrade[i].amount1to2 <== decodedTx[i].amount1;
         processSpotTrade[i].amount2to1 <== decodedTx[i].amount2;
-
-        processSpotTrade[i].orderRoot1 <== orderRoots[i][0];
-        processSpotTrade[i].orderRoot2 <== orderRoots[i][1];
-
         processSpotTrade[i].order1TokenSellBalance <== decodedTx[i].balance1;
         // for reusing universal checker, balance2 here must be a leaf of the final merkle tree
         processSpotTrade[i].order2TokenBuyBalance <== decodedTx[i].balance2 - decodedTx[i].amount1;
         processSpotTrade[i].order2TokenSellBalance <== decodedTx[i].balance3;
         processSpotTrade[i].order1TokenBuyBalance <== decodedTx[i].balance4 - decodedTx[i].amount2;
+
+        
+        processSpotTrade[i].orderRoot1 <== orderRoots[i][0];
+        processSpotTrade[i].orderRoot2 <== orderRoots[i][1];
 
         for (var j = 0; j < orderLevels; j++) {
             processSpotTrade[i].orderPathElements[0][j][0] <== orderPathElements[i][0][j][0];
@@ -366,5 +369,6 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
         }
         processSpotTrade[i].oldAccountRoot <== oldAccountRoots[i];
         processSpotTrade[i].newAccountRoot <== newAccountRoots[i];
+
     }
 }
