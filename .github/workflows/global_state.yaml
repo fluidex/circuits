@@ -50,7 +50,7 @@ jobs:
       - name: setup circom
         run: |
           mkdir -p ~/bin
-          pushd ~/bin; wget https://github.com/fluidex/static_files/raw/master/circom; popd
+          pushd ~/bin; wget https://github.com/fluidex/static_files/raw/master/circom; chmod +x circom; popd
 
       - name: Run global_state_test (with real trades)
         run: |
