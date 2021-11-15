@@ -1,4 +1,3 @@
-import * as snarkit2 from 'snarkit2';
 import { circuitSrcToName } from './common/circuit';
 import { TestCheckLeafExists, TestCheckLeafUpdate } from './testcases/binary_merkle_tree';
 import { TestRescueHash, TestRescueHash2 } from './testcases/rescue';
@@ -15,6 +14,7 @@ import { TestBlock } from './testcases/block';
 import { TestDecodeFloat } from './testcases/decode_float';
 import { TestTxDataEncode } from './testcases/encode_txdata';
 import { SimpleTest } from './testcases/interface';
+import { writeCircuitIntoDir, writeInputOutputIntoDir, writeJsonWithBigint } from './ioutil';
 
 import * as path from 'path';
 import * as fs from 'fs';
@@ -48,12 +48,12 @@ export async function exportTestCase(outDir: string, t: SimpleTest, createChildD
   const circuitName = circuitSrcToName(t.getComponent().main);
   const circuitDir = createChildDir ? path.join(outDir, circuitName) : outDir;
   fs.mkdirSync(circuitDir, { recursive: true });
-  await snarkit2.utils.writeCircuitIntoDir(circuitDir, t.getComponent());
+  await writeCircuitIntoDir(circuitDir, t.getComponent());
   for (const d of t.getTestData()) {
     const testName = d.name;
     const dataDir = path.join(circuitDir, 'data', d.name);
     console.log('export', testName, 'to', dataDir);
-    await snarkit2.utils.writeInputOutputIntoDir(dataDir, d.input, d.output || {});
+    await writeInputOutputIntoDir(dataDir, d.input, d.output || {});
   }
 }
 

@@ -9,7 +9,8 @@ const printf = require('printf');
 import { inspect } from 'util';
 import { Account } from 'fluidex.js';
 import { OrderState, OrderInput, OrderSide } from 'fluidex.js';
-import { babyJub } from 'circomlib';
+import { babyJub } from 'circomlibjs';
+import { writeCircuitIntoDir, writeInputOutputIntoDir, writeJsonWithBigint } from './ioutil';
 //import { utils as ffutils } from 'ffjavascript';
 const ffjavascript = require('ffjavascript');
 const ffutils = ffjavascript.utils;
@@ -445,10 +446,10 @@ function replayMsgs(fileName) {
 async function exportCircuitAndTestData(blocks, component) {
   const circuitDir = path.join('testdata', circuitSrcToName(component.main));
   const dataDir = path.join(circuitDir, 'data');
-  await snarkit2.utils.writeCircuitIntoDir(circuitDir, component);
+  await writeCircuitIntoDir(circuitDir, component);
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
-    await snarkit2.utils.writeInputOutputIntoDir(path.join(dataDir, printf('%04d', i)), block, {});
+    await writeInputOutputIntoDir(path.join(dataDir, printf('%04d', i)), block, {});
   }
   return circuitDir;
 }
