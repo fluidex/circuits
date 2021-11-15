@@ -1,8 +1,8 @@
 // Generated from tpl/ejs/src/tx_dec_enc.circom.ejs. Don't modify this file manually
 // This circuit dedicate for a simple unit test of decode_tx.circom and encode_data.circom
 
-include "./decode_tx.circom"
-include "./encode_data.circom"
+include "./decode_tx.circom";
+include "./encode_data.circom";
 
 template GenerateTxDataFromTx(balanceLevels, orderLevels, accountLevels) {
     signal input in[TxLength()];

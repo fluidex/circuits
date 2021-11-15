@@ -72,7 +72,7 @@ template RescueMimc() {
         // pow five inv
         for(var j = 0; j < STATE_WIDTH; j++) {
             invpow[i][j] = InvPow5();
-            invpow[i][j].in <== inner[i * 6][j]
+            invpow[i][j].in <== inner[i * 6][j];
             inner[i * 6 + 1][j] <== invpow[i][j].out;
         }
         // mul
@@ -94,7 +94,7 @@ template RescueMimc() {
         // pow five
         for(var j = 0; j < STATE_WIDTH; j++) {
             pow[i][j] = Pow5();
-            pow[i][j].in <== inner[i * 6 + 3][j]
+            pow[i][j].in <== inner[i * 6 + 3][j];
             inner[i * 6 + 4][j] <== pow[i][j].out;
         }
         // mul
@@ -128,7 +128,7 @@ template Rescue(nInputs) {
     var RATE = 2;
     var STATE_WIDTH = 3;
     var cycles = (nInputs + RATE - 1) \ RATE; // Math.ceil
-    assert(nInputs <= cycles * RATE)
+    assert(nInputs <= cycles * RATE);
     component mimcs[cycles];
     signal inner[2 * cycles + 1][STATE_WIDTH];
     for (var j = 0; j < RATE; j++) {

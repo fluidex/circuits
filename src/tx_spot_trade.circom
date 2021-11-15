@@ -1,7 +1,7 @@
 // Generated from tpl/ejs/src/tx_spot_trade.circom.ejs. Don't modify this file manually
 // This circuit dedicate for a simple unit test of spot_trade.circom 
 
-include "./decode_tx.circom"
+include "./decode_tx.circom";
 include "./spot_trade.circom";
 
 template TestSpotTrade(balanceLevels, orderLevels, accountLevels) {
@@ -15,18 +15,18 @@ template TestSpotTrade(balanceLevels, orderLevels, accountLevels) {
     signal input txDataHashLo;
 
     // transactions
-    signal private input txsType[1];
-    signal private input encodedTxs[1][ TxLength()];
+    signal input txsType[1];
+    signal input encodedTxs[1][ TxLength()];
 
     // State
-    signal private input balancePathElements[1][4][balanceLevels][1]; // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
-    signal private input orderPathElements[1][2][orderLevels][1]; // index meanings: [tx idx][orderAccount1, orderAccount2][levels][siblings]
-    signal private input accountPathElements[1][2][accountLevels][1]; // index meanings: [tx idx][sender, receiver][levels][siblings]
+    signal input balancePathElements[1][4][balanceLevels][1]; // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
+    signal input orderPathElements[1][2][orderLevels][1]; // index meanings: [tx idx][orderAccount1, orderAccount2][levels][siblings]
+    signal input accountPathElements[1][2][accountLevels][1]; // index meanings: [tx idx][sender, receiver][levels][siblings]
 
     // roots
-    signal private input orderRoots[1][2];
-    signal private input oldAccountRoots[1];
-    signal private input newAccountRoots[1];
+    signal input orderRoots[1][2];
+    signal input oldAccountRoots[1];
+    signal input newAccountRoots[1];
 
     component decodedTx = DecodeTx();
     for (var i = 0; i < TxLength(); i++) {

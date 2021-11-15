@@ -179,6 +179,7 @@ function main() {
   //console.log(`generate ${outputFile} from ${tplFile}`);
   let tpl = fs.readFileSync(tplFile, 'utf-8');
   const tplFilePosix = path.normalize(tplFile).split(path.sep);
+  //let output = `// Generated from ${path.posix.join.apply(path.posix, tplFilePosix)} at ${(new Date()).toLocaleString()}. Don't modify this file manually\n`;
   let output = `// Generated from ${path.posix.join.apply(path.posix, tplFilePosix)}. Don't modify this file manually\n`;
   output += ejs.render(tpl, { codegen });
   const overwrite = true;
