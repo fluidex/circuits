@@ -3,7 +3,7 @@ include "../node_modules/circomlib/circuits/compconstant.circom";
 include "./lib/hash_state.circom";
 include "./lib/sha256.circom";
 include "./decode_tx.circom";
-include "./encode_data.circom"
+include "./encode_data.circom";
 include "./deposit.circom";
 include "./transfer.circom";
 include "./withdraw.circom";
@@ -32,18 +32,18 @@ template Block(nTxs, balanceLevels, orderLevels, accountLevels) {
     signal input txDataHashLo;
 
     // transactions
-    signal private input txsType[nTxs];
-    signal private input encodedTxs[nTxs][ TxLength()];
+    signal input txsType[nTxs];
+    signal input encodedTxs[nTxs][ TxLength()];
 
     // State
-    signal private input balancePathElements[nTxs][4][balanceLevels][1]; // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
-    signal private input orderPathElements[nTxs][2][orderLevels][1]; // index meanings: [tx idx][orderAccount1, orderAccount2][levels][siblings]
-    signal private input accountPathElements[nTxs][2][accountLevels][1]; // index meanings: [tx idx][sender, receiver][levels][siblings]
+    signal input balancePathElements[nTxs][4][balanceLevels][1]; // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
+    signal input orderPathElements[nTxs][2][orderLevels][1]; // index meanings: [tx idx][orderAccount1, orderAccount2][levels][siblings]
+    signal input accountPathElements[nTxs][2][accountLevels][1]; // index meanings: [tx idx][sender, receiver][levels][siblings]
 
     // roots
-    signal private input orderRoots[nTxs][2];
-    signal private input oldAccountRoots[nTxs];
-    signal private input newAccountRoots[nTxs];
+    signal input orderRoots[nTxs][2];
+    signal input oldAccountRoots[nTxs];
+    signal input newAccountRoots[nTxs];
 
 
     oldAccountRoots[0] === oldRoot;

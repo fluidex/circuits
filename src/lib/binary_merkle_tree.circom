@@ -61,8 +61,8 @@ template CheckLeafExists(levels){
   // levels is depth of tree
   signal input leaf;
 
-  signal private input pathElements[levels][1];
-  signal private input pathIndex[levels];
+  signal input pathElements[levels][1];
+  signal input pathIndex[levels];
 
   signal input root;
 
@@ -83,8 +83,8 @@ template CheckLeafUpdate(levels) {
   signal input enabled;
   signal input oldLeaf;
   signal input newLeaf;
-  signal private input pathElements[levels][1];
-  signal private input pathIndex[levels];
+  signal input pathElements[levels][1];
+  signal input pathIndex[levels];
   signal input oldRoot;
   signal input newRoot;
   component oldTree = CheckLeafExists(levels);
@@ -134,7 +134,7 @@ template CalculateRootFromLeaves(levels) {
     var numIntermediateHashers = numLeafHashers - 1;
 
     // Inputs to the snark
-    signal private input leaves[totalLeaves];
+    signal input leaves[totalLeaves];
 
     // The output
     signal output root;
@@ -176,8 +176,8 @@ template CalculateRootFromRepeatedLeaves(nLevels) {
         hashers[i] = HashLeftRight();
     }
 
-    hashers.left <== leaf;
-    hashers.right <== leaf;
+    hashers[0].left <== leaf;
+    hashers[0].right <== leaf;
 
     for (var i = 1; i < nLevels; i++) {
         hashers[i].left <== hashers[i-1].hash;

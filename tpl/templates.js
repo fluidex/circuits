@@ -114,18 +114,18 @@ const BlockInputTpl = `
     signal input txDataHashLo;
 
     // transactions
-    signal private input txsType[__];
-    signal private input encodedTxs[__][ _TxLength];
+    signal input txsType[__];
+    signal input encodedTxs[__][ _TxLength];
 
     // State
-    signal private input balancePathElements[__][4][balanceLevels][1]; // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
-    signal private input orderPathElements[__][2][orderLevels][1]; // index meanings: [tx idx][orderAccount1, orderAccount2][levels][siblings]
-    signal private input accountPathElements[__][2][accountLevels][1]; // index meanings: [tx idx][sender, receiver][levels][siblings]
+    signal input balancePathElements[__][4][balanceLevels][1]; // index meanings: [tx idx][sender, receiver, sender, receiver][levels][siblings]
+    signal input orderPathElements[__][2][orderLevels][1]; // index meanings: [tx idx][orderAccount1, orderAccount2][levels][siblings]
+    signal input accountPathElements[__][2][accountLevels][1]; // index meanings: [tx idx][sender, receiver][levels][siblings]
 
     // roots
-    signal private input orderRoots[__][2];
-    signal private input oldAccountRoots[__];
-    signal private input newAccountRoots[__];
+    signal input orderRoots[__][2];
+    signal input oldAccountRoots[__];
+    signal input newAccountRoots[__];
 `;
 
 function generateMultiAssign(comp, fields, prefix, suffix = '', indent = 8) {

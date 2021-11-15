@@ -19,3 +19,4 @@ template Num2BitsIfEnabled(n) {
     check.in[0] <== lc1;
     check.in[1] <== in;
 }
+

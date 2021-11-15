@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { poseidon } from 'circomlib';
+import { poseidon } from 'circomlibjs';
 import { getCircomlibCircuitsDir } from '../common/circuit';
 import { SimpleTest, TestComponent } from './interface';
 import { assert } from 'console';

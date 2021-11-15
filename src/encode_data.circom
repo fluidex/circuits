@@ -1,6 +1,6 @@
 // Generated from tpl/ejs/src/encode_data.circom.ejs. Don't modify this file manually
-include "./constants.circom"
-include "./floats.circom"
+include "./constants.circom";
+include "./floats.circom";
 include "./lib/bitify.circom";
 
 function TxDataLength(balanceLevels, orderLevels, accountLevels) { 
