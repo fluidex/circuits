@@ -72,11 +72,11 @@ class DA_Hasher {
 
   encodeRawTx(tx: tx.RawTx) {
     const { txType, payload } = tx;
-    assert(this.encoder.checkAlign());
+    assert(this.encoder.checkAlign(), 'must start at specified alignment');
     switch (txType) {
       case TxType.Deposit:
         if (payload[TxDetailIdx.Ay1] !== payload[TxDetailIdx.Ay2]) {
-          assert(payload[TxDetailIdx.Amount] === 0n);
+          assert(payload[TxDetailIdx.Amount] === 0n, 'no amount is allowed for update key tx');
           this.encoder.encodeNumber(1, 3); //100
           this.encodeRawPayload(payload, 'encodeL2Key');
           break;
@@ -93,7 +93,7 @@ class DA_Hasher {
         let order2Filled =
           payload[TxDetailIdx.NewOrder2FilledBuy] === decodeFloat(payload[TxDetailIdx.NewOrder2AmountBuy]) ||
           payload[TxDetailIdx.NewOrder2FilledSell] === decodeFloat(payload[TxDetailIdx.NewOrder2AmountSell]);
-        assert(order1Filled || order2Filled);
+        assert(order1Filled || order2Filled, 'at least one order has to bee filled');
 
         this.encoder.encodeNumber((order1Filled ? 2 : 0) + (order2Filled ? 4 : 0), 3); //010, 011 or 001
         this.encodeRawPayload(payload, 'encodeSpotTrade');
