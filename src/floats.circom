@@ -27,7 +27,8 @@ template DecodeFloats() {
         pe[i] <== (pe[i-1] * (10**(2**i)) - pe[i-1]) * toBits.out[manitisaBits()+i] + pe[i-1];
     }    
 
-    signal scale10 <== pe[exponentBits() - 1];
+    signal scale10;
+    scale10 <== pe[exponentBits() - 1];
 
     var lcm = 0;
     var e2 = 1;

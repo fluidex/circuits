@@ -1,6 +1,7 @@
 // Generated from tpl/ejs/src/decode_tx.circom.ejs. Don't modify this file manually
-include "./constants.circom"
-include "./floats.circom"
+include "./constants.circom";
+include "./floats.circom";
+include "./lib/bitify.circom";
 
 // TODO: i suggest remove this component and let each child op component to do its own decoding
 /**
