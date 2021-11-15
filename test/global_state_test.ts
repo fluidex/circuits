@@ -1,5 +1,5 @@
 import { GlobalState } from './global_state';
-import * as snarkit from 'snarkit';
+import * as snarkit2 from 'snarkit2';
 import { circuitSrcToName } from './common/circuit';
 import { hashWithdraw, hashTransfer, hashOrderInput } from './common/tx';
 import { assert } from 'console';
@@ -445,10 +445,10 @@ function replayMsgs(fileName) {
 async function exportCircuitAndTestData(blocks, component) {
   const circuitDir = path.join('testdata', circuitSrcToName(component.main));
   const dataDir = path.join(circuitDir, 'data');
-  await snarkit.utils.writeCircuitIntoDir(circuitDir, component);
+  await snarkit2.utils.writeCircuitIntoDir(circuitDir, component);
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
-    await snarkit.utils.writeInputOutputIntoDir(path.join(dataDir, printf('%04d', i)), block, {});
+    await snarkit2.utils.writeInputOutputIntoDir(path.join(dataDir, printf('%04d', i)), block, {});
   }
   return circuitDir;
 }
@@ -475,7 +475,7 @@ async function mainTest() {
     backend: 'auto',
     witnessFileType: 'wtns',
   };
-  await snarkit.testCircuitDir(circuitDir, path.join(circuitDir, 'data'), testOptions);
+  await snarkit2.testCircuitDir(circuitDir, path.join(circuitDir, 'data'), testOptions);
 }
 
 mainTest();

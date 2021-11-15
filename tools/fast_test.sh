@@ -23,13 +23,13 @@ function generateTestCases() {
 }
 
 function testBlock() {
-	npx snarkit test --backend native --witness_type bin testdata/Block_2_2_2_2
+	npx snarkit2 test --backend native --witness_type bin testdata/Block_2_2_2_2
 }
 
 function testAll() {
 	for d in `ls testdata`
 	do
-		npx snarkit test --backend auto --witness_type bin testdata/$d &
+		npx snarkit2 test --backend auto --witness_type bin testdata/$d
 	done
 	for job in `jobs -p`
 	do
