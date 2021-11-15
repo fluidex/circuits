@@ -31,6 +31,7 @@ function testAll() {
 	do
 		npx snarkit2 test --backend auto --witness_type bin testdata/$d
 	done
+
 	for job in `jobs -p`
 	do
 		wait $job || exit 1
