@@ -47,6 +47,11 @@ jobs:
         run:
           npm ci
 
+      - name: setup circom
+          mkdir -p ~/bin
+          export PATH=$PATH:~/bin
+          pushd ~/bin; wget https://github.com/fluidex/static_files/raw/master/circom; popd
+
       - name: Run test_all (fast_test)
         run: |
           rm testdata -rf

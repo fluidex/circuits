@@ -12,7 +12,7 @@ component main ${mainPublic}= ${main};`;
   fs.writeFileSync(fileName, srcCode, 'utf8');
 }
 
-async function writeJsonWithBigint(path: string, obj: Object) {
+async function writeJsonWithBigint(path: string, obj) {
   let text = JSON.stringify(
     obj,
     (key, value) => (typeof value === 'bigint' ? value.toString() : value), // return everything else unchanged
