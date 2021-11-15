@@ -50,10 +50,11 @@ jobs:
       - name: setup circom
         run: |
           mkdir -p ~/bin
-          export PATH=$PATH:~/bin
           pushd ~/bin; wget https://github.com/fluidex/static_files/raw/master/circom; popd
 
       - name: Run global_state_test (with real trades)
         run: |
           rm testdata -rf
+          export PATH=$PATH:~/bin
+          ls ~/bin; circom --version
           time npx ts-node test/global_state_test.ts
