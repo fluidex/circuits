@@ -391,7 +391,7 @@ class GlobalState {
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
 
-    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
+    encodedTx[TxDetailIdx.Amount] = tx.amount;
 
     encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);
@@ -476,7 +476,7 @@ class GlobalState {
     encodedTx[TxDetailIdx.AccountID2] = tx.to;
     encodedTx[TxDetailIdx.TokenID1] = tx.tokenID;
     encodedTx[TxDetailIdx.TokenID2] = tx.tokenID;
-    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
+    encodedTx[TxDetailIdx.Amount] = tx.amount;
     encodedTx[TxDetailIdx.Nonce1] = fromAccount.nonce;
     encodedTx[TxDetailIdx.Nonce2] = toAccount.nonce;
     encodedTx[TxDetailIdx.Sign1] = fromAccount.sign;
@@ -536,7 +536,7 @@ class GlobalState {
     let encodedTx: Array<bigint> = new Array(TxLength);
     encodedTx.fill(0n, 0, TxLength);
 
-    encodedTx[TxDetailIdx.Amount] = encodeFloat(tx.amount);
+    encodedTx[TxDetailIdx.Amount] = tx.amount;
 
     encodedTx[TxDetailIdx.TokenID1] = Scalar.e(tx.tokenID);
     encodedTx[TxDetailIdx.AccountID1] = Scalar.e(tx.accountID);

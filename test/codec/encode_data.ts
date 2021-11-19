@@ -3,7 +3,7 @@ import { encodeCtx } from './bitstream';
 
 export function txDAEncodeLength(nTokenLevel: number, nOrderLevel: number, nAccountLevel: number) {
   let ret = 0;
-  let commonLen = nAccountLevel * 2 + nTokenLevel * 2 + 40 * 1;
+  let commonLen = 128 * 1 + nAccountLevel * 2 + nTokenLevel * 1;
   if (ret < commonLen) {
     ret = commonLen;
   }
@@ -47,8 +47,7 @@ class DAEncoder extends encodeCtx {
     AccountID1: 0,
     AccountID2: 1,
     TokenID1: 2,
-    TokenID2: 3,
-    Amount: 4,
+    Amount: 3,
   };
 
   encodeCommon(payload: Array<bigint>, idx) {
@@ -62,8 +61,7 @@ class DAEncoder extends encodeCtx {
     this.encodeNumber(payload[idx['AccountID1']], accountLevels, false);
     this.encodeNumber(payload[idx['AccountID2']], accountLevels, false);
     this.encodeNumber(payload[idx['TokenID1']], balanceLevels, false);
-    this.encodeNumber(payload[idx['TokenID2']], balanceLevels, false);
-    this.encodeNumber(payload[idx['Amount']], floats, false);
+    this.encodeNumber(payload[idx['Amount']], 128, false);
     this.encodeAlign(this.encodeLength);
   }
 

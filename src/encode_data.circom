@@ -6,7 +6,7 @@ include "./lib/bitify.circom";
 function TxDataLength(balanceLevels, orderLevels, accountLevels) { 
     var ret = 0;
 
-    var commonLen = accountLevels*2 + balanceLevels*2 + 40*1;
+    var commonLen = 128*1 + accountLevels*2 + balanceLevels*1;
     if ( ret < commonLen){
         ret = commonLen;
     }
@@ -34,7 +34,6 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
     signal input accountID1;
     signal input accountID2;
     signal input tokenID1;
-    signal input tokenID2;
     signal input amount;
     signal input newOrder1TokenSell;
     signal input newOrder2TokenSell;
@@ -101,20 +100,13 @@ template EncodeData(balanceLevels, orderLevels, accountLevels) {
         encodedCommonTx[i+offset] <== useCommon*encodeCommonTokenID1.out[i];
     }
     offset += balanceLevels;
-    component encodeCommonTokenID2 = Num2BitsIfEnabled(balanceLevels);
-    encodeCommonTokenID2.in <== tokenID2;
-    encodeCommonTokenID2.enabled <== 1;
-    for (var i = 0; i < balanceLevels; i++) {
-        encodedCommonTx[i+offset] <== useCommon*encodeCommonTokenID2.out[i];
-    }
-    offset += balanceLevels;
-    component encodeCommonAmount = Num2BitsIfEnabled(floats);
+    component encodeCommonAmount = Num2BitsIfEnabled(128);
     encodeCommonAmount.in <== amount;
     encodeCommonAmount.enabled <== 1;
-    for (var i = 0; i < floats; i++) {
+    for (var i = 0; i < 128; i++) {
         encodedCommonTx[i+offset] <== useCommon*encodeCommonAmount.out[i];
     }
-    offset += floats;
+    offset += 128;
     //filling reset part by 0
     assert(offset <= encodeLength);
     for (var i = 0; i < encodeLength - offset; i++) {
