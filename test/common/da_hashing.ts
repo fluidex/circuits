@@ -7,6 +7,8 @@ import { assert } from 'console';
 
 const { TxDetailIdx, TxType } = tx;
 
+const U128MAX = BigInt('340282366920938463463374607431768211456');
+
 class DA_Hasher {
   private encoder: DAEncoder;
 
@@ -20,17 +22,17 @@ class DA_Hasher {
 
   encodeTransfer(tx: tx.TranferTx) {
     this.encoder.encodeNumber(0, 3); //000
-    this.encoder.encodeCommon([tx.from, tx.to, tx.tokenID, tx.tokenID, encodeFloat(tx.amount)], DAEncoder.commonIdx);
+    this.encoder.encodeCommon([tx.from, tx.to, tx.tokenID, tx.amount], DAEncoder.commonIdx);
   }
 
   encodeWithdraw(tx: tx.WithdrawTx) {
     this.encoder.encodeNumber(2, 3); //010
-    this.encoder.encodeCommon([tx.accountID, tx.accountID, tx.tokenID, tx.tokenID, encodeFloat(tx.amount)], DAEncoder.commonIdx);
+    this.encoder.encodeCommon([tx.accountID, tx.accountID, tx.tokenID, tx.amount], DAEncoder.commonIdx);
   }
 
   encodeDeposit(tx: tx.DepositToOldTx | tx.DepositToNewTx) {
     this.encoder.encodeNumber(0, 3); //000
-    this.encoder.encodeCommon([tx.accountID, tx.accountID, tx.tokenID, tx.tokenID, encodeFloat(tx.amount)], DAEncoder.commonIdx);
+    this.encoder.encodeCommon([tx.accountID, tx.accountID, tx.tokenID, tx.amount], DAEncoder.commonIdx);
   }
 
   encodeKeyUpdate(tx: tx.DepositToNewTx) {
@@ -84,6 +86,7 @@ class DA_Hasher {
       //when handling common deposit tx, continue to next case
       case TxType.Transfer:
         this.encoder.encodeNumber(0, 3); //000
+        assert(payload[TxDetailIdx.Amount] < U128MAX);
         this.encodeRawPayload(payload, 'encodeCommon');
         break;
       case TxType.SpotTrade:

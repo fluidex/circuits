@@ -9,7 +9,7 @@ include "./lib/bitify.circom";
  */
 
 function TxLength() { return 60; }
-function DecodeAmountCount() {return 5; }
+function DecodeAmountCount() {return 4; }
 
 template DecodeTx() {
 
@@ -106,8 +106,7 @@ template DecodeTx() {
     s2 <== in[21];
     r8x2 <== in[22];
     r8y2 <== in[23];
-    decodeAmount[0].encodedAmount <== in[24];
-    amount <== decodeAmount[0].decodedAmount;
+    amount <== in[24];
     amount1 <== in[25];
     amount2 <== in[26];
     balance3 <== in[27];
@@ -124,12 +123,12 @@ template DecodeTx() {
     newOrder1ID <== in[38];
     newOrder1TokenSell <== in[39];
     newOrder1FilledSell <== in[40];
-    decodeAmount[1].encodedAmount <== in[41];
-    newOrder1AmountSell <== decodeAmount[1].decodedAmount;
+    decodeAmount[0].encodedAmount <== in[41];
+    newOrder1AmountSell <== decodeAmount[0].decodedAmount;
     newOrder1TokenBuy <== in[42];
     newOrder1FilledBuy <== in[43];
-    decodeAmount[2].encodedAmount <== in[44];
-    newOrder1AmountBuy <== decodeAmount[2].decodedAmount;
+    decodeAmount[1].encodedAmount <== in[44];
+    newOrder1AmountBuy <== decodeAmount[1].decodedAmount;
     oldOrder2ID <== in[45];
     oldOrder2TokenSell <== in[46];
     oldOrder2FilledSell <== in[47];
@@ -140,12 +139,12 @@ template DecodeTx() {
     newOrder2ID <== in[52];
     newOrder2TokenSell <== in[53];
     newOrder2FilledSell <== in[54];
-    decodeAmount[3].encodedAmount <== in[55];
-    newOrder2AmountSell <== decodeAmount[3].decodedAmount;
+    decodeAmount[2].encodedAmount <== in[55];
+    newOrder2AmountSell <== decodeAmount[2].decodedAmount;
     newOrder2TokenBuy <== in[56];
     newOrder2FilledBuy <== in[57];
-    decodeAmount[4].encodedAmount <== in[58];
-    newOrder2AmountBuy <== decodeAmount[4].decodedAmount;
+    decodeAmount[3].encodedAmount <== in[58];
+    newOrder2AmountBuy <== decodeAmount[3].decodedAmount;
     dstIsNew <== in[59];
 
 }

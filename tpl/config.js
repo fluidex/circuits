@@ -68,8 +68,8 @@ function getCommonPayload() {
     );
 }
 function getEncodedAmount() {
+  //no amount would be compressed outside of spotTrade any more
   return splitAndTrim(`
-  amount
   `).concat(orderLeafsNaming(['amountSell', 'amountBuy'], ['new']));
 }
 //console.log('commonPayload', getCommonPayload())
@@ -138,8 +138,7 @@ const config = {
       ['accountID1', 'accountLevels'],
       ['accountID2', 'accountLevels'],
       ['tokenID1', 'balanceLevels'],
-      ['tokenID2', 'balanceLevels'],
-      ['amount', 'floats'],
+      ['amount', '128'],
     ],
     spotTrade: [
       ['accountID1', 'accountLevels'],
