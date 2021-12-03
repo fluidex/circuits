@@ -9,8 +9,8 @@ const printf = require('printf');
 import { inspect } from 'util';
 import { Account } from 'fluidex.js';
 import { OrderState, OrderInput, OrderSide } from 'fluidex.js';
-import { babyJub } from 'circomlibjs';
 import { writeCircuitIntoDir, writeInputOutputIntoDir, writeJsonWithBigint } from './ioutil';
+import { babyjub } from 'circomlibjs';
 //import { utils as ffutils } from 'ffjavascript';
 const ffjavascript = require('ffjavascript');
 const ffutils = ffjavascript.utils;
@@ -138,7 +138,7 @@ function patchOrder(orderBefore, afterState, [baseToken, quoteToken]) {
 
 function parseSignature(sigStr: string, hash) {
   const sigBuf = Buffer.from(sigStr, 'hex');
-  let r8 = babyJub.unpackPoint(sigBuf.slice(0, 32));
+  let r8 = babyjub.unpackPoint(sigBuf.slice(0, 32));
   let sign = {
     hash,
     S: ffutils.leBuff2int(sigBuf.slice(32, 64)),
@@ -298,7 +298,7 @@ function handleTrade(state: GlobalState, accounts: Array<Account>, trade) {
 function handleUser(state: GlobalState, { l2_pubkey, user_id }) {
   let compressed = Buffer.from(l2_pubkey.slice(2), 'hex');
   let sign = (compressed[31] & 0x80) == 0 ? 0 : 1;
-  let pt = babyJub.unpackPoint(compressed);
+  let pt = babyjub.unpackPoint(compressed);
   let ay = BigInt(pt[1].toString(10));
 
   state.UpdateL2Key(
