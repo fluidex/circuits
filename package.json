@@ -25,7 +25,7 @@
     "print-diff": "^1.0.0",
     "printf": "^0.6.1",
     "scrypt-js": "^3.0.1",
-    "shelljs": "^0.8.4",
+    "shelljs": "^0.8.5",
     "snarkit2": "github:fluidex/snarkit2",
     "snarkjs": "^0.3.55",
     "tmp-promise": "^3.0.2",
